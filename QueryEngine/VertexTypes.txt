@@ -1,0 +1,16 @@
+﻿{
+"Kind": "Person",
+"Name": "string",
+"LastName": "string",
+"Age": "integer"
+}
+{
+"Kind": "House",
+"Adress": "string",
+"POST": "integer"
+}
+{
+"Kind": "Car"
+}
+
+

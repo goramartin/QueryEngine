@@ -1,0 +1,7 @@
+﻿{
+"Kind": "Basic"
+}
+{
+"Kind": "FriendOf",
+"Lenght": "integer"
+}

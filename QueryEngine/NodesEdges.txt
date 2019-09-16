@@ -1,0 +1,10 @@
+﻿1  Person Pavel Jezek 30
+2 Person Tomas Holan 35
+6 Car 
+:
+3 FriendOf 1 2 5
+5 Basic 1 2 
+7 Basic 1 6
+4 FriendOf 2 1 5
+
+
