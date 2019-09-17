@@ -16,17 +16,17 @@ namespace QueryEngine
     }
 
 
-    class Vertex:EdgeListField
+    class Vertex : EdgeListField
     {
-       
-        public int edgePosition;
-        //public int refferenceCounter; 
 
+        public int edgePosition;
+        public List<IncomingEdge> incomingEdges;
         public Vertex(int id, Table table)
         {
             this.id = id;
             this.table = table;
             this.edgePosition = -1;
+            this.incomingEdges = new List<IncomingEdge>();
         }
 
         public Vertex()
@@ -34,14 +34,33 @@ namespace QueryEngine
             this.id = -1;
             this.table = null;
             this.edgePosition = -1;
+            this.incomingEdges = new List<IncomingEdge>();
+
         }
 
         public void SetEdgePosition(int position) => this.edgePosition = position;
 
         public bool HasEdges() { if (this.edgePosition == -1) return false; else return true; }
 
+        public void AddIncomingEdge(IncomingEdge e) { this.incomingEdges.Add(e); }
+
     }
 
+
+    class IncomingEdge
+    {
+        public Vertex FromVertex;
+        public Edge incomingEdge;
+
+        public IncomingEdge()
+        {
+            this.FromVertex = null;
+            this.incomingEdge = null;
+        } 
+
+        public void AddFromVertex(Vertex v) { this.FromVertex = v; }
+        public void AddEdge(Edge e) { this.incomingEdge = e; }
+    }
     class Edge:EdgeListField
     {
         public Vertex endVertex;

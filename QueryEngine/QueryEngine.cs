@@ -69,6 +69,11 @@ namespace QueryEngine
                 Console.WriteLine(item.table.IRI);
                 Console.WriteLine(item.edgePosition);
                 Console.WriteLine();
+                foreach (var it in item.incomingEdges)
+                {
+                    Console.WriteLine(it.FromVertex.id);
+                    Console.WriteLine(it.incomingEdge.id);
+                }
             }
 
             //displey whats inside edges
