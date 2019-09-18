@@ -54,16 +54,16 @@ namespace QueryEngine
                 }
                 else if (Char.IsLetter((char)ch))
                 {
-                    //Get identifier value
+                    //Get identifier value.
                     string ident = GetIdentifier((char)ch, reader);
                     
-                    //Try whether it is a Query word
+                    //Try whether it is a Query word.
                     Token.TokenType tok = default;
                     if (tokenTypes.TryGetValue(ident, out tok))
                     {
                         tokens.Add(new Token(null, tok));
                     }
-                    //Else it is identifier
+                    //Else it is identifier.
                     else { tokens.Add(new Token(ident, Token.TokenType.Identifier)); }
                 }
                 else throw new ArgumentException($"{(char)ch} Found character that could not be parsed. Tokenizer.");
@@ -143,22 +143,35 @@ namespace QueryEngine
 
         public Node ParseMatchExpr(List<Token> tokens) 
         {
-            return null;
+            MatchNode matchNode = new MatchNode();
+            //IncrementPosition(); //Becuase we always expect we read Select and then we must increase position
+            if (!CheckToken(position, Token.TokenType.Match, tokens))
+                throw new ArgumentException("SelectParser, position is not set at Match Token.");
+            else
+            {
+                IncrementPosition();
+                Node node = ParseVertexExpr(tokens);
+                if (node == null) throw new ArgumentException("Failed to parse Match Expresion.");
+                matchNode.AddNext(node);
+            }
+            return matchNode;
+
         }
 
         private Node ParseVariableExpr(List<Token> tokens)
         {
             VariableNode variableNode = new VariableNode();
 
-            //Expecting identifier
+            //Expecting identifier.
             Node name = ParseIdentifierExrp(tokens);
             if (name == null) return null;
             else variableNode.AddName(name);
             IncrementPosition();
 
 
-            //case of property name .PropName , if there is dot, there must follow identifier
-            if (CheckToken(position, Token.TokenType.Dot, tokens))
+            //Case of property name .PropName , if there is dot, there must follow identifier.
+            if ((CheckToken(position, Token.TokenType.Dot, tokens))|| 
+                (CheckToken(position, Token.TokenType.DoubleDot, tokens)))
             {
                 IncrementPosition();
                 Node identifierNode = ParseIdentifierExrp(tokens);
@@ -167,7 +180,7 @@ namespace QueryEngine
                 IncrementPosition();
             }
 
-            //comma signals there is another variable, next variablenode must follow
+            //Comma signals there is another variable, next variablenode must follow.
             if (CheckToken(position, Token.TokenType.Comma, tokens))
             {
                 IncrementPosition();
@@ -178,8 +191,6 @@ namespace QueryEngine
             return variableNode;
         }
     
-
-
         private Node ParseIdentifierExrp(List<Token> tokens)
         {
             if (CheckToken(position, Token.TokenType.Identifier, tokens))
@@ -189,17 +200,87 @@ namespace QueryEngine
 
         private Node ParseVertexExpr(List<Token> tokens)
         {
-            return null;
+            VertexNode vertexNode = new VertexNode();
+
+            //Parse Values of the variable.
+            Node variableNode = ParseVariableExpr(tokens);
+            if (variableNode == null) throw new ArgumentException("ParseVertex, expected variable.");
+            else vertexNode.AddVariable(variableNode);
+
+            //Position incremented from leaving function PsrseVariable.
+            //Parse Edge.
+            Node edgeNode = ParseEdgeExpr(tokens);
+            if (edgeNode != null) vertexNode.AddNext(edgeNode);
+
+            //Always must return valid vertex.
+            return vertexNode;
         }
 
         private Node ParseEdgeExpr(List<Token> tokens)
         {
-            return null;
+            EdgeNode edgeNode = new EdgeNode();
+
+            //Define type of edge.
+            EdgeType type = DefineEdgeType(tokens);
+            if (type == EdgeType.NotEdge) return null;
+            else edgeNode.SetType(type);
+            IncrementPosition();
+
+            //Parse variable of edge.
+            Node variableNode = ParseVariableExpr(tokens);
+            if (variableNode == null) throw new ArgumentException("ParseEdge, expected variable.");
+            else edgeNode.AddVariable(variableNode);
+            
+            //Skip end character of edge.
+            IncrementPosition();
+
+            //Next must be vertex.
+            Node vertexNode = ParseVertexExpr(tokens);
+            if (vertexNode != null) edgeNode.AddNext(vertexNode);
+            else throw new ArgumentException("PArseEdge, expected vertex.");
+
+            return edgeNode;
+        }
+        
+        private EdgeType DefineEdgeType(List<Token> tokens)
+        {
+            //Any edge
+            if (PredictEgeType(Token.TokenType.Dash, Token.TokenType.Dash, tokens))
+            {
+                return EdgeType.AnyEdge;
+            }
+            //In edge
+            else if (PredictEgeType(Token.TokenType.Less, Token.TokenType.Dash, tokens))
+            {
+                return EdgeType.InEdge;
+
+            }
+            //Out edge
+            else if (PredictEgeType(Token.TokenType.Dash, Token.TokenType.Greater, tokens))
+            {
+                return EdgeType.OutEdge;
+            }
+            else return EdgeType.NotEdge;
         }
 
-        private bool CheckToken(int position, Token.TokenType type, List<Token> tokens)
+        //Predict possible edge at front.
+        private bool PredictEgeType(Token.TokenType t1, Token.TokenType t2, List<Token> tokens)
         {
-            if (position < tokens.Count && tokens[position].type == type)
+            int predictionOne = position + 2;
+            int predictionTwo = position + 4;
+            if (CheckToken(position, t1, tokens) && 
+                (CheckToken(predictionOne, t2, tokens) || CheckToken(predictionTwo, t2, tokens)))
+            {
+                return true ;
+            }
+            return false;
+
+        }
+
+        //Check for token on position given.
+        private bool CheckToken(int p, Token.TokenType type, List<Token> tokens)
+        {
+            if (p < tokens.Count && tokens[p].type == type)
             {
                 return true;
             }
@@ -232,9 +313,7 @@ namespace QueryEngine
         T Visit(IdentifierNode node);
         T Visit(VariableNode node);
         T Visit(VertexNode node);
-        T Visit(IncomingEdgeNode node);
-        T Visit(OutgoingEdgeNode node);
-        T Visit(AnyEdgeNode node);
+        T Visit(EdgeNode node);
         T Visit(MatchNode node);
         T Visit(SelectNode node);
     }
@@ -258,20 +337,7 @@ namespace QueryEngine
             throw new NotImplementedException();
         }
 
-        public bool Visit(IncomingEdgeNode node)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool Visit(OutgoingEdgeNode node)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool Visit(AnyEdgeNode node)
-        {
-            throw new NotImplementedException();
-        }
+        
 
         public bool Visit(MatchNode node)
         {
@@ -282,13 +348,15 @@ namespace QueryEngine
         {
             throw new NotImplementedException();
         }
+
+        public bool Visit(EdgeNode node)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     class MatchVisitor : IVisitor<bool>
     {
-
-
-
 
         public bool Visit(IdentifierNode node)
         {
@@ -305,27 +373,17 @@ namespace QueryEngine
             throw new NotImplementedException();
         }
 
-        public bool Visit(IncomingEdgeNode node)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool Visit(OutgoingEdgeNode node)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool Visit(AnyEdgeNode node)
-        {
-            throw new NotImplementedException();
-        }
-
         public bool Visit(MatchNode node)
         {
             throw new NotImplementedException();
         }
 
         public bool Visit(SelectNode node)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Visit(EdgeNode node)
         {
             throw new NotImplementedException();
         }
@@ -376,27 +434,20 @@ namespace QueryEngine
     }
 
 
-    class IncomingEdgeNode : CommomMatchNode
+    enum EdgeType{ InEdge,OutEdge,AnyEdge, NotEdge};
+    class EdgeNode : CommomMatchNode
     {
+        EdgeType type;
         public override T Accept<T>(IVisitor<T> visitor)
         {
             return visitor.Visit(this);
         }
-    }
-    class AnyEdgeNode : CommomMatchNode
-    {
-        public override T Accept<T>(IVisitor<T> visitor)
+        public void SetType(EdgeType type)
         {
-            return visitor.Visit(this);
+            this.type = type;
         }
     }
-    class OutgoingEdgeNode : CommomMatchNode
-    {
-        public override T Accept<T>(IVisitor<T> visitor)
-        {
-            return visitor.Visit(this);
-        }
-    }
+
     class VertexNode : CommomMatchNode
     {
         public override T Accept<T>(IVisitor<T> visitor)
