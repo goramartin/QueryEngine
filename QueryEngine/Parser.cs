@@ -111,6 +111,16 @@ namespace QueryEngine
 
     }
 
+    class Parser
+    {
+
+
+
+
+
+    }
+
+
 
 
 
@@ -140,12 +150,104 @@ namespace QueryEngine
         T Visit(SelectNode node);
     }
 
+    class SelectVisitor : IVisitor<bool>
+    {
+
+
+        public bool Visit(IdentifierNode node)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Visit(VariableNode node)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Visit(VertexNode node)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Visit(IncomingEdgeNode node)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Visit(OutgoingEdgeNode node)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Visit(AnyEdgeNode node)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Visit(MatchNode node)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Visit(SelectNode node)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    class MatchVisitor : IVisitor<bool>
+    {
+
+
+
+
+        public bool Visit(IdentifierNode node)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Visit(VariableNode node)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Visit(VertexNode node)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Visit(IncomingEdgeNode node)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Visit(OutgoingEdgeNode node)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Visit(AnyEdgeNode node)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Visit(MatchNode node)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Visit(SelectNode node)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+
 
     abstract class Node
     {
         public abstract T Accept<T>(IVisitor<T> visitor);
     }
-
     abstract class QueryNode :Node
     {
         public  Node next;
@@ -154,7 +256,6 @@ namespace QueryEngine
             this.next = next;
         }
     }
-
     abstract class CommomMatchNode : QueryNode
     {
         Node variable;
@@ -164,6 +265,7 @@ namespace QueryEngine
             this.variable = v;
         }
     }
+
 
     class MatchNode : QueryNode
     {
@@ -188,6 +290,7 @@ namespace QueryEngine
             return visitor.Visit(this);
         }
     }
+
 
     class IncomingEdgeNode : CommomMatchNode
     {
@@ -218,6 +321,7 @@ namespace QueryEngine
         }
     }
 
+
     class VariableNode : QueryNode
     {
         Node name;
@@ -238,7 +342,6 @@ namespace QueryEngine
             return visitor.Visit(this);
         }
     }
-
     class IdentifierNode : Node
     {
         string value;
