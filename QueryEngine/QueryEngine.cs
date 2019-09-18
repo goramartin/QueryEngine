@@ -13,8 +13,16 @@ namespace QueryEngine
        
         static void Main(string[] args)
         {
+            List<Token> tokens = Tokenizer.Tokenize(Console.In);
 
+            foreach (var item in tokens)
+            {
+                Console.WriteLine(item.type);
+                if (item.type == Token.TokenType.Identifier) Console.WriteLine(item.strValue) ;
+            }
+            
 
+            /*
             Graph g = new Graph();
 
             /////////////
@@ -84,7 +92,7 @@ namespace QueryEngine
                 Console.WriteLine(item.endVertex.id);
                 Console.WriteLine();
             }
-
+            */
         }
     }
 }

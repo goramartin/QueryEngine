@@ -110,7 +110,7 @@ namespace QueryEngine
 
         private Dictionary<string, Table> LoadTables(string filename)
         {
-            var reader = new WordReader(filename);
+            var reader = new Reader(filename);
             var processor = new TableDictProcessor();
             var creator = new CreatorFromFile<Dictionary<string, Table>>(reader, processor);
             return creator.Create();
@@ -120,7 +120,7 @@ namespace QueryEngine
 
         public void LoadEdgeList(string filename) 
         {
-            var reader = new WordReader(filename);
+            var reader = new Reader(filename);
             var processor = new EdgeListProcessor();
             processor.PassParameters(NodeTables, EdgeTables);
             var creator = new CreatorFromFile<EdgeListHolder>(reader, processor);

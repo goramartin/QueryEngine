@@ -133,11 +133,17 @@ namespace QueryEngine
         static PropertyFactory()
         {
             registry = new Dictionary<string, Type>();
+            InicialiseRegistry();
+            }
+
+        private static void InicialiseRegistry()
+        {
             RegisterProperty("string", typeof(StringProperty));
             RegisterProperty("integer", typeof(IntProperty));
+
         }
 
-        private static void RegisterProperty(string token, Type type)
+    private static void RegisterProperty(string token, Type type)
         {
             if (registry.ContainsKey(token))
                 throw new ArgumentException("PropertyFactory: Property Type already registered.");

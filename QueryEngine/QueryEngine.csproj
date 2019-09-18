@@ -44,9 +44,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Creators.cs" />
+    <Compile Include="Parser.cs" />
     <Compile Include="Tables.cs" />
     <Compile Include="Graph.cs" />
-    <Compile Include="WordReader.cs" />
+    <Compile Include="Reader.cs" />
     <Compile Include="QueryEngine.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
