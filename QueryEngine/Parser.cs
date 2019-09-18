@@ -27,7 +27,7 @@ namespace QueryEngine
     static class Tokenizer
     {
         static Dictionary<string, Token.TokenType> tokenTypes;
-
+        static char EndOfQueryCharacter = ';';
         static Tokenizer()
         {
             tokenTypes = new Dictionary<string, Token.TokenType>();
@@ -41,7 +41,7 @@ namespace QueryEngine
             while (true)
             {
                 ch = reader.Read();
-                if (ch == ';') break;
+                if (ch == EndOfQueryCharacter) break;
 
                 if (tokenTypes.TryGetValue(((char)ch).ToString(), out Token.TokenType token))
                 {
@@ -54,14 +54,14 @@ namespace QueryEngine
                 else if (Char.IsLetter((char)ch))
                 {
                     string ident = GetIdentifier((char)ch, reader);
-                    Token.TokenType t = 0;
+                    Token.TokenType t = default;
                     if (tokenTypes.TryGetValue(ident, out t))
                     {
                         tokens.Add(new Token(null, token));
                     }
                     else { tokens.Add(new Token(ident, Token.TokenType.Identifier)); }
                 }
-                else throw new ArgumentException("{0} Found character that could not be parsed.Tokenizer.", ch.ToString());
+                else throw new ArgumentException($"{(char)ch} Found character that could not be parsed. Tokenizer.");
             }
 
             return tokens;
@@ -86,7 +86,6 @@ namespace QueryEngine
             return strValue;
 
         }
-
 
         private static void RegisterToken(string str, Token.TokenType type)
         {
@@ -118,4 +117,139 @@ namespace QueryEngine
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+    interface IVisitor<T>
+    {
+        T Visit(IdentifierNode node);
+        T Visit(VariableNode node);
+        T Visit(VertexNode node);
+        T Visit(IncomingEdgeNode node);
+        T Visit(OutgoingEdgeNode node);
+        T Visit(AnyEdgeNode node);
+        T Visit(MatchNode node);
+        T Visit(SelectNode node);
+    }
+
+
+    abstract class Node
+    {
+        public abstract T Accept<T>(IVisitor<T> visitor);
+    }
+
+    abstract class QueryNode :Node
+    {
+        public  Node next;
+        public void AddNext(Node next)
+        {
+            this.next = next;
+        }
+    }
+
+    abstract class CommomMatchNode : QueryNode
+    {
+        Node variable;
+
+        public void AddVariable(Node v)
+        {
+            this.variable = v;
+        }
+    }
+
+    class MatchNode : QueryNode
+    {
+        public MatchNode(Node n)
+        {
+            this.next = n;
+        }
+
+        public override T Accept<T>(IVisitor<T> visitor)
+        {
+            return visitor.Visit(this);
+        }
+    }
+    class SelectNode : QueryNode
+    {
+        public SelectNode(Node n)
+        {
+            this.next = n;
+        }
+        public override T Accept<T>(IVisitor<T> visitor)
+        {
+            return visitor.Visit(this);
+        }
+    }
+
+    class IncomingEdgeNode : CommomMatchNode
+    {
+        public override T Accept<T>(IVisitor<T> visitor)
+        {
+            return visitor.Visit(this);
+        }
+    }
+    class AnyEdgeNode : CommomMatchNode
+    {
+        public override T Accept<T>(IVisitor<T> visitor)
+        {
+            return visitor.Visit(this);
+        }
+    }
+    class OutgoingEdgeNode : CommomMatchNode
+    {
+        public override T Accept<T>(IVisitor<T> visitor)
+        {
+            return visitor.Visit(this);
+        }
+    }
+    class VertexNode : CommomMatchNode
+    {
+        public override T Accept<T>(IVisitor<T> visitor)
+        {
+            return visitor.Visit(this);
+        }
+    }
+
+    class VariableNode : QueryNode
+    {
+        Node name;
+        Node propName;
+
+        public void AddName(Node n)
+        {
+            this.name = n;
+        }
+
+        public void AddProperty(Node p)
+        {
+            this.propName = p;
+        }
+
+        public override T Accept<T>(IVisitor<T> visitor)
+        {
+            return visitor.Visit(this);
+        }
+    }
+
+    class IdentifierNode : Node
+    {
+        string value;
+
+        public IdentifierNode(string v) { this.value = v; }
+
+        public void AddValue(string v) { this.value = v; }
+
+        public override T Accept<T>(IVisitor<T> visitor)
+        {
+            return visitor.Visit(this);
+        }
+    }
 }
