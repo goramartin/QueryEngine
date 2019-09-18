@@ -20,7 +20,11 @@ namespace QueryEngine
                 Console.WriteLine(item.type);
                 if (item.type == Token.TokenType.Identifier) Console.WriteLine(item.strValue) ;
             }
-            
+
+            Parser p = new Parser();
+            SelectNode s =(SelectNode) p.ParseSelectExpr(tokens);
+
+            Console.ReadLine();
 
             /*
             Graph g = new Graph();
