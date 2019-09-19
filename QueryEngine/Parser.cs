@@ -11,7 +11,7 @@ namespace QueryEngine
         { 
                 Match, Select,
 
-                Asterix, Dot, DoubleDot, Comma, Dash, Less, Greater, 
+                Asterix, Dot, DoubleDot, Comma, Dash, Less, Greater,  LeftParen, RightParen, LeftBrace, RightBrace,
                 Identifier,
         }
         public readonly string strValue;
@@ -110,6 +110,10 @@ namespace QueryEngine
             RegisterToken("-", Token.TokenType.Dash);
             RegisterToken(">", Token.TokenType.Greater);
             RegisterToken("<", Token.TokenType.Less);
+            RegisterToken("[", Token.TokenType.LeftBrace);
+            RegisterToken("]", Token.TokenType.RightBrace);
+            RegisterToken("(", Token.TokenType.LeftParen);
+            RegisterToken(")", Token.TokenType.RightParen);
             RegisterToken("MATCH", Token.TokenType.Match);
             RegisterToken("SELECT", Token.TokenType.Select);
         }
@@ -162,13 +166,20 @@ namespace QueryEngine
         {
             VariableNode variableNode = new VariableNode();
 
-            //Expecting identifier.
-            Node name = ParseIdentifierExrp(tokens);
-            if (name == null) return null;
-            else variableNode.AddName(name);
+            // (*)
+            if (CheckToken(position, Token.TokenType.Asterix, tokens))
+            {
+                variableNode.AddName(new IdentifierNode("*"));
+            }
+            else
+            {
+                //Expecting identifier.
+                Node name = ParseIdentifierExrp(tokens);
+                if (name == null) return null;
+                else variableNode.AddName(name);
+            }
+
             IncrementPosition();
-
-
             //Case of property name .PropName , if there is dot, there must follow identifier.
             if ((CheckToken(position, Token.TokenType.Dot, tokens))|| 
                 (CheckToken(position, Token.TokenType.DoubleDot, tokens)))
@@ -202,10 +213,18 @@ namespace QueryEngine
         {
             VertexNode vertexNode = new VertexNode();
 
+            // (
+            if (CheckToken(position, Token.TokenType.LeftParen, tokens)) IncrementPosition();
+            else return null;
+
             //Parse Values of the variable.
             Node variableNode = ParseVariableExpr(tokens);
             if (variableNode == null) throw new ArgumentException("ParseVertex, expected variable.");
             else vertexNode.AddVariable(variableNode);
+
+            // )
+            if (CheckToken(position, Token.TokenType.RightParen,tokens)) IncrementPosition();
+            else return null;
 
             //Position incremented from leaving function PsrseVariable.
             //Parse Edge.
@@ -220,18 +239,26 @@ namespace QueryEngine
         {
             EdgeNode edgeNode = new EdgeNode();
 
-            //Define type of edge.
+            //Define type of edge.  in <...-, out -...>, any -...-
             EdgeType type = DefineEdgeType(tokens);
             if (type == EdgeType.NotEdge) return null;
             else edgeNode.SetType(type);
             IncrementPosition();
 
+            // [
+            if (CheckToken(position, Token.TokenType.LeftBrace, tokens)) IncrementPosition();
+            else throw new ArgumentException("ParseEdge, expected Leftbrace.");
+
             //Parse variable of edge.
             Node variableNode = ParseVariableExpr(tokens);
             if (variableNode == null) throw new ArgumentException("ParseEdge, expected variable.");
             else edgeNode.AddVariable(variableNode);
-            
-            //Skip end character of edge.
+
+            // ]
+            if (CheckToken(position, Token.TokenType.RightBrace, tokens)) IncrementPosition();
+            else throw new ArgumentException("ParseEdge, expected rightbrace.");
+
+            //Skip end character of edge.  >,-
             IncrementPosition();
 
             //Next must be vertex.
@@ -244,30 +271,25 @@ namespace QueryEngine
         
         private EdgeType DefineEdgeType(List<Token> tokens)
         {
-            //Any edge
+            //Any edge -[..]-
             if (PredictEgeType(Token.TokenType.Dash, Token.TokenType.Dash, tokens))
-            {
                 return EdgeType.AnyEdge;
-            }
-            //In edge
+            //In edge <[..]-
             else if (PredictEgeType(Token.TokenType.Less, Token.TokenType.Dash, tokens))
-            {
                 return EdgeType.InEdge;
-
-            }
-            //Out edge
+            //Out edge -[..]>
             else if (PredictEgeType(Token.TokenType.Dash, Token.TokenType.Greater, tokens))
-            {
                 return EdgeType.OutEdge;
-            }
             else return EdgeType.NotEdge;
         }
 
         //Predict possible edge at front.
         private bool PredictEgeType(Token.TokenType t1, Token.TokenType t2, List<Token> tokens)
         {
-            int predictionOne = position + 2;
-            int predictionTwo = position + 4;
+            // -[e]>
+            int predictionOne = position + 4;
+            // -[e:x]>
+            int predictionTwo = position + 6;
             if (CheckToken(position, t1, tokens) && 
                 (CheckToken(predictionOne, t2, tokens) || CheckToken(predictionTwo, t2, tokens)))
             {
