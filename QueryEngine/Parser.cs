@@ -378,22 +378,21 @@ namespace QueryEngine
 
     interface IVisitor<T>
     {
-        T Visit(IdentifierNode node);
-        T Visit(VariableNode node);
+        T Visit(SelectNode node);
+        T Visit(MatchNode node);
         T Visit(VertexNode node);
         T Visit(EdgeNode node);
-        T Visit(MatchNode node);
-        T Visit(SelectNode node);
+        T Visit(VariableNode node);
+        T Visit(IdentifierNode node);
     }
 
     class SelectVisitor : IVisitor<bool>
     {
-        public bool Visit(IdentifierNode node)
+        public bool Visit(SelectNode node)
         {
-            throw new NotImplementedException();
         }
 
-        public bool Visit(VariableNode node)
+        public bool Visit(MatchNode node)
         {
             throw new NotImplementedException();
         }
@@ -403,17 +402,17 @@ namespace QueryEngine
             throw new NotImplementedException();
         }
 
-        public bool Visit(MatchNode node)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool Visit(SelectNode node)
-        {
-            throw new NotImplementedException();
-        }
-
         public bool Visit(EdgeNode node)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Visit(VariableNode node)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Visit(IdentifierNode node)
         {
             throw new NotImplementedException();
         }
@@ -421,8 +420,21 @@ namespace QueryEngine
 
     class MatchVisitor : IVisitor<bool>
     {
+        public bool Visit(SelectNode node)
+        {
+            throw new NotImplementedException();
+        }
 
-        public bool Visit(IdentifierNode node)
+        public bool Visit(MatchNode node)
+        {
+        }
+
+        public bool Visit(VertexNode node)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Visit(EdgeNode node)
         {
             throw new NotImplementedException();
         }
@@ -432,22 +444,7 @@ namespace QueryEngine
             throw new NotImplementedException();
         }
 
-        public bool Visit(VertexNode node)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool Visit(MatchNode node)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool Visit(SelectNode node)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool Visit(EdgeNode node)
+        public bool Visit(IdentifierNode node)
         {
             throw new NotImplementedException();
         }
