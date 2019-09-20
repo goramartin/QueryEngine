@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace QueryEngine
 {
+    //One field in edge list... that is one field in list of vertices and one filed in list of edges
     abstract class Field
     {
         public int id;
@@ -46,7 +47,6 @@ namespace QueryEngine
 
     }
 
-
     class IncomingEdge
     {
         public Vertex FromVertex;
@@ -60,8 +60,9 @@ namespace QueryEngine
 
         public void AddFromVertex(Vertex v) { this.FromVertex = v; }
         public void AddEdge(Edge e) { this.incomingEdge = e; }
+
     }
-    class Edge:Field
+    class Edge : Field
     {
         public Vertex endVertex;
 

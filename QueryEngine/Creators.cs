@@ -107,6 +107,7 @@ namespace QueryEngine
             }
         }
 
+
         public void PassParameters(params object[] prms)
         {
             this.dict = (Dictionary<string, Table>)prms[0];
@@ -181,6 +182,7 @@ namespace QueryEngine
         }
     }
 
+    //Creates edge list from data file.
     class EdgeListProcessor : IProcessor<EdgeListHolder>
     {
         List<Vertex> vertices;

@@ -388,8 +388,6 @@ namespace QueryEngine
 
     class SelectVisitor : IVisitor<bool>
     {
-
-
         public bool Visit(IdentifierNode node)
         {
             throw new NotImplementedException();
@@ -404,8 +402,6 @@ namespace QueryEngine
         {
             throw new NotImplementedException();
         }
-
-        
 
         public bool Visit(MatchNode node)
         {
@@ -458,11 +454,13 @@ namespace QueryEngine
     }
 
 
-
+    //Parent to every node.
+    //Gives Visit method.
     abstract class Node
     {
         public abstract T Accept<T>(IVisitor<T> visitor);
     }
+   
     abstract class QueryNode :Node
     {
         public  Node next;
@@ -471,6 +469,8 @@ namespace QueryEngine
             this.next = next;
         }
     }
+  
+    //Only vertices and edges inherit from this class.
     abstract class CommomMatchNode : QueryNode
     {
         Node variable;
@@ -484,9 +484,7 @@ namespace QueryEngine
 
     class MatchNode : QueryNode
     {
-        public MatchNode()
-        {
-        }
+        public MatchNode() { }
 
         public override T Accept<T>(IVisitor<T> visitor)
         {
@@ -495,6 +493,8 @@ namespace QueryEngine
     }
     class SelectNode : QueryNode
     {
+        public SelectNode() { }
+
         public override T Accept<T>(IVisitor<T> visitor)
         {
             return visitor.Visit(this);

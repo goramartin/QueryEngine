@@ -39,10 +39,13 @@ namespace QueryEngine
 
         public void AddNewProperty(Property newProp)
         {
-            if (properties == null || newProp == null) throw new ArgumentException($"{this.GetType()} Failed to add Property, list or prop not inicialised.");
+            if (properties == null || newProp == null) 
+                throw new ArgumentException($"{this.GetType()} Failed to add Property, list or prop not inicialised.");
+           
             foreach (var item in properties)
             {
-                if (newProp.IRI == item.IRI) throw new ArgumentException($"{this.GetType()} Adding property that already exists.");
+                if (newProp.IRI == item.IRI) 
+                    throw new ArgumentException($"{this.GetType()} Adding property that already exists.");
             }
             this.properties.Add(newProp);
         }
@@ -76,7 +79,8 @@ namespace QueryEngine
         
         public Property(string propName) 
         {
-            if (propName == null) throw new ArgumentException($"{this.GetType()} Property<T> name not inicalised.");
+            if (propName == null) 
+                throw new ArgumentException($"{this.GetType()} Property<T> name not inicalised.");
             else
             {
                 this.propHolder = new List<T>();

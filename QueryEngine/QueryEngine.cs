@@ -13,13 +13,16 @@ namespace QueryEngine
         
         private static Query CreateQuery(TextReader reader) 
         {
+            //Create tokens from console.
             List<Token> tokens = Tokenizer.Tokenize(reader);
 
+            //Parse tokens in order of the query words.
             Parser.ResetPosition();
             SelectNode selectNode = Parser.ParseSelectExpr(tokens);
             MatchNode matchNode = Parser.ParseMatchExpr(tokens);
 
-            //to do better if it returns null;
+            //Check if it successfully parsed every token.
+            //to do better if it returns null when failed.
             if (tokens.Count != Parser.GetPosition()) 
                 throw new ArgumentException("Failed to parse every token."); 
 
@@ -30,6 +33,7 @@ namespace QueryEngine
 
         private static Graph CreateGraph(string[] args)
         {
+            //better if it returns null when failed.
             Graph g = new Graph();
             g.LoadNodeTables("VertexTypes.txt");
             g.LoadEdgeTables("EdgeTypes.txt");
@@ -40,8 +44,9 @@ namespace QueryEngine
 
         private static void Run(string[] args, TextReader reader, TextWriter writer)
         {
-            Graph g = CreateGraph(args);
 
+
+            Graph g = CreateGraph(args);
             Query query = CreateQuery(reader);    
 
 
@@ -77,9 +82,9 @@ namespace QueryEngine
                 if (item.type == Token.TokenType.Identifier) Console.WriteLine(item.strValue) ;
             }
 
-            Parser p = new Parser();
-            SelectNode d = (SelectNode)p.ParseSelectExpr(tokens);
-            MatchNode s =(MatchNode) p.ParseMatchExpr(tokens);
+         
+            SelectNode d = Parser.ParseSelectExpr(tokens);
+            MatchNode s = Parser.ParseMatchExpr(tokens);
 
             Console.ReadLine();
 
