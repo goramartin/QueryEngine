@@ -10,9 +10,65 @@ namespace QueryEngine
 {
     class QueryEngine
     {
-       
+        
+        private static Query CreateQuery(TextReader reader) 
+        {
+            List<Token> tokens = Tokenizer.Tokenize(reader);
+
+            Parser.ResetPosition();
+            SelectNode selectNode = Parser.ParseSelectExpr(tokens);
+            MatchNode matchNode = Parser.ParseMatchExpr(tokens);
+
+            //to do better if it returns null;
+            if (tokens.Count != Parser.GetPosition()) 
+                throw new ArgumentException("Failed to parse every token."); 
+
+            Query query = new Query(selectNode, matchNode);
+
+            return query;
+        }
+
+        private static Graph CreateGraph(string[] args)
+        {
+            Graph g = new Graph();
+            g.LoadNodeTables("VertexTypes.txt");
+            g.LoadEdgeTables("EdgeTypes.txt");
+            g.LoadEdgeList("NodesEdges.txt");
+            return g;
+        }
+
+
+        private static void Run(string[] args, TextReader reader, TextWriter writer)
+        {
+            Graph g = CreateGraph(args);
+
+            Query query = CreateQuery(reader);    
+
+
+
+
+
+
+
+
+        }
+
         static void Main(string[] args)
         {
+            try
+            {
+                Run(args, Console.In, Console.Out);
+                return;
+            }
+            catch (Exception e )
+            {
+                Console.WriteLine( e.Message);
+            }
+           
+
+
+
+
             List<Token> tokens = Tokenizer.Tokenize(Console.In);
 
             foreach (var item in tokens)

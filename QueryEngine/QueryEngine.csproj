@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="Creators.cs" />
     <Compile Include="Parser.cs" />
+    <Compile Include="QueryObjects.cs" />
     <Compile Include="Tables.cs" />
     <Compile Include="Graph.cs" />
     <Compile Include="Reader.cs" />

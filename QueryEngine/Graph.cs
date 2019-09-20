@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace QueryEngine
 {
-    abstract class EdgeListField
+    abstract class Field
     {
         public int id;
         public Table table;
@@ -16,7 +16,7 @@ namespace QueryEngine
     }
 
 
-    class Vertex : EdgeListField
+    class Vertex : Field
     {
 
         public int edgePosition;
@@ -61,7 +61,7 @@ namespace QueryEngine
         public void AddFromVertex(Vertex v) { this.FromVertex = v; }
         public void AddEdge(Edge e) { this.incomingEdge = e; }
     }
-    class Edge:EdgeListField
+    class Edge:Field
     {
         public Vertex endVertex;
 
@@ -115,19 +115,27 @@ namespace QueryEngine
             var creator = new CreatorFromFile<Dictionary<string, Table>>(reader, processor);
             return creator.Create();
         }
-        public void LoadEdgeTables(string filename) => this.EdgeTables = LoadTables(filename);
-        public void LoadNodeTables(string filename) => this.NodeTables = LoadTables(filename);
-
-        public void LoadEdgeList(string filename) 
+        private EdgeListHolder LoadList(string filename) 
         {
             var reader = new Reader(filename);
             var processor = new EdgeListProcessor();
             processor.PassParameters(NodeTables, EdgeTables);
             var creator = new CreatorFromFile<EdgeListHolder>(reader, processor);
-            EdgeListHolder edgeList = creator.Create();
+            return creator.Create();
+        }
+
+
+        public void LoadEdgeTables(string filename) => this.EdgeTables = LoadTables(filename);
+        public void LoadNodeTables(string filename) => this.NodeTables = LoadTables(filename);
+
+        public void LoadEdgeList(string filename) 
+        {
+            EdgeListHolder edgeList = LoadList(filename);
             this.vertices = edgeList.vertices;
             this.edges = edgeList.edges;
         }
+
+
 
     }
 }

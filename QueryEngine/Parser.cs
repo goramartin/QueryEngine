@@ -120,15 +120,17 @@ namespace QueryEngine
 
     }
 
-    class Parser
+    static class Parser
     {
-        int position = 0;
-        public Parser() { }
+        static int position;
+        static Parser() { position = 0; }
 
-        public void ResetPosition() { this.position = 0; }
-        private void IncrementPosition() { this.position++; }
+        static public int GetPosition() { return position; }
 
-        public Node ParseSelectExpr(List<Token> tokens) 
+        static public void ResetPosition() { position = 0; }
+        static private void IncrementPosition() { position++; }
+
+        static public SelectNode ParseSelectExpr(List<Token> tokens) 
         {
             SelectNode selectNode = new SelectNode();
 
@@ -144,7 +146,7 @@ namespace QueryEngine
 
             return selectNode;
         }
-        public Node ParseMatchExpr(List<Token> tokens) 
+        static public MatchNode ParseMatchExpr(List<Token> tokens) 
         {
             MatchNode matchNode = new MatchNode();
             //IncrementPosition(); //Becuase we always expect we read Select and then we must increase position
@@ -162,7 +164,7 @@ namespace QueryEngine
         }
 
 
-        private Node ParseVariableExpr(List<Token> tokens)
+        static private Node ParseVariableExpr(List<Token> tokens)
         {
             VariableNode variableNode = new VariableNode();
 
@@ -200,7 +202,7 @@ namespace QueryEngine
             }
             return variableNode;
         }
-        private Node ParseVarForMatchExpr(List<Token> tokens)
+        static private Node ParseVarForMatchExpr(List<Token> tokens)
         {
             VariableNode variableNode = new VariableNode();
 
@@ -221,7 +223,7 @@ namespace QueryEngine
             if (variableNode.IsEmpty()) return null;
             else return variableNode;
         }
-        private Node ParseIdentifierExrp(List<Token> tokens)
+        static private Node ParseIdentifierExrp(List<Token> tokens)
         {
             if (CheckToken(position, Token.TokenType.Identifier, tokens))
                 return new IdentifierNode(tokens[position].strValue);
@@ -230,7 +232,7 @@ namespace QueryEngine
 
 
 
-        private Node ParseVertexExpr(List<Token> tokens)
+        static private Node ParseVertexExpr(List<Token> tokens)
         {
             VertexNode vertexNode = new VertexNode();
 
@@ -254,7 +256,7 @@ namespace QueryEngine
             //Always must return valid vertex.
             return vertexNode;
         }
-        private Node ParseEdgeExpr(List<Token> tokens)
+        static private Node ParseEdgeExpr(List<Token> tokens)
         {
             EdgeNode edgeNode = new EdgeNode();
 
@@ -275,7 +277,7 @@ namespace QueryEngine
             return edgeNode;
         }
 
-        private Node ParseEdge(List<Token> tokens)
+        static private Node ParseEdge(List<Token> tokens)
         {
             EdgeNode edgeNode = new EdgeNode();
             //Define type of edge.  in <...-, out -...>, any -...-
@@ -302,7 +304,7 @@ namespace QueryEngine
 
             return edgeNode;
         }
-        private Node ParseAnonymousEdge(List<Token> tokens)
+        static private Node ParseAnonymousEdge(List<Token> tokens)
         {
             EdgeNode edgeNode = new EdgeNode();
             bool found = false;
@@ -333,7 +335,7 @@ namespace QueryEngine
             else return null;
 
         }
-        private EdgeType DefineEdgeType(List<Token> tokens)
+        static private EdgeType DefineEdgeType(List<Token> tokens)
         {
             //Any edge -[..]-
             if (PredictEgeType(Token.TokenType.Dash, Token.TokenType.Dash, tokens))
@@ -346,7 +348,7 @@ namespace QueryEngine
                 return EdgeType.OutEdge;
             else return EdgeType.NotEdge;
         }
-        private bool PredictEgeType(Token.TokenType t1, Token.TokenType t2, List<Token> tokens)
+        static private bool PredictEgeType(Token.TokenType t1, Token.TokenType t2, List<Token> tokens)
         {
             // -[e]>
             int predictionOne = position + 4;
@@ -363,7 +365,7 @@ namespace QueryEngine
         }
 
         //Check for token on position given.
-        private bool CheckToken(int p, Token.TokenType type, List<Token> tokens)
+        static private bool CheckToken(int p, Token.TokenType type, List<Token> tokens)
         {
             if (p < tokens.Count && tokens[p].type == type)
             {
@@ -372,9 +374,7 @@ namespace QueryEngine
             return false;
 
         }
-
     }
-
 
     interface IVisitor<T>
     {
