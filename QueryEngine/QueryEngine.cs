@@ -92,6 +92,10 @@ namespace QueryEngine
                 Console.WriteLine( e.Message);
             }
 
+
+            //just for testing
+            ///////////////////////////////////////
+
             Graph g = new Graph();
             g.LoadNodeTables("VertexTypes.txt");
             g.LoadEdgeTables("EdgeTypes.txt");

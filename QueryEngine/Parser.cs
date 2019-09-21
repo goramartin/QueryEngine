@@ -541,7 +541,7 @@ namespace QueryEngine
             if (readingName)
             {
                 //It has name, it can not be anonnymous.
-                result[p].SetIsAnnonymous(false);
+                result[p].SetAnnonymous(false);
                 //Try if the variable is alredy in the scope.
                 if (scope.TryGetValue(node.value, out int positionOfRepeated))
                 {
@@ -646,7 +646,6 @@ namespace QueryEngine
         }
 
     }
-
     class VertexNode : CommomMatchNode
     {
         public override void Accept<T>(IVisitor<T> visitor)

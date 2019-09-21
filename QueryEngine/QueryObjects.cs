@@ -66,16 +66,8 @@ namespace QueryEngine
     class Scope
     {
         private Dictionary<string, int > scopeVar;
-
-        public Scope(Dictionary<string,int> sv)
-        {
-            this.scopeVar = sv;
-        }
-        public Scope() 
-        {
-            scopeVar = new Dictionary<string, int>();
-        }
-
+        public Scope(Dictionary<string,int> sv)=> this.scopeVar = sv;
+        public Scope() => this.scopeVar = new Dictionary<string, int>();
         public Dictionary<string, int> GetScopeVariables() => this.scopeVar;
     }
 
@@ -84,10 +76,7 @@ namespace QueryEngine
    class SelectObject
    {
         private List<SelectVariable> selectVariables;
-        public SelectObject(List<SelectVariable> l)
-        {
-            this.selectVariables = l;
-        }
+        public SelectObject(List<SelectVariable> sv) => this.selectVariables = sv;
 
         public List<SelectVariable> GetSelectVariables() => this.selectVariables;
    }
@@ -113,28 +102,11 @@ namespace QueryEngine
         }
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
     //Match represents patter to match in main match algorithm.
    class MatchObject
    {
         private List<BaseMatch> pattern;
-
-        public MatchObject(List<BaseMatch> p)
-        {
-            this.pattern = p;
-        }
-
+        public MatchObject(List<BaseMatch> p) => this.pattern = p;
         public List<BaseMatch> GetPattern() => this.pattern;
 
    }
@@ -148,7 +120,7 @@ namespace QueryEngine
 
         public abstract bool Apply(Field element);
 
-        public void SetIsAnnonymous(bool b) => this.anonnymous = b;
+        public void SetAnnonymous(bool b) => this.anonnymous = b;
         public void SetRepeated(bool b) => this.repeated = b;
         public void SetPositionOfRepeatedField(int p) => this.positionOfRepeatedField = p;
         public void SetType(Table t) => this.type = t;
