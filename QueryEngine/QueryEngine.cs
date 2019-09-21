@@ -62,8 +62,8 @@ namespace QueryEngine
         {
             try
             {
-                Run(args, Console.In, Console.Out);
-                return;
+         //      Run(args, Console.In, Console.Out);
+           //     return;
             }
             catch (Exception e )
             {
@@ -84,11 +84,16 @@ namespace QueryEngine
 
          
             SelectNode d = Parser.ParseSelectExpr(tokens);
-            MatchNode s = Parser.ParseMatchExpr(tokens);
+            // MatchNode s = Parser.ParseMatchExpr(tokens);
+            SelectVisitor selectVisitor = new SelectVisitor();
+            d.Accept(selectVisitor);
+            var k = selectVisitor.GetResult();
+
+
 
             Console.ReadLine();
 
-            /*
+            
             Graph g = new Graph();
 
             /////////////
@@ -158,7 +163,7 @@ namespace QueryEngine
                 Console.WriteLine(item.endVertex.id);
                 Console.WriteLine();
             }
-            */
+            Console.ReadLine();
         }
     }
 }

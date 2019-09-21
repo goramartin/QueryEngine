@@ -138,7 +138,7 @@ namespace QueryEngine
         {
             registry = new Dictionary<string, Type>();
             InicialiseRegistry();
-            }
+        }
 
         private static void InicialiseRegistry()
         {
@@ -147,7 +147,7 @@ namespace QueryEngine
 
         }
 
-    private static void RegisterProperty(string token, Type type)
+         private static void RegisterProperty(string token, Type type)
         {
             if (registry.ContainsKey(token))
                 throw new ArgumentException("PropertyFactory: Property Type already registered.");

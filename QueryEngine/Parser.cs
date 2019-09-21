@@ -7,12 +7,12 @@ namespace QueryEngine
 {
     struct Token
     {
-        public enum TokenType 
-        { 
-                Match, Select,
+        public enum TokenType
+        {
+            Match, Select,
 
-                Asterix, Dot, DoubleDot, Comma, Dash, Less, Greater,  LeftParen, RightParen, LeftBrace, RightBrace,
-                Identifier,
+            Asterix, Dot, DoubleDot, Comma, Dash, Less, Greater, LeftParen, RightParen, LeftBrace, RightBrace,
+            Identifier,
         }
         public readonly string strValue;
         public TokenType type;
@@ -33,7 +33,7 @@ namespace QueryEngine
             tokenTypes = new Dictionary<string, Token.TokenType>();
             InitialiseRegistry();
         }
-        
+
         public static List<Token> Tokenize(TextReader reader)
         {
             List<Token> tokens = new List<Token>();
@@ -56,7 +56,7 @@ namespace QueryEngine
                 {
                     //Get identifier value.
                     string ident = GetIdentifier((char)ch, reader);
-                    
+
                     //Try whether it is a Query word.
                     Token.TokenType tok = default;
                     if (tokenTypes.TryGetValue(ident, out tok))
@@ -71,8 +71,8 @@ namespace QueryEngine
 
             return tokens;
         }
-       
-       private static string GetIdentifier(char ch, TextReader reader)
+
+        private static string GetIdentifier(char ch, TextReader reader)
         {
             string strValue = "";
             strValue += ch;
@@ -130,7 +130,7 @@ namespace QueryEngine
         static public void ResetPosition() { position = 0; }
         static private void IncrementPosition() { position++; }
 
-        static public SelectNode ParseSelectExpr(List<Token> tokens) 
+        static public SelectNode ParseSelectExpr(List<Token> tokens)
         {
             SelectNode selectNode = new SelectNode();
 
@@ -146,7 +146,7 @@ namespace QueryEngine
 
             return selectNode;
         }
-        static public MatchNode ParseMatchExpr(List<Token> tokens) 
+        static public MatchNode ParseMatchExpr(List<Token> tokens)
         {
             MatchNode matchNode = new MatchNode();
             //IncrementPosition(); //Becuase we always expect we read Select and then we must increase position
@@ -212,7 +212,7 @@ namespace QueryEngine
             variableNode.AddName(name);
 
             //
-            if (CheckToken(position,Token.TokenType.DoubleDot, tokens))
+            if (CheckToken(position, Token.TokenType.DoubleDot, tokens))
             {
                 IncrementPosition();
                 Node identifierNode = ParseIdentifierExrp(tokens);
@@ -245,7 +245,7 @@ namespace QueryEngine
             vertexNode.AddVariable(variableNode);
 
             // )
-            if (CheckToken(position, Token.TokenType.RightParen,tokens)) IncrementPosition();
+            if (CheckToken(position, Token.TokenType.RightParen, tokens)) IncrementPosition();
             else return null;
 
             //Position incremented from leaving function PsrseVariable.
@@ -317,7 +317,7 @@ namespace QueryEngine
                 position += 2;
             }
             else if (CheckToken(position, Token.TokenType.Dash, tokens) &&
-                    (!CheckToken(position +1, Token.TokenType.LeftBrace, tokens)))
+                    (!CheckToken(position + 1, Token.TokenType.LeftBrace, tokens)))
             {
                 edgeNode.SetType(EdgeType.AnyEdge);
                 found = true;
@@ -356,9 +356,9 @@ namespace QueryEngine
             int predictionTwo = position + 5;
             // -[e:x]>
             int predictionThree = position + 6;
-            if (CheckToken(position, t1, tokens) && 
-                (CheckToken(predictionOne, t2, tokens) || 
-                 CheckToken(predictionTwo, t2, tokens) || 
+            if (CheckToken(position, t1, tokens) &&
+                (CheckToken(predictionOne, t2, tokens) ||
+                 CheckToken(predictionTwo, t2, tokens) ||
                  CheckToken(predictionThree, t2, tokens))) return true;
             else return false;
 
@@ -378,84 +378,105 @@ namespace QueryEngine
 
     interface IVisitor<T>
     {
-        T Visit(SelectNode node);
-        T Visit(MatchNode node);
-        T Visit(VertexNode node);
-        T Visit(EdgeNode node);
-        T Visit(VariableNode node);
-        T Visit(IdentifierNode node);
+        T GetResult();
+        void Visit(SelectNode node);
+        void Visit(MatchNode node);
+        void Visit(VertexNode node);
+        void Visit(EdgeNode node);
+        void Visit(VariableNode node);
+        void Visit(IdentifierNode node);
     }
 
-    class SelectVisitor : IVisitor<bool>
+    //Iterating over linked variables.
+    class SelectVisitor : IVisitor<List<SelectVariable>>
     {
-        public bool Visit(SelectNode node)
+        List<SelectVariable> result;
+        bool addingName;
+
+        public SelectVisitor()
         {
+            result = new List<SelectVariable>();
+            addingName = true;
         }
 
-        public bool Visit(MatchNode node)
+        public List<SelectVariable> GetResult()
+        {
+            return this.result;
+        }
+
+        public void Visit(SelectNode node)
+        {
+            node.next.Accept(this);
+            if (result.Count < 1) 
+                throw new ArgumentException("SelectVisitor, failed to parse select expr.");
+        }
+
+        public void Visit(MatchNode node)
         {
             throw new NotImplementedException();
         }
-
-        public bool Visit(VertexNode node)
+        public void Visit(VertexNode node)
         {
             throw new NotImplementedException();
         }
-
-        public bool Visit(EdgeNode node)
+        public void Visit(EdgeNode node)
         {
             throw new NotImplementedException();
         }
-
-        public bool Visit(VariableNode node)
+       
+        //Create new variable and try parse its name and propname.
+        //Name shall never be null.
+        //Jump to next variable node.
+        public void Visit(VariableNode node)
         {
-            throw new NotImplementedException();
+            addingName = true;
+            result.Add(new SelectVariable());
+            if (node.name == null)
+                throw new ArgumentException("SelectVisitor, could not parse variable name.");
+            else
+            {
+                node.name.Accept(this);
+                addingName = false;
+                if (node.propName != null) node.propName.Accept(this);
+            }
+
+            if (node.next == null) return;
+            else node.next.Accept(this);
+            
         }
 
-        public bool Visit(IdentifierNode node)
+        public void Visit(IdentifierNode node)
         {
-            throw new NotImplementedException();
+            //If adding name it must be successful, otherwise it is failed parsing.
+            //There is always one object in results, count -1 can never undergo limit.
+            if (addingName)
+            {
+                if (!result[result.Count-1].TrySetName(node.value))
+                    throw new ArgumentException("SelectVisitor, could not set name to variable.");
+            }
+            //If it try assign propname, it also must always be success, 
+            //because it could not be assigned before this.
+            else
+            {
+                if (!result[result.Count-1].TrySetPropName(node.value))
+                    throw new ArgumentException("SelectVisitor, could not set propname to variable.");
+            }
+
         }
     }
 
-    class MatchVisitor : IVisitor<bool>
-    {
-        public bool Visit(SelectNode node)
-        {
-            throw new NotImplementedException();
-        }
 
-        public bool Visit(MatchNode node)
-        {
-        }
 
-        public bool Visit(VertexNode node)
-        {
-            throw new NotImplementedException();
-        }
 
-        public bool Visit(EdgeNode node)
-        {
-            throw new NotImplementedException();
-        }
 
-        public bool Visit(VariableNode node)
-        {
-            throw new NotImplementedException();
-        }
 
-        public bool Visit(IdentifierNode node)
-        {
-            throw new NotImplementedException();
-        }
-    }
 
 
     //Parent to every node.
     //Gives Visit method.
     abstract class Node
     {
-        public abstract T Accept<T>(IVisitor<T> visitor);
+        public abstract void Accept<T>(IVisitor<T> visitor);
     }
    
     abstract class QueryNode :Node
@@ -470,7 +491,7 @@ namespace QueryEngine
     //Only vertices and edges inherit from this class.
     abstract class CommomMatchNode : QueryNode
     {
-        Node variable;
+        public Node variable;
 
         public void AddVariable(Node v)
         {
@@ -483,18 +504,18 @@ namespace QueryEngine
     {
         public MatchNode() { }
 
-        public override T Accept<T>(IVisitor<T> visitor)
+        public override void Accept<T>(IVisitor<T> visitor)
         {
-            return visitor.Visit(this);
+            visitor.Visit(this);
         }
     }
     class SelectNode : QueryNode
     {
         public SelectNode() { }
 
-        public override T Accept<T>(IVisitor<T> visitor)
+        public override void Accept<T>(IVisitor<T> visitor)
         {
-            return visitor.Visit(this);
+            visitor.Visit(this);
         }
     }
 
@@ -503,9 +524,9 @@ namespace QueryEngine
     class EdgeNode : CommomMatchNode
     {
         EdgeType type;
-        public override T Accept<T>(IVisitor<T> visitor)
+        public override void Accept<T>(IVisitor<T> visitor)
         {
-            return visitor.Visit(this);
+             visitor.Visit(this);
         }
         public void SetType(EdgeType type)
         {
@@ -515,17 +536,17 @@ namespace QueryEngine
 
     class VertexNode : CommomMatchNode
     {
-        public override T Accept<T>(IVisitor<T> visitor)
+        public override void Accept<T>(IVisitor<T> visitor)
         {
-            return visitor.Visit(this);
+           visitor.Visit(this);
         }
     }
 
 
     class VariableNode : QueryNode
     {
-        Node name;
-        Node propName;
+       public  Node name;
+       public  Node propName;
 
         public void AddName(Node n)
         {
@@ -546,22 +567,22 @@ namespace QueryEngine
             else return false;
         }
 
-        public override T Accept<T>(IVisitor<T> visitor)
+        public override void Accept<T>(IVisitor<T> visitor)
         {
-            return visitor.Visit(this);
+           visitor.Visit(this);
         }
     }
     class IdentifierNode : Node
     {
-        string value;
+        public string value { get; private set; }
 
         public IdentifierNode(string v) { this.value = v; }
 
         public void AddValue(string v) { this.value = v; }
 
-        public override T Accept<T>(IVisitor<T> visitor)
+        public override void Accept<T>(IVisitor<T> visitor)
         {
-            return visitor.Visit(this);
+             visitor.Visit(this);
         }
     }
 }
