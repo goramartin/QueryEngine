@@ -91,8 +91,6 @@ namespace QueryEngine
             {
                 Console.WriteLine( e.Message);
             }
-           
-
 
             Graph g = new Graph();
             g.LoadNodeTables("VertexTypes.txt");
@@ -117,6 +115,10 @@ namespace QueryEngine
             var k = selectVisitor.GetResult();
             s.Accept(matchVisitor);
             var l = matchVisitor.GetResult();
+
+            Query q = new Query(new SelectObject(k), new MatchObject(l), scope);
+            Console.WriteLine(q.CheckCorrectnessOfScope());
+
 
 
             Console.ReadLine();

@@ -10,20 +10,50 @@ namespace QueryEngine
     //Query represents query information, carrying it in each of the query main words.
     class Query
     {
-        SelectObject selectObject;
-        MatchObject matchObject;
+        SelectObject select;
+        MatchObject match;
         Scope scope;
 
         public Query(SelectObject s, MatchObject m, Scope scope)
         {
-            this.selectObject = s;
-            this.matchObject = m;
+            this.select = s;
+            this.match = m;
             this.scope = scope;
         }
 
 
+        //Check if variables in select correspond to variables in scope
+        public bool CheckCorrectnessOfScope()
+        {
+            var sc = scope.GetScopeVariables();
+            var pattern = match.GetPattern();
+            foreach (var item in select.GetSelectVariables())
+            {
+                if (!sc.TryGetValue(item.name, out int p)) return false;
+                
+                //If in select need property, we check if the property is correct.
+                if (item.propName != null) 
+                {
+                    if (pattern[p].GetTable() == null) return false;
+                    if (!pattern[p].GetTable().ContainsProperty(item.propName)) return false;    
+                }
+            }
+            return CheckCorrectnessOfPatternTypes(pattern);
+        } 
 
-
+        //Check whether in the pattern the repeating variables are same.
+        private bool CheckCorrectnessOfPatternTypes(List<BaseMatch> pattern)
+        {
+            for (int i = 0; i < pattern.Count; i++)
+            {
+                BaseMatch b = pattern[i];
+                if (b.IsRepeated())
+                {
+                    if (!b.Equals(b.GetPositionOfRepeatedField())) return false;
+                }
+            }
+            return true;
+        }
 
     }
 
@@ -98,7 +128,7 @@ namespace QueryEngine
     //Match represents patter to match in main match algorithm.
    class MatchObject
    {
-        List<BaseMatch> pattern;
+        private List<BaseMatch> pattern;
 
         public MatchObject(List<BaseMatch> p)
         {
@@ -106,6 +136,7 @@ namespace QueryEngine
         }
 
         public List<BaseMatch> GetPattern() => this.pattern;
+
    }
 
     abstract class BaseMatch
@@ -122,6 +153,8 @@ namespace QueryEngine
         public void SetPositionOfRepeatedField(int p) => this.positionOfRepeatedField = p;
         public void SetType(Table t) => this.type = t;
         public Table GetTable() => this.type;
+        public bool IsRepeated() => this.repeated;
+        public int GetPositionOfRepeatedField() => this.positionOfRepeatedField;
 
     }
 
@@ -139,6 +172,19 @@ namespace QueryEngine
         {
             throw new NotImplementedException();
         }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is VertexMatch)
+            {
+                var o = obj as VertexMatch;
+                if (this.GetTable() != o.GetTable()) return false;
+                return true;
+            }
+            return false;
+
+        }
+
     }
     class EdgeMatch : BaseMatch
     {
@@ -160,6 +206,18 @@ namespace QueryEngine
         public EdgeType GetEdgeType() => this.edgeType;
         public void SetEdgeType(EdgeType type) => this.edgeType = type;
 
+        public override bool Equals(object obj)
+        {
+            if (obj is EdgeMatch)
+            {
+                var o = obj as EdgeMatch;
+                if (o.edgeType != this.edgeType) return false;
+                if (this.GetTable() != o.GetTable()) return false;
+                return true;
+            }
+            return false;
+
+        }
 
     }
 

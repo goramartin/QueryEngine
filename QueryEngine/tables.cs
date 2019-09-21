@@ -37,6 +37,14 @@ namespace QueryEngine
 
         public void AddID(int id) { this.IDs.Add(id); }
 
+        public bool ContainsProperty(string iri)
+        {
+            for (int i = 0; i < properties.Count; i++)
+            {
+                if (properties[i].IRI == iri) return true;
+            }
+            return false;
+        }
         public void AddNewProperty(Property newProp)
         {
             if (properties == null || newProp == null) 
