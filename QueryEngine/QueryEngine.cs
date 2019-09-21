@@ -94,8 +94,11 @@ namespace QueryEngine
            
 
 
-
-
+            Graph g = new Graph();
+            g.LoadNodeTables("VertexTypes.txt");
+            g.LoadEdgeTables("EdgeTypes.txt");
+            g.LoadEdgeList("NodesEdges.txt");
+            Scope scope = new Scope();
             List<Token> tokens = Tokenizer.Tokenize(Console.In);
 
             foreach (var item in tokens)
@@ -106,20 +109,21 @@ namespace QueryEngine
 
          
             SelectNode d = Parser.ParseSelectExpr(tokens);
-            // MatchNode s = Parser.ParseMatchExpr(tokens);
+            MatchNode s = Parser.ParseMatchExpr(tokens);
             SelectVisitor selectVisitor = new SelectVisitor();
+            MatchVisitor matchVisitor = new MatchVisitor(scope,g.NodeTables, g.EdgeTables);
+            
             d.Accept(selectVisitor);
             var k = selectVisitor.GetResult();
-
+            s.Accept(matchVisitor);
+            var l = matchVisitor.GetResult();
 
 
             Console.ReadLine();
 
             
-            Graph g = new Graph();
 
             /////////////
-            g.LoadNodeTables("VertexTypes.txt");
             Console.WriteLine();
             //Display whats inside dictionary of nodes 
             foreach (var item in g.NodeTables)
@@ -140,7 +144,6 @@ namespace QueryEngine
 
 
             /////////////
-            g.LoadEdgeTables("EdgeTypes.txt");
             
             //Display whats inside dictionary of edges
             foreach (var item in g.EdgeTables)
@@ -161,7 +164,6 @@ namespace QueryEngine
 
             
             /////////////
-            g.LoadEdgeList("NodesEdges.txt");
             
             //Display whats inside vertices
             foreach (var item in g.vertices)
