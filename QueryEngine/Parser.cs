@@ -399,31 +399,15 @@ namespace QueryEngine
             addingName = true;
         }
 
-        public List<SelectVariable> GetResult()
-        {
-            return this.result;
-        }
-
+        public List<SelectVariable> GetResult() 
+        { return this.result; }
         public void Visit(SelectNode node)
         {
             node.next.Accept(this);
-            if (result.Count < 1) 
+            if (result.Count < 1)
                 throw new ArgumentException("SelectVisitor, failed to parse select expr.");
         }
 
-        public void Visit(MatchNode node)
-        {
-            throw new NotImplementedException();
-        }
-        public void Visit(VertexNode node)
-        {
-            throw new NotImplementedException();
-        }
-        public void Visit(EdgeNode node)
-        {
-            throw new NotImplementedException();
-        }
-       
         //Create new variable and try parse its name and propname.
         //Name shall never be null.
         //Jump to next variable node.
@@ -442,30 +426,87 @@ namespace QueryEngine
 
             if (node.next == null) return;
             else node.next.Accept(this);
-            
-        }
 
+        }
         public void Visit(IdentifierNode node)
         {
             //If adding name it must be successful, otherwise it is failed parsing.
             //There is always one object in results, count -1 can never undergo limit.
             if (addingName)
             {
-                if (!result[result.Count-1].TrySetName(node.value))
+                if (!result[result.Count - 1].TrySetName(node.value))
                     throw new ArgumentException("SelectVisitor, could not set name to variable.");
             }
             //If it try assign propname, it also must always be success, 
             //because it could not be assigned before this.
             else
             {
-                if (!result[result.Count-1].TrySetPropName(node.value))
+                if (!result[result.Count - 1].TrySetPropName(node.value))
                     throw new ArgumentException("SelectVisitor, could not set propname to variable.");
             }
 
         }
+
+        //Can never appear.  
+        public void Visit(MatchNode node)
+        {
+            throw new NotImplementedException();
+        }
+        public void Visit(VertexNode node)
+        {
+            throw new NotImplementedException();
+        }
+        public void Visit(EdgeNode node)
+        {
+            throw new NotImplementedException();
+        }
     }
 
+    class MatchVisitor : IVisitor<List<BaseMatch>>
+    {
+        List<BaseMatch> result;
 
+
+
+        public MatchVisitor()
+        {
+            this.result = new List<BaseMatch>();
+        }
+        public List<BaseMatch> GetResult()
+        { return this.result; }
+        
+
+
+        public void Visit(SelectNode node)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Visit(MatchNode node)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Visit(VertexNode node)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Visit(EdgeNode node)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Visit(VariableNode node)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Visit(IdentifierNode node)
+        {
+            throw new NotImplementedException();
+        }
+    }
 
 
 

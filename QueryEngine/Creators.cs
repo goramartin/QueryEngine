@@ -129,7 +129,8 @@ namespace QueryEngine
 
         private void ProcessKind(string param)
         {
-            if (param != "Kind") throw new ArgumentException($"{this.GetType()} Expected Kind");
+            if (param != "Kind") 
+                throw new ArgumentException($"{this.GetType()} Expected Kind");
             this.readingName = true;
             this.state = State.DoubleDot;
         }
@@ -139,7 +140,8 @@ namespace QueryEngine
         private void ProcessName(string param) 
         {
             this.newTable = new Table(param);
-            if (this.dict.ContainsKey(param)) throw new ArgumentException($"{this.GetType()} Adding table that exists.");
+            if (this.dict.ContainsKey(param)) 
+                throw new ArgumentException($"{this.GetType()} Adding table that exists.");
             else this.dict.Add(param, this.newTable);
             this.state = State.PropName;
         }

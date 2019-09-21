@@ -16,19 +16,39 @@ namespace QueryEngine
             //Create tokens from console.
             List<Token> tokens = Tokenizer.Tokenize(reader);
 
-            //Parse tokens in order of the query words.
+            //Parse and create in order of the query words.
             Parser.ResetPosition();
-            SelectNode selectNode = Parser.ParseSelectExpr(tokens);
-            MatchNode matchNode = Parser.ParseMatchExpr(tokens);
+            Scope scope = new Scope();
+            SelectObject select = CreateSelectObject(tokens);
+            MatchObject match = CreateMatchObject(tokens, scope);
+
 
             //Check if it successfully parsed every token.
             //to do better if it returns null when failed.
             if (tokens.Count != Parser.GetPosition()) 
                 throw new ArgumentException("Failed to parse every token."); 
 
-            Query query = new Query(selectNode, matchNode);
+            Query query = new Query(select, match, scope);
 
             return query;
+        }
+
+        private static SelectObject CreateSelectObject(List<Token> tokens)
+        {
+            SelectNode selectNode = Parser.ParseSelectExpr(tokens);
+            SelectVisitor visitor = new SelectVisitor();
+            selectNode.Accept(visitor);
+            SelectObject so = new SelectObject(visitor.GetResult());
+            return so;
+        }
+
+        private static MatchObject CreateMatchObject(List<Token> tokens, Scope s)
+        {
+            MatchNode matchNode = Parser.ParseMatchExpr(tokens);
+            MatchVisitor visitor = new MatchVisitor();
+            matchNode.Accept(visitor);
+            MatchObject mo = new MatchObject(visitor.GetResult());
+            return mo;
         }
 
         private static Graph CreateGraph(string[] args)

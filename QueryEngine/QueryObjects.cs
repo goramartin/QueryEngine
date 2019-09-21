@@ -14,19 +14,13 @@ namespace QueryEngine
         MatchObject matchObject;
         Scope scope;
 
-        public Query(SelectNode s, MatchNode m)
+        public Query(SelectObject s, MatchObject m, Scope scope)
         {
-            selectObject = new SelectObject(s);
-            matchObject = new MatchObject(m);
-            CreateScope();
+            this.selectObject = s;
+            this.matchObject = m;
+            this.scope = scope;
         }
 
-        private bool CreateScope()
-        {
-            this.scope = new Scope();
-            return true;
-
-        }
     }
 
     //Scope represents scope of variable in the whole query.
@@ -34,15 +28,24 @@ namespace QueryEngine
     {
         public List<ScopeVariable> scopeVariables;
 
+        public Scope(List<ScopeVariable> sv)
+        {
+            this.scopeVariables = sv;
+        }
 
+        public Scope() { }
 
+        public void AddVariables(List<ScopeVariable> l)
+        {
+            this.scopeVariables = l;
+        }
     }
 
     class ScopeVariable
     {
         public string name;
         public int positionInPattern;
-
+        public ScopeVariable() { }
         public void AddVariableName(string n) => this.name = n;
         public void AddPositionInPattern(int p) => this.positionInPattern = p;
     }
@@ -53,12 +56,12 @@ namespace QueryEngine
    class SelectObject
    {
         public List<SelectVariable> selectVariables;
-        public SelectObject(SelectNode node)
+        public SelectObject(List<SelectVariable> l)
         {
+            this.selectVariables = l;
         }
 
    }
-
     class SelectVariable
     {
         public string name { get; private set; } 
@@ -75,7 +78,21 @@ namespace QueryEngine
             else return false;
         }
         
+        public bool IsEmpty()
+        {
+            if ((this.name == null) && (this.propName == null)) return true;
+            else return false;
+        }
     }
+
+
+
+
+
+
+
+
+
 
 
 
@@ -85,17 +102,30 @@ namespace QueryEngine
    {
         List<BaseMatch> pattern;
 
-
-        public MatchObject(MatchNode node)
+        public MatchObject(List<BaseMatch> l)
         {
+            this.pattern = l;
         }
-
-
    }
 
     abstract class BaseMatch
     {
+        protected bool anonnymous;
+        protected bool repeated;
+        protected int positionOfRepeatedField;
+        protected Table type;
+
         public abstract bool Apply(Field element);
+
+        public void SetIsAnnonymous(bool b) => this.anonnymous = b;
+        public void SetRepeated(bool b) => this.repeated = b;
+        public void SetPositionOfRepeatedField(int p) => this.positionOfRepeatedField = p;
+        public void SetType(Table t)
+        {
+            //to do
+            this.type = t;
+        }
+
     }
 
     class VertexMatch : BaseMatch
@@ -105,13 +135,19 @@ namespace QueryEngine
             throw new NotImplementedException();
         }
     }
-
     class EdgeMatch : BaseMatch
     {
+        protected EdgeType edgeType;
+
         public override bool Apply(Field element)
         {
             throw new NotImplementedException();
         }
+
+        public EdgeType GetEdgeType() => this.edgeType;
+        public void SetEdgeType(EdgeType type) => this.edgeType = type;
+
+
     }
 
 
