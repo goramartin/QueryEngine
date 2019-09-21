@@ -31,41 +31,31 @@ namespace QueryEngine
     //Scope represents scope of variable in the whole query.
     class Scope
     {
-        public List<ScopeVariable> scopeVariables;
+        private Dictionary<string, int > scopeVar;
 
-        public Scope(List<ScopeVariable> sv)
+        public Scope(Dictionary<string,int> sv)
         {
-            this.scopeVariables = sv;
+            this.scopeVar = sv;
+        }
+        public Scope() 
+        {
+            scopeVar = new Dictionary<string, int>();
         }
 
-        public Scope() { }
-
-        public void AddVariables(List<ScopeVariable> l)
-        {
-            this.scopeVariables = l;
-        }
+        public Dictionary<string, int> GetScopeVariables() => this.scopeVar;
     }
-
-    class ScopeVariable
-    {
-        public string name;
-        public int positionInPattern;
-        public ScopeVariable() { }
-        public void AddVariableName(string n) => this.name = n;
-        public void AddPositionInPattern(int p) => this.positionInPattern = p;
-    }
-
 
 
     //Select represents list of variables to print.
    class SelectObject
    {
-        public List<SelectVariable> selectVariables;
+        private List<SelectVariable> selectVariables;
         public SelectObject(List<SelectVariable> l)
         {
             this.selectVariables = l;
         }
 
+        public List<SelectVariable> GetSelectVariables() => this.selectVariables;
    }
     class SelectVariable
     {
@@ -82,7 +72,6 @@ namespace QueryEngine
             if (this.propName == null) { this.propName = n; return true; }
             else return false;
         }
-        
         public bool IsEmpty()
         {
             if ((this.name == null) && (this.propName == null)) return true;
@@ -107,10 +96,12 @@ namespace QueryEngine
    {
         List<BaseMatch> pattern;
 
-        public MatchObject(List<BaseMatch> l)
+        public MatchObject(List<BaseMatch> p)
         {
-            this.pattern = l;
+            this.pattern = p;
         }
+
+        public List<BaseMatch> GetPattern() => this.pattern;
    }
 
     abstract class BaseMatch
@@ -126,11 +117,20 @@ namespace QueryEngine
         public void SetRepeated(bool b) => this.repeated = b;
         public void SetPositionOfRepeatedField(int p) => this.positionOfRepeatedField = p;
         public void SetType(Table t) => this.type = t;
+        public Table GetTable() => this.type;
 
     }
 
     class VertexMatch : BaseMatch
     {
+        public VertexMatch()
+        {
+            this.anonnymous = true;
+            this.positionOfRepeatedField = -1;
+            this.repeated = false;
+            this.type = null;
+        }
+
         public override bool Apply(Field element)
         {
             throw new NotImplementedException();
@@ -139,6 +139,14 @@ namespace QueryEngine
     class EdgeMatch : BaseMatch
     {
         protected EdgeType edgeType;
+
+        public EdgeMatch()
+        {
+            this.anonnymous = true;
+            this.positionOfRepeatedField = -1;
+            this.repeated = false;
+            this.type = null;
+        }
 
         public override bool Apply(Field element)
         {

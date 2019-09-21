@@ -376,6 +376,9 @@ namespace QueryEngine
         }
     }
 
+
+
+
     interface IVisitor<T>
     {
         T GetResult();
@@ -465,49 +468,108 @@ namespace QueryEngine
     class MatchVisitor : IVisitor<List<BaseMatch>>
     {
         List<BaseMatch> result;
-        List<ScopeVariable> scope;
+        Dictionary<string, int> scope;
         Dictionary<string, Table> vTables;
         Dictionary<string, Table> eTables;
+        bool readingName;
+        bool readingVertex;
 
         public MatchVisitor(Scope s,
             Dictionary<string, Table> v, Dictionary<string, Table> e)
         {
             this.result = new List<BaseMatch>();
-            this.scope = s.scopeVariables;
+            this.scope = s.GetScopeVariables();
             this.vTables = v;
             this.eTables = e;
+            this.readingName = true;
+            this.readingVertex = true;
         }
+       
+        
         public List<BaseMatch> GetResult()
         { return this.result; }
         
-
-
-        public void Visit(SelectNode node)
-        {
-            throw new NotImplementedException();
-        }
-
         public void Visit(MatchNode node)
         {
-            throw new NotImplementedException();
+            node.next.Accept(this);
+            if (result.Count < 1) 
+                throw new ArgumentException("MatchVisitor, failed to parse match expr.");
         }
 
         public void Visit(VertexNode node)
         {
-            throw new NotImplementedException();
+            this.readingVertex = true;
+            VertexMatch vm = new VertexMatch();
+            result.Add(vm);
+            if (node.variable != null) node.variable.Accept(this);
+            if (node.next != null ) node.next.Accept(this);
         }
 
         public void Visit(EdgeNode node)
         {
-            throw new NotImplementedException();
+            this.readingVertex = false;
+            EdgeMatch em = new EdgeMatch();
+            em.SetEdgeType(node.GetEdgeType());
+            result.Add(em);
+            if (node.variable != null) node.variable.Accept(this);
+            if (node.next == null) 
+                throw new ArgumentException("MatchVisitor, missing end vertex from edge.");
+            else node.next.Accept(this);
+
         }
 
         public void Visit(VariableNode node)
         {
-            throw new NotImplementedException();
+          readingName = true;
+          //It is not anonnymous field.
+          if (node.name != null)
+          {
+                node.name.Accept(this);
+          }
+          //It has set type.
+          if (node.propName != null)
+          {
+                readingName = false;
+                node.propName.Accept(this);
+          } 
+
         }
 
         public void Visit(IdentifierNode node)
+        {
+            int p = result.Count - 1;
+            if (readingName)
+            {
+                //It has name, it can not be anonnymous.
+                result[p].SetIsAnnonymous(false);
+                //Try if the variable is alredy in the scope.
+                if (scope.TryGetValue(node.value, out int positionOfRepeated))
+                {
+                    //If it is, set the repeated status.
+                    result[p].SetRepeated(true);
+                    result[p].SetPositionOfRepeatedField(positionOfRepeated);
+                }
+                //It is new variable, then add it to scope.
+                else scope.Add(node.value, p);
+            }
+            else
+            {
+                if (readingVertex) ProcessType(p, node, vTables);
+                else ProcessType(p, node, eTables);
+            }
+        }
+
+        private void ProcessType(int p ,IdentifierNode node, Dictionary<string,Table> d)
+        {
+            //Try find the table of the variable, it has to be always valid table name.
+                if (!d.TryGetValue(node.value, out Table table))
+                    throw new ArgumentException("MatchVisitor, could not parse Table name.");
+                else result[p].SetType(table);
+        }
+
+
+        //Should never occur.
+        public void Visit(SelectNode node)
         {
             throw new NotImplementedException();
         }
@@ -578,6 +640,11 @@ namespace QueryEngine
         {
             this.type = type;
         }
+        public EdgeType GetEdgeType()
+        {
+            return this.type;
+        }
+
     }
 
     class VertexNode : CommomMatchNode
