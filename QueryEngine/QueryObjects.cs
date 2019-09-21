@@ -23,6 +23,11 @@ namespace QueryEngine
 
     }
 
+
+
+
+
+
     //Scope represents scope of variable in the whole query.
     class Scope
     {
@@ -120,11 +125,7 @@ namespace QueryEngine
         public void SetIsAnnonymous(bool b) => this.anonnymous = b;
         public void SetRepeated(bool b) => this.repeated = b;
         public void SetPositionOfRepeatedField(int p) => this.positionOfRepeatedField = p;
-        public void SetType(Table t)
-        {
-            //to do
-            this.type = t;
-        }
+        public void SetType(Table t) => this.type = t;
 
     }
 

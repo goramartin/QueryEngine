@@ -40,9 +40,7 @@ namespace QueryEngine
         }
 
         public void SetEdgePosition(int position) => this.edgePosition = position;
-
         public bool HasEdges() { if (this.edgePosition == -1) return false; else return true; }
-
         public void AddIncomingEdge(IncomingEdge e) { this.incomingEdges.Add(e); }
 
     }
@@ -135,8 +133,6 @@ namespace QueryEngine
             this.vertices = edgeList.vertices;
             this.edges = edgeList.edges;
         }
-
-
 
     }
 }

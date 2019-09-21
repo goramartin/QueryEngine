@@ -465,12 +465,17 @@ namespace QueryEngine
     class MatchVisitor : IVisitor<List<BaseMatch>>
     {
         List<BaseMatch> result;
+        List<ScopeVariable> scope;
+        Dictionary<string, Table> vTables;
+        Dictionary<string, Table> eTables;
 
-
-
-        public MatchVisitor()
+        public MatchVisitor(Scope s,
+            Dictionary<string, Table> v, Dictionary<string, Table> e)
         {
             this.result = new List<BaseMatch>();
+            this.scope = s.scopeVariables;
+            this.vTables = v;
+            this.eTables = e;
         }
         public List<BaseMatch> GetResult()
         { return this.result; }

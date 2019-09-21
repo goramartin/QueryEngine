@@ -11,7 +11,8 @@ namespace QueryEngine
     class QueryEngine
     {
         
-        private static Query CreateQuery(TextReader reader) 
+        private static Query CreateQuery(TextReader reader,
+            Dictionary<string, Table> v, Dictionary<string, Table> e) 
         {
             //Create tokens from console.
             List<Token> tokens = Tokenizer.Tokenize(reader);
@@ -20,7 +21,7 @@ namespace QueryEngine
             Parser.ResetPosition();
             Scope scope = new Scope();
             SelectObject select = CreateSelectObject(tokens);
-            MatchObject match = CreateMatchObject(tokens, scope);
+            MatchObject match = CreateMatchObject(tokens, scope, v, e);
 
 
             //Check if it successfully parsed every token.
@@ -42,10 +43,11 @@ namespace QueryEngine
             return so;
         }
 
-        private static MatchObject CreateMatchObject(List<Token> tokens, Scope s)
+        private static MatchObject CreateMatchObject(List<Token> tokens, Scope s, 
+            Dictionary<string, Table> v, Dictionary<string, Table> e)
         {
             MatchNode matchNode = Parser.ParseMatchExpr(tokens);
-            MatchVisitor visitor = new MatchVisitor();
+            MatchVisitor visitor = new MatchVisitor(s,v,e);
             matchNode.Accept(visitor);
             MatchObject mo = new MatchObject(visitor.GetResult());
             return mo;
@@ -67,7 +69,7 @@ namespace QueryEngine
 
 
             Graph g = CreateGraph(args);
-            Query query = CreateQuery(reader);    
+            Query query = CreateQuery(reader, g.NodeTables, g.EdgeTables);    
 
 
 
