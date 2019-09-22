@@ -93,6 +93,13 @@ namespace QueryEngine
             }
 
 
+            Element f = ((Element)new Vertex());
+
+            Console.WriteLine(f is Vertex);
+
+
+
+
             //just for testing
             ///////////////////////////////////////
 
@@ -100,6 +107,8 @@ namespace QueryEngine
             g.LoadNodeTables("VertexTypes.txt");
             g.LoadEdgeTables("EdgeTypes.txt");
             g.LoadEdgeList("NodesEdges.txt");
+          
+            
             Scope scope = new Scope();
             List<Token> tokens = Tokenizer.Tokenize(Console.In);
 
@@ -121,9 +130,9 @@ namespace QueryEngine
             var l = matchVisitor.GetResult();
 
             Query q = new Query(new SelectObject(k), new MatchObject(l), scope);
-            Console.WriteLine(q.CheckCorrectnessOfScope());
+            Console.WriteLine(q.CheckCorrectnessOfQuery());
 
-
+  
 
             Console.ReadLine();
 
@@ -180,11 +189,13 @@ namespace QueryEngine
                 Console.WriteLine();
                 foreach (var it in item.incomingEdges)
                 {
-                    Console.WriteLine(it.FromVertex.id);
-                    Console.WriteLine(it.incomingEdge.id);
+                    Console.WriteLine(it.endVertex.id);
+                    Console.WriteLine(it.id);
                 }
             }
 
+
+            Console.WriteLine();
             //displey whats inside edges
             foreach (var item in g.edges)
             {

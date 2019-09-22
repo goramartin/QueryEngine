@@ -7,27 +7,30 @@ using System.Threading.Tasks;
 namespace QueryEngine
 {
     //One field in edge list... that is one field in list of vertices and one filed in list of edges
-    abstract class Field
+     abstract class Element
     {
         public int id;
         public Table table;
 
         public void AddID(int id) => this.id = id;
         public void AddTable(Table table) => this.table = table;
+
+        public Table GetTable() => this.table;
+        public int GetID() => this.id;
     }
 
 
-    class Vertex : Field
+    class Vertex : Element
     {
 
         public int edgePosition;
-        public List<IncomingEdge> incomingEdges;
+        public List<Edge> incomingEdges;
         public Vertex(int id, Table table)
         {
             this.id = id;
             this.table = table;
             this.edgePosition = -1;
-            this.incomingEdges = new List<IncomingEdge>();
+            this.incomingEdges = new List<Edge>();
         }
 
         public Vertex()
@@ -35,32 +38,20 @@ namespace QueryEngine
             this.id = -1;
             this.table = null;
             this.edgePosition = -1;
-            this.incomingEdges = new List<IncomingEdge>();
+            this.incomingEdges = new List<Edge>();
 
         }
 
         public void SetEdgePosition(int position) => this.edgePosition = position;
         public bool HasEdges() { if (this.edgePosition == -1) return false; else return true; }
-        public void AddIncomingEdge(IncomingEdge e) { this.incomingEdges.Add(e); }
+        public void AddIncomingEdge(Edge e) { this.incomingEdges.Add(e); }
+
+        public List<Edge> GetIncomingEdges() => this.incomingEdges;
+        public int GetEdgePosition() => this.edgePosition;
 
     }
 
-    class IncomingEdge
-    {
-        public Vertex FromVertex;
-        public Edge incomingEdge;
-
-        public IncomingEdge()
-        {
-            this.FromVertex = null;
-            this.incomingEdge = null;
-        } 
-
-        public void AddFromVertex(Vertex v) { this.FromVertex = v; }
-        public void AddEdge(Edge e) { this.incomingEdge = e; }
-
-    }
-    class Edge : Field
+    class Edge : Element
     {
         public Vertex endVertex;
 
@@ -78,6 +69,7 @@ namespace QueryEngine
         }
 
         public void AddEndVertex(Vertex vertex) => this.endVertex = vertex;
+        public Vertex GetEndVertex() => this.endVertex;
     }
 
     //Only for holder purpose during creation inside Processor
@@ -88,9 +80,6 @@ namespace QueryEngine
 
         public EdgeListHolder() { this.vertices = null; this.edges = null; }
     }
-
-
-
 
     class Graph
     {

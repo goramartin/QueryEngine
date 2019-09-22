@@ -193,7 +193,7 @@ namespace QueryEngine
         Dictionary<string, Table> edgeTables;
         bool finished;
         bool readingNodes;
-        IncomingEdge incomingEdge;
+        Edge incomingEdge;
 
 
         Vertex vertex;
@@ -317,8 +317,8 @@ namespace QueryEngine
         {
             Vertex fromVertex = FindVertex(param);
             if (!fromVertex.HasEdges()) fromVertex.SetEdgePosition(edges.Count);
-            this.incomingEdge = new IncomingEdge();
-            this.incomingEdge.AddFromVertex(fromVertex);
+            this.incomingEdge = new Edge();
+            this.incomingEdge.AddEndVertex(fromVertex);
             this.state = State.EdgeToID;
         }
 
@@ -330,8 +330,11 @@ namespace QueryEngine
         {
             Vertex endVertex = FindVertex(param);
             this.edge.AddEndVertex(endVertex);
-            this.incomingEdge.AddEdge(this.edge);
+
+            this.incomingEdge.AddTable(this.edge.table);
+            this.incomingEdge.AddID(this.edge.id);
             endVertex.AddIncomingEdge(this.incomingEdge);
+            
             this.paramsToReadLeft = this.edge.table.GetPropertyCount();
             FinishParams();
 

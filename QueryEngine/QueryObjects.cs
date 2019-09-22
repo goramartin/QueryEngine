@@ -23,7 +23,7 @@ namespace QueryEngine
 
 
         //Check if variables in select correspond to variables in scope
-        public bool CheckCorrectnessOfScope()
+        public bool CheckCorrectnessOfQuery()
         {
             var sc = scope.GetScopeVariables();
             var pattern = match.GetPattern();
@@ -31,7 +31,7 @@ namespace QueryEngine
             {
                 if (!sc.TryGetValue(item.name, out int p)) return false;
                 
-                //If in select need property, we check if the property is correct.
+                //If select needs property, we check if the property is correct.
                 if (item.propName != null) 
                 {
                     if (pattern[p].GetTable() == null) return false;
@@ -77,7 +77,6 @@ namespace QueryEngine
    {
         private List<SelectVariable> selectVariables;
         public SelectObject(List<SelectVariable> sv) => this.selectVariables = sv;
-
         public List<SelectVariable> GetSelectVariables() => this.selectVariables;
    }
     class SelectVariable
@@ -111,22 +110,56 @@ namespace QueryEngine
 
    }
 
+    //Class representing single step of pattern to match.
+    //Method apply returns true if the element can be added to final result.
     abstract class BaseMatch
     {
         protected bool anonnymous;
-        protected bool repeated;
+        protected bool repeatedVariable;
         protected int positionOfRepeatedField;
         protected Table type;
 
-        public abstract bool Apply(Field element);
+        public abstract bool Apply(Element element, List<BaseMatch> baseMatches, Element[] result);
+
+        protected bool ApplyCommon(Element element, List<BaseMatch> baseMatches, Element[] result)
+        {
+            //Check type, comparing references to tables.
+            if ((this.type != null) && (this.type != element.GetTable())) return false;
+            
+            //It is anonnymous, then it can match any vertex/edge.
+            if (this.anonnymous) return true;
+
+            //It is repetition of variable before, check if it has same id.
+            if (repeatedVariable)
+            {
+                if (result[positionOfRepeatedField].GetID() != element.GetID()) return false;
+            }
+
+            //Check if the element is not set for another variable.
+            for (int i = 0; i < baseMatches.Count; i++)
+            {
+                Element tmpEl = result[i];
+                if (tmpEl == null) break;
+                if (tmpEl.GetID() == element.GetID())
+                {
+                    if (baseMatches[i].IsAnonnymous()) continue;
+                    else if (i == positionOfRepeatedField) continue;
+                    else return false;
+                }
+            }
+
+            return true;
+        }
+
 
         public void SetAnnonymous(bool b) => this.anonnymous = b;
-        public void SetRepeated(bool b) => this.repeated = b;
+        public void SetRepeated(bool b) => this.repeatedVariable = b;
         public void SetPositionOfRepeatedField(int p) => this.positionOfRepeatedField = p;
         public void SetType(Table t) => this.type = t;
         public Table GetTable() => this.type;
-        public bool IsRepeated() => this.repeated;
+        public bool IsRepeated() => this.repeatedVariable;
         public int GetPositionOfRepeatedField() => this.positionOfRepeatedField;
+        public bool IsAnonnymous() => this.anonnymous;
 
     }
 
@@ -136,14 +169,16 @@ namespace QueryEngine
         {
             this.anonnymous = true;
             this.positionOfRepeatedField = -1;
-            this.repeated = false;
+            this.repeatedVariable = false;
             this.type = null;
         }
 
-        public override bool Apply(Field element)
+        public override bool Apply(Element element, List<BaseMatch> baseMatches, Element[] result)
         {
-            throw new NotImplementedException();
+            if (!(element is Vertex)) return false;
+            else return ApplyCommon(element, baseMatches, result);
         }
+
 
         public override bool Equals(object obj)
         {
@@ -166,13 +201,14 @@ namespace QueryEngine
         {
             this.anonnymous = true;
             this.positionOfRepeatedField = -1;
-            this.repeated = false;
+            this.repeatedVariable = false;
             this.type = null;
         }
 
-        public override bool Apply(Field element)
+        public override bool Apply(Element element, List<BaseMatch> baseMatches, Element[] result)
         {
-            throw new NotImplementedException();
+            if (!(element is Edge)) return false;
+            else return ApplyCommon(element, baseMatches, result);
         }
 
         public EdgeType GetEdgeType() => this.edgeType;
