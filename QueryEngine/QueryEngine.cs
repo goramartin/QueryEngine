@@ -66,8 +66,6 @@ namespace QueryEngine
 
         private static void Run(string[] args, TextReader reader, TextWriter writer)
         {
-
-
             Graph g = CreateGraph(args);
             Query query = CreateQuery(reader, g.NodeTables, g.EdgeTables);    
 

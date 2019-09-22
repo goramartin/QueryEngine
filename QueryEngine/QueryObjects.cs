@@ -121,7 +121,7 @@ namespace QueryEngine
 
         public abstract bool Apply(Element element, List<BaseMatch> baseMatches, Element[] result);
 
-        protected bool ApplyCommon(Element element, List<BaseMatch> baseMatches, Element[] result)
+        protected bool CheckCommonConditions(Element element, List<BaseMatch> baseMatches, Element[] result)
         {
             //Check type, comparing references to tables.
             if ((this.type != null) && (this.type != element.GetTable())) return false;
@@ -136,10 +136,14 @@ namespace QueryEngine
             }
 
             //Check if the element is not set for another variable.
-            for (int i = 0; i < baseMatches.Count; i++)
+            //Result length and baseMatches count are same.
+            for (int i = 0; i < result.Length; i++)
             {
                 Element tmpEl = result[i];
+                
+                //Further ahead, there are no elements stored in result.
                 if (tmpEl == null) break;
+                
                 if (tmpEl.GetID() == element.GetID())
                 {
                     if (baseMatches[i].IsAnonnymous()) continue;
@@ -176,7 +180,7 @@ namespace QueryEngine
         public override bool Apply(Element element, List<BaseMatch> baseMatches, Element[] result)
         {
             if (!(element is Vertex)) return false;
-            else return ApplyCommon(element, baseMatches, result);
+            else return CheckCommonConditions(element, baseMatches, result);
         }
 
 
@@ -208,7 +212,7 @@ namespace QueryEngine
         public override bool Apply(Element element, List<BaseMatch> baseMatches, Element[] result)
         {
             if (!(element is Edge)) return false;
-            else return ApplyCommon(element, baseMatches, result);
+            else return CheckCommonConditions(element, baseMatches, result);
         }
 
         public EdgeType GetEdgeType() => this.edgeType;
