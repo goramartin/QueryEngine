@@ -110,6 +110,49 @@ namespace QueryEngine
 
    }
 
+    interface IPatternMatcher
+    {
+        void Search();
+    }
+
+    class DFSPatternMatcher : IPatternMatcher
+    {
+        Graph graph;
+        List<BaseMatch> pattern;
+        Element[] result;
+
+
+        public DFSPatternMatcher(List<BaseMatch> p, Graph g)
+        {
+            this.graph = g;
+            this.result = new Element[p.Count];
+        }
+
+        public void Search()
+        {
+
+
+
+
+
+
+
+
+
+
+
+
+        }
+
+
+
+
+    }
+
+
+
+
+
     //Class representing single step of pattern to match.
     //Method apply returns true if the element can be added to final result.
     abstract class BaseMatch
