@@ -120,6 +120,8 @@ namespace QueryEngine
         Graph graph;
         List<BaseMatch> pattern;
         Element[] result;
+        bool processingVertex;
+        int patternIndex; 
 
 
         public DFSPatternMatcher(List<BaseMatch> p, Graph g)
@@ -130,19 +132,101 @@ namespace QueryEngine
 
         public void Search()
         {
-
-
-
-
-
-
-
-
-
-
-
-
+           
+            foreach (var v in graph.GetAllVertices())
+            {
+                processingVertex = true;
+                patternIndex = 0;
+                Element nextElement = v;
+                while (true)
+                {
+                    bool success = pattern[patternIndex].Apply(nextElement, pattern, result);
+                    if (success) 
+                    {
+                        AddToResult(nextElement, patternIndex);
+                        if ( (pattern.Count-1) == patternIndex ) 
+                        {
+                            //to do print
+                            nextElement = null;
+                            continue;
+                        }
+                        patternIndex++;
+                        nextElement = DoDFSForward(nextElement, null);
+                    }
+                    else
+                    {
+                        nextElement = DoDFSBack(nextElement);
+                        if (patternIndex - 1 <= 0) break;
+                    }
+                }
+            }
         }
+
+        private Element DoDFSForward(Element lastElement, Edge lastUsedEdge)
+        {
+            if (processingVertex)
+            {
+                //get first edge from list based on type
+                processingVertex = false;
+            }
+            else 
+            {
+                processingVertex = true;
+                return ((Edge)lastElement).endVertex; 
+            }
+
+            
+
+            //do dfs
+
+            return null;
+        }
+
+        //When processing the vertex, we failed to add te vertex, that means we need to go down in the pattern
+        //but also remove the edge we came with to the vertex. So we return null, next loop in algorithm fails on adding edge, so the edge gets removed.
+        //When processing edge, we get the last used edge, remove it from results (Note there can be no edge). 
+        //We try to do dfs from the vertex the edge started from with the edge we got from results before. If it returns edge we can continue 
+        //trying to apply edge on the same index in pattern. If it is null we need to remove the vertex because there are no more available edges.
+        //In order to do that we go down in pattern and return null, so the algorithm fail on adding vertex so it jumps here again.
+        private Element DoDFSBack(Element element)
+        {
+            if (processingVertex)
+            {
+                //Remove vertex in result, go down in pattern.
+                result[patternIndex] = null;
+                patternIndex--;
+                processingVertex = false;
+                return null;
+                //to do what to do with last used edge
+            }
+            else
+            {
+                //Get used edge, if there was used one and remove it from results.
+                Edge lastUsedEdge = (Edge)result[patternIndex];
+                if (element == null) element = lastUsedEdge;
+                RemoveFromResult(patternIndex);
+
+                //Try to find new edge from the vertex of the used edge.
+                Element nextElement = DoDFSForward(result[patternIndex - 1], (Edge)element);
+                if (nextElement == null)
+                {
+                    patternIndex--;
+                    processingVertex = true;
+                }
+                return nextElement;
+            }
+        }
+
+        private void AddToResult(Element element, int index)
+        {
+            this.result[index] = element;
+        }
+
+        private void RemoveFromResult(int index)
+        {
+            this.result[index] = null;
+        }
+
 
 
 
@@ -222,7 +306,8 @@ namespace QueryEngine
 
         public override bool Apply(Element element, List<BaseMatch> baseMatches, Element[] result)
         {
-            if (!(element is Vertex)) return false;
+            if (element == null) return false;
+            else if (!(element is Vertex)) return false;
             else return CheckCommonConditions(element, baseMatches, result);
         }
 
@@ -254,7 +339,8 @@ namespace QueryEngine
 
         public override bool Apply(Element element, List<BaseMatch> baseMatches, Element[] result)
         {
-            if (!(element is Edge)) return false;
+            if (element == null) return false;
+            else if (!(element is Edge)) return false;
             else return CheckCommonConditions(element, baseMatches, result);
         }
 

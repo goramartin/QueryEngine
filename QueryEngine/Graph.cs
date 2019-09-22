@@ -123,5 +123,7 @@ namespace QueryEngine
             this.edges = edgeList.edges;
         }
 
+        public List<Vertex> GetAllVertices() => this.vertices;
+
     }
 }
