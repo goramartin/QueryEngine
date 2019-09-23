@@ -128,6 +128,7 @@ namespace QueryEngine
         {
             this.graph = g;
             this.result = new Element[p.Count];
+            this.pattern = p;
         }
 
         public void Search()
@@ -146,7 +147,7 @@ namespace QueryEngine
                         AddToResult(nextElement, patternIndex);
                         if ( (pattern.Count-1) == patternIndex ) 
                         {
-                            //to do print
+                            result.Print();
                             nextElement = null;
                             continue;
                         }
@@ -166,6 +167,18 @@ namespace QueryEngine
         {
             if (processingVertex)
             {
+                EdgeType edgeType = ((EdgeMatch)pattern[patternIndex]).GetEdgeType();
+
+
+
+
+
+
+
+
+
+
+
                 //get first edge from list based on type
                 processingVertex = false;
             }
@@ -182,7 +195,7 @@ namespace QueryEngine
             return null;
         }
 
-        //When processing the vertex, we failed to add te vertex, that means we need to go down in the pattern
+        //When processing the vertex, we failed to add the vertex, that means we need to go down in the pattern,
         //but also remove the edge we came with to the vertex. So we return null, next loop in algorithm fails on adding edge, so the edge gets removed.
         //When processing edge, we get the last used edge, remove it from results (Note there can be no edge). 
         //We try to do dfs from the vertex the edge started from with the edge we got from results before. If it returns edge we can continue 
@@ -197,7 +210,6 @@ namespace QueryEngine
                 patternIndex--;
                 processingVertex = false;
                 return null;
-                //to do what to do with last used edge
             }
             else
             {
@@ -362,6 +374,22 @@ namespace QueryEngine
 
     }
 
+
+    static class ExtensionArray
+    {
+        public static void Print(this Element[] tmp)
+        {
+            Console.WriteLine(":");
+            for (int i = 0; i < tmp.Length; i++)
+            {
+                Console.WriteLine("{0} ", tmp[i].GetID());
+            }
+
+
+        }
+
+
+    }
 
 
 

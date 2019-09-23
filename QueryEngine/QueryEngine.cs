@@ -91,21 +91,14 @@ namespace QueryEngine
             }
 
 
-            Element f = ((Element)new Vertex());
-
-            Console.WriteLine(f is Vertex);
-
-
-
-
-            //just for testing
-            ///////////////////////////////////////
-
             Graph g = new Graph();
             g.LoadNodeTables("VertexTypes.txt");
             g.LoadEdgeTables("EdgeTypes.txt");
             g.LoadEdgeList("NodesEdges.txt");
           
+            //just for testing
+            ///////////////////////////////////////
+            /*
             
             Scope scope = new Scope();
             List<Token> tokens = Tokenizer.Tokenize(Console.In);
@@ -134,19 +127,19 @@ namespace QueryEngine
 
             Console.ReadLine();
 
-            
+            */
 
             /////////////
             Console.WriteLine();
             //Display whats inside dictionary of nodes 
             foreach (var item in g.NodeTables)
             {
-                Console.WriteLine(item.Key);
-                Console.WriteLine(item.Value.IRI);
+                Console.WriteLine("Key:"+item.Key);
+                Console.WriteLine("TableIri:"+item.Value.IRI);
                 foreach (var ite in item.Value.properties)
                 {
-                    Console.WriteLine(ite.IRI);
-                    Console.WriteLine(ite.GetType());
+                    Console.WriteLine("PropertyIRI:"+ite.IRI);
+                    Console.WriteLine("PropertyType:"+ ite.GetType());
                 }
 
                 Console.WriteLine();
@@ -161,12 +154,12 @@ namespace QueryEngine
             //Display whats inside dictionary of edges
             foreach (var item in g.EdgeTables)
             {
-                Console.WriteLine(item.Key);
-                Console.WriteLine(item.Value.IRI);
+                Console.WriteLine("Key:" + item.Key);
+                Console.WriteLine("TableIri:" + item.Value.IRI);
                 foreach (var ite in item.Value.properties)
                 {
-                    Console.WriteLine(ite.IRI);
-                    Console.WriteLine(ite.GetType());
+                    Console.WriteLine("PropertyIRI:" + ite.IRI);
+                    Console.WriteLine("PropertyType:" + ite.GetType());
                 }
 
                 Console.WriteLine();
@@ -175,34 +168,44 @@ namespace QueryEngine
 
             ///
 
-            
+
             /////////////
-            
+
+            Console.WriteLine("Vertices");
             //Display whats inside vertices
             foreach (var item in g.vertices)
             {
-                Console.WriteLine(item.id);
-                Console.WriteLine(item.table.IRI);
-                Console.WriteLine(item.edgePosition);
+                Console.WriteLine("ID:"+item.id);
+                Console.WriteLine("TableIRI:" + item.table.IRI);
+                Console.WriteLine("OutP:" + item.outEdgePosition);
+                Console.WriteLine("InP:" + item.inEdgePosition);
+                Console.WriteLine("P:" +item.GetPositionInVertices());
                 Console.WriteLine();
-                foreach (var it in item.incomingEdges)
-                {
-                    Console.WriteLine(it.endVertex.id);
-                    Console.WriteLine(it.id);
-                }
             }
-
-
             Console.WriteLine();
+            Console.WriteLine("OutEdges");
             //displey whats inside edges
-            foreach (var item in g.edges)
+            foreach (var item in g.outEdges)
             {
-                Console.WriteLine(item.id);
-                Console.WriteLine(item.table.IRI);
-                Console.WriteLine(item.endVertex.id);
+                Console.WriteLine("ID:" + item.id);
+                Console.WriteLine("TableIRI:" + item.table.IRI);
+                Console.WriteLine("EndVertexID:" + item.endVertex.id);
+                Console.WriteLine();
+            }
+            Console.WriteLine();
+            Console.WriteLine("InEdges");
+            foreach (var item in g.inEdges)
+            {
+                Console.WriteLine("ID:" + item.id);
+                Console.WriteLine("TableIRI:" + item.table.IRI);
+                Console.WriteLine("EndVertexID:" + item.endVertex.id);
                 Console.WriteLine();
             }
             Console.ReadLine();
+
+
         }
+
+
     }
 }

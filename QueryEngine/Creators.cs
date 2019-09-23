@@ -197,6 +197,8 @@ namespace QueryEngine
         List<Edge> inEdges;
         Dictionary<string, Table> nodeTables;
         Dictionary<string, Table> edgeTables;
+        List<Edge>[] incomingEdgesTable;
+        
         bool finished;
         bool readingNodes;
         Edge incomingEdge;
@@ -269,7 +271,10 @@ namespace QueryEngine
         //Parse id. Create new Vertex Instance. Ad id into the instance.
         private void ProcessNodeID(string param)
         {
-            if (param == ":") { this.readingNodes = false; return; };
+            if (param == ":") { 
+                this.readingNodes = false;
+                InicialiseInEdgesTables();
+                return; };
 
             int id = 0;
             if (!int.TryParse(param, out id)) 
@@ -336,7 +341,7 @@ namespace QueryEngine
         //Parse Id of the end vertex.
         //Find the vertex in the list vertices.
         //Add found vertex to the edge.
-        //Create incoming edge
+        //Create incoming edge, add it to table based on vertex position in vertices.
         //Actualise if more parameters are needed for the edge.
         private void ProcessEdgeToID(string param)
         {
@@ -345,7 +350,7 @@ namespace QueryEngine
 
             this.incomingEdge.AddTable(this.edge.table);
             this.incomingEdge.AddID(this.edge.id);
-            inEdges.Add(this.incomingEdge);
+            this.incomingEdgesTable[endVertex.GetPositionInVertices()].Add(this.incomingEdge);
             
             this.paramsToReadLeft = this.edge.table.GetPropertyCount();
             FinishParams();
@@ -387,25 +392,34 @@ namespace QueryEngine
             return vertex;
         }
 
-        //List InEdges is unsorted, we sort it based on endvertices, because vertices in list vertices are ordered based on their id
-        //which makes them ascending.
-        //Add in edge position to each vertex.
+        //Merge results from tables into one.
+        //Iterate over tables with in edges of each vertex, if it is empty, continue.
+        //Else take count and set inedgep of vertex, merge result.
         private void FinalizeInEdges()
         {
-            this.inEdges.Sort((x, y) => (x.endVertex.id.CompareTo(y.endVertex.id)));
-            int tmpId = -1;
-            for (int i = 0; i < inEdges.Count; i++)
+            int count = 0;
+
+            for (int i = 0; i < incomingEdgesTable.Length; i++)
             {
-                Vertex v = inEdges[i].GetEndVertex();
-                if (tmpId != v.GetID())
-                {
-                    tmpId = v.GetID();
-                    v.SetInEdgePosition(i);
-                }
+                int c = incomingEdgesTable[i].Count;
+                if (c == 0) continue;
+                vertices[i].SetInEdgePosition(count);
+                for (int k = 0; k < c; k++)
+                    inEdges.Add(incomingEdgesTable[i][k]);
+                count += c;
             }
-
-
         }
+
+        private void InicialiseInEdgesTables()
+        {
+            this.incomingEdgesTable = new List<Edge>[vertices.Count];
+            for (int i = 0; i < incomingEdgesTable.Length; i++)
+            {
+                incomingEdgesTable[i] = new List<Edge>();
+            }
+        }
+
+
 
     }
 

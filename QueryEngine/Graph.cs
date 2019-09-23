@@ -38,6 +38,7 @@ namespace QueryEngine
             this.id = -1;
             this.table = null;
             this.outEdgePosition = -1;
+            this.inEdgePosition = - 1;
 
         }
 
