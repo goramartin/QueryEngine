@@ -221,14 +221,16 @@ namespace QueryEngine
 
         private Element FindNextEdge(int start, int end, List<Edge> edges, Element lastUsedEdge)
         {
+            if (start == -1) return null;
 
-
-
-
-
-
-
-
+            bool canPick = false;
+            if (lastUsedEdge == null) canPick = true;
+            for (int i = start; i < end; i++)
+            {
+                if (canPick) return edges[i];
+                else if (lastUsedEdge.GetID() == edges[i].GetID()) canPick = true;
+            }
+            return null;
         }
         
         private Element ProcessInEdge(int p, Element last)
@@ -261,10 +263,6 @@ namespace QueryEngine
         {
             this.result[index] = null;
         }
-
-
-
-
 
     }
 
