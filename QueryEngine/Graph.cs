@@ -22,32 +22,33 @@ namespace QueryEngine
 
     class Vertex : Element
     {
-
-        public int edgePosition;
-        public List<Edge> incomingEdges;
+        public int positionInVertices;
+        public int outEdgePosition;
+        public int inEdgePosition;
         public Vertex(int id, Table table)
         {
             this.id = id;
             this.table = table;
-            this.edgePosition = -1;
-            this.incomingEdges = new List<Edge>();
+            this.outEdgePosition = -1;
+            this.inEdgePosition = -1;
         }
 
         public Vertex()
         {
             this.id = -1;
             this.table = null;
-            this.edgePosition = -1;
-            this.incomingEdges = new List<Edge>();
+            this.outEdgePosition = -1;
 
         }
 
-        public void SetEdgePosition(int position) => this.edgePosition = position;
-        public bool HasEdges() { if (this.edgePosition == -1) return false; else return true; }
-        public void AddIncomingEdge(Edge e) { this.incomingEdges.Add(e); }
+        public void SetPositionInVertices(int position) => this.positionInVertices = position;
+        public void SetOutEdgePosition(int position) => this.outEdgePosition = position;
+        public void SetInEdgePosition(int position) => this.inEdgePosition = position;
 
-        public List<Edge> GetIncomingEdges() => this.incomingEdges;
-        public int GetEdgePosition() => this.edgePosition;
+        public bool HasEdges() { if (this.outEdgePosition == -1) return false; else return true; }
+        public int GetOutEdgePosition() => this.outEdgePosition;
+        public int GetInEdgePosition() => this.inEdgePosition;
+        public int GetPositionInVertices() => this.positionInVertices;
 
     }
 
@@ -76,9 +77,10 @@ namespace QueryEngine
     class EdgeListHolder
     {
         public List<Vertex> vertices;
-        public List<Edge> edges;
+        public List<Edge> outEdges;
+        public List<Edge> inEdges;
 
-        public EdgeListHolder() { this.vertices = null; this.edges = null; }
+        public EdgeListHolder() { this.vertices = null; this.outEdges = null; this.inEdges = null; }
     }
 
     class Graph
@@ -86,13 +88,15 @@ namespace QueryEngine
         public Dictionary<string, Table> NodeTables;
         public Dictionary<string, Table> EdgeTables;
         public List<Vertex> vertices;
-        public List<Edge> edges;
+        public List<Edge> outEdges;
+        public List<Edge> inEdges;
 
         public Graph()
         {
             this.NodeTables = null;
             this.vertices = null;
-            this.edges = null;
+            this.outEdges = null;
+            this.inEdges = null;
             this.EdgeTables = null;
         }
 
@@ -120,7 +124,8 @@ namespace QueryEngine
         {
             EdgeListHolder edgeList = LoadList(filename);
             this.vertices = edgeList.vertices;
-            this.edges = edgeList.edges;
+            this.outEdges = edgeList.outEdges;
+            this.inEdges = edgeList.inEdges;
         }
 
         public List<Vertex> GetAllVertices() => this.vertices;

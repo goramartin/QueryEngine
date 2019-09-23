@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 namespace QueryEngine
 {
+
+    //Interface for state oriented processing of incoming words from file.
     interface IProcessor<T>
     {
         bool Finished();
@@ -185,10 +187,14 @@ namespace QueryEngine
     }
 
     //Creates edge list from data file.
+    //We suppose vertices in datafile are stored based on their id in ascending order.
+    //We suppose edges in datafile are stored based on id of the from vertex in ascending order.
+    //That is to say, having three vertices with ids 1, 2, 3... first all edges are from vertex 1, then edges from vertex 2 etc. 
     class EdgeListProcessor : IProcessor<EdgeListHolder>
     {
         List<Vertex> vertices;
-        List<Edge> edges;
+        List<Edge> outEdges;
+        List<Edge> inEdges;
         Dictionary<string, Table> nodeTables;
         Dictionary<string, Table> edgeTables;
         bool finished;
@@ -206,7 +212,8 @@ namespace QueryEngine
         public EdgeListProcessor()
         {
             this.vertices = new List<Vertex>();
-            this.edges = new List<Edge>();
+            this.outEdges = new List<Edge>();
+            this.inEdges = new List<Edge>();
             this.finished = false;
             this.readingNodes = true;
             this.state = State.ID;
@@ -222,7 +229,8 @@ namespace QueryEngine
         {
             var tmp = new EdgeListHolder();
             tmp.vertices = this.vertices;
-            tmp.edges = this.edges;
+            tmp.outEdges = this.outEdges;
+            tmp.inEdges = this.inEdges;
             return tmp;
         }
 
@@ -268,6 +276,7 @@ namespace QueryEngine
                 throw new ArgumentException($"{this.GetType()} Reading wrong node ID. ID is not a number.");
 
             this.vertex = new Vertex();
+            this.vertex.SetPositionInVertices(vertices.Count);
             this.vertex.AddID(id);
             this.state = State.Type;
         }
@@ -292,7 +301,7 @@ namespace QueryEngine
         //Parse id of the edge and create new edge with this id.
         private void ProcessEdgeID(string param) 
         {
-            if (param == null) { this.finished = true; return; }
+            if (param == null) { FinalizeInEdges(); this.finished = true; return; }
 
             int id = 0;
             if (!int.TryParse(param, out id))
@@ -313,10 +322,12 @@ namespace QueryEngine
             this.edge.table.AddID(this.edge.id);
             this.state = State.EdgeFromID;
         }
+        //Find vertex the edge starts from. If edge processed is first edge of vertex, set edge position.
+        //Note the Count is pointing to the empty space where the processed edge will be added in FinishParams.
         private void ProcessEdgeFromID(string param) 
         {
             Vertex fromVertex = FindVertex(param);
-            if (!fromVertex.HasEdges()) fromVertex.SetEdgePosition(edges.Count);
+            if (!fromVertex.HasEdges()) fromVertex.SetOutEdgePosition(outEdges.Count);
             this.incomingEdge = new Edge();
             this.incomingEdge.AddEndVertex(fromVertex);
             this.state = State.EdgeToID;
@@ -325,6 +336,7 @@ namespace QueryEngine
         //Parse Id of the end vertex.
         //Find the vertex in the list vertices.
         //Add found vertex to the edge.
+        //Create incoming edge
         //Actualise if more parameters are needed for the edge.
         private void ProcessEdgeToID(string param)
         {
@@ -333,7 +345,7 @@ namespace QueryEngine
 
             this.incomingEdge.AddTable(this.edge.table);
             this.incomingEdge.AddID(this.edge.id);
-            endVertex.AddIncomingEdge(this.incomingEdge);
+            inEdges.Add(this.incomingEdge);
             
             this.paramsToReadLeft = this.edge.table.GetPropertyCount();
             FinishParams();
@@ -358,7 +370,7 @@ namespace QueryEngine
             if (this.paramsToReadLeft == 0)
             {
                 if (this.readingNodes) this.vertices.Add(this.vertex);
-                else this.edges.Add(this.edge);
+                else this.outEdges.Add(this.edge);
                 this.state = State.ID;
             }
             //continue parsing parameters
@@ -374,6 +386,27 @@ namespace QueryEngine
             if (vertex == null) throw new ArgumentException($"{this.GetType()} ID is not found in vertices.");
             return vertex;
         }
+
+        //List InEdges is unsorted, we sort it based on endvertices, because vertices in list vertices are ordered based on their id
+        //which makes them ascending.
+        //Add in edge position to each vertex.
+        private void FinalizeInEdges()
+        {
+            this.inEdges.Sort((x, y) => (x.endVertex.id.CompareTo(y.endVertex.id)));
+            int tmpId = -1;
+            for (int i = 0; i < inEdges.Count; i++)
+            {
+                Vertex v = inEdges[i].GetEndVertex();
+                if (tmpId != v.GetID())
+                {
+                    tmpId = v.GetID();
+                    v.SetInEdgePosition(i);
+                }
+            }
+
+
+        }
+
     }
 
 
