@@ -24,7 +24,8 @@ namespace QueryEngine
 
         public Table(string tableName)
         {
-            if (tableName == null) throw new ArgumentException($"{this.GetType()} Table name not inicalised.");
+            if (tableName == null) 
+                throw new ArgumentException($"{this.GetType()} Table name not inicalised.");
             else
             { 
                 this.IRI = tableName;

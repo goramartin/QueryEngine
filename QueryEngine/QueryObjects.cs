@@ -59,11 +59,6 @@ namespace QueryEngine
 
     }
 
-
-
-
-
-
     //Scope represents scope of variable in the whole query.
     class Scope
     {
@@ -75,7 +70,7 @@ namespace QueryEngine
 
 
     //Select represents list of variables to print.
-   class SelectObject
+    class SelectObject
    {
         private List<SelectVariable> selectVariables;
         public SelectObject(List<SelectVariable> sv) => this.selectVariables = sv;
@@ -106,7 +101,7 @@ namespace QueryEngine
 
 
     //Match represents patter to match in main match algorithm.
-   class MatchObject
+    class MatchObject
    {
         private List<BaseMatch> pattern;
         public MatchObject(List<BaseMatch> p) => this.pattern = p;
@@ -135,7 +130,6 @@ namespace QueryEngine
             this.result = new Element[p.Count];
             this.pattern = p;
         }
-
         public void Search()
         {
             foreach (var v in graph.GetAllVertices()) {
@@ -212,7 +206,6 @@ namespace QueryEngine
             }
         }
 
-
         private Element FindNextEdge(int start, int end, List<Edge> edges, Element lastUsedEdge)
         {
             if (start == -1) return null;
@@ -225,21 +218,18 @@ namespace QueryEngine
             }
             return null;
         }
-        
         private Element ProcessInEdge(int p, Element last)
         {
             return FindNextEdge(graph.GetPositionOfEdges(false, p), 
                                 graph.GetRangeToLastEdgeOfVertex(false, p),
                                 graph.GetAllInEdges(), last);
         }
-
         private Element ProcessOutEdge(int p, Element last)
         {
              return FindNextEdge(graph.GetPositionOfEdges(true, p),
                                  graph.GetRangeToLastEdgeOfVertex(true, p),
                                  graph.GetAllOutEdges(), last);
         }
-        
         private Element ProcessAnyEdge(int p, Element last)
         {
             Element e = null;
@@ -251,14 +241,10 @@ namespace QueryEngine
             if (!processingInEdge) e = ProcessOutEdge(p, last);
             return e;
         }
-
-
-
         private void AddToResult(Element element, int index)
         {
             this.result[index] = element;
         }
-
         private void RemoveFromResult(int index)
         {
             this.result[index] = null;
@@ -318,7 +304,6 @@ namespace QueryEngine
         public bool IsAnonnymous() => this.anonnymous;
 
     }
-
     class VertexMatch : BaseMatch
     {
         public VertexMatch()

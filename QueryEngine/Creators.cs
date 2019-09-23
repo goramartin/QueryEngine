@@ -268,7 +268,6 @@ namespace QueryEngine
                 }
         }
 
-        //Parse id. Create new Vertex Instance. Ad id into the instance.
         private void ProcessNodeID(string param)
         {
             if (param == ":") { 
@@ -286,8 +285,6 @@ namespace QueryEngine
             this.state = State.Type;
         }
 
-        //Parse table name. Get the table name. Add table from dictionary into vertex.
-        //Add vertex id into the table IDs and actualise parameter count for next reading.
         private void ProcessNodeType(string param)
         {
             Table table;
@@ -303,7 +300,6 @@ namespace QueryEngine
 
         //Reading file after :.
         //Null means end of file.
-        //Parse id of the edge and create new edge with this id.
         private void ProcessEdgeID(string param) 
         {
             if (param == null) { FinalizeInEdges(); this.finished = true; return; }
@@ -317,8 +313,6 @@ namespace QueryEngine
             this.state = State.Type;
         }
         
-        //Find correct table of the edge based on input type.
-        //Add this table to the edge and acualise IDs in the table with the edge id.
         private void ProcessEdgeType(string param)
         {
             Table table;
@@ -327,6 +321,7 @@ namespace QueryEngine
             this.edge.table.AddID(this.edge.id);
             this.state = State.EdgeFromID;
         }
+        
         //Find vertex the edge starts from. If edge processed is first edge of vertex, set edge position.
         //Note the Count is pointing to the empty space where the processed edge will be added in FinishParams.
         private void ProcessEdgeFromID(string param) 
@@ -338,11 +333,6 @@ namespace QueryEngine
             this.state = State.EdgeToID;
         }
 
-        //Parse Id of the end vertex.
-        //Find the vertex in the list vertices.
-        //Add found vertex to the edge.
-        //Create incoming edge, add it to table based on vertex position in vertices.
-        //Actualise if more parameters are needed for the edge.
         private void ProcessEdgeToID(string param)
         {
             Vertex endVertex = FindVertex(param);
@@ -392,9 +382,7 @@ namespace QueryEngine
             return vertex;
         }
 
-        //Merge results from tables into one.
-        //Iterate over tables with in edges of each vertex, if it is empty, continue.
-        //Else take count and set inedgep of vertex, merge result.
+        //Merge results from inedges tables into one.
         private void FinalizeInEdges()
         {
             int count = 0;

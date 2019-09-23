@@ -390,7 +390,8 @@ namespace QueryEngine
         void Visit(IdentifierNode node);
     }
 
-    //Iterating over linked variables.
+
+    //Creates list of variables to print for select from query.
     class SelectVisitor : IVisitor<List<SelectVariable>>
     {
         List<SelectVariable> result;
@@ -465,6 +466,8 @@ namespace QueryEngine
         }
     }
 
+
+    //Creates pattern for match from query.
     class MatchVisitor : IVisitor<List<BaseMatch>>
     {
         List<BaseMatch> result;
