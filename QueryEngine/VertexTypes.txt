@@ -1,16 +1,9 @@
 ﻿{
-"Kind": "Person",
-"Name": "string",
-"LastName": "string",
-"Age": "integer"
+"Kind": "Person"
 }
 {
-"Kind": "House",
-"Adress": "string",
-"POST": "integer"
+"Kind": "Friend"
 }
-{
-"Kind": "Car"
-}
+
 
 

@@ -25,7 +25,6 @@ namespace QueryEngine
 
 
             //Check if it successfully parsed every token.
-            //to do better if it returns null when failed.
             if (tokens.Count != Parser.GetPosition()) 
                 throw new ArgumentException("Failed to parse every token."); 
 
@@ -55,7 +54,6 @@ namespace QueryEngine
 
         private static Graph CreateGraph(string[] args)
         {
-            //better if it returns null when failed.
             Graph g = new Graph();
             g.LoadNodeTables("VertexTypes.txt");
             g.LoadEdgeTables("EdgeTypes.txt");
@@ -67,9 +65,10 @@ namespace QueryEngine
         private static void Run(string[] args, TextReader reader, TextWriter writer)
         {
             Graph g = CreateGraph(args);
-            Query query = CreateQuery(reader, g.NodeTables, g.EdgeTables);    
-
-
+            Query query = CreateQuery(reader, g.NodeTables, g.EdgeTables);
+            query.CheckCorrectnessOfQuery();
+            DFSPatternMatcher dfs = new DFSPatternMatcher(, g);
+            dfs.Search();
 
 
 
@@ -82,8 +81,8 @@ namespace QueryEngine
         {
             try
             {
-         //      Run(args, Console.In, Console.Out);
-           //     return;
+               Run(args, Console.In, Console.Out);
+               return;
             }
             catch (Exception e )
             {
@@ -91,14 +90,22 @@ namespace QueryEngine
             }
 
 
+        
+
+            #region PRINT
+
+            /*
             Graph g = new Graph();
             g.LoadNodeTables("VertexTypes.txt");
             g.LoadEdgeTables("EdgeTypes.txt");
             g.LoadEdgeList("NodesEdges.txt");
           
+            
+            
+            
             //just for testing
             ///////////////////////////////////////
-            /*
+            
             
             Scope scope = new Scope();
             List<Token> tokens = Tokenizer.Tokenize(Console.In);
@@ -106,7 +113,7 @@ namespace QueryEngine
             foreach (var item in tokens)
             {
                 Console.WriteLine(item.type);
-                if (item.type == Token.TokenType.Identifier) Console.WriteLine(item.strValue) ;
+               if (item.type == Token.TokenType.Identifier) Console.WriteLine(item.strValue) ;
             }
 
          
@@ -122,12 +129,16 @@ namespace QueryEngine
 
             Query q = new Query(new SelectObject(k), new MatchObject(l), scope);
             Console.WriteLine(q.CheckCorrectnessOfQuery());
+            Console.WriteLine();
+            DFSPatternMatcher dfs = new DFSPatternMatcher(l, g);
+            dfs.Search();
 
-  
+
 
             Console.ReadLine();
 
-            */
+
+
 
             /////////////
             Console.WriteLine();
@@ -202,8 +213,8 @@ namespace QueryEngine
                 Console.WriteLine();
             }
             Console.ReadLine();
-
-
+            */
+            #endregion PRINT
         }
 
 

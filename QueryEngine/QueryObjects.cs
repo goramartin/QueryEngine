@@ -29,6 +29,7 @@ namespace QueryEngine
             var pattern = match.GetPattern();
             foreach (var item in select.GetSelectVariables())
             {
+                if (item.name == "*") continue;
                 if (!sc.TryGetValue(item.name, out int p)) return false;
                 
                 //If select needs property, we check if the property is correct.
@@ -101,6 +102,8 @@ namespace QueryEngine
         }
     }
 
+
+
     //Match represents patter to match in main match algorithm.
    class MatchObject
    {
@@ -121,6 +124,7 @@ namespace QueryEngine
         List<BaseMatch> pattern;
         Element[] result;
         bool processingVertex;
+        bool processingInEdge; //valid only when any edge is wanted 
         int patternIndex; 
 
 
@@ -133,20 +137,16 @@ namespace QueryEngine
 
         public void Search()
         {
-           
-            foreach (var v in graph.GetAllVertices())
-            {
+            foreach (var v in graph.GetAllVertices()) {
                 processingVertex = true;
+                processingInEdge = true;
                 patternIndex = 0;
                 Element nextElement = v;
-                while (true)
-                {
+                while (true){
                     bool success = pattern[patternIndex].Apply(nextElement, pattern, result);
-                    if (success) 
-                    {
+                    if (success) {
                         AddToResult(nextElement, patternIndex);
-                        if ( (pattern.Count-1) == patternIndex ) 
-                        {
+                        if ( (pattern.Count-1) == patternIndex ){
                             result.Print();
                             nextElement = null;
                             continue;
@@ -154,10 +154,9 @@ namespace QueryEngine
                         patternIndex++;
                         nextElement = DoDFSForward(nextElement, null);
                     }
-                    else
-                    {
+                    else {
                         nextElement = DoDFSBack(nextElement);
-                        if (patternIndex - 1 <= 0) break;
+                        if (patternIndex <= 0) break;
                     }
                 }
             }
@@ -165,8 +164,7 @@ namespace QueryEngine
 
         private Element DoDFSForward(Element lastElement, Edge lastUsedEdge)
         {
-            if (processingVertex)
-            {
+            if (processingVertex){
                 EdgeType edgeType = ((EdgeMatch)pattern[patternIndex]).GetEdgeType();
 
                 Element nextElement = null;
@@ -178,8 +176,7 @@ namespace QueryEngine
                 processingVertex = false;
                 return nextElement;
             }
-            else 
-            {
+            else {
                 processingVertex = true;
                 return ((Edge)lastElement).endVertex; 
             }
@@ -193,25 +190,20 @@ namespace QueryEngine
         //In order to do that we go down in pattern and return null, so the algorithm fail on adding vertex so it jumps here again.
         private Element DoDFSBack(Element element)
         {
-            if (processingVertex)
-            {
-                //Remove vertex in result, go down in pattern.
+            if (processingVertex) {
                 result[patternIndex] = null;
                 patternIndex--;
                 processingVertex = false;
                 return null;
             }
-            else
-            {
-                //Get used edge, if there was used one and remove it from results.
+            else {
                 Edge lastUsedEdge = (Edge)result[patternIndex];
                 if (element == null) element = lastUsedEdge;
                 RemoveFromResult(patternIndex);
 
-                //Try to find new edge from the vertex of the used edge.
+                processingVertex = true; //To jump into dfs.
                 Element nextElement = DoDFSForward(result[patternIndex - 1], (Edge)element);
-                if (nextElement == null)
-                {
+                if (nextElement == null) {
                     patternIndex--;
                     processingVertex = true;
                 }
@@ -219,14 +211,14 @@ namespace QueryEngine
             }
         }
 
+
         private Element FindNextEdge(int start, int end, List<Edge> edges, Element lastUsedEdge)
         {
             if (start == -1) return null;
 
             bool canPick = false;
             if (lastUsedEdge == null) canPick = true;
-            for (int i = start; i < end; i++)
-            {
+            for (int i = start; i < end; i++) {
                 if (canPick) return edges[i];
                 else if (lastUsedEdge.GetID() == edges[i].GetID()) canPick = true;
             }
@@ -235,20 +227,27 @@ namespace QueryEngine
         
         private Element ProcessInEdge(int p, Element last)
         {
-            return FindNextEdge(graph.GetPositionOfEdges(false, p), graph.GetRangeToLastEdgeOfVertex(false, p),
-                                               graph.GetAllInEdges(), last);
+            return FindNextEdge(graph.GetPositionOfEdges(false, p), 
+                                graph.GetRangeToLastEdgeOfVertex(false, p),
+                                graph.GetAllInEdges(), last);
         }
 
         private Element ProcessOutEdge(int p, Element last)
         {
-             return FindNextEdge(graph.GetPositionOfEdges(true, p), graph.GetRangeToLastEdgeOfVertex(true, p),
-                                               graph.GetAllOutEdges(), last);
+             return FindNextEdge(graph.GetPositionOfEdges(true, p),
+                                 graph.GetRangeToLastEdgeOfVertex(true, p),
+                                 graph.GetAllOutEdges(), last);
         }
         
         private Element ProcessAnyEdge(int p, Element last)
         {
-            var e = ProcessInEdge(p, last);
-            if (e == null) e = ProcessOutEdge(p, last);
+            Element e = null;
+            if (processingInEdge)
+            {
+                e = ProcessInEdge(p, last);
+                if (e == null) { last = null; processingInEdge = false; }
+            }
+            if (!processingInEdge) e = ProcessOutEdge(p, last);
             return e;
         }
 
