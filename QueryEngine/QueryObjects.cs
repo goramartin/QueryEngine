@@ -169,30 +169,20 @@ namespace QueryEngine
             {
                 EdgeType edgeType = ((EdgeMatch)pattern[patternIndex]).GetEdgeType();
 
+                Element nextElement = null;
+                int p = ((Vertex)lastElement).GetPositionInVertices();
+                if (edgeType == EdgeType.InEdge) nextElement = ProcessInEdge(p, lastUsedEdge);
+                else if (edgeType == EdgeType.OutEdge) nextElement = ProcessOutEdge(p, lastUsedEdge);
+                else nextElement = ProcessAnyEdge(p, lastUsedEdge);
 
-
-
-
-
-
-
-
-
-
-                //get first edge from list based on type
                 processingVertex = false;
+                return nextElement;
             }
             else 
             {
                 processingVertex = true;
                 return ((Edge)lastElement).endVertex; 
             }
-
-            
-
-            //do dfs
-
-            return null;
         }
 
         //When processing the vertex, we failed to add the vertex, that means we need to go down in the pattern,
@@ -228,6 +218,39 @@ namespace QueryEngine
                 return nextElement;
             }
         }
+
+        private Element FindNextEdge(int start, int end, List<Edge> edges, Element lastUsedEdge)
+        {
+
+
+
+
+
+
+
+
+        }
+        
+        private Element ProcessInEdge(int p, Element last)
+        {
+            return FindNextEdge(graph.GetPositionOfEdges(false, p), graph.GetRangeToLastEdgeOfVertex(false, p),
+                                               graph.GetAllInEdges(), last);
+        }
+
+        private Element ProcessOutEdge(int p, Element last)
+        {
+             return FindNextEdge(graph.GetPositionOfEdges(true, p), graph.GetRangeToLastEdgeOfVertex(true, p),
+                                               graph.GetAllOutEdges(), last);
+        }
+        
+        private Element ProcessAnyEdge(int p, Element last)
+        {
+            var e = ProcessInEdge(p, last);
+            if (e == null) e = ProcessOutEdge(p, last);
+            return e;
+        }
+
+
 
         private void AddToResult(Element element, int index)
         {

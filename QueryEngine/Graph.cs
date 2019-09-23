@@ -130,6 +130,38 @@ namespace QueryEngine
         }
 
         public List<Vertex> GetAllVertices() => this.vertices;
+        public List<Edge> GetAllOutEdges() => this.outEdges;
+        public List<Edge> GetAllInEdges() => this.inEdges;
 
+        public int GetPositionOfEdges(bool isOut, int positionOfVertex)
+        {
+            if (isOut) return vertices[positionOfVertex].outEdgePosition;
+            else return vertices[positionOfVertex].inEdgePosition;
+        }
+
+        public int GetRangeToLastEdgeOfVertex(bool isOut, int positionOfVertex)
+        {
+            //Has edge?
+            if (GetPositionOfEdges(isOut, positionOfVertex) == -1) return -1;
+            //Is it the last vertex in array?
+            else if (positionOfVertex + 1 == vertices.Count)
+            {
+                if (isOut) return outEdges.Count;
+                else return inEdges.Count;
+            }
+            else
+            {
+                //Find first vertex that has edges and return start of those edges.
+                for (int i = positionOfVertex + 1; i < vertices.Count; i++)
+                {
+                    int t = GetPositionOfEdges(isOut, i);
+                    if (t != -1) return t;
+                }
+                //Else the edges of the vertex on positionofvertex continue until end of array.
+                if (isOut) return outEdges.Count;
+                else return inEdges.Count;
+            }
+
+        }
     }
 }
