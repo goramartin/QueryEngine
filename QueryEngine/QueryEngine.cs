@@ -67,14 +67,8 @@ namespace QueryEngine
             Graph g = CreateGraph(args);
             Query query = CreateQuery(reader, g.NodeTables, g.EdgeTables);
             query.CheckCorrectnessOfQuery();
-            DFSPatternMatcher dfs = new DFSPatternMatcher(, g);
+            DFSPatternMatcher dfs = new DFSPatternMatcher(query.GetMatchPattern(), g);
             dfs.Search();
-
-
-
-
-
-
         }
 
         static void Main(string[] args)
@@ -88,9 +82,6 @@ namespace QueryEngine
             {
                 Console.WriteLine( e.Message);
             }
-
-
-        
 
             #region PRINT
 

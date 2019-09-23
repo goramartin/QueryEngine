@@ -1,3 +1,6 @@
 ﻿{
 "Kind": "Basic"
 }
+{
+"Kind": "NotBasic"
+}

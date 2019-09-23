@@ -21,6 +21,7 @@ namespace QueryEngine
             this.scope = scope;
         }
 
+        public List<BaseMatch> GetMatchPattern() { return this.match.GetPattern(); }
 
         //Check if variables in select correspond to variables in scope
         public bool CheckCorrectnessOfQuery()
@@ -265,10 +266,6 @@ namespace QueryEngine
 
     }
 
-
-
-
-
     //Class representing single step of pattern to match.
     //Method apply returns true if the element can be added to final result.
     abstract class BaseMatch
@@ -290,21 +287,17 @@ namespace QueryEngine
 
             //It is repetition of variable before, check if it has same id.
             if (repeatedVariable)
-            {
                 if (result[positionOfRepeatedField].GetID() != element.GetID()) return false;
-            }
 
             //Check if the element is not set for another variable.
             //Result length and baseMatches count are same.
-            for (int i = 0; i < result.Length; i++)
-            {
+            for (int i = 0; i < result.Length; i++) {
                 Element tmpEl = result[i];
                 
                 //Further ahead, there are no elements stored in result.
                 if (tmpEl == null) break;
                 
-                if (tmpEl.GetID() == element.GetID())
-                {
+                if (tmpEl.GetID() == element.GetID()) {
                     if (baseMatches[i].IsAnonnymous()) continue;
                     else if (i == positionOfRepeatedField) continue;
                     else return false;
@@ -404,11 +397,7 @@ namespace QueryEngine
             {
                 Console.WriteLine("{0} ", tmp[i].GetID());
             }
-
-
         }
-
-
     }
 
 
