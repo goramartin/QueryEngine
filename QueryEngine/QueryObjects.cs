@@ -27,6 +27,7 @@ namespace QueryEngine
         public bool CheckCorrectnessOfQuery()
         {
             var sc = scope.GetScopeVariables();
+            if (sc.Count == 0) return false;
             var pattern = match.GetPattern();
             foreach (var item in select.GetSelectVariables())
             {
@@ -380,7 +381,7 @@ namespace QueryEngine
             Console.WriteLine(":");
             for (int i = 0; i < tmp.Length; i++)
             {
-                Console.WriteLine("{0} ", tmp[i].GetID());
+                Console.Write("{0} ", tmp[i].GetID());
             }
         }
     }
