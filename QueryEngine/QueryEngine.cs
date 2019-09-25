@@ -112,8 +112,6 @@ namespace QueryEngine
          
             SelectNode d = Parser.ParseSelectExpr(tokens);
             MatchNode s = Parser.ParseMatchExpr(tokens);
-            Console.ReadLine();
-            /*
             
             SelectVisitor selectVisitor = new SelectVisitor();
             MatchVisitor matchVisitor = new MatchVisitor(scope,g.NodeTables, g.EdgeTables);
@@ -123,6 +121,8 @@ namespace QueryEngine
             s.Accept(matchVisitor);
             var l = matchVisitor.GetResult();
 
+            Console.ReadLine();
+            /*
             Query q = new Query(new SelectObject(k), new MatchObject(l), scope);
             Console.WriteLine(q.CheckCorrectnessOfQuery());
             Console.WriteLine();

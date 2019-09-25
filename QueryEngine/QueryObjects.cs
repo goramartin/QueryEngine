@@ -104,8 +104,10 @@ namespace QueryEngine
     //Match represents patter to match in main match algorithm.
     class MatchObject
    {
+        private List<List<BaseMatch>> p;
         private List<BaseMatch> pattern;
         public MatchObject(List<BaseMatch> p) => this.pattern = p;
+        public MatchObject(List<List<BaseMatch>> p) => this.p= p;
         public List<BaseMatch> GetPattern() => this.pattern;
 
    }

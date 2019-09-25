@@ -493,42 +493,54 @@ namespace QueryEngine
 
 
     //Creates pattern for match from query.
-    class MatchVisitor : IVisitor<List<BaseMatch>>
+    //We create new pattern for each division of a comma {viewed as MatchDivider node} 
+    class MatchVisitor : IVisitor<List<List<BaseMatch>>>
     {
-        List<BaseMatch> result;
+        List<List<BaseMatch>> result;
+        List<BaseMatch> currentPattern;
         Dictionary<string, int> scope;
         Dictionary<string, Table> vTables;
         Dictionary<string, Table> eTables;
         bool readingName;
         bool readingVertex;
+        int patternCount;
+
 
         public MatchVisitor(Scope s,
             Dictionary<string, Table> v, Dictionary<string, Table> e)
         {
-            this.result = new List<BaseMatch>();
+            this.currentPattern = new List<BaseMatch>();
+            this.result = new List<List<BaseMatch>>();
             this.scope = s.GetScopeVariables();
             this.vTables = v;
             this.eTables = e;
             this.readingName = true;
             this.readingVertex = true;
+            this.patternCount = 0;
         }
        
         
-        public List<BaseMatch> GetResult()
+        public List<List<BaseMatch>> GetResult()
         { return this.result; }
         
         public void Visit(MatchNode node)
         {
+            //Create new pattern and start its parsing.
+            result.Add(currentPattern);
             node.next.Accept(this);
-            if (result.Count < 1) 
-                throw new ArgumentException("MatchVisitor, failed to parse match expr.");
+
+            for (int i = 0; i < result.Count; i++)
+            {
+                if (result[i].Count <= 0) 
+                    throw new ArgumentException("MatchVisitor, failed to parse match expr.");
+            }
         }
 
         public void Visit(VertexNode node)
         {
             this.readingVertex = true;
             VertexMatch vm = new VertexMatch();
-            result.Add(vm);
+            currentPattern.Add(vm);
             if (node.variable != null) node.variable.Accept(this);
             if (node.next != null ) node.next.Accept(this);
         }
@@ -538,7 +550,7 @@ namespace QueryEngine
             this.readingVertex = false;
             EdgeMatch em = new EdgeMatch();
             em.SetEdgeType(node.GetEdgeType());
-            result.Add(em);
+            currentPattern.Add(em);
             if (node.variable != null) node.variable.Accept(this);
             if (node.next == null) 
                 throw new ArgumentException("MatchVisitor, missing end vertex from edge.");
@@ -565,25 +577,25 @@ namespace QueryEngine
 
         public void Visit(IdentifierNode node)
         {
-            int p = result.Count - 1;
+            int relativePosition = currentPattern.Count - 1;
             if (readingName)
             {
                 //It has name, it can not be anonnymous.
-                result[p].SetAnnonymous(false);
+                currentPattern[relativePosition].SetAnnonymous(false);
                 //Try if the variable is alredy in the scope.
                 if (scope.TryGetValue(node.value, out int positionOfRepeated))
                 {
                     //If it is, set the repeated status.
-                    result[p].SetRepeated(true);
-                    result[p].SetPositionOfRepeatedField(positionOfRepeated);
+                    currentPattern[relativePosition].SetRepeated(true);
+                    currentPattern[relativePosition].SetPositionOfRepeatedField(positionOfRepeated);
                 }
                 //It is new variable, then add it to scope.
-                else scope.Add(node.value, p);
+                else scope.Add(node.value, GetAbsolutePosition());
             }
             else
             {
-                if (readingVertex) ProcessType(p, node, vTables);
-                else ProcessType(p, node, eTables);
+                if (readingVertex) ProcessType(relativePosition, node, vTables);
+                else ProcessType(relativePosition, node, eTables);
             }
         }
 
@@ -592,16 +604,28 @@ namespace QueryEngine
             //Try find the table of the variable, it has to be always valid table name.
                 if (!d.TryGetValue(node.value, out Table table))
                     throw new ArgumentException("MatchVisitor, could not parse Table name.");
-                else result[p].SetType(table);
+                else currentPattern[p].SetType(table);
         }
 
+        private int GetAbsolutePosition()
+        {
+            int c = 0;
+            for (int i = 0; i < result.Count; i++)
+                c += result[i].Count;
+            return (c - 1);
+        }
+
+        public void Visit(MatchDivider node)
+        {
+            //Create new pattern and start its parsing.
+            currentPattern = new List<BaseMatch>();
+            result.Add(currentPattern);
+            patternCount++;
+            node.next.Accept(this);
+        }
 
         //Should never occur.
         public void Visit(SelectNode node)
-        {
-            throw new NotImplementedException();
-        }
-        public void Visit(MatchDivider node)
         {
             throw new NotImplementedException();
         }
