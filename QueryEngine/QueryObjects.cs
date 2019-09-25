@@ -21,7 +21,7 @@ namespace QueryEngine
             this.scope = scope;
         }
 
-        public List<BaseMatch> GetMatchPattern() { return this.match.GetPattern(); }
+        public List<List<BaseMatch>> GetMatchPattern() { return this.match.GetPattern(); }
 
         //Check if variables in select correspond to variables in scope
         public bool CheckCorrectnessOfQuery()
@@ -37,27 +37,43 @@ namespace QueryEngine
                 //If select needs property, we check if the property is correct.
                 if (item.propName != null) 
                 {
-                    if (pattern[p].GetTable() == null) return false;
-                    if (!pattern[p].GetTable().ContainsProperty(item.propName)) return false;    
+                    if (GetMatch(p, pattern).GetTable() == null) return false;
+                    if (!GetMatch(p, pattern).GetTable().ContainsProperty(item.propName)) return false;    
                 }
             }
             return CheckCorrectnessOfPatternTypes(pattern);
         } 
 
         //Check whether in the pattern the repeating variables are same.
-        private bool CheckCorrectnessOfPatternTypes(List<BaseMatch> pattern)
+        private bool CheckCorrectnessOfPatternTypes(List<List<BaseMatch>> pattern)
         {
             for (int i = 0; i < pattern.Count; i++)
             {
-                BaseMatch b = pattern[i];
-                if (b.IsRepeated())
+                for (int k = 0; k < pattern[i].Count; k++)
                 {
-                    if (!b.Equals(b.GetPositionOfRepeatedField())) return false;
+                    BaseMatch b = pattern[i][k];
+                    if (b.IsRepeated())
+                    if (!b.Equals(
+                            GetMatch(b.GetPositionOfRepeatedField(),pattern))) 
+                            return false;
                 }
             }
             return true;
         }
 
+        private BaseMatch GetMatch(int position, List<List<BaseMatch>> pattern)
+        {
+            int p = 0;
+            for (int i = 0; i < pattern.Count; i++)
+            {
+                for (int k = 0; k < pattern[i].Count; k++)
+                {
+                    if (p == position) return pattern[i][k];
+                    p++;
+                }
+            }
+            throw new ArgumentException("QueryCheck, could not find any variable.");
+        }
     }
 
     //Scope represents scope of variable in the whole query.
@@ -104,11 +120,9 @@ namespace QueryEngine
     //Match represents patter to match in main match algorithm.
     class MatchObject
    {
-        private List<List<BaseMatch>> p;
-        private List<BaseMatch> pattern;
-        public MatchObject(List<BaseMatch> p) => this.pattern = p;
-        public MatchObject(List<List<BaseMatch>> p) => this.p= p;
-        public List<BaseMatch> GetPattern() => this.pattern;
+        private List<List<BaseMatch>> pattern;
+        public MatchObject(List<List<BaseMatch>> p) => this.pattern= p;
+        public List<List<BaseMatch>> GetPattern() => this.pattern;
 
    }
 

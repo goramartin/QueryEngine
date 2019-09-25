@@ -69,8 +69,6 @@ namespace QueryEngine
             Graph g = CreateGraph(args);
             Query query = CreateQuery(reader, g.NodeTables, g.EdgeTables);
             if (!query.CheckCorrectnessOfQuery()) throw new ArgumentException("Query is not correct, check assigned variables and their types.");
-            DFSPatternMatcher dfs = new DFSPatternMatcher(query.GetMatchPattern(), g);
-            dfs.Search();
         }
 
         static void Main(string[] args)
