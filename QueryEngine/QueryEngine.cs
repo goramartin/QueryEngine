@@ -77,8 +77,8 @@ namespace QueryEngine
         {
             try
             {
-               Run(args, Console.In, Console.Out);
-               return;
+               //Run(args, Console.In, Console.Out);
+               //return;
             }
             catch (Exception e )
             {
@@ -87,7 +87,7 @@ namespace QueryEngine
 
             #region PRINT
 
-            /*
+            
             Graph g = new Graph();
             g.LoadNodeTables("VertexTypes.txt");
             g.LoadEdgeTables("EdgeTypes.txt");
@@ -112,6 +112,9 @@ namespace QueryEngine
          
             SelectNode d = Parser.ParseSelectExpr(tokens);
             MatchNode s = Parser.ParseMatchExpr(tokens);
+            Console.ReadLine();
+            /*
+            
             SelectVisitor selectVisitor = new SelectVisitor();
             MatchVisitor matchVisitor = new MatchVisitor(scope,g.NodeTables, g.EdgeTables);
             

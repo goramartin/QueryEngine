@@ -294,7 +294,6 @@ namespace QueryEngine
             return true;
         }
 
-
         public void SetAnnonymous(bool b) => this.anonnymous = b;
         public void SetRepeated(bool b) => this.repeatedVariable = b;
         public void SetPositionOfRepeatedField(int p) => this.positionOfRepeatedField = p;

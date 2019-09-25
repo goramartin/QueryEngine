@@ -251,8 +251,15 @@ namespace QueryEngine
             //Position incremented from leaving function PsrseVariable.
             //Parse Edge.
             Node edgeNode = ParseEdgeExpr(tokens);
-            if (edgeNode != null) vertexNode.AddNext(edgeNode);
+            if (edgeNode != null)
+            {
+                vertexNode.AddNext(edgeNode);
+                return vertexNode;
+            }
 
+            //Try Parse another pattern, divided by comma.
+            Node newPattern = ParseNewPatternExpr(tokens);
+            if (newPattern != null) vertexNode.AddNext(newPattern);
             //Always must return valid vertex.
             return vertexNode;
         }
@@ -272,10 +279,23 @@ namespace QueryEngine
             //Next must be vertex.
             Node vertexNode = ParseVertexExpr(tokens);
             if (vertexNode != null) edgeNode.AddNext(vertexNode);
-            else throw new ArgumentException("PArseEdge, expected vertex.");
+            else throw new ArgumentException("ParseEdge, expected vertex.");
 
             return edgeNode;
         }
+        static private Node ParseNewPatternExpr(List<Token> tokens)
+        {
+            if (!CheckToken(position, Token.TokenType.Comma, tokens)) return null;
+            IncrementPosition();
+
+            MatchDivider matchDivider = new MatchDivider();
+
+            Node newPattern = ParseVertexExpr(tokens);
+            if (newPattern == null) throw new ArgumentException("ParseNewPatern, expected new pattern.");
+            matchDivider.AddNext(newPattern);
+            return matchDivider;
+        }
+
 
         static private Node ParseEdge(List<Token> tokens)
         {
@@ -384,6 +404,7 @@ namespace QueryEngine
         T GetResult();
         void Visit(SelectNode node);
         void Visit(MatchNode node);
+        void Visit(MatchDivider node);
         void Visit(VertexNode node);
         void Visit(EdgeNode node);
         void Visit(VariableNode node);
@@ -449,6 +470,10 @@ namespace QueryEngine
                     throw new ArgumentException("SelectVisitor, could not set propname to variable.");
             }
 
+        }
+        public void Visit(MatchDivider node)
+        {
+            throw new NotImplementedException();
         }
 
         //Can never appear.  
@@ -576,6 +601,10 @@ namespace QueryEngine
         {
             throw new NotImplementedException();
         }
+        public void Visit(MatchDivider node)
+        {
+            throw new NotImplementedException();
+        }
     }
 
 
@@ -656,7 +685,13 @@ namespace QueryEngine
            visitor.Visit(this);
         }
     }
-
+    class MatchDivider : QueryNode
+    {
+        public override void Accept<T>(IVisitor<T> visitor)
+        {
+            visitor.Visit(this);
+        }
+    }
 
     class VariableNode : QueryNode
     {
