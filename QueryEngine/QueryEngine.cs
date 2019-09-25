@@ -69,14 +69,16 @@ namespace QueryEngine
             Graph g = CreateGraph(args);
             Query query = CreateQuery(reader, g.NodeTables, g.EdgeTables);
             if (!query.CheckCorrectnessOfQuery()) throw new ArgumentException("Query is not correct, check assigned variables and their types.");
+            DFSPatternMatcher dfs = new DFSPatternMatcher(query.GetMatchPattern(),g);
+            dfs.Search();
         }
 
         static void Main(string[] args)
         {
             try
             {
-               //Run(args, Console.In, Console.Out);
-               //return;
+               Run(args, Console.In, Console.Out);
+               return;
             }
             catch (Exception e )
             {
@@ -85,6 +87,7 @@ namespace QueryEngine
 
             #region PRINT
 
+            /*
             
             Graph g = new Graph();
             g.LoadNodeTables("VertexTypes.txt");
@@ -103,8 +106,8 @@ namespace QueryEngine
 
             foreach (var item in tokens)
             {
-                Console.WriteLine(item.type);
-               if (item.type == Token.TokenType.Identifier) Console.WriteLine(item.strValue) ;
+              //  Console.WriteLine(item.type);
+             //  if (item.type == Token.TokenType.Identifier) Console.WriteLine(item.strValue) ;
             }
 
          
@@ -119,10 +122,12 @@ namespace QueryEngine
             s.Accept(matchVisitor);
             var l = matchVisitor.GetResult();
 
-            Console.ReadLine();
-            /*
             Query q = new Query(new SelectObject(k), new MatchObject(l), scope);
             Console.WriteLine(q.CheckCorrectnessOfQuery());
+            Console.ReadLine();
+              
+              
+             
             Console.WriteLine();
             DFSPatternMatcher dfs = new DFSPatternMatcher(l, g);
             dfs.Search();

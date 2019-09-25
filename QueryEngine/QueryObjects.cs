@@ -37,13 +37,12 @@ namespace QueryEngine
                 //If select needs property, we check if the property is correct.
                 if (item.propName != null) 
                 {
-                    if (GetMatch(p, pattern).GetTable() == null) return false;
-                    if (!GetMatch(p, pattern).GetTable().ContainsProperty(item.propName)) return false;    
+                    if (pattern.GetMatch(p).GetTable() == null) return false;
+                    if (!pattern.GetMatch(p).GetTable().ContainsProperty(item.propName)) return false;    
                 }
             }
             return CheckCorrectnessOfPatternTypes(pattern);
         } 
-
         //Check whether in the pattern the repeating variables are same.
         private bool CheckCorrectnessOfPatternTypes(List<List<BaseMatch>> pattern)
         {
@@ -54,26 +53,13 @@ namespace QueryEngine
                     BaseMatch b = pattern[i][k];
                     if (b.IsRepeated())
                     if (!b.Equals(
-                            GetMatch(b.GetPositionOfRepeatedField(),pattern))) 
+                            pattern.GetMatch(b.GetPositionOfRepeatedField()))) 
                             return false;
                 }
             }
             return true;
         }
-
-        private BaseMatch GetMatch(int position, List<List<BaseMatch>> pattern)
-        {
-            int p = 0;
-            for (int i = 0; i < pattern.Count; i++)
-            {
-                for (int k = 0; k < pattern[i].Count; k++)
-                {
-                    if (p == position) return pattern[i][k];
-                    p++;
-                }
-            }
-            throw new ArgumentException("QueryCheck, could not find any variable.");
-        }
+        
     }
 
     //Scope represents scope of variable in the whole query.
@@ -117,6 +103,10 @@ namespace QueryEngine
 
 
 
+
+
+
+
     //Match represents patter to match in main match algorithm.
     class MatchObject
    {
@@ -134,50 +124,91 @@ namespace QueryEngine
     class DFSPatternMatcher : IPatternMatcher
     {
         Graph graph;
-        List<BaseMatch> pattern;
+        List<List<BaseMatch>> pattern;
+        List<BaseMatch> currentPattern;
         Element[] result;
         bool processingVertex;
         bool processingInEdge; //valid only when any edge is wanted 
         int patternIndex; 
+        int currentPatternIndex;
 
-
-        public DFSPatternMatcher(List<BaseMatch> p, Graph g)
+        public DFSPatternMatcher(List<List<BaseMatch>> p, Graph g)
         {
             this.graph = g;
-            this.result = new Element[p.Count];
+            this.result = new Element[p.GetCount()];
             this.pattern = p;
         }
+
         public void Search()
         {
-            foreach (var v in graph.GetAllVertices()) {
+            patternIndex = 0;
+            currentPattern = pattern[patternIndex];
+            int[] lastUsedVertices = new int[pattern.Count-1];
+            int lastUsedVertex = -1;
+            while (true){
+                if (lastUsedVertex == -1) lastUsedVertex = DFS(0, false);
+                else lastUsedVertex = DFS(lastUsedVertex,true);
+                if (lastUsedVertex == -1) {
+                    if (patternIndex == 0) break;
+                    patternIndex--;
+                    lastUsedVertex = lastUsedVertices[patternIndex];
+                    currentPattern = pattern[patternIndex];
+                }
+                else{
+                    lastUsedVertices[patternIndex] = lastUsedVertex;
+                    patternIndex++;
+                    currentPattern = pattern[patternIndex];
+                    lastUsedVertex = -1;
+                }
+            }
+        }
+
+        public int DFS(int position, bool cameFromUp)
+        {
+            var vertices = graph.GetAllVertices();
+            for (int i = position; i < vertices.Count; i++) {
                 processingVertex = true;
                 processingInEdge = true;
-                patternIndex = 0;
-                Element nextElement = v;
-                while (true){
-                    bool success = pattern[patternIndex].Apply(nextElement, pattern, result);
+                Element nextElement = vertices[i];
+                currentPatternIndex = 0;
+                if (cameFromUp)
+                {
+                    nextElement = null;
+                    currentPatternIndex = currentPattern.Count-1;
+                    cameFromUp = false;
+                }
+                while (true)
+                {
+                    bool success = currentPattern[currentPatternIndex].Apply(nextElement, pattern, result);
                     if (success) {
-                        AddToResult(nextElement, patternIndex);
-                        if ( (pattern.Count-1) == patternIndex ){
-                            result.Print();
-                            nextElement = null;
-                            continue;
+                        AddToResult(nextElement, currentPatternIndex);//to do
+                        if ((currentPattern.Count - 1) == currentPatternIndex) //last position in current pattern
+                        {
+                            if (patternIndex == pattern.Count - 1) //last pattern from patterns
+                            {
+                                result.Print();
+                                nextElement = null;
+                                continue;
+                            }
+                            else return i;
                         }
-                        patternIndex++;
+                        currentPatternIndex++;
                         nextElement = DoDFSForward(nextElement, null);
                     }
-                    else {
+                    else
+                    {
                         nextElement = DoDFSBack(nextElement);
-                        if (patternIndex <= 0) break;
+                        if (currentPatternIndex <= 0) break ; 
                     }
                 }
             }
+            return -1;
         }
 
         private Element DoDFSForward(Element lastElement, Edge lastUsedEdge)
         {
             if (processingVertex){
-                EdgeType edgeType = ((EdgeMatch)pattern[patternIndex]).GetEdgeType();
+                EdgeType edgeType = ((EdgeMatch)currentPattern[currentPatternIndex]).GetEdgeType();
 
                 Element nextElement = null;
                 int p = ((Vertex)lastElement).GetPositionInVertices();
@@ -203,20 +234,20 @@ namespace QueryEngine
         private Element DoDFSBack(Element element)
         {
             if (processingVertex) {
-                result[patternIndex] = null;
-                patternIndex--;
+                RemoveFromResult(currentPatternIndex);
+                currentPatternIndex--;
                 processingVertex = false;
                 return null;
             }
             else {
-                Edge lastUsedEdge = (Edge)result[patternIndex];
+                Edge lastUsedEdge = (Edge)result[GetAbsolutePosition(currentPatternIndex)];
                 if (element == null) element = lastUsedEdge;
-                RemoveFromResult(patternIndex);
+                RemoveFromResult(currentPatternIndex);
 
                 processingVertex = true; //To jump into dfs.
-                Element nextElement = DoDFSForward(result[patternIndex - 1], (Edge)element);
+                Element nextElement = DoDFSForward(result[GetAbsolutePosition(currentPatternIndex) - 1], (Edge)element); //to do
                 if (nextElement == null) {
-                    patternIndex--;
+                    currentPatternIndex--;
                     processingVertex = true;
                 }
                 return nextElement;
@@ -260,14 +291,33 @@ namespace QueryEngine
         }
         private void AddToResult(Element element, int index)
         {
+            index = GetAbsolutePosition(index);
             this.result[index] = element;
         }
         private void RemoveFromResult(int index)
         {
+            index = GetAbsolutePosition(index);
             this.result[index] = null;
         }
+        private int GetAbsolutePosition(int index)
+        {
+            for (int i = 0; i < patternIndex; i++)
+            {
+                index += pattern[i].Count;
+            }
+            return index;
+        }
+
 
     }
+
+
+
+
+
+
+
+
 
     //Class representing single step of pattern to match.
     //Method apply returns true if the element can be added to final result.
@@ -278,9 +328,9 @@ namespace QueryEngine
         protected int positionOfRepeatedField;
         protected Table type;
 
-        public abstract bool Apply(Element element, List<BaseMatch> baseMatches, Element[] result);
+        public abstract bool Apply(Element element, List<List<BaseMatch>> baseMatches, Element[] result);
 
-        protected bool CheckCommonConditions(Element element, List<BaseMatch> baseMatches, Element[] result)
+        protected bool CheckCommonConditions(Element element, List<List<BaseMatch>> baseMatches, Element[] result)
         {
             //Check type, comparing references to tables.
             if ((this.type != null) && (this.type != element.GetTable())) return false;
@@ -293,7 +343,6 @@ namespace QueryEngine
                 if (result[positionOfRepeatedField].GetID() != element.GetID()) return false;
 
             //Check if the element is not set for another variable.
-            //Result length and baseMatches count are same.
             for (int i = 0; i < result.Length; i++) {
                 Element tmpEl = result[i];
                 
@@ -301,8 +350,11 @@ namespace QueryEngine
                 if (tmpEl == null) break;
                 
                 if (tmpEl.GetID() == element.GetID()) {
-                    if (baseMatches[i].IsAnonnymous()) continue;
-                    else if (i == positionOfRepeatedField) continue;
+                    BaseMatch tmp = baseMatches.GetMatch(i);
+                    if (tmp.IsAnonnymous()) continue;
+                    else if (i == this.positionOfRepeatedField) continue;
+                    else if ((tmp.positionOfRepeatedField != -1) &&
+                            (tmp.positionOfRepeatedField == this.positionOfRepeatedField)) continue;
                     else return false;
                 }
             }
@@ -330,7 +382,7 @@ namespace QueryEngine
             this.type = null;
         }
 
-        public override bool Apply(Element element, List<BaseMatch> baseMatches, Element[] result)
+        public override bool Apply(Element element, List<List<BaseMatch>> baseMatches, Element[] result)
         {
             if (element == null) return false;
             else if (!(element is Vertex)) return false;
@@ -363,7 +415,7 @@ namespace QueryEngine
             this.type = null;
         }
 
-        public override bool Apply(Element element, List<BaseMatch> baseMatches, Element[] result)
+        public override bool Apply(Element element, List<List<BaseMatch>> baseMatches, Element[] result)
         {
             if (element == null) return false;
             else if (!(element is Edge)) return false;
@@ -393,15 +445,50 @@ namespace QueryEngine
     {
         public static void Print(this Element[] tmp)
         {
-            Console.WriteLine(":");
             for (int i = 0; i < tmp.Length; i++)
             {
                 Console.Write("{0} ", tmp[i].GetID());
             }
+            Console.WriteLine();
+            Console.WriteLine(":");
+        }
+
+        public static void Populate<T>(this T[] arr, T value)
+        {
+            for (int i = 0; i < arr.Length; i++)
+            {
+                arr[i] = value;
+            }
         }
     }
 
+    static class ExtensionPattern
+    {
+        public static BaseMatch GetMatch(this List<List<BaseMatch>> pattern, int position)
+        {
+            int p = 0;
+            for (int i = 0; i < pattern.Count; i++)
+            {
+                for (int k = 0; k < pattern[i].Count; k++)
+                {
+                    if (p == position) return pattern[i][k];
+                    p++;
+                }
+            }
+            throw new ArgumentException("QueryCheck, could not find any variable.");
+        }
 
+        public static int GetCount(this List<List<BaseMatch>> pattern)
+        {
+            int c = 0;
+            for (int i = 0; i < pattern.Count; i++)
+            {
+                c += pattern[i].Count;
+            }
+            return c;
+        }
+
+    }
 
 
 }
