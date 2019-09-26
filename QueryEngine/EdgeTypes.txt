@@ -1,6 +1,8 @@
-﻿{
+﻿[
+{
 "Kind": "Basic"
-}
+},
 {
 "Kind": "NotBasic"
 }
+]

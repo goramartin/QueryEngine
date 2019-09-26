@@ -1,9 +1,11 @@
-﻿{
+﻿[
+{
 "Kind": "Person"
-}
+},
 {
 "Kind": "Friend"
 }
+]
 
 
 

@@ -57,18 +57,19 @@ namespace QueryEngine
         Table newTable;
         string newPropName;
         bool finished;
-        bool readingName;
-        enum State { Kind, Name, LeftBracket, PropName, PropType, DoubleDot };
+        enum State { Kind, Name, LeftBracket, PropName, PropType,
+                     DoubleDot,Comma, CommaS, RightBracket, RightSquaredBrace, LeftSquareBrace,
+                       LeftMark, RightMark};
         State state;
+        State lastState;
 
         public TableDictProcessor()
         {
             this.dict = new Dictionary<string, Table>();
             this.finished = false;
-            this.state = State.LeftBracket;
+            this.state = State.LeftSquareBrace;
             this.newTable = null;
             this.newPropName = null;
-            this.readingName = false;
         }
 
         public bool Finished()
@@ -86,14 +87,14 @@ namespace QueryEngine
         {
             switch (state)
             {
-                case State.LeftBracket:
-                    ProcessLeftBracket(param);
-                    break;
                 case State.Kind:
                     ProcessKind(param);
                     break;
                 case State.Name:
                     ProcessName(param);
+                    break;
+                case State.LeftBracket:
+                    ProcessLeftBracket(param);
                     break;
                 case State.PropName:
                     ProcessPropName(param);
@@ -104,8 +105,23 @@ namespace QueryEngine
                 case State.DoubleDot:
                     ProcessDoubleDot(param);
                     break;
+                case State.Comma:
+                    ProcessCommaAfterProp(param);
+                    break;
+                case State.CommaS:
+                    ProcessCommaAfterBracket(param);
+                    break;
+                case State.LeftSquareBrace:
+                    ProcessLeftSquaredBrace(param);
+                    break;
+                case State.LeftMark:
+                    ProcessLeftMark(param);
+                    break;
+                case State.RightMark:
+                    ProcessRightMark(param);
+                    break;
                 default:
-                    throw new ArgumentException($"{this.GetType()} Expected different state.");
+                    throw new ArgumentException("TableCreator, Expected different state.");
             }
         }
 
@@ -116,26 +132,54 @@ namespace QueryEngine
         }
 
 
+        private void ProcessLeftSquaredBrace(string param)
+        {
+            if (param != "[") throw new ArgumentException("Failed to parse types of table, expected [.");
+            this.state = State.LeftBracket;
+        }
 
         private void ProcessLeftBracket(string param)
         { 
-            if (param == null) 
-            {
-                this.finished = true; 
-                return;
-            };
-            
             if (param != "{") throw new ArgumentException($"{this.GetType()} Expected left Bracket");
-            this.state = State.Kind;
+            this.lastState = State.LeftBracket;
+            this.state = State.LeftMark;
+        }
+
+        private void ProcessLeftMark(string param)
+        {
+            if (param != "\"") throw new ArgumentException(($"{this.GetType()} Expected left quotations."));
+
+            if (this.lastState == State.LeftBracket) this.state = State.Kind;
+            else if (this.lastState == State.Kind) this.state = State.Name;
+            else if (this.lastState == State.Name) this.state = State.PropName;
+            else if (this.lastState == State.PropName) this.state = State.PropType;
+            else if (this.lastState == State.PropType) this.state = State.PropName;
         }
 
         private void ProcessKind(string param)
         {
             if (param != "Kind") 
                 throw new ArgumentException($"{this.GetType()} Expected Kind");
-            this.readingName = true;
-            this.state = State.DoubleDot;
+            this.lastState = State.Kind;
+            this.state = State.RightMark;
         }
+
+
+        private void ProcessRightMark(string param)
+        {
+            if (param != "\"")
+                throw new ArgumentException($"{this.GetType()} Expected \"");
+            if ((lastState == State.Kind) || (lastState == State.PropName)) this.state = State.DoubleDot;
+            else this.state = State.Comma;
+        }
+
+
+        private void ProcessDoubleDot(string param)
+        {
+            if (param != ":") throw new ArgumentException($"{this.GetType()} Expected :");
+            this.state = State.LeftMark;
+        }
+
 
         //If it is null we finished reading the file.
         //Else it creates new table with the param name and add it to dictionary.
@@ -145,35 +189,34 @@ namespace QueryEngine
             if (this.dict.ContainsKey(param)) 
                 throw new ArgumentException($"{this.GetType()} Adding table that exists.");
             else this.dict.Add(param, this.newTable);
-            this.state = State.PropName;
+            this.lastState = State.Name;
+            this.state = State.RightMark;
         }
+
+
+        private void ProcessCommaAfterProp(string param)
+        {
+            if (param == ",") this.state = State.LeftMark;
+            else if (param == "}") this.state = State.CommaS;
+        }
+
+        private void ProcessCommaAfterBracket(string param)
+        {
+            if (param == ",") this.state = State.LeftBracket;
+            else if (param == "]")
+            {
+                this.finished = true;
+                return;
+            }
+        }
+
 
         //Expected to read name or }
         private void ProcessPropName(string param)
         {
-            if (param == "}")
-            {
-                this.state = State.LeftBracket;
-                return;
-            }
-            else 
-            {
                 this.newPropName = param;
-                this.state = State.DoubleDot;
-            }
-        }
-
-        //Expected to get character :.
-        private void ProcessDoubleDot(string param)
-        {
-            if (param != ":") throw new ArgumentException($"{this.GetType()} Expected DoubleDot.");
-            if (this.readingName)
-            { 
-                this.state = State.Name;
-                this.readingName = false;
-                return;
-            }
-            else this.state = State.PropType;
+            this.lastState = State.PropName;
+                this.state = State.RightMark;
         }
 
         //Based on the incoming parameter, create new instance of property through PropertyFactory.
@@ -182,9 +225,16 @@ namespace QueryEngine
         {
             Property newProp = PropertyFactory.CreateProperty(param, this.newPropName);
             this.newTable.AddNewProperty(newProp);
-            this.state = State.PropName;
+
+
+            this.lastState = State.PropType;
+            this.state = State.Comma;
         }
     }
+
+
+
+
 
     //Creates edge list from data file.
     //We suppose vertices in datafile are stored based on their id in ascending order.
@@ -202,10 +252,10 @@ namespace QueryEngine
         bool finished;
         bool readingNodes;
         Edge incomingEdge;
+        Edge outEdge;
 
 
         Vertex vertex;
-        Edge edge;
         enum State { ID, Type, Parameters, EdgeFromID, EdgeToID };
         State state;
         int paramsToReadLeft;
@@ -255,7 +305,7 @@ namespace QueryEngine
                         break;
                     case State.Parameters:
                         if (this.readingNodes) ProcessParams(param, this.vertex.table); 
-                        else { ProcessParams(param, this.edge.table); }
+                        else { ProcessParams(param, this.outEdge.table); }
                         break;
                     case State.EdgeFromID:
                         ProcessEdgeFromID(param);
@@ -308,8 +358,9 @@ namespace QueryEngine
             if (!int.TryParse(param, out id))
                 throw new ArgumentException($"{this.GetType()} Reading wrong node ID. ID is not a number.");
 
-            this.edge = new Edge();
-            this.edge.AddID(id);
+            this.outEdge = new Edge();
+            this.outEdge.SetPositionInEdges(outEdges.Count);
+            this.outEdge.AddID(id);
             this.state = State.Type;
         }
         
@@ -317,8 +368,8 @@ namespace QueryEngine
         {
             Table table;
             edgeTables.TryGetValue(param, out table);
-            this.edge.AddTable(table);
-            this.edge.table.AddID(this.edge.id);
+            this.outEdge.AddTable(table);
+            this.outEdge.table.AddID(this.outEdge.id);
             this.state = State.EdgeFromID;
         }
         
@@ -336,13 +387,13 @@ namespace QueryEngine
         private void ProcessEdgeToID(string param)
         {
             Vertex endVertex = FindVertex(param);
-            this.edge.AddEndVertex(endVertex);
+            this.outEdge.AddEndVertex(endVertex);
 
-            this.incomingEdge.AddTable(this.edge.table);
-            this.incomingEdge.AddID(this.edge.id);
+            this.incomingEdge.AddTable(this.outEdge.table);
+            this.incomingEdge.AddID(this.outEdge.id);
             this.incomingEdgesTable[endVertex.GetPositionInVertices()].Add(this.incomingEdge);
             
-            this.paramsToReadLeft = this.edge.table.GetPropertyCount();
+            this.paramsToReadLeft = this.outEdge.table.GetPropertyCount();
             FinishParams();
 
         }
@@ -365,7 +416,7 @@ namespace QueryEngine
             if (this.paramsToReadLeft == 0)
             {
                 if (this.readingNodes) this.vertices.Add(this.vertex);
-                else this.outEdges.Add(this.edge);
+                else this.outEdges.Add(this.outEdge);
                 this.state = State.ID;
             }
             //continue parsing parameters
@@ -382,7 +433,10 @@ namespace QueryEngine
             return vertex;
         }
 
+        
         //Merge results from inedges tables into one.
+        //Set positions for inEdges field in vertices.
+        //Set positions for inEdges in their own list.
         private void FinalizeInEdges()
         {
             int count = 0;
@@ -396,7 +450,20 @@ namespace QueryEngine
                     inEdges.Add(incomingEdgesTable[i][k]);
                 count += c;
             }
+
+            SetPositionsInListforInEdges();
         }
+
+        private void SetPositionsInListforInEdges()
+        {
+            for (int i = 0; i < inEdges.Count; i++)
+            {
+                inEdges[i].SetPositionInEdges(i);
+            }
+
+
+        }
+
 
         private void InicialiseInEdgesTables()
         {

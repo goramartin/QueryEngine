@@ -31,6 +31,7 @@ namespace QueryEngine
             this.table = table;
             this.outEdgePosition = -1;
             this.inEdgePosition = -1;
+            this.positionInVertices = -1;
         }
 
         public Vertex()
@@ -56,12 +57,14 @@ namespace QueryEngine
     class Edge : Element
     {
         public Vertex endVertex;
+        public int positionInEdges;
 
         public Edge(int id, Table table, Vertex vertex)
         {
             this.id = id;
             this.table = table;
             this.endVertex = vertex;
+            this.positionInEdges = -1;
         }
         public Edge()
         {
@@ -70,8 +73,10 @@ namespace QueryEngine
             this.endVertex = null;
         }
 
+        public void SetPositionInEdges(int p) => this.positionInEdges = p;
         public void AddEndVertex(Vertex vertex) => this.endVertex = vertex;
         public Vertex GetEndVertex() => this.endVertex;
+        public int GetPositionInEdges() => this.positionInEdges;
     }
 
     //Only for holder purpose during creation inside Processor
@@ -110,7 +115,7 @@ namespace QueryEngine
         }
         private EdgeListHolder LoadList(string filename) 
         {
-            var reader = new Reader(filename);
+            var reader = new WordReader(filename);
             var processor = new EdgeListProcessor();
             processor.PassParameters(NodeTables, EdgeTables);
             var creator = new CreatorFromFile<EdgeListHolder>(reader, processor);
