@@ -114,7 +114,9 @@ Every vertex is enveloped in () and every non-anonymous edge is enveloped in [].
 3 Every query must end with a semicolon ";".
 
 
-## Example queries.
+## Example queries for test graph.
+
+![](images/testgraph.png)
 
 SELECT x MATCH (x);
 
