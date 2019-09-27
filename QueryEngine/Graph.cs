@@ -11,6 +11,7 @@ namespace QueryEngine
     {
         public int id;
         public Table table;
+        public int positionInList;
 
         public void AddID(int id) => this.id = id;
         public void AddTable(Table table) => this.table = table;
@@ -22,7 +23,6 @@ namespace QueryEngine
 
     class Vertex : Element
     {
-        public int positionInVertices;
         public int outEdgePosition;
         public int inEdgePosition;
         public Vertex(int id, Table table)
@@ -31,7 +31,7 @@ namespace QueryEngine
             this.table = table;
             this.outEdgePosition = -1;
             this.inEdgePosition = -1;
-            this.positionInVertices = -1;
+            this.positionInList = -1;
         }
 
         public Vertex()
@@ -43,28 +43,27 @@ namespace QueryEngine
 
         }
 
-        public void SetPositionInVertices(int position) => this.positionInVertices = position;
+        public void SetPositionInVertices(int position) => this.positionInList = position;
         public void SetOutEdgePosition(int position) => this.outEdgePosition = position;
         public void SetInEdgePosition(int position) => this.inEdgePosition = position;
 
         public bool HasEdges() { if (this.outEdgePosition == -1) return false; else return true; }
         public int GetOutEdgePosition() => this.outEdgePosition;
         public int GetInEdgePosition() => this.inEdgePosition;
-        public int GetPositionInVertices() => this.positionInVertices;
+        public int GetPositionInVertices() => this.positionInList;
 
     }
 
     class Edge : Element
     {
         public Vertex endVertex;
-        public int positionInEdges;
 
         public Edge(int id, Table table, Vertex vertex)
         {
             this.id = id;
             this.table = table;
             this.endVertex = vertex;
-            this.positionInEdges = -1;
+            this.positionInList = -1;
         }
         public Edge()
         {
@@ -73,10 +72,10 @@ namespace QueryEngine
             this.endVertex = null;
         }
 
-        public void SetPositionInEdges(int p) => this.positionInEdges = p;
+        public void SetPositionInEdges(int p) => this.positionInList = p;
         public void AddEndVertex(Vertex vertex) => this.endVertex = vertex;
         public Vertex GetEndVertex() => this.endVertex;
-        public int GetPositionInEdges() => this.positionInEdges;
+        public int GetPositionInEdges() => this.positionInList;
     }
 
     //Only for holder purpose during creation inside Processor

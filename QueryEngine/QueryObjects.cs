@@ -245,7 +245,8 @@ namespace QueryEngine
                 RemoveFromResult(currentPatternIndex);
 
                 processingVertex = true; //To jump into dfs.
-                Element nextElement = DoDFSForward(result[GetAbsolutePosition(currentPatternIndex) - 1], (Edge)element); //to do
+                Element nextElement = 
+                    DoDFSForward(result[GetAbsolutePosition(currentPatternIndex) - 1], (Edge)element);
                 if (nextElement == null) {
                     currentPatternIndex--;
                     processingVertex = true;
@@ -257,14 +258,18 @@ namespace QueryEngine
         private Element FindNextEdge(int start, int end, List<Edge> edges, Element lastUsedEdge)
         {
             if (start == -1) return null;
+            else if (lastUsedEdge == null) return edges[start];
+            else if (end - 1 == lastUsedEdge.positionInList) return null;
+            else return edges[lastUsedEdge.positionInList + 1];
 
+            /*
             bool canPick = false;
             if (lastUsedEdge == null) canPick = true;
             for (int i = start; i < end; i++) {
                 if (canPick) return edges[i];
                 else if (lastUsedEdge.GetID() == edges[i].GetID()) canPick = true;
             }
-            return null;
+            return null; */
         }
         private Element ProcessInEdge(int p, Element last)
         {

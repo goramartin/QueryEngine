@@ -464,7 +464,6 @@ namespace QueryEngine
 
         }
 
-
         private void InicialiseInEdgesTables()
         {
             this.incomingEdgesTable = new List<Edge>[vertices.Count];

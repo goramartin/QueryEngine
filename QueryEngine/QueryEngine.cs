@@ -67,12 +67,11 @@ namespace QueryEngine
             //Every query needs valid SELECT and MATCH expr.
             //Every query must end with semicolon ';'.
             Graph g = CreateGraph(args);
-
-            Console.Read();
             Query query = CreateQuery(reader, g.NodeTables, g.EdgeTables);
             if (!query.CheckCorrectnessOfQuery()) throw new ArgumentException("Query is not correct, check assigned variables and their types.");
             DFSPatternMatcher dfs = new DFSPatternMatcher(query.GetMatchPattern(),g);
             dfs.Search();
+           
         }
 
         static void Main(string[] args)
