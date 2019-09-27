@@ -78,8 +78,8 @@ namespace QueryEngine
         {
             try
             {
-               Run(args, Console.In, Console.Out);
-               return;
+              // Run(args, Console.In, Console.Out);
+             //  return;
             }
             catch (Exception e )
             {
@@ -90,13 +90,13 @@ namespace QueryEngine
 
 
 
-            /* 
-             *  Graph g = new Graph();
+             Graph g = new Graph();
             g.LoadNodeTables("VertexTypes.txt");
            g.LoadEdgeTables("EdgeTypes.txt");
            g.LoadEdgeList("NodesEdges.txt");
 
 
+            /* 
 
 
            //just for testing
@@ -179,7 +179,7 @@ namespace QueryEngine
            Console.WriteLine() ;
 
            ///
-
+           */
 
            /////////////
 
@@ -189,8 +189,11 @@ namespace QueryEngine
            {
                Console.WriteLine("ID:"+item.id);
                Console.WriteLine("TableIRI:" + item.table.IRI);
-               Console.WriteLine("OutP:" + item.outEdgePosition);
-               Console.WriteLine("InP:" + item.inEdgePosition);
+               Console.WriteLine("OutSP:" + item.outEdgesStartPosition);
+                Console.WriteLine("OutEP:" + item.outEdgesEndPosition);
+
+                Console.WriteLine("InSP:" + item.inEdgesStartPosition);
+                Console.WriteLine("INEP:" + item.inEdgesEndPosition);
                Console.WriteLine("P:" +item.GetPositionInVertices());
                Console.WriteLine();
            }
@@ -214,7 +217,7 @@ namespace QueryEngine
                Console.WriteLine();
            }
            Console.ReadLine();
-           */
+           /**/
             #endregion PRINT
         }
 

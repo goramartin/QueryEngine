@@ -352,7 +352,7 @@ namespace QueryEngine
         //Null means end of file.
         private void ProcessEdgeID(string param) 
         {
-            if (param == null) { FinalizeInEdges(); this.finished = true; return; }
+            if (param == null) { FinalizeInEdges(); FinalizeVertices(); this.finished = true; return; }
 
             int id = 0;
             if (!int.TryParse(param, out id))
@@ -378,7 +378,7 @@ namespace QueryEngine
         private void ProcessEdgeFromID(string param) 
         {
             Vertex fromVertex = FindVertex(param);
-            if (!fromVertex.HasEdges()) fromVertex.SetOutEdgePosition(outEdges.Count);
+            if (!fromVertex.HasOutEdges()) fromVertex.SetOutEdgesStartPosition(outEdges.Count);
             this.incomingEdge = new Edge();
             this.incomingEdge.AddEndVertex(fromVertex);
             this.state = State.EdgeToID;
@@ -445,13 +445,39 @@ namespace QueryEngine
             {
                 int c = incomingEdgesTable[i].Count;
                 if (c == 0) continue;
-                vertices[i].SetInEdgePosition(count);
+                vertices[i].SetInEdgesStartPosition(count);
                 for (int k = 0; k < c; k++)
                     inEdges.Add(incomingEdgesTable[i][k]);
                 count += c;
             }
 
             SetPositionsInListforInEdges();
+        }
+
+        //Set count on in/out edges.
+        private void FinalizeVertices()
+        {
+            for (int i = 0; i < vertices.Count; i++)
+            {
+                vertices[i].outEdgesEndPosition = FindEndPositionOfEdges(isOut: true, i);
+                vertices[i].inEdgesEndPosition = FindEndPositionOfEdges(isOut: false, i);
+            }
+        }
+
+        private int FindEndPositionOfEdges(bool isOut, int p)
+        {
+            if ((isOut)&&(!vertices[p].HasOutEdges())) return -1;
+            else if((!isOut)&&(!vertices[p].HasInEdges())) return -1;
+            
+            for (int k = p + 1; k < vertices.Count; k++)
+            {
+                Vertex v = vertices[k];
+                int t = isOut ? v.outEdgesStartPosition : v.inEdgesStartPosition;
+                if (t != -1) return t;
+            }
+
+            if (isOut) return outEdges.Count;
+            else return inEdges.Count;
         }
 
         private void SetPositionsInListforInEdges()

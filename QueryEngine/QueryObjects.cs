@@ -261,27 +261,16 @@ namespace QueryEngine
             else if (lastUsedEdge == null) return edges[start];
             else if (end - 1 == lastUsedEdge.positionInList) return null;
             else return edges[lastUsedEdge.positionInList + 1];
-
-            /*
-            bool canPick = false;
-            if (lastUsedEdge == null) canPick = true;
-            for (int i = start; i < end; i++) {
-                if (canPick) return edges[i];
-                else if (lastUsedEdge.GetID() == edges[i].GetID()) canPick = true;
-            }
-            return null; */
         }
         private Element ProcessInEdge(int p, Element last)
         {
-            return FindNextEdge(graph.GetPositionOfEdges(false, p), 
-                                graph.GetRangeToLastEdgeOfVertex(false, p),
-                                graph.GetAllInEdges(), last);
+            graph.GetRangeToLastEdgeOfVertex(isOut:false, p, out int start, out int end);
+            return FindNextEdge(start, end, graph.GetAllInEdges(), last);
         }
         private Element ProcessOutEdge(int p, Element last)
         {
-             return FindNextEdge(graph.GetPositionOfEdges(true, p),
-                                 graph.GetRangeToLastEdgeOfVertex(true, p),
-                                 graph.GetAllOutEdges(), last);
+            graph.GetRangeToLastEdgeOfVertex(isOut:true, p, out int start, out int end);
+            return FindNextEdge(start, end, graph.GetAllOutEdges(), last);
         }
         private Element ProcessAnyEdge(int p, Element last)
         {
@@ -307,13 +296,9 @@ namespace QueryEngine
         private int GetAbsolutePosition(int index)
         {
             for (int i = 0; i < patternIndex; i++)
-            {
                 index += pattern[i].Count;
-            }
             return index;
         }
-
-
     }
 
 

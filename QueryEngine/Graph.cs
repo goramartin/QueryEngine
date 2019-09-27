@@ -23,14 +23,18 @@ namespace QueryEngine
 
     class Vertex : Element
     {
-        public int outEdgePosition;
-        public int inEdgePosition;
+        public int outEdgesStartPosition;
+        public int outEdgesEndPosition;
+        public int inEdgesStartPosition;
+        public int inEdgesEndPosition;
         public Vertex(int id, Table table)
         {
             this.id = id;
             this.table = table;
-            this.outEdgePosition = -1;
-            this.inEdgePosition = -1;
+            this.outEdgesStartPosition = -1;
+            this.outEdgesEndPosition = -1;
+            this.inEdgesStartPosition = -1;
+            this.inEdgesEndPosition= -1;
             this.positionInList = -1;
         }
 
@@ -38,19 +42,28 @@ namespace QueryEngine
         {
             this.id = -1;
             this.table = null;
-            this.outEdgePosition = -1;
-            this.inEdgePosition = - 1;
+            this.outEdgesStartPosition = -1;
+            this.outEdgesEndPosition = -1;
+            this.inEdgesStartPosition = -1;
+            this.inEdgesEndPosition = -1;
+            this.positionInList = -1; ;
 
         }
 
         public void SetPositionInVertices(int position) => this.positionInList = position;
-        public void SetOutEdgePosition(int position) => this.outEdgePosition = position;
-        public void SetInEdgePosition(int position) => this.inEdgePosition = position;
+        public void SetOutEdgesStartPosition(int position) => this.outEdgesStartPosition = position;
+        public void SetOutEdgesEndPosition(int count) => this.outEdgesEndPosition = count;
+        public void SetInEdgesStartPosition(int position) => this.inEdgesStartPosition = position;
+        public void SetInEdgesEndPosition(int count) => this.inEdgesEndPosition = count;
 
-        public bool HasEdges() { if (this.outEdgePosition == -1) return false; else return true; }
-        public int GetOutEdgePosition() => this.outEdgePosition;
-        public int GetInEdgePosition() => this.inEdgePosition;
+        public bool HasOutEdges() { if (this.outEdgesStartPosition == -1) return false; else return true; }
+        public bool HasInEdges() { if (this.inEdgesStartPosition == -1) return false; else return true; }
         public int GetPositionInVertices() => this.positionInList;
+        public int GetOutEdgesStartPosition() => this.outEdgesStartPosition;
+        public int GetOutEdgesEndPosition() => this.outEdgesEndPosition;
+        public int GetInEdgesStartPosition() => this.inEdgesStartPosition;
+        public int GetInEdgesEndPosition() => this.inEdgesEndPosition;
+
 
     }
 
@@ -137,28 +150,19 @@ namespace QueryEngine
         public List<Edge> GetAllOutEdges() => this.outEdges;
         public List<Edge> GetAllInEdges() => this.inEdges;
 
-        public int GetPositionOfEdges(bool isOut, int positionOfVertex)
+        public void GetRangeToLastEdgeOfVertex(bool isOut, int positionOfVertex, out int start, out int end)
         {
-            if (isOut) return vertices[positionOfVertex].outEdgePosition;
-            else return vertices[positionOfVertex].inEdgePosition;
-        }
-
-        public int GetRangeToLastEdgeOfVertex(bool isOut, int positionOfVertex)
-        {
-            //Has edge?
-            if (GetPositionOfEdges(isOut, positionOfVertex) == -1) return -1;
-          
-            //Find first vertex that has edges and return start of those edges.
-            for (int i = positionOfVertex + 1; i < vertices.Count; i++)
+            Vertex vertex = vertices[positionOfVertex];
+            if (isOut)
             {
-                int t = GetPositionOfEdges(isOut, i);
-                if (t != -1) return t;
+                start = vertex.GetOutEdgesStartPosition();
+                end = vertex.GetOutEdgesEndPosition();
             }
-            //Else the edges of the vertex on positionofvertex continue until end of array.
-            if (isOut) return outEdges.Count;
-            else return inEdges.Count;
-            
-
+            else
+            {
+                start = vertex.GetInEdgesStartPosition();
+                end = vertex.GetInEdgesEndPosition();
+            }
         }
     }
 }
