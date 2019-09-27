@@ -40,10 +40,9 @@ Ids must be sorted in ascending order.
 Properties goes as there are in data scheme.
 
 For edges.      
-
 ID Type FromVertexID ToVertexID Properties 
 
-The same rule apply excpept the edges must be sorted according to the vertex IDs. That is, if we have three vertices with id's 1 2 3.
+The same rule apply except the edges must be sorted according to the vertex IDs. That is, if we have three vertices with ids 1 2 3.
 After double dot we expect edges that starts with FromVertexID 1, then edges with FromVertexID 2 and so on.
 Edges IDs and Vertices IDs do not collerate. There can be edge with id 1 and simultaneously vertex with id 1. 
 
@@ -73,7 +72,9 @@ Every variable/asterix must be separated by comma, and accessing properties of a
 
 ### Match syntax
 Match expression expects pattern to match. There can be more patterns separated by comma.
+
 Types of vertices:
+
 
 | Syntax      | Description |
 | ----------- | ----------- |
