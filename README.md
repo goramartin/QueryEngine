@@ -35,10 +35,12 @@ File includes particular nodes and edges. First, there must be all nodes and the
 
 For vertex.     
 ID Type Properties
+
 Ids must be sorted in ascending order.
 Properties goes as there are in data scheme.
 
 For edges.      
+
 ID Type FromVertexID ToVertexID Properties 
 
 The same rule apply excpept the edges must be sorted according to the vertex IDs. That is, if we have three vertices with id's 1 2 3.
