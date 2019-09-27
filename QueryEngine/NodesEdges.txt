@@ -6,9 +6,9 @@
 6 Person
 7 Person
 :
+7 Basic 1 2
 8 Basic 1 4
 9 Basic 1 5
-17 Basic 1 2
 10 Basic 2 3
 11 Basic 2 6
 12 Basic 3 7
