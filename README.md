@@ -80,7 +80,10 @@ Types of vertices:
 |  (:Person)  | Anonymous vertex with defined type        |
 |  (x:Person)  | Defined vertex with defined type        |
 
+
 Types of edges:
+
+
 | Syntax      | Description |
 | ----------- | ----------- |
 | -      | Anonymous any direction edge       |
@@ -111,12 +114,18 @@ Every vertex is enveloped in () and every non-anonymous edge is enveloped in [].
 ## Example queries.
 
 SELECT x MATCH (x);
+
 SELECT x MATCH (x)->(y);
+
 SELECT x MATCH (x)->(y), (y)->(x);
+
 SELECT x MATCH (x)-[e]>(y)-[p]>(x);
+
 SELECT x MATCH (x)->(y), (y)->(k), (y)->(p);
+
 SELECT x MATCH (x)-[e]>(y), (x)-[r]>(p)-[t]>(z)-[o]>(y);
- 
+
+SELECT x MATCH (x)<[e]-(y), (x)<[p]-(z); 
 
 
 
