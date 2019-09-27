@@ -85,10 +85,9 @@ namespace QueryEngine
                 c= (Console.ReadLine());
                 if (c[0] != 'y') break;
                 Console.Clear();
+
             }
         }
-
-
 
         static void Main(string[] args)
         {
