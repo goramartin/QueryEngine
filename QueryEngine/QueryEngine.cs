@@ -98,6 +98,8 @@ namespace QueryEngine
             catch (Exception e )
             {
                 Console.WriteLine( e.Message);
+                Console.ReadLine();
+                Console.ReadLine();
             }
 
             //TestClass.Run();
