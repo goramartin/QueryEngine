@@ -93,11 +93,11 @@ Types of edges:
 | -      | Anonymous any direction edge       |
 | -> | Anonymous out direction edge     |
 |  <-  | Anonymous in direction edge         |
-|  -[e]>  | Defined out direction edge with name e       |
-|  <[e]-  | Defined in direction edge with name e        |
+|  -[e]->  | Defined out direction edge with name e       |
+|  <-[e]-  | Defined in direction edge with name e        |
 |  -[e]-  | Defined any direction edge with name e        |
-|  -[:BasicEdge]>  | Anonymous edge with defined type        |
-|  -[e:BasicEdge]>  | Defined edge with defined type        |
+|  -[:BasicEdge]->  | Anonymous edge with defined type        |
+|  -[e:BasicEdge]->  | Defined edge with defined type        |
 
 
 Every vertex is enveloped in () and every non-anonymous edge is enveloped in []. Variables can repeat, however edge and vertex cannot have the same name. Also once defined variable, the type cannot change in next repetition of variable. When repeating variable with defined type, the type must be included in every occurence.
@@ -125,13 +125,13 @@ SELECT x MATCH (x)->(y);
 
 SELECT x MATCH (x)->(y), (y)->(x);
 
-SELECT x MATCH (x)-[e]>(y)-[p]>(x);
+SELECT x MATCH (x)-[e]->(y)-[p]->(x);
 
 SELECT x MATCH (x)->(y), (y)->(k), (y)->(p);
 
-SELECT x MATCH (x)-[e]>(y), (x)-[r]>(p)-[t]>(z)-[o]>(y);
+SELECT x MATCH (x)-[e]->(y), (x)-[r]->(p)-[t]->(z)-[o]->(y);
 
-SELECT x MATCH (x)<[e]-(y), (x)<[p]-(z); 
+SELECT x MATCH (x)<-[e]-(y), (x)<-[p]-(z); 
 
 
 
