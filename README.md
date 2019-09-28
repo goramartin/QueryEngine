@@ -72,6 +72,7 @@ Every variable/asterix must be separated by comma, and accessing properties of a
 
 ### Match syntax
 Match expression expects pattern to match. There can be more patterns separated by comma.
+Variables must consist of alpha characters, and the names are case sensitive.
 
 Types of vertices:
 
@@ -114,7 +115,9 @@ Every vertex is enveloped in () and every non-anonymous edge is enveloped in [].
 3 Every query must end with a semicolon ";".
 
 
-## Example queries.
+## Example queries for test graph.
+
+![](images/testgraph.png)
 
 SELECT x MATCH (x);
 
