@@ -129,6 +129,7 @@ namespace QueryEngine
 
         static public void ResetPosition() { position = 0; }
         static private void IncrementPosition() { position++; }
+        static private void IncrementPositionBy(int p) { position += p; }
 
         static public SelectNode ParseSelectExpr(List<Token> tokens)
         {
@@ -283,6 +284,7 @@ namespace QueryEngine
 
             return edgeNode;
         }
+      
         static private Node ParseNewPatternExpr(List<Token> tokens)
         {
             if (!CheckToken(position, Token.TokenType.Comma, tokens)) return null;
@@ -297,14 +299,44 @@ namespace QueryEngine
         }
 
 
+        static private Node ParseAnonymousEdge(List<Token> tokens)
+        {
+            EdgeNode edgeNode = new EdgeNode();
+
+            if (CheckOutEdgeHead(position, tokens))
+            {
+                edgeNode.SetEdgeType(EdgeType.OutEdge);
+                IncrementPositionBy(2);
+            }
+            else if (CheckAnyEdgeHead(position, tokens) &&
+                    (!CheckToken(position + 1, Token.TokenType.LeftBrace, tokens)))
+            {
+                edgeNode.SetEdgeType(EdgeType.AnyEdge);
+                IncrementPosition();
+            }
+            else if (CheckInEdgeHead(position, tokens) &&
+                    !CheckToken(position + 2, Token.TokenType.LeftBrace, tokens))
+            {
+                edgeNode.SetEdgeType(EdgeType.InEdge);
+                IncrementPositionBy(2);
+            }
+
+            if (edgeNode.GetEdgeType() != default(EdgeType)) return edgeNode;
+            else return null;
+
+        }
         static private Node ParseEdge(List<Token> tokens)
         {
             EdgeNode edgeNode = new EdgeNode();
             //Define type of edge.  in <...-, out -...>, any -...-
             EdgeType type = DefineEdgeType(tokens);
             if (type == EdgeType.NotEdge) return null;
-            else edgeNode.SetType(type);
-            IncrementPosition();
+            else
+            {
+                edgeNode.SetEdgeType(type);
+                if (type == EdgeType.InEdge) IncrementPositionBy(2);
+                else IncrementPosition();
+            }
 
             // [
             if (CheckToken(position, Token.TokenType.LeftBrace, tokens)) IncrementPosition();
@@ -319,70 +351,111 @@ namespace QueryEngine
             if (CheckToken(position, Token.TokenType.RightBrace, tokens)) IncrementPosition();
             else throw new ArgumentException("ParseEdge, expected rightbrace.");
 
-            //Skip end character of edge.  >,-
-            IncrementPosition();
+
+            //Skip end character of edge.  ->,-
+            if (type == EdgeType.OutEdge) IncrementPositionBy(2);
+            else IncrementPosition();
 
             return edgeNode;
         }
-        static private Node ParseAnonymousEdge(List<Token> tokens)
-        {
-            EdgeNode edgeNode = new EdgeNode();
-            bool found = false;
-
-            if (CheckToken(position, Token.TokenType.Dash, tokens) &&
-                    (CheckToken(position + 1, Token.TokenType.Greater, tokens)))
-            {
-                edgeNode.SetType(EdgeType.OutEdge);
-                found = true;
-                position += 2;
-            }
-            else if (CheckToken(position, Token.TokenType.Dash, tokens) &&
-                    (!CheckToken(position + 1, Token.TokenType.LeftBrace, tokens)))
-            {
-                edgeNode.SetType(EdgeType.AnyEdge);
-                found = true;
-                position += 1;
-            }
-            else if (CheckToken(position, Token.TokenType.Less, tokens) &&
-                    (CheckToken(position + 1, Token.TokenType.Dash, tokens)))
-            {
-                edgeNode.SetType(EdgeType.InEdge);
-                found = true;
-                position += 2;
-            }
-
-            if (found) return edgeNode;
-            else return null;
-
-        }
         static private EdgeType DefineEdgeType(List<Token> tokens)
         {
-            //Any edge -[..]-
-            if (PredictEgeType(Token.TokenType.Dash, Token.TokenType.Dash, tokens))
-                return EdgeType.AnyEdge;
-            //In edge <[..]-
-            else if (PredictEgeType(Token.TokenType.Less, Token.TokenType.Dash, tokens))
-                return EdgeType.InEdge;
-            //Out edge -[..]>
-            else if (PredictEgeType(Token.TokenType.Dash, Token.TokenType.Greater, tokens))
+            //The order of checks matter. We first must refute out edge,
+            //else there could be any edge instead of out edge.
+            //Out edge -[..]->
+            if (PredictEdgeTypeOut(tokens))
                 return EdgeType.OutEdge;
+            //In edge <-[..]-
+            else if (PredictEdgeTypeIn(tokens))
+                return EdgeType.InEdge;
+            //Any edge -[..]-
+            else if (PredictEgeTypeAny(tokens))
+                return EdgeType.AnyEdge;
             else return EdgeType.NotEdge;
         }
-        static private bool PredictEgeType(Token.TokenType t1, Token.TokenType t2, List<Token> tokens)
-        {
-            // -[e]>
-            int predictionOne = position + 4;
-            // -[:prop]>
-            int predictionTwo = position + 5;
-            // -[e:x]>
-            int predictionThree = position + 6;
-            if (CheckToken(position, t1, tokens) &&
-                (CheckToken(predictionOne, t2, tokens) ||
-                 CheckToken(predictionTwo, t2, tokens) ||
-                 CheckToken(predictionThree, t2, tokens))) return true;
-            else return false;
 
+        static private bool PredictEgeTypeAny(List<Token> tokens)
+        {
+            // -[e]-
+            int pOne = position + 4;
+            // -[:prop]-
+            int pTwo = position + 5;
+            // -[e:x]-
+            int pThree = position + 6;
+            if (CheckAnyEdgeHead(position, tokens) && CheckDashForward(pOne, pTwo, pThree, tokens))
+
+                return true;
+            else return false;
         }
+
+        static private bool PredictEdgeTypeIn(List<Token> tokens)
+        {
+            // <-[e]-
+            int pOne = position + 5;
+            // <-[:prop]-
+            int pTwo = position + 6;
+            // <-[e:x]-
+            int pThree = position + 7;
+            if (CheckInEdgeHead(position, tokens) && CheckDashForward(pOne, pTwo, pThree, tokens))
+                return true;
+            else return false;
+        }
+
+        static private bool PredictEdgeTypeOut(List<Token> tokens)
+        {
+            // -[e]->
+            int pOne = position + 4;
+            // -[:prop]->
+            int pTwo = position + 5;
+            // -[e:x]->
+            int pThree = position + 6;
+            if (CheckAnyEdgeHead(position, tokens) && CheckOutEdgeHeadForward(pOne, pTwo, pThree, tokens))
+                return true;
+            else return false;
+        }
+
+        static private bool CheckDashForward(int first, int second, int third, List<Token> tokens)
+        {
+            if (CheckToken(first, Token.TokenType.Dash, tokens) ||
+             CheckToken(second, Token.TokenType.Dash, tokens) ||
+             CheckToken(third, Token.TokenType.Dash, tokens)) return true;
+            else return false;
+        }
+
+        static private bool CheckOutEdgeHeadForward(int first, int second, int third, List<Token> tokens)
+        {
+            if (CheckOutEdgeHead(first, tokens) ||
+                CheckOutEdgeHead(second, tokens) ||
+                (CheckOutEdgeHead(third, tokens)))
+                return true;
+            else return false;
+        }
+
+        static private bool CheckInEdgeHead(int p, List<Token> tokens)
+        {
+            if (CheckToken(p, Token.TokenType.Less, tokens) &&
+                    CheckToken(p + 1, Token.TokenType.Dash, tokens))
+                return true;
+            else return false;
+        }
+
+        static private bool CheckOutEdgeHead(int p, List<Token> tokens)
+        {
+            if (CheckToken(p, Token.TokenType.Dash, tokens) &&
+                     (CheckToken(p + 1, Token.TokenType.Greater, tokens)))
+                return true;
+            else return false;
+        }
+
+        static private bool CheckAnyEdgeHead(int p, List<Token> tokens)
+        {
+            if (CheckToken(p, Token.TokenType.Dash, tokens))
+                return true;
+            else return false;
+        }
+
+
+
 
         //Check for token on position given.
         static private bool CheckToken(int p, Token.TokenType type, List<Token> tokens)
@@ -424,7 +497,7 @@ namespace QueryEngine
             addingName = true;
         }
 
-        public List<SelectVariable> GetResult() 
+        public List<SelectVariable> GetResult()
         { return this.result; }
         public void Visit(SelectNode node)
         {
@@ -518,11 +591,11 @@ namespace QueryEngine
             this.readingVertex = true;
             this.patternCount = 0;
         }
-       
-        
+
+
         public List<List<BaseMatch>> GetResult()
         { return this.result; }
-        
+
         public void Visit(MatchNode node)
         {
             //Create new pattern and start its parsing.
@@ -531,7 +604,7 @@ namespace QueryEngine
 
             for (int i = 0; i < result.Count; i++)
             {
-                if (result[i].Count <= 0) 
+                if (result[i].Count <= 0)
                     throw new ArgumentException("MatchVisitor, failed to parse match expr.");
             }
         }
@@ -542,7 +615,7 @@ namespace QueryEngine
             VertexMatch vm = new VertexMatch();
             currentPattern.Add(vm);
             if (node.variable != null) node.variable.Accept(this);
-            if (node.next != null ) node.next.Accept(this);
+            if (node.next != null) node.next.Accept(this);
         }
 
         public void Visit(EdgeNode node)
@@ -552,7 +625,7 @@ namespace QueryEngine
             em.SetEdgeType(node.GetEdgeType());
             currentPattern.Add(em);
             if (node.variable != null) node.variable.Accept(this);
-            if (node.next == null) 
+            if (node.next == null)
                 throw new ArgumentException("MatchVisitor, missing end vertex from edge.");
             else node.next.Accept(this);
 
@@ -560,18 +633,18 @@ namespace QueryEngine
 
         public void Visit(VariableNode node)
         {
-          readingName = true;
-          //It is not anonnymous field.
-          if (node.name != null)
-          {
+            readingName = true;
+            //It is not anonnymous field.
+            if (node.name != null)
+            {
                 node.name.Accept(this);
-          }
-          //It has set type.
-          if (node.propName != null)
-          {
+            }
+            //It has set type.
+            if (node.propName != null)
+            {
                 readingName = false;
                 node.propName.Accept(this);
-          } 
+            }
 
         }
 
@@ -599,12 +672,12 @@ namespace QueryEngine
             }
         }
 
-        private void ProcessType(int p ,IdentifierNode node, Dictionary<string,Table> d)
+        private void ProcessType(int p, IdentifierNode node, Dictionary<string, Table> d)
         {
             //Try find the table of the variable, it has to be always valid table name.
-                if (!d.TryGetValue(node.value, out Table table))
-                    throw new ArgumentException("MatchVisitor, could not parse Table name.");
-                else currentPattern[p].SetType(table);
+            if (!d.TryGetValue(node.value, out Table table))
+                throw new ArgumentException("MatchVisitor, could not parse Table name.");
+            else currentPattern[p].SetType(table);
         }
 
         private int GetAbsolutePosition()
@@ -642,16 +715,16 @@ namespace QueryEngine
     {
         public abstract void Accept<T>(IVisitor<T> visitor);
     }
-   
-    abstract class QueryNode :Node
+
+    abstract class QueryNode : Node
     {
-        public  Node next;
+        public Node next;
         public void AddNext(Node next)
         {
             this.next = next;
         }
     }
-  
+
     //Only vertices and edges inherit from this class.
     abstract class CommomMatchNode : QueryNode
     {
@@ -684,15 +757,15 @@ namespace QueryEngine
     }
 
 
-    enum EdgeType{ InEdge,OutEdge,AnyEdge, NotEdge};
+    enum EdgeType { NotEdge, InEdge, OutEdge, AnyEdge };
     class EdgeNode : CommomMatchNode
     {
         EdgeType type;
         public override void Accept<T>(IVisitor<T> visitor)
         {
-             visitor.Visit(this);
+            visitor.Visit(this);
         }
-        public void SetType(EdgeType type)
+        public void SetEdgeType(EdgeType type)
         {
             this.type = type;
         }
@@ -706,7 +779,7 @@ namespace QueryEngine
     {
         public override void Accept<T>(IVisitor<T> visitor)
         {
-           visitor.Visit(this);
+            visitor.Visit(this);
         }
     }
     class MatchDivider : QueryNode
@@ -719,8 +792,8 @@ namespace QueryEngine
 
     class VariableNode : QueryNode
     {
-       public  Node name;
-       public  Node propName;
+        public Node name;
+        public Node propName;
 
         public void AddName(Node n)
         {
@@ -743,7 +816,7 @@ namespace QueryEngine
 
         public override void Accept<T>(IVisitor<T> visitor)
         {
-           visitor.Visit(this);
+            visitor.Visit(this);
         }
     }
     class IdentifierNode : Node
@@ -756,7 +829,7 @@ namespace QueryEngine
 
         public override void Accept<T>(IVisitor<T> visitor)
         {
-             visitor.Visit(this);
+            visitor.Visit(this);
         }
     }
 }

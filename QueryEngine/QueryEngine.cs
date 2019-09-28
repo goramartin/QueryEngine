@@ -93,14 +93,14 @@ namespace QueryEngine
         {
             try
             {
-               Run(args, Console.In, Console.Out);
+              // Run(args, Console.In, Console.Out);
             }
             catch (Exception e )
             {
                 Console.WriteLine( e.Message);
             }
 
-            //TestClass.Run();
+            TestClass.Run();
             
         }
 

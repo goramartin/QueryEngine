@@ -14,8 +14,8 @@ namespace QueryEngine
 
 
  
-             Graph g = new Graph();
-            g.LoadNodeTables("VertexTypes.txt");
+           Graph g = new Graph();
+           g.LoadNodeTables("VertexTypes.txt");
            g.LoadEdgeTables("EdgeTypes.txt");
            g.LoadEdgeList("NodesEdges.txt");
 
@@ -25,6 +25,7 @@ namespace QueryEngine
            //just for testing
            ///////////////////////////////////////
 
+           Console.ReadLine();
 
            Scope scope = new Scope();
            List<Token> tokens = Tokenizer.Tokenize(Console.In);
@@ -36,8 +37,12 @@ namespace QueryEngine
            }
 
 
+
+
            SelectNode d = Parser.ParseSelectExpr(tokens);
            MatchNode s = Parser.ParseMatchExpr(tokens);
+
+
 
            SelectVisitor selectVisitor = new SelectVisitor();
            MatchVisitor matchVisitor = new MatchVisitor(scope,g.NodeTables, g.EdgeTables);
@@ -49,7 +54,6 @@ namespace QueryEngine
 
            Query q = new Query(new SelectObject(k), new MatchObject(l), scope);
            Console.WriteLine(q.CheckCorrectnessOfQuery());
-           Console.ReadLine();
 
 
 
