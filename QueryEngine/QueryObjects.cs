@@ -62,7 +62,12 @@ namespace QueryEngine
         
     }
 
-    //Scope represents scope of variable in the whole query.
+    
+    
+    /// <summary>
+    /// Scope represents scope of variable in the whole query.///
+    /// 
+    /// </summary>
     class Scope
     {
         private Dictionary<string, int > scopeVar;
@@ -72,7 +77,10 @@ namespace QueryEngine
     }
 
 
-    //Select represents list of variables to print.
+    /// <summary>
+    /// Select represents list of variables to print.
+    /// 
+    /// </summary>
     class SelectObject
    {
         private List<SelectVariable> selectVariables;
@@ -421,4 +429,66 @@ namespace QueryEngine
         }
 
     }
+
+
+    /// <summary>
+    /// Class used to shallow parsing match expression.
+    /// Pattern contains single nodes with their corresponding attributes collected when parsed.
+    /// Connections represents dictionary of other Parsed Patterns, where index is the index of pattern and string
+    /// is variable that the two patterns are connected by.
+    /// </summary>
+    class ParsedPattern
+    {
+        public List<ParsedPatternNode> Pattern;
+        public Dictionary<int, string> Connections;
+
+        public ParsedPattern()
+        {
+            this.Pattern = new List<ParsedPatternNode>();
+            this.Connections = new Dictionary<int, string>();
+        }
+
+        public void AddParsedPatternNode(ParsedPatternNode node)
+        {
+            this.Pattern.Add(node);
+        }
+
+        public int GetCount() => this.Pattern.Count;
+
+        public ParsedPatternNode GetLastPasrsedPatternNode() => this.Pattern[this.Pattern.Count - 1];
+
+    }
+
+
+    /// <summary>
+    /// Represents single Node when parsing match expression.
+    /// </summary>
+    class ParsedPatternNode
+    {
+        public bool isAnonymous;
+        public bool isVertex;
+        public Table table;
+        public EdgeType edgeType;
+        public string name;
+
+        public ParsedPatternNode()
+        {
+            this.table = null;
+            this.name = null;
+            this.isVertex = true;
+            this.isAnonymous = true;
+        }
+
+        public bool IsAnonymous() => this.isAnonymous;
+        public bool IsVertex() => this.isVertex;
+        public Table GetTable() => this.table;
+        public EdgeType GetEdgeType() => this.edgeType;
+        public string GetName() => this.name;
+
+
+    }
+
+
+
+
 }

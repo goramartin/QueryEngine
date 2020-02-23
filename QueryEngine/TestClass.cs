@@ -17,16 +17,15 @@ namespace QueryEngine
            Graph g = new Graph();
            g.LoadNodeTables("NodeTypes.txt");
            g.LoadEdgeTables("EdgeTypes.txt");
-            g.LoadVertices("Nodes.txt");
-            g.LoadEdges("Edges.txt");
+           g.LoadVertices("Nodes.txt");
+           g.LoadEdges("Edges.txt");
 
 
            //just for testing
            ///////////////////////////////////////
-           /*
-           Console.ReadLine();
+            
 
-           Scope scope = new Scope();
+
            List<Token> tokens = Tokenizer.Tokenize(Console.In);
 
            foreach (var item in tokens)
@@ -43,12 +42,16 @@ namespace QueryEngine
 
 
            SelectVisitor selectVisitor = new SelectVisitor();
-           MatchVisitor matchVisitor = new MatchVisitor(scope,g.NodeTables, g.EdgeTables);
+           MatchVisitor matchVisitor = new MatchVisitor(g.NodeTables, g.EdgeTables);
 
            d.Accept(selectVisitor);
            var k = selectVisitor.GetResult();
            s.Accept(matchVisitor);
            var l = matchVisitor.GetResult();
+
+            Console.ReadLine();
+
+           /*
 
            Query q = new Query(new SelectObject(k), new MatchObject(l), scope);
            Console.WriteLine(q.CheckCorrectnessOfQuery());

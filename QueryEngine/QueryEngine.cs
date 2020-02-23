@@ -44,11 +44,12 @@ namespace QueryEngine
         private static MatchObject CreateMatchObject(List<Token> tokens, Scope s, 
             Dictionary<string, Table> v, Dictionary<string, Table> e)
         {
-            MatchNode matchNode = Parser.ParseMatchExpr(tokens);
-            MatchVisitor visitor = new MatchVisitor(s,v,e);
-            matchNode.Accept(visitor);
-            MatchObject mo = new MatchObject(visitor.GetResult());
-            return mo;
+            //  MatchNode matchNode = Parser.ParseMatchExpr(tokens);
+            //  MatchVisitor visitor = new MatchVisitor(s,v,e);
+            //  matchNode.Accept(visitor);
+            //  MatchObject mo = new MatchObject(visitor.GetResult());
+            //  return mo;
+            return null;
         }
 
         private static Graph CreateGraph(string[] args)
