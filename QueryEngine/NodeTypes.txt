@@ -1,0 +1,11 @@
+﻿[
+{
+"Kind": "Person"
+},
+{
+"Kind": "Friend"
+}
+]
+
+
+

@@ -54,7 +54,7 @@ namespace QueryEngine
         private static Graph CreateGraph(string[] args)
         {
             Graph g = new Graph();
-            g.LoadNodeTables("VertexTypes.txt");
+            g.LoadNodeTables("NodeTypes.txt");
             g.LoadEdgeTables("EdgeTypes.txt");
             g.LoadVertices("Nodes.txt");
             g.LoadEdges("Edges.txt");
