@@ -13,8 +13,6 @@
  * 
  */
 
-
-
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -1105,6 +1103,9 @@ namespace QueryEngine
         }
     }
 
+
+
+
     /// <summary>
     /// Class used to shallow parsing match expression.
     /// Pattern contains single nodes with their corresponding attributes collected when parsed.
@@ -1136,6 +1137,7 @@ namespace QueryEngine
 
     /// <summary>
     /// Represents single Node when parsing match expression.
+    /// There is no need to create another type just for edge type as those will be created later.
     /// </summary>
     class ParsedPatternNode
     {
@@ -1159,7 +1161,21 @@ namespace QueryEngine
         public EdgeType GetEdgeType() => this.edgeType;
         public string GetName() => this.name;
 
+        public override bool Equals(object obj)
+        {
+            if (obj is ParsedPatternNode)
+            {
+                var o = obj as ParsedPatternNode;
 
+                if (this.name != o.name) return false;
+                else if (this.isAnonymous != o.isAnonymous) return false;
+                else if (this.isVertex != o.isVertex) return false;
+                else if (this.table.IRI != o.table.IRI) return false;
+                else if (this.edgeType != o.edgeType) return false;
+                return true;
+            }
+            return false;
+        }
     }
 }
 

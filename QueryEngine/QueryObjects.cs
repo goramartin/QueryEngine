@@ -10,9 +10,9 @@ namespace QueryEngine
     //Query represents query information, carrying it in each of the query main words.
     class Query
     {
+        Scope scope;
         SelectObject select;
         MatchObject match;
-        Scope scope;
 
         public Query(SelectObject s, MatchObject m, Scope scope)
         {
@@ -23,6 +23,13 @@ namespace QueryEngine
 
         public List<List<BaseMatch>> GetMatchPattern() { return this.match.GetPattern(); }
 
+
+
+
+        /// <summary>
+        /// ////////// NOW WILL BE DONE IN SELECT OBJECT
+        /// </summary>
+        /// <returns></returns>
         //Check if variables in select correspond to variables in scope
         public bool CheckCorrectnessOfQuery()
         {
@@ -43,6 +50,14 @@ namespace QueryEngine
             }
             return CheckCorrectnessOfPatternTypes(pattern);
         } 
+
+        
+        
+        /// <summary>
+        /// ///////// NOW WILL BE DONE IN MATCHOBJECT
+        /// </summary>
+        /// <param name="pattern"></param>
+        /// <returns></returns>
         //Check whether in the pattern the repeating variables are same.
         private bool CheckCorrectnessOfPatternTypes(List<List<BaseMatch>> pattern)
         {
@@ -65,27 +80,69 @@ namespace QueryEngine
     
     
     /// <summary>
-    /// Scope represents scope of variable in the whole query.///
+    /// Scope represents scope of variables in the whole query during pattern matching.
+    /// When the Pattern is flattned the integer value that resides on given variable name
+    /// corresponds to the index in the flattened pattern.
+    /// That is done because we need to retrieve the variable from the matched elements from within the flattened pattern.
     /// 
+    /// Each variable is inserted only once despite possible multiple occurences of the same variable.
+    /// The main purpose of the scope is to obtain Elements that is the repetition does not change the desired value.
     /// </summary>
     class Scope
     {
         private Dictionary<string, int > scopeVar;
+
         public Scope(Dictionary<string,int> sv)=> this.scopeVar = sv;
         public Scope() => this.scopeVar = new Dictionary<string, int>();
+
         public Dictionary<string, int> GetScopeVariables() => this.scopeVar;
+
+        /// <summary>
+        /// Adds variable to the dictionary.
+        /// </summary>
+        /// <param name="varName"> Name of variable to insert </param>
+        /// <param name="position"> Position in flattened pattern </param>
+        public void AddVariable( string varName, int position) 
+        {
+            if (this.scopeVar.ContainsKey(varName)) throw new ArgumentException($"{this.GetType()} Variable is already in the Score.");
+            else this.scopeVar.Add(varName, position);
+            
+        }
+
+        /// <summary>
+        /// Returns positon of variable based on the name of the variable.
+        /// </summary>
+        /// <param name="name"> Variable to be searched for in Dictionary. </param>
+        /// <returns> Position of variable in flattened pattern </returns>
+        public int GetVariablePosition(string name)
+        {
+            if (this.scopeVar.TryGetValue(name, out int position)) return position;
+            else return -1;
+        }
+
     }
 
 
     /// <summary>
-    /// Select represents list of variables to print.
-    /// 
+    /// Select represents list of variables to be printed.
+    /// List of select variables contains names and proprty names to be printed from the result.
     /// </summary>
     class SelectObject
    {
         private List<SelectVariable> selectVariables;
         public SelectObject(List<SelectVariable> sv) => this.selectVariables = sv;
         public List<SelectVariable> GetSelectVariables() => this.selectVariables;
+
+        // to do
+        public void CheckCorrectnessOfSelect()
+        {
+
+
+
+
+
+
+        }
    }
     class SelectVariable
     {
@@ -114,15 +171,106 @@ namespace QueryEngine
 
 
 
-
-    //Match represents patter to match in main match algorithm.
+    /// <summary>
+    /// Match represents pattern to match in main match algorithm also it checks th correctness of the pattern when creating it.
+    /// The pattern is created from List of Parsed Patterns passed from Visitor that processes Match expression.
+    /// </summary>
     class MatchObject
-   {
+    {
         private List<List<BaseMatch>> pattern;
-        public MatchObject(List<List<BaseMatch>> p) => this.pattern= p;
-        public List<List<BaseMatch>> GetPattern() => this.pattern;
 
-   }
+        public MatchObject() { this.pattern = new List<List<BaseMatch>>(); }
+
+
+        //to do
+
+        /// <summary>
+        /// Creates pattern from Parsed Pattern made by match visitor, also creates scope for variables
+        /// during pattern matching.
+        /// </summary>
+        /// <param name="parsedPatterns"></param>
+        /// <param name="scope"></param>
+        public void CreatePattern(List<ParsedPattern> parsedPatterns, Scope scope)
+        {
+            CheckCorrectness(parsedPatterns);
+            FillConnections(parsedPatterns);
+
+
+
+
+
+
+
+        }
+
+
+        // to do
+
+        /// <summary>
+        /// Fills connection dictionaries that represent connection between other patterns and on which variable they connects.
+        
+        /// </summary>
+        /// <param name="parsedPatterns"> Parser Pattern from MatchVisitor</param>
+        private void FillConnections(List<ParsedPattern> parsedPatterns)
+        {
+            for (int i = 0; i < parsedPatterns.Count; i++)
+            {
+                for (int j = i+1; j < parsedPatterns.Count; j++)
+                {
+
+
+
+
+
+
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Throws error when the given pattern is fault.
+        /// Fault pattern contains one of: No variables, Discrepant variable definitions
+        /// discrepant type definitions
+        /// Correctness is checked only against the first appearance of the variable.
+        /// </summary>
+        /// <param name="parsedPatterns"></param>
+        private void CheckCorrectness(List<ParsedPattern> parsedPatterns)
+        {
+            Dictionary<string, ParsedPatternNode> tmpDict = new Dictionary<string, ParsedPatternNode>();
+            for (int i = 0; i < parsedPatterns.Count; i++)
+            {
+                var tmpPattern = parsedPatterns[i].Pattern;
+                for (int j = 0; j < tmpPattern.Count; j++)
+                {
+                    string name = tmpPattern[j].GetName();
+                    // Anonymous variables are skipped.
+                    if (name == null) continue;
+                    // Try to obtain variable with the same name, if it is missing insert it to dictionary.
+                    if (!tmpDict.TryGetValue(name, out ParsedPatternNode node)) tmpDict.Add(name, tmpPattern[j]);
+                    else
+                    {   // Compare the two variables with the same name.
+                        if (!node.Equals(tmpPattern[j])) throw new ArgumentException($"{this.GetType()} Variables from Match expr are not matching.");
+                        else continue;
+                    }
+                }
+            }
+            // Check if at least one variable was found.
+            if (tmpDict.Count == 0) throw new ArgumentException($"{this.GetType()} No given variable in the query.");
+        }
+
+        public List<List<BaseMatch>> GetPattern() => this.pattern;
+    }
+
+
+
+
+
+
+
+
+
+
 
     interface IPatternMatcher
     {
@@ -309,6 +457,10 @@ namespace QueryEngine
         }
     }
 
+
+
+
+
     //Class representing single step of pattern to match.
     //Method apply returns true if the element can be added to final result.
     abstract class BaseMatch
@@ -429,66 +581,5 @@ namespace QueryEngine
         }
 
     }
-
-
-    /// <summary>
-    /// Class used to shallow parsing match expression.
-    /// Pattern contains single nodes with their corresponding attributes collected when parsed.
-    /// Connections represents dictionary of other Parsed Patterns, where index is the index of pattern and string
-    /// is variable that the two patterns are connected by.
-    /// </summary>
-    class ParsedPattern
-    {
-        public List<ParsedPatternNode> Pattern;
-        public Dictionary<int, string> Connections;
-
-        public ParsedPattern()
-        {
-            this.Pattern = new List<ParsedPatternNode>();
-            this.Connections = new Dictionary<int, string>();
-        }
-
-        public void AddParsedPatternNode(ParsedPatternNode node)
-        {
-            this.Pattern.Add(node);
-        }
-
-        public int GetCount() => this.Pattern.Count;
-
-        public ParsedPatternNode GetLastPasrsedPatternNode() => this.Pattern[this.Pattern.Count - 1];
-
-    }
-
-
-    /// <summary>
-    /// Represents single Node when parsing match expression.
-    /// </summary>
-    class ParsedPatternNode
-    {
-        public bool isAnonymous;
-        public bool isVertex;
-        public Table table;
-        public EdgeType edgeType;
-        public string name;
-
-        public ParsedPatternNode()
-        {
-            this.table = null;
-            this.name = null;
-            this.isVertex = true;
-            this.isAnonymous = true;
-        }
-
-        public bool IsAnonymous() => this.isAnonymous;
-        public bool IsVertex() => this.isVertex;
-        public Table GetTable() => this.table;
-        public EdgeType GetEdgeType() => this.edgeType;
-        public string GetName() => this.name;
-
-
-    }
-
-
-
 
 }
