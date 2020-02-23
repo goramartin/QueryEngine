@@ -1,17 +1,32 @@
-﻿using System;
+﻿
+/**
+ * File includes definition of tables and property types.
+ * Each node has a pointer to a type, that is to say, a table.
+ * Each table holds all the nodes of the same type.
+ * Table has two lists, one for properties - names lists with values of a single type of a node,
+ * list of IDs, each index is a representation of a node, on that index lies the real ID.
+ * On the same index we will find values of properties of the node in the property lists. 
+ * 
+ * Properties are form from an abstract type Property that is visible from within a table.
+ * Generic properties extend Property, and specialisations are created separately. 
+ * Properties are created with a help of an Activator class based on a passed name.
+ */
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
 
 namespace QueryEngine
 {
-    /// <summary>
-    /// Class representing single node type.
-    /// Encompasses table of properties pertaining to the type. 
-    /// List IDs consists of added nodes into the table. Values of the node we can find on the same position in the properties.
-    /// </summary>
+     /// <summary>
+    // Class representing single node type.
+    // Encompasses table of properties pertaining to the type. 
+    // List IDs consists of added nodes into the table. Values of the node we can find 
+    // on the same position in the properties.
+     /// </summary>
     class Table
     {
+        // Name of the table (type of node)
         private string tableIri;
         public string IRI 
         {
@@ -19,7 +34,10 @@ namespace QueryEngine
             protected set => this.tableIri=value; 
         }
 
+        // Properties pertaining to a table.
         public List<Property> properties;
+        
+        // Represents nodes inside a table. An index represents also an index inside the property lists. 
         public List<int> IDs;
 
         public Table(string tableName)
@@ -36,8 +54,13 @@ namespace QueryEngine
 
         public int GetPropertyCount() { return this.properties.Count;  }
 
+        //TODO check if the id is there.
         public void AddID(int id) { this.IDs.Add(id); }
 
+        /// <summary>
+        /// Checks whether a given property name is set on a table.
+        /// </summary>
+        /// <param name="iri">Property about to be searched for.</param>
         public bool ContainsProperty(string iri)
         {
             for (int i = 0; i < properties.Count; i++)
@@ -46,6 +69,12 @@ namespace QueryEngine
             }
             return false;
         }
+
+        /// <summary>
+        /// Adds new property into a table.
+        /// Throws when the property is already inside.
+        /// </summary>
+        /// <param name="newProp">Property to be added into a table.</param>
         public void AddNewProperty(Property newProp)
         {
             if (properties == null || newProp == null) 
@@ -60,6 +89,11 @@ namespace QueryEngine
         }
     }
 
+
+    /// <summary>
+    /// Abstract property, holds only id of a property (name).
+    /// Its functions are visible from a table.
+    /// </summary>
     abstract class Property
     {
         private string propiri; 
@@ -75,13 +109,17 @@ namespace QueryEngine
         /// Method to insert property value from the string into the property list.
         /// Used when inserting new particular node.
         /// </summary>
-        /// <param name="strProp">Value that will be parsed into the correct formar and inserted into the list.</param>
+        /// <param name="strProp">Value that will be parsed into the correct format and inserted into the list.</param>
         public abstract void ParsePropFromStringToList(string strProp);
 
         public abstract void ClearProperty();
     }
 
-
+    /// <summary>
+    /// Represents typed property of a table.
+    /// We create specialisations based on the type of T.
+    /// Its functions are not visible from a table.
+    /// </summary>
     abstract class Property<T>: Property
     {
         public List<T> propHolder; 
@@ -102,9 +140,6 @@ namespace QueryEngine
             this.propHolder.Clear();
         }
     }
-
-
-
 
 #region PropertySpecialisations
 

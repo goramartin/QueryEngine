@@ -56,7 +56,8 @@ namespace QueryEngine
             Graph g = new Graph();
             g.LoadNodeTables("VertexTypes.txt");
             g.LoadEdgeTables("EdgeTypes.txt");
-            g.LoadEdgeList("NodesEdges.txt");
+            g.LoadVertices("Nodes.txt");
+            g.LoadEdges("Edges.txt");
             return g;
         }
 
@@ -91,7 +92,7 @@ namespace QueryEngine
 
         static void Main(string[] args)
         {
-            try
+           /* try
             {
                Run(args, Console.In, Console.Out);
             }
@@ -101,8 +102,8 @@ namespace QueryEngine
                 Console.ReadLine();
                 Console.ReadLine();
             }
-
-            //TestClass.Run();
+            */
+            TestClass.Run();
             
         }
 

@@ -7,7 +7,9 @@ using System.Threading.Tasks;
 namespace QueryEngine
 {
 
-    //Interface for state oriented processing of incoming words from file.
+    /// <summary>
+    /// Interface for state oriented processing of incoming files.
+    /// </summary>
     interface IProcessor<T>
     {
         bool Finished();
@@ -22,8 +24,10 @@ namespace QueryEngine
         T Create();
     }
 
-    //Class takes reader and processor that proccesses words from reader.
-    //Main purpose is to have a general way to create classes from files.
+    /// <summary>
+    /// Class takes reader and processor that proccesses words from reader.
+    /// Main purpose is to have a general way to create classes from files.
+    /// </summary>
     class CreatorFromFile<T> : ICreator<T>
     {
         IReader reader;
@@ -49,8 +53,9 @@ namespace QueryEngine
 
     }
 
-
-    //Creates distionary/map from data scheme with specific nodes in the graph.
+    /// <summary>
+    /// Creates distionary/map from data scheme with specific nodes in the graph.
+    /// </summary>
     class TableDictProcessor : IProcessor<Dictionary<string, Table>>
     {
         Dictionary<string, Table> dict;
@@ -181,8 +186,9 @@ namespace QueryEngine
         }
 
 
-        //If it is null we finished reading the file.
-        //Else it creates new table with the param name and add it to dictionary.
+        /// <summary>
+        /// Processes name of the table. Call for creating of a table.
+        /// </summary>
         private void ProcessName(string param) 
         {
             this.newTable = new Table(param);
@@ -210,17 +216,18 @@ namespace QueryEngine
             }
         }
 
-
-        //Expected to read name or }
         private void ProcessPropName(string param)
         {
-                this.newPropName = param;
+            this.newPropName = param;
             this.lastState = State.PropName;
-                this.state = State.RightMark;
+            this.state = State.RightMark;
         }
 
-        //Based on the incoming parameter, create new instance of property through PropertyFactory.
-        //Add it to the tables list.
+
+        /// <summary>
+        /// Processes property name.
+        /// Creates new proprty based on type.
+        /// </summary>
         private void ProcessPropType(string param)
         {
             Property newProp = PropertyFactory.CreateProperty(param, this.newPropName);
@@ -232,42 +239,36 @@ namespace QueryEngine
         }
     }
 
-
-
-
-
-    //Creates edge list from data file.
-    //We suppose vertices in datafile are stored based on their id in ascending order.
-    //We suppose edges in datafile are stored based on id of the from vertex in ascending order.
-    //That is to say, having three vertices with ids 1, 2, 3... first all edges are from vertex 1, then edges from vertex 2 etc. 
+    /// <summary>
+    /// Creates edge list from data file.
+    /// We suppose vertices in datafile are stored based on their id in ascending order.
+    /// We suppose edges in datafile are stored based on id of the from vertex in ascending order.
+    /// That is to say, having three vertices with ids 1, 2, 3... first all edges are from vertex 1, then edges from vertex 2 etc. 
+    /// </summary>
     class EdgeListProcessor : IProcessor<EdgeListHolder>
     {
+        EdgeListHolder holder = new EdgeListHolder();
+
         List<Vertex> vertices;
         List<Edge> outEdges;
         List<Edge> inEdges;
-        Dictionary<string, Table> nodeTables;
+        
         Dictionary<string, Table> edgeTables;
         List<Edge>[] incomingEdgesTable;
         
         bool finished;
-        bool readingNodes;
         Edge incomingEdge;
         Edge outEdge;
 
-
-        Vertex vertex;
         enum State { ID, Type, Parameters, EdgeFromID, EdgeToID };
         State state;
         int paramsToReadLeft;
 
-
         public EdgeListProcessor()
         {
-            this.vertices = new List<Vertex>();
             this.outEdges = new List<Edge>();
             this.inEdges = new List<Edge>();
             this.finished = false;
-            this.readingNodes = true;
             this.state = State.ID;
             this.paramsToReadLeft = 0;
         }
@@ -280,7 +281,6 @@ namespace QueryEngine
         public EdgeListHolder GetResult()
         {
             var tmp = new EdgeListHolder();
-            tmp.vertices = this.vertices;
             tmp.outEdges = this.outEdges;
             tmp.inEdges = this.inEdges;
             return tmp;
@@ -288,8 +288,9 @@ namespace QueryEngine
 
         public void PassParameters(params object[] prms)
         {
-            this.nodeTables = (Dictionary<string, Table>)prms[0];
             this.edgeTables = (Dictionary<string, Table>)prms[1];
+            this.vertices = (List<Vertex>)prms[2];
+            InicialiseInEdgesTables();
         }
 
         public void Process(string param)
@@ -298,14 +299,13 @@ namespace QueryEngine
                 switch (state)
                 {
                     case State.ID:
-                        if (this.readingNodes) ProcessNodeID(param); else { ProcessEdgeID(param); }
+                        ProcessEdgeID(param);
                         break;
                     case State.Type:
-                        if (this.readingNodes) ProcessNodeType(param); else { ProcessEdgeType(param); }
+                        ProcessEdgeType(param); 
                         break;
                     case State.Parameters:
-                        if (this.readingNodes) ProcessParams(param, this.vertex.table); 
-                        else { ProcessParams(param, this.outEdge.table); }
+                        ProcessParams(param, this.outEdge.table);
                         break;
                     case State.EdgeFromID:
                         ProcessEdgeFromID(param);
@@ -316,35 +316,6 @@ namespace QueryEngine
                     default:
                        throw new ArgumentException($"{this.GetType()} Expected different state.");
                 }
-        }
-
-        private void ProcessNodeID(string param)
-        {
-            if (param == ":") { 
-                this.readingNodes = false;
-                InicialiseInEdgesTables();
-                return; };
-
-            int id = 0;
-            if (!int.TryParse(param, out id)) 
-                throw new ArgumentException($"{this.GetType()} Reading wrong node ID. ID is not a number.");
-
-            this.vertex = new Vertex();
-            this.vertex.SetPositionInVertices(vertices.Count);
-            this.vertex.AddID(id);
-            this.state = State.Type;
-        }
-
-        private void ProcessNodeType(string param)
-        {
-            Table table;
-            nodeTables.TryGetValue(param, out table);
-            this.vertex.AddTable(table);
-            this.vertex.table.AddID(this.vertex.id);
-                       
-            this.paramsToReadLeft = this.vertex.table.GetPropertyCount();
-            FinishParams();
-           
         }
 
 
@@ -402,7 +373,6 @@ namespace QueryEngine
         //Add the parameter there.
         private void ProcessParams(string param, Table table)
         {
-
             int accessedPropertyPosition = table.GetPropertyCount() - this.paramsToReadLeft;
             table.properties[accessedPropertyPosition].ParsePropFromStringToList(param);
 
@@ -415,8 +385,7 @@ namespace QueryEngine
             //For no more parameters to parse left
             if (this.paramsToReadLeft == 0)
             {
-                if (this.readingNodes) this.vertices.Add(this.vertex);
-                else this.outEdges.Add(this.outEdge);
+                this.outEdges.Add(this.outEdge);
                 this.state = State.ID;
             }
             //continue parsing parameters
@@ -434,6 +403,7 @@ namespace QueryEngine
         }
 
         
+
         //Merge results from inedges tables into one.
         //Set positions for inEdges field in vertices.
         //Set positions for inEdges in their own list.
@@ -452,32 +422,6 @@ namespace QueryEngine
             }
 
             SetPositionsInListforInEdges();
-        }
-
-        //Set count on in/out edges.
-        private void FinalizeVertices()
-        {
-            for (int i = 0; i < vertices.Count; i++)
-            {
-                vertices[i].outEdgesEndPosition = FindEndPositionOfEdges(isOut: true, i);
-                vertices[i].inEdgesEndPosition = FindEndPositionOfEdges(isOut: false, i);
-            }
-        }
-
-        private int FindEndPositionOfEdges(bool isOut, int p)
-        {
-            if ((isOut)&&(!vertices[p].HasOutEdges())) return -1;
-            else if((!isOut)&&(!vertices[p].HasInEdges())) return -1;
-            
-            for (int k = p + 1; k < vertices.Count; k++)
-            {
-                Vertex v = vertices[k];
-                int t = isOut ? v.outEdgesStartPosition : v.inEdgesStartPosition;
-                if (t != -1) return t;
-            }
-
-            if (isOut) return outEdges.Count;
-            else return inEdges.Count;
         }
 
         private void SetPositionsInListforInEdges()
@@ -499,11 +443,140 @@ namespace QueryEngine
             }
         }
 
+        //Set count on in/out edges.
+        private void FinalizeVertices()
+        {
+            for (int i = 0; i < vertices.Count; i++)
+            {
+                vertices[i].outEdgesEndPosition = FindEndPositionOfEdges(isOut: true, i);
+                vertices[i].inEdgesEndPosition = FindEndPositionOfEdges(isOut: false, i);
+            }
+        }
+        private int FindEndPositionOfEdges(bool isOut, int p)
+        {
+            if ((isOut)&&(!vertices[p].HasOutEdges())) return -1;
+            else if((!isOut)&&(!vertices[p].HasInEdges())) return -1;
+            
+            for (int k = p + 1; k < vertices.Count; k++)
+            {
+                Vertex v = vertices[k];
+                int t = isOut ? v.outEdgesStartPosition : v.inEdgesStartPosition;
+                if (t != -1) return t;
+            }
 
-
+            if (isOut) return outEdges.Count;
+            else return inEdges.Count;
+        }
     }
 
 
+    class VerticesListProcessor : IProcessor<List<Vertex>>
+    {
+        List<Vertex> vertices;
+        Dictionary<string, Table> nodeTables;
+        bool finished;
 
+        Vertex vertex;
+        enum State { ID, Type, Parameters};
+        State state;
+        int paramsToReadLeft;
+
+        public VerticesListProcessor()
+        {
+            this.vertices = new List<Vertex>();
+            this.finished = false;
+            this.state = State.ID;
+            this.paramsToReadLeft = 0;
+        }
+
+        public bool Finished()
+        {
+            return this.finished;
+        }
+
+        public List<Vertex> GetResult()
+        {
+            return this.vertices;
+        }
+
+        public void PassParameters(params object[] prms)
+        {
+            this.nodeTables = (Dictionary<string, Table>)prms[0];
+        }
+
+        public void Process(string param)
+        {
+
+            switch (state)
+            {
+                case State.ID:
+                    ProcessNodeID(param);
+                    break;
+                case State.Type:
+                    ProcessNodeType(param);
+                    break;
+                case State.Parameters:
+                    ProcessParams(param, this.vertex.table);
+                    break;
+                default:
+                    throw new ArgumentException($"{this.GetType()} Expected different state.");
+            }
+        }
+
+        private void ProcessNodeID(string param)
+        {
+            if (param == null)
+            {
+                this.finished = true; 
+                return;
+            };
+
+            int id = 0;
+            if (!int.TryParse(param, out id))
+                throw new ArgumentException($"{this.GetType()} Reading wrong node ID. ID is not a number.");
+
+            this.vertex = new Vertex();
+            this.vertex.SetPositionInVertices(vertices.Count);
+            this.vertex.AddID(id);
+            this.state = State.Type;
+        }
+
+        private void ProcessNodeType(string param)
+        {
+            Table table;
+            nodeTables.TryGetValue(param, out table);
+            this.vertex.AddTable(table);
+            this.vertex.table.AddID(this.vertex.id);
+
+            this.paramsToReadLeft = this.vertex.table.GetPropertyCount();
+            FinishParams();
+
+        }
+
+
+        //Get the position of property where adding the parameter.
+        //Add the parameter there.
+        private void ProcessParams(string param, Table table)
+        {
+
+            int accessedPropertyPosition = table.GetPropertyCount() - this.paramsToReadLeft;
+            table.properties[accessedPropertyPosition].ParsePropFromStringToList(param);
+
+            this.paramsToReadLeft--;
+            FinishParams();
+        }
+
+        private void FinishParams()
+        {
+            //For no more parameters to parse left
+            if (this.paramsToReadLeft == 0)
+            {
+                this.vertices.Add(this.vertex);
+                this.state = State.ID;
+            }
+            //continue parsing parameters
+            else this.state = State.Parameters;
+        }
+    }
 
 }

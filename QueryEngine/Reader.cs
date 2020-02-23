@@ -7,7 +7,12 @@ using System.IO;
 
 namespace QueryEngine
 {
-    //must return null when finished reading
+
+     /// <summary>
+    /// Interfaces for reading text files.
+    /// If it is at the end of a file, it returns null.
+    /// Delimeters can be set.
+    /// </summary>
     interface IReader: IDisposable
     {
         string Read();
@@ -27,7 +32,7 @@ namespace QueryEngine
     {
         StringBuilder wordBuilder;
         StreamReader fileReader;
-        char[] delimeters = new char[] { '\r', '\n', '\t', ' ', '"', ',' }; //delimeters between words
+        char[] delimeters = new char[] { '\r', '\n', '\t', ' ', '"', ',' };
         bool end;
 
         public WordReader(string fileName)
@@ -105,6 +110,12 @@ namespace QueryEngine
         }
     }
 
+     /// <summary>
+    /// Class for reading text files.
+    /// Gets one file and pulls each non whitespace character from the file.
+    /// If it is at the end of file, it returns null.
+    /// Delimeters can be set.
+    /// </summary>
     class Reader : IReader
     {
         StringBuilder wordBuilder;

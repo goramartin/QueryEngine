@@ -17,14 +17,14 @@ namespace QueryEngine
            Graph g = new Graph();
            g.LoadNodeTables("VertexTypes.txt");
            g.LoadEdgeTables("EdgeTypes.txt");
-           g.LoadEdgeList("NodesEdges.txt");
-
-
+            //g.LoadData("NodesEdges.txt");
+            g.LoadVertices("Nodes.txt");
+            g.LoadEdges("Edges.txt");
 
 
            //just for testing
            ///////////////////////////////////////
-
+           /*
            Console.ReadLine();
 
            Scope scope = new Scope();
@@ -35,7 +35,6 @@ namespace QueryEngine
               Console.WriteLine(item.type);
               if (item.type == Token.TokenType.Identifier) Console.WriteLine(item.strValue) ;
            }
-
 
 
 
@@ -65,13 +64,15 @@ namespace QueryEngine
 
            Console.ReadLine();
 
+           */
 
 
 
            /////////////
            Console.WriteLine();
            //Display whats inside dictionary of nodes 
-           foreach (var item in g.NodeTables)
+           
+            foreach (var item in g.NodeTables)
            {
                Console.WriteLine("Key:"+item.Key);
                Console.WriteLine("TableIri:"+item.Value.IRI);
@@ -83,15 +84,13 @@ namespace QueryEngine
 
                Console.WriteLine();
            }
-           Console.WriteLine();
-
-
-
+           
 
            /////////////
-
+           Console.WriteLine();
            //Display whats inside dictionary of edges
-           foreach (var item in g.EdgeTables)
+           
+            foreach (var item in g.EdgeTables)
            {
                Console.WriteLine("Key:" + item.Key);
                Console.WriteLine("TableIri:" + item.Value.IRI);
@@ -105,13 +104,11 @@ namespace QueryEngine
            }
            Console.WriteLine() ;
 
-           ///
-           
 
            /////////////
-
            Console.WriteLine("Vertices");
            //Display whats inside vertices
+
            foreach (var item in g.vertices)
            {
                Console.WriteLine("ID:"+item.id);
@@ -124,10 +121,17 @@ namespace QueryEngine
                Console.WriteLine("P:" +item.GetPositionInVertices());
                Console.WriteLine();
            }
-           Console.WriteLine();
-           Console.WriteLine("OutEdges");
-           //displey whats inside edges
-           foreach (var item in g.outEdges)
+
+
+           
+            
+            //////////////
+            Console.WriteLine();
+            Console.WriteLine("OutEdges");
+            //displey whats inside edges
+          
+            
+            foreach (var item in g.outEdges)
            {
                Console.WriteLine("ID:" + item.id);
                Console.WriteLine("TableIRI:" + item.table.IRI);
@@ -146,7 +150,7 @@ namespace QueryEngine
            Console.ReadLine();
            
             #endregion PRINT
-
+            
 
         }
 
