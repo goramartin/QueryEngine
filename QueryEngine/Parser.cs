@@ -1,4 +1,21 @@
-﻿using System;
+﻿
+/**
+ *  This file contains definitions of Tokens, Tokenizers, Parsers and assiciated classes,
+ *  those are... nodes that the Parser uses to create parsing tree and visitors to 
+ *  process the parsing tree.
+ * 
+ * Parsing is done via Deep descend parsing (Top to bottom).
+ * The whole query expression forms a single tree. Each parser method (ParseSelectExpr, ParseMatchExpr...)
+ * parses only the part corresponding to the query word and leaves the internal position of the next parsed token
+ * to the next token after the last token parsed by methods above.
+ * 
+ * Visitors then create structures that are used to create query objects.
+ * 
+ */
+
+
+
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
