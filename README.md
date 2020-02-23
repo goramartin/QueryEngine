@@ -3,7 +3,7 @@ Is a query program for graphs. It gets three files, schemas for edges and vertic
 
 ## Input files
 
-### VertexTypes.txt/EdgeTypes.txt [Json syntax]
+### NodeTypes.txt/EdgeTypes.txt [Json syntax]
 
 They consists only of json array. Inside of the array, there are listed objects. Each object represents one type(table) of a node/an edge.
 Each of the types must include at least one property, that is **Kind** with a value referring to it is name.
@@ -29,18 +29,22 @@ Afterwards, there comes properties of the table. As values pertaining to the pro
 ]
 ```
 
-### NodesEdges.txt
+### Nodes.txt & Edges.txt
 
-File includes particular nodes and edges. First, there must be all nodes and then edges. Nodes and edges are separated with a line only with a double dot. Each line with data consists of:
+Files include particular nodes and edges.
 
-For vertex.     
-ID Type Properties
+Stored data in files:
+
+#### For vertices:
+
+    ID Type Properties
 
 Ids must be sorted in ascending order.
 Properties goes as there are in data scheme.
 
-For edges.      
-ID Type FromVertexID ToVertexID Properties 
+#### For edges:
+
+    ID Type FromVertexID ToVertexID Properties 
 
 The same rule apply except the edges must be sorted according to the vertex IDs. That is, if we have three vertices with ids 1 2 3.
 After double dot we expect edges that starts with FromVertexID 1, then edges with FromVertexID 2 and so on.
@@ -49,10 +53,13 @@ Edges IDs and Vertices IDs do not collerate. There can be edge with id 1 and sim
 >Example
 
 ```
+Nodes.txt
 1 Person Pavel Mikulas 21
 2 Person Patrik Peska 40
 3 Person Max Slev 20
-:
+...
+
+Edges.txt
 4 BasicEdge 1 2
 5 BasicEdge 1 3
 6 BasicEdge 2 1
