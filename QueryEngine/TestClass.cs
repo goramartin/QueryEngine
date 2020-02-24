@@ -49,8 +49,11 @@ namespace QueryEngine
            s.Accept(matchVisitor);
            var l = matchVisitor.GetResult();
 
-            Console.ReadLine();
+            var scope = new Scope();
+            var match = new MatchObject();
+            match.CreatePattern(l, scope);
 
+            Console.ReadLine();
            /*
 
            Query q = new Query(new SelectObject(k), new MatchObject(l), scope);

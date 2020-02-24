@@ -14,6 +14,7 @@ namespace QueryEngine
         SelectObject select;
         MatchObject match;
 
+        //needs to be rearanged
         public Query(SelectObject s, MatchObject m, Scope scope)
         {
             this.select = s;
@@ -23,58 +24,6 @@ namespace QueryEngine
 
         public List<List<BaseMatch>> GetMatchPattern() { return this.match.GetPattern(); }
 
-
-
-
-        /// <summary>
-        /// ////////// NOW WILL BE DONE IN SELECT OBJECT
-        /// </summary>
-        /// <returns></returns>
-        //Check if variables in select correspond to variables in scope
-        public bool CheckCorrectnessOfQuery()
-        {
-            var sc = scope.GetScopeVariables();
-            if (sc.Count == 0) return false;
-            var pattern = match.GetPattern();
-            foreach (var item in select.GetSelectVariables())
-            {
-                if (item.name == "*") continue;
-                if (!sc.TryGetValue(item.name, out int p)) return false;
-                
-                //If select needs property, we check if the property is correct.
-                if (item.propName != null) 
-                {
-                    if (pattern.GetMatch(p).GetTable() == null) return false;
-                    if (!pattern.GetMatch(p).GetTable().ContainsProperty(item.propName)) return false;    
-                }
-            }
-            return CheckCorrectnessOfPatternTypes(pattern);
-        } 
-
-        
-        
-        /// <summary>
-        /// ///////// NOW WILL BE DONE IN MATCHOBJECT
-        /// </summary>
-        /// <param name="pattern"></param>
-        /// <returns></returns>
-        //Check whether in the pattern the repeating variables are same.
-        private bool CheckCorrectnessOfPatternTypes(List<List<BaseMatch>> pattern)
-        {
-            for (int i = 0; i < pattern.Count; i++)
-            {
-                for (int k = 0; k < pattern[i].Count; k++)
-                {
-                    BaseMatch b = pattern[i][k];
-                    if (b.IsRepeated())
-                    if (!b.Equals(
-                            pattern.GetMatch(b.GetPositionOfRepeatedField()))) 
-                            return false;
-                }
-            }
-            return true;
-        }
-        
     }
 
     
@@ -134,7 +83,7 @@ namespace QueryEngine
         public List<SelectVariable> GetSelectVariables() => this.selectVariables;
 
         // to do
-        public void CheckCorrectnessOfSelect()
+        public void CheckCorrectnessOfSelect(Dictionary<string, Table> nodeTables, Dictionary<string, Table> edgeTables, Scope scope)
         {
 
 
@@ -182,49 +131,94 @@ namespace QueryEngine
         public MatchObject() { this.pattern = new List<List<BaseMatch>>(); }
 
 
-        //to do
 
         /// <summary>
         /// Creates pattern from Parsed Pattern made by match visitor, also creates scope for variables
         /// during pattern matching.
+        /// Given pattern is check for correctness and ordered so each connected patterns go after each 
+        /// Then the resulting pattern is created. Patterns to be splited are splited into two based on split variable.
+        /// For example: (a) -> (b) -> (c) splited by var. b == (b) <- (a) , (b) -> (c)
         /// </summary>
-        /// <param name="parsedPatterns"></param>
-        /// <param name="scope"></param>
+        /// <param name="parsedPatterns"> Pattern created by Match Visitor </param>
+        /// <param name="scope"> Query scope of variable (empty) </param>
         public void CreatePattern(List<ParsedPattern> parsedPatterns, Scope scope)
         {
             CheckCorrectness(parsedPatterns);
-            FillConnections(parsedPatterns);
+            var orderedPatterns = OrderPatterns(parsedPatterns);
 
 
 
+
+
+
+
+            Console.ReadLine();
 
 
 
 
         }
 
-
-        // to do
-
         /// <summary>
-        /// Fills connection dictionaries that represent connection between other patterns and on which variable they connects.
-        
+        /// Orders patterns so that each consecutive pattern can be connected with patterns before.
+        /// Map used patterns in array of bools. If we found two patterns that have got same variable
+        /// Check for if one of the pattern is used, if first is used and second not, we add second to results and mark split by firsts var.
+        /// If first is not used and second is, we add first to result and mark its splitby by second variable.
+        /// If both are used we skip them, if non of them are used we add both and set split by policy to the second pattern.
+        /// Usused patterns, those that couldnt be connected to any other pattern are added at the end.
+        /// Their splitBy property remains set to Null.
         /// </summary>
         /// <param name="parsedPatterns"> Parser Pattern from MatchVisitor</param>
-        private void FillConnections(List<ParsedPattern> parsedPatterns)
+        private List<ParsedPattern> OrderPatterns(List<ParsedPattern> parsedPatterns)
         {
+            List<ParsedPattern> result = new List<ParsedPattern>();
+            bool[] usedPatterns = new bool[parsedPatterns.Count];
+            usedPatterns.Populate(false);
+            
+            // For each pattern in ParsedPatterns
             for (int i = 0; i < parsedPatterns.Count; i++)
             {
+                var currentParsedPattern = parsedPatterns[i];
+                // Take subsequent patterns
                 for (int j = i+1; j < parsedPatterns.Count; j++)
                 {
-
-
-
-
-
-
+                    var otherParsedPattern = parsedPatterns[j];
+                    if (currentParsedPattern.TryFindEqualVariables(otherParsedPattern, out string varName))
+                    {
+                        if (!usedPatterns[i] && !usedPatterns[j])
+                        {
+                            usedPatterns[i] = true; usedPatterns[j] = true;
+                            result.Add(parsedPatterns[i]); result.Add(parsedPatterns[j]);
+                            parsedPatterns[j].splitBy = varName;
+                        }
+                        else if (usedPatterns[i] && !usedPatterns[j])
+                        {
+                            usedPatterns[j] = true;
+                            result.Add(parsedPatterns[j]);
+                            parsedPatterns[j].splitBy = varName;
+                        }
+                        else if (usedPatterns[i] && usedPatterns[j])
+                        {
+                            // Special case, Added two unconnected nodes which the first one is later connected by later one
+                            if (parsedPatterns[i].splitBy == null) parsedPatterns[i].splitBy = varName;
+                        }
+                        else if (!usedPatterns[i] && usedPatterns[j])
+                        {
+                            usedPatterns[i] = true;
+                            result.Add(parsedPatterns[i]);
+                            parsedPatterns[i].splitBy = varName;
+                        } 
+                    }
                 }
             }
+
+            // Add rest of unconnected patterns 
+            for (int i = 0; i < usedPatterns.Length; i++)
+            {
+                if (usedPatterns[i] == false) result.Add(parsedPatterns[i]);
+            }
+
+            return result;
         }
 
 
@@ -261,15 +255,6 @@ namespace QueryEngine
 
         public List<List<BaseMatch>> GetPattern() => this.pattern;
     }
-
-
-
-
-
-
-
-
-
 
 
     interface IPatternMatcher

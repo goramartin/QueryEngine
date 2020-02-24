@@ -11,19 +11,22 @@ namespace QueryEngine
     class QueryEngine
     {
         private static Query CreateQuery(TextReader reader,
-            Dictionary<string, Table> v, Dictionary<string, Table> e) 
+            Dictionary<string, Table> nodeTables, Dictionary<string, Table> edgeTables) 
         {
-            //Create tokens from console.
+            // Create tokens from console.
             List<Token> tokens = Tokenizer.Tokenize(reader);
 
-            //Parse and create in order of the query words.
+            // Parse and create in order of the query words.
             Parser.ResetPosition();
             Scope scope = new Scope();
             SelectObject select = CreateSelectObject(tokens);
-            MatchObject match = CreateMatchObject(tokens, scope, v, e);
+            MatchObject match = CreateMatchObject(tokens, scope, nodeTables, edgeTables);
+
+            // Check correctness of select part
+            select.CheckCorrectnessOfSelect(nodeTables, edgeTables, scope);
 
 
-            //Check if it successfully parsed every token.
+            // Check if it successfully parsed every token.
             if (tokens.Count != Parser.GetPosition()) 
                 throw new ArgumentException("Failed to parse every token."); 
 
@@ -34,32 +37,41 @@ namespace QueryEngine
 
         private static SelectObject CreateSelectObject(List<Token> tokens)
         {
+            // Create tree of select part of query
             SelectNode selectNode = Parser.ParseSelectExpr(tokens);
+            
+            // Process parse tree and create list of variables to be printed
             SelectVisitor visitor = new SelectVisitor();
             selectNode.Accept(visitor);
-            SelectObject so = new SelectObject(visitor.GetResult());
-            return so;
+            
+            SelectObject selectObject = new SelectObject(visitor.GetResult());
+            return selectObject;
         }
 
-        private static MatchObject CreateMatchObject(List<Token> tokens, Scope s, 
-            Dictionary<string, Table> v, Dictionary<string, Table> e)
+        private static MatchObject CreateMatchObject(List<Token> tokens, Scope scope, 
+            Dictionary<string, Table> nodeTables, Dictionary<string, Table> edgeTables)
         {
-            //  MatchNode matchNode = Parser.ParseMatchExpr(tokens);
-            //  MatchVisitor visitor = new MatchVisitor(s,v,e);
-            //  matchNode.Accept(visitor);
-            //  MatchObject mo = new MatchObject(visitor.GetResult());
-            //  return mo;
-            return null;
+            // Create parse tree of match part of query and
+            // create a shallow pattern
+            MatchNode matchNode = Parser.ParseMatchExpr(tokens);
+            MatchVisitor matchVisitor = new MatchVisitor(nodeTables, edgeTables);
+            matchNode.Accept(matchVisitor);
+
+            //Create real pattern and scope
+            MatchObject matchObject = new MatchObject();
+            matchObject.CreatePattern(matchVisitor.GetResult(), scope);
+
+            return matchObject;
         }
 
         private static Graph CreateGraph(string[] args)
         {
-            Graph g = new Graph();
-            g.LoadNodeTables("NodeTypes.txt");
-            g.LoadEdgeTables("EdgeTypes.txt");
-            g.LoadVertices("Nodes.txt");
-            g.LoadEdges("Edges.txt");
-            return g;
+            Graph graph = new Graph();
+            graph.LoadNodeTables("NodeTypes.txt");
+            graph.LoadEdgeTables("EdgeTypes.txt");
+            graph.LoadVertices("Nodes.txt");
+            graph.LoadEdges("Edges.txt");
+            return graph;
         }
 
 
@@ -67,17 +79,17 @@ namespace QueryEngine
         {
             //Every query needs valid SELECT and MATCH expr.
             //Every query must end with semicolon ';'.
-            Graph g = CreateGraph(args);
+            Graph graph = CreateGraph(args);
             
             while (true)
             {
                 Console.WriteLine("Enter Query:");
-                Query query = CreateQuery(reader, g.NodeTables, g.EdgeTables);
-                if (!query.CheckCorrectnessOfQuery()) throw new ArgumentException("Query is not correct, check assigned variables and their types.");
+                Query query = CreateQuery(reader, graph.NodeTables, graph.EdgeTables);
+              
                 Console.WriteLine();
                 Console.WriteLine("Results:");
 
-                DFSPatternMatcher dfs = new DFSPatternMatcher(query.GetMatchPattern(),g);
+                DFSPatternMatcher dfs = new DFSPatternMatcher(query.GetMatchPattern(), graph);
                 dfs.Search();
 
                 Console.WriteLine();
