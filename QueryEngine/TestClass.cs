@@ -29,9 +29,9 @@ namespace QueryEngine
               if (item.type == Token.TokenType.Identifier) Console.WriteLine(item.strValue) ;
            }
 
-            var scope = new VariableMap();
+            var map = new VariableMap();
             var select = new SelectObject(tokens);
-            var match = new MatchObject(tokens, scope, g.NodeTables, g.EdgeTables);
+            var match = new MatchObject(tokens, map, g);
 
             Console.ReadLine();
            /*

@@ -20,7 +20,7 @@ namespace QueryEngine
             while (true)
             {
                 Console.WriteLine("Enter Query:");
-                Query query = new Query(reader, graph.NodeTables, graph.EdgeTables);
+                Query query = new Query(reader, graph);
               
                 Console.WriteLine();
                 Console.WriteLine("Results:");
