@@ -409,7 +409,6 @@ namespace QueryEngine
     {
         void Search();
     }
-
     class DFSPatternMatcher : IPatternMatcher
     {
         Graph graph;
