@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
+
 
 namespace QueryEngine
 {
@@ -10,51 +12,65 @@ namespace QueryEngine
     //Query represents query information, carrying it in each of the query main words.
     class Query
     {
-        Scope scope;
+        VariableMap variableMap;
         SelectObject select;
         MatchObject match;
 
         //needs to be rearanged
-        public Query(SelectObject s, MatchObject m, Scope scope)
+        public Query(TextReader reader,
+            Dictionary<string, Table> nodeTables, Dictionary<string, Table> edgeTables)
         {
-            this.select = s;
-            this.match = m;
-            this.scope = scope;
+            // Create tokens from console.
+            List<Token> tokens = Tokenizer.Tokenize(reader);
+
+            // Parse and create in order of the query words.
+            Parser.ResetPosition();
+            this.variableMap = new VariableMap();
+            this.select = new SelectObject(tokens);
+            this.match = new MatchObject(tokens, variableMap, nodeTables, edgeTables);
+
+            // Check correctness of select part
+            select.CheckCorrectnessOfSelect(nodeTables, edgeTables, variableMap);
+
+            // Check if it successfully parsed every token.
+            if (tokens.Count != Parser.GetPosition())
+                throw new ArgumentException("Failed to parse every token.");
         }
 
         public List<List<BaseMatch>> GetMatchPattern() { return this.match.GetPattern(); }
 
     }
 
-    
-    
+
+
     /// <summary>
-    /// Scope represents scope of variables in the whole query during pattern matching.
+    /// VariableMap represents a map of variables in the whole query during pattern matching.
     /// When the Pattern is flattned the integer value that resides on given variable name
     /// corresponds to the index in the flattened pattern.
     /// That is done because we need to retrieve the variable from the matched elements from within the flattened pattern.
     /// 
     /// Each variable is inserted only once despite possible multiple occurences of the same variable.
-    /// The main purpose of the scope is to obtain Elements that is the repetition does not change the desired value.
+    /// The main purpose of the variableMap is to obtain Elements that is the repetition does not change the desired value.
     /// </summary>
-    class Scope
+    class VariableMap
     {
-        private Dictionary<string, int > scopeVar;
+        private Dictionary<string, Tuple<int, Table> > variableMap;
 
-        public Scope(Dictionary<string,int> sv)=> this.scopeVar = sv;
-        public Scope() => this.scopeVar = new Dictionary<string, int>();
+        public VariableMap(Dictionary<string, Tuple<int, Table>> sv)=> this.variableMap = sv;
+        public VariableMap() => this.variableMap = new Dictionary<string, Tuple<int, Table>>();
 
-        public Dictionary<string, int> GetScopeVariables() => this.scopeVar;
+        public Dictionary<string, Tuple<int, Table>> GetvariableMapVariables() => this.variableMap;
 
         /// <summary>
         /// Adds variable to the dictionary.
         /// </summary>
         /// <param name="varName"> Name of variable to insert </param>
         /// <param name="position"> Position in flattened pattern </param>
-        public void AddVariable( string varName, int position) 
+        /// <param name="table"> Type of inserted variable </param>
+        public void AddVariable(string varName, int position, Table table) 
         {
-            if (this.scopeVar.ContainsKey(varName)) throw new ArgumentException($"{this.GetType()} Variable is already in the Score.");
-            else this.scopeVar.Add(varName, position);
+            if (this.variableMap.ContainsKey(varName)) throw new ArgumentException($"{this.GetType()} Variable is already in the Score.");
+            else this.variableMap.Add(varName, Tuple.Create<int, Table>(position,table));
             
         }
 
@@ -65,7 +81,7 @@ namespace QueryEngine
         /// <returns> Position of variable in flattened pattern </returns>
         public int GetVariablePosition(string name)
         {
-            if (this.scopeVar.TryGetValue(name, out int position)) return position;
+            if (this.variableMap.TryGetValue(name, out var tuple)) return tuple.Item1;
             else return -1;
         }
 
@@ -79,11 +95,22 @@ namespace QueryEngine
     class SelectObject
    {
         private List<SelectVariable> selectVariables;
-        public SelectObject(List<SelectVariable> sv) => this.selectVariables = sv;
+        public SelectObject(List<Token> tokens)
+        {
+            // Create tree of select part of query
+            SelectNode selectNode = Parser.ParseSelectExpr(tokens);
+
+            // Process parse tree and create list of variables to be printed
+            SelectVisitor visitor = new SelectVisitor();
+            selectNode.Accept(visitor);
+
+            this.selectVariables = visitor.GetResult();
+        }
+
         public List<SelectVariable> GetSelectVariables() => this.selectVariables;
 
         // to do
-        public void CheckCorrectnessOfSelect(Dictionary<string, Table> nodeTables, Dictionary<string, Table> edgeTables, Scope scope)
+        public void CheckCorrectnessOfSelect(Dictionary<string, Table> nodeTables, Dictionary<string, Table> edgeTables, VariableMap variableMap)
         {
 
 
@@ -128,22 +155,34 @@ namespace QueryEngine
     {
         private List<List<BaseMatch>> pattern;
 
-        public MatchObject() { this.pattern = new List<List<BaseMatch>>(); }
+        public MatchObject(List<Token> tokens, VariableMap variableMap,
+            Dictionary<string, Table> nodeTables, Dictionary<string, Table> edgeTables) {
+
+            // Create parse tree of match part of query and
+            // create a shallow pattern
+            MatchNode matchNode = Parser.ParseMatchExpr(tokens);
+            MatchVisitor matchVisitor = new MatchVisitor(nodeTables, edgeTables);
+            matchNode.Accept(matchVisitor);
+
+            //Create real pattern and variableMap
+            var result = matchVisitor.GetResult();
+            this.CheckParsedPatternCorrectness(result);
+            this.CreatePattern(result, variableMap);
+        }
 
 
 
         /// <summary>
-        /// Creates pattern from Parsed Pattern made by match visitor, also creates scope for variables
+        /// Creates pattern from Parsed Pattern made by match visitor, also creates a map for variables
         /// during pattern matching.
         /// Given pattern is check for correctness and ordered so each connected patterns go after each 
         /// Then the resulting pattern is created. Patterns to be splited are splited into two based on split variable.
         /// For example: (a) -> (b) -> (c) splited by var. b == (b) <- (a) , (b) -> (c)
         /// </summary>
         /// <param name="parsedPatterns"> Pattern created by Match Visitor </param>
-        /// <param name="scope"> Query scope of variable (empty) </param>
-        public void CreatePattern(List<ParsedPattern> parsedPatterns, Scope scope)
+        /// <param name="variableMap"> Query map of variables (empty) </param>
+        public void CreatePattern(List<ParsedPattern> parsedPatterns, VariableMap variableMap)
         {
-            CheckCorrectness(parsedPatterns);
             var orderedPatterns = OrderPatterns(parsedPatterns);
 
 
@@ -229,7 +268,7 @@ namespace QueryEngine
         /// Correctness is checked only against the first appearance of the variable.
         /// </summary>
         /// <param name="parsedPatterns"></param>
-        private void CheckCorrectness(List<ParsedPattern> parsedPatterns)
+        private void CheckParsedPatternCorrectness(List<ParsedPattern> parsedPatterns)
         {
             Dictionary<string, ParsedPatternNode> tmpDict = new Dictionary<string, ParsedPatternNode>();
             for (int i = 0; i < parsedPatterns.Count; i++)
@@ -255,6 +294,10 @@ namespace QueryEngine
 
         public List<List<BaseMatch>> GetPattern() => this.pattern;
     }
+
+
+
+
 
 
     interface IPatternMatcher

@@ -137,14 +137,20 @@ namespace QueryEngine
         public List<Edge> outEdges;
         public List<Edge> inEdges;
 
-        public Graph()
+        public Graph(string[] args)
         {
             this.NodeTables = null;
             this.vertices = null;
             this.outEdges = null;
             this.inEdges = null;
             this.EdgeTables = null;
+
+            this.LoadNodeTables("NodeTypes.txt");
+            this.LoadEdgeTables("EdgeTypes.txt");
+            this.LoadVertices("Nodes.txt");
+            this.LoadEdges("Edges.txt");
         }
+
 
      
         /// <summary>
@@ -157,10 +163,10 @@ namespace QueryEngine
             var creator = new CreatorFromFile<Dictionary<string, Table>>(reader, processor);
             return creator.Create();
         }
-        public void LoadEdgeTables(string filename) => this.EdgeTables = LoadTables(filename);
-        public void LoadNodeTables(string filename) => this.NodeTables = LoadTables(filename);
+        private void LoadEdgeTables(string filename) => this.EdgeTables = LoadTables(filename);
+        private void LoadNodeTables(string filename) => this.NodeTables = LoadTables(filename);
 
-        public void LoadVertices(string filename)
+        private void LoadVertices(string filename)
         {
             var reader = new WordReader(filename);
             var processor = new VerticesListProcessor();
@@ -169,7 +175,7 @@ namespace QueryEngine
             this.vertices = creator.Create();
         }
 
-        public void LoadEdges(string filename)
+        private void LoadEdges(string filename)
         {
             var reader = new WordReader(filename);
             var processor = new EdgeListProcessor();

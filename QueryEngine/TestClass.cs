@@ -14,12 +14,7 @@ namespace QueryEngine
 
 
  
-           Graph g = new Graph();
-           g.LoadNodeTables("NodeTypes.txt");
-           g.LoadEdgeTables("EdgeTypes.txt");
-           g.LoadVertices("Nodes.txt");
-           g.LoadEdges("Edges.txt");
-
+           Graph g = new Graph( new string[]{ "" } );
 
            //just for testing
            ///////////////////////////////////////
@@ -34,24 +29,9 @@ namespace QueryEngine
               if (item.type == Token.TokenType.Identifier) Console.WriteLine(item.strValue) ;
            }
 
-
-
-           SelectNode d = Parser.ParseSelectExpr(tokens);
-           MatchNode s = Parser.ParseMatchExpr(tokens);
-
-
-
-           SelectVisitor selectVisitor = new SelectVisitor();
-           MatchVisitor matchVisitor = new MatchVisitor(g.NodeTables, g.EdgeTables);
-
-           d.Accept(selectVisitor);
-           var k = selectVisitor.GetResult();
-           s.Accept(matchVisitor);
-           var l = matchVisitor.GetResult();
-
-            var scope = new Scope();
-            var match = new MatchObject();
-            match.CreatePattern(l, scope);
+            var scope = new VariableMap();
+            var select = new SelectObject(tokens);
+            var match = new MatchObject(tokens, scope, g.NodeTables, g.EdgeTables);
 
             Console.ReadLine();
            /*
