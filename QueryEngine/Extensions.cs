@@ -27,32 +27,4 @@ namespace QueryEngine
         }
     }
 
-    static class ExtensionPattern
-    {
-        public static BaseMatch GetMatch(this List<List<BaseMatch>> pattern, int position)
-        {
-            int p = 0;
-            for (int i = 0; i < pattern.Count; i++)
-            {
-                for (int k = 0; k < pattern[i].Count; k++)
-                {
-                    if (p == position) return pattern[i][k];
-                    p++;
-                }
-            }
-            throw new ArgumentException("QueryCheck, could not find any variable.");
-        }
-
-        public static int GetCount(this List<List<BaseMatch>> pattern)
-        {
-            int c = 0;
-            for (int i = 0; i < pattern.Count; i++)
-            {
-                c += pattern[i].Count;
-            }
-            return c;
-        }
-
-    }
-
 }
