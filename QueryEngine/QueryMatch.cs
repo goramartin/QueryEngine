@@ -14,9 +14,8 @@ namespace QueryEngine
     /// </summary>
     class MatchObject
     {
-        private List<List<BaseMatch>> pattern;
-        private IPatternMatcher matcher;
-        private IPattern p;
+        private IPatternMatcher Matcher;
+        private IPattern Pattern;
 
         /// <summary>
         /// Creates Match expression
@@ -38,97 +37,8 @@ namespace QueryEngine
 
             // Create  matcher and pattern based on the name of matcher and pattern
             // Change if necessary just for testing 
-            this.matcher = MatchFactory.CreateMatcher("DFS");
-            this.p = MatchFactory.CreatePattern("DFS", "SIMPLE", variableMap, result);
-        }
-
-
-        /// <summary>
-        /// Creates pattern from Parsed Pattern made by match visitor, also creates a map for variables
-        /// during pattern matching.
-        /// Given pattern is check for correctness and ordered so each connected patterns go after each 
-        /// Then the resulting pattern is created. Patterns to be splited are splited into two based on split variable.
-        /// For example: (a) -> (b) -> (c) splited by var. b == (b) <- (a) , (b) -> (c)
-        /// </summary>
-        /// <param name="parsedPatterns"> Pattern created by Match Visitor </param>
-        /// <param name="variableMap"> Query map of variables (empty) </param>
-        public void CreatePattern(List<ParsedPattern> parsedPatterns, VariableMap variableMap)
-        {
-            var orderedPatterns = OrderPatterns(parsedPatterns);
-
-
-
-
-
-
-
-            Console.ReadLine();
-
-
-
-
-        }
-
-        /// <summary>
-        /// Orders patterns so that each consecutive pattern can be connected with patterns before.
-        /// Map used patterns in array of bools. If we found two patterns that have got same variable
-        /// Check for if one of the pattern is used, if first is used and second not, we add second to results and mark split by firsts var.
-        /// If first is not used and second is, we add first to result and mark its splitby by second variable.
-        /// If both are used we skip them, if non of them are used we add both and set split by policy to the second pattern.
-        /// Usused patterns, those that couldnt be connected to any other pattern are added at the end.
-        /// Their splitBy property remains set to Null.
-        /// </summary>
-        /// <param name="parsedPatterns"> Parser Pattern from MatchVisitor</param>
-        private List<ParsedPattern> OrderPatterns(List<ParsedPattern> parsedPatterns)
-        {
-            List<ParsedPattern> result = new List<ParsedPattern>();
-            bool[] usedPatterns = new bool[parsedPatterns.Count];
-            usedPatterns.Populate(false);
-
-            // For each pattern in ParsedPatterns
-            for (int i = 0; i < parsedPatterns.Count; i++)
-            {
-                var currentParsedPattern = parsedPatterns[i];
-                // Take subsequent patterns
-                for (int j = i + 1; j < parsedPatterns.Count; j++)
-                {
-                    var otherParsedPattern = parsedPatterns[j];
-                    if (currentParsedPattern.TryFindEqualVariables(otherParsedPattern, out string varName))
-                    {
-                        if (!usedPatterns[i] && !usedPatterns[j])
-                        {
-                            usedPatterns[i] = true; usedPatterns[j] = true;
-                            result.Add(parsedPatterns[i]); result.Add(parsedPatterns[j]);
-                            parsedPatterns[j].splitBy = varName;
-                        }
-                        else if (usedPatterns[i] && !usedPatterns[j])
-                        {
-                            usedPatterns[j] = true;
-                            result.Add(parsedPatterns[j]);
-                            parsedPatterns[j].splitBy = varName;
-                        }
-                        else if (usedPatterns[i] && usedPatterns[j])
-                        {
-                            // Special case, Added two unconnected nodes which the first one is later connected by later one
-                            if (parsedPatterns[i].splitBy == null) parsedPatterns[i].splitBy = varName;
-                        }
-                        else if (!usedPatterns[i] && usedPatterns[j])
-                        {
-                            usedPatterns[i] = true;
-                            result.Add(parsedPatterns[i]);
-                            parsedPatterns[i].splitBy = varName;
-                        }
-                    }
-                }
-            }
-
-            // Add rest of unconnected patterns 
-            for (int i = 0; i < usedPatterns.Length; i++)
-            {
-                if (usedPatterns[i] == false) result.Add(parsedPatterns[i]);
-            }
-
-            return result;
+            this.Matcher = MatchFactory.CreateMatcher("DFS");
+            this.Pattern = MatchFactory.CreatePattern("DFS", "SIMPLE", variableMap, result);
         }
 
         /// <summary>
@@ -137,7 +47,7 @@ namespace QueryEngine
         /// discrepant type definitions
         /// Correctness is checked only against the first appearance of the variable.
         /// </summary>
-        /// <param name="parsedPatterns"></param>
+        /// <param name="parsedPatterns"> Patterns to check. </param>
         private void CheckParsedPatternCorrectness(List<ParsedPattern> parsedPatterns)
         {
             Dictionary<string, ParsedPatternNode> tmpDict = new Dictionary<string, ParsedPatternNode>();
@@ -162,7 +72,7 @@ namespace QueryEngine
             if (tmpDict.Count == 0) throw new ArgumentException($"{this.GetType()} No given variable in the query.");
         }
 
-        public List<List<BaseMatch>> GetPattern() => this.pattern;
+        public IPattern GetPattern() => this.Pattern;
     }
 
 
@@ -173,62 +83,83 @@ namespace QueryEngine
 
     //Class representing single step of pattern to match.
     //Method apply returns true if the element can be added to final result.
-    abstract class BaseMatch
+    abstract class DFSBaseMatch
     {
+        public enum MatchType { Vertex, Edge};
         protected bool anonnymous;
         protected bool repeatedVariable;
         protected int positionOfRepeatedField;
         protected Table type;
 
-        public abstract bool Apply(Element element, List<List<BaseMatch>> baseMatches, Element[] result);
+        public abstract bool Apply(Element element, Element[] scope);
 
-        protected bool CheckCommonConditions(Element element, List<List<BaseMatch>> baseMatches, Element[] result)
+        protected bool CheckCommonConditions(Element element, Element[] scope)
         {
-            //Check type, comparing references to tables.
+            // Check type, comparing references to tables.
             if ((this.type != null) && (this.type != element.GetTable())) return false;
 
-            //It is anonnymous, then it can match any vertex/edge.
+            // It is anonnymous, then it can match any vertex/edge.
             if (this.anonnymous) return true;
 
-            //It is repetition of variable before, check if it has same id.
-            if (repeatedVariable)
-                if (result[positionOfRepeatedField].GetID() != element.GetID()) return false;
-
-            //Check if the element is not set for another variable.
-            for (int i = 0; i < result.Length; i++)
+            // It is repetition of variable before
+            if (this.repeatedVariable)
             {
-                Element tmpEl = result[i];
-
-                //Further ahead, there are no elements stored in result.
-                if (tmpEl == null) break;
-
-                if (tmpEl.GetID() == element.GetID())
+                // The variable was used, check if it has got the same id.
+                if (!this.IsFirstAppereance(scope))
                 {
-                    BaseMatch tmp = baseMatches.GetMatch(i);
-                    if (tmp.IsAnonnymous()) continue;
-                    else if (i == this.positionOfRepeatedField) continue;
-                    else if ((tmp.positionOfRepeatedField != -1) &&
-                            (tmp.positionOfRepeatedField == this.positionOfRepeatedField)) continue;
-                    else return false;
+                    if (scope[positionOfRepeatedField].GetID() != element.GetID()) return false;
+                    else { /* empty else no other option*/ }
+
+                } else // Else check if the element can be used at the variable ( check other variables for similarity )
+                {
+                    for (int i = 0; i < scope.Length; i++)
+                    {
+                        Element tmpEl = scope[i];
+
+                        // The element occupies different variable
+                        if (this.positionOfRepeatedField != i && tmpEl.GetID() == element.GetID()) return false;
+
+                        // if the variable is occupied in its slot
+                        if (this.positionOfRepeatedField == i && tmpEl != null) return false;
+
+
+                    }
+                    
+                    // The element can be used, place him into the scope and return true;
+                     scope[this.positionOfRepeatedField] = element;
                 }
-            }
+            } 
 
             return true;
         }
 
         public void SetAnnonymous(bool b) => this.anonnymous = b;
+        public bool IsAnonnymous() => this.anonnymous;
+        
         public void SetRepeated(bool b) => this.repeatedVariable = b;
         public void SetPositionOfRepeatedField(int p) => this.positionOfRepeatedField = p;
+        public int GetPositionOfRepeatedField() => this.positionOfRepeatedField;
+        public bool IsRepeated() => this.repeatedVariable;
+        
+        /// <summary>
+        /// Returns whether the variable representing this match node is empty or occupied.
+        /// </summary>
+        /// <param name="elements"></param>
+        /// <returns> True on empty </returns>
+        public bool IsFirstAppereance(Element[] elements)
+        {
+            if (elements[this.positionOfRepeatedField] == null) return true;
+            else return false;
+        }
+
         public void SetType(Table t) => this.type = t;
         public Table GetTable() => this.type;
-        public bool IsRepeated() => this.repeatedVariable;
-        public int GetPositionOfRepeatedField() => this.positionOfRepeatedField;
-        public bool IsAnonnymous() => this.anonnymous;
+        
 
     }
-    class VertexMatch : BaseMatch
+    class DFSVertexMatch : DFSBaseMatch
     {
-        public VertexMatch()
+        public DFSVertexMatch()
         {
             this.anonnymous = true;
             this.positionOfRepeatedField = -1;
@@ -236,19 +167,30 @@ namespace QueryEngine
             this.type = null;
         }
 
-        public override bool Apply(Element element, List<List<BaseMatch>> baseMatches, Element[] result)
+        public DFSVertexMatch(ParsedPatternNode node, int indexInMap)
+        {
+            if (indexInMap != -1)
+            {
+                this.repeatedVariable = true;
+                this.anonnymous = false;
+            }
+            this.positionOfRepeatedField = indexInMap;
+            this.type = node.table;
+        }
+
+        public override bool Apply(Element element,Element[] scope)
         {
             if (element == null) return false;
             else if (!(element is Vertex)) return false;
-            else return CheckCommonConditions(element, baseMatches, result);
+            else return CheckCommonConditions(element, scope);
         }
 
 
         public override bool Equals(object obj)
         {
-            if (obj is VertexMatch)
+            if (obj is DFSVertexMatch)
             {
-                var o = obj as VertexMatch;
+                var o = obj as DFSVertexMatch;
                 if (this.GetTable() != o.GetTable()) return false;
                 return true;
             }
@@ -257,11 +199,11 @@ namespace QueryEngine
         }
 
     }
-    class EdgeMatch : BaseMatch
+    class DFSEdgeMatch : DFSBaseMatch
     {
         protected EdgeType edgeType;
 
-        public EdgeMatch()
+        public DFSEdgeMatch()
         {
             this.anonnymous = true;
             this.positionOfRepeatedField = -1;
@@ -269,11 +211,22 @@ namespace QueryEngine
             this.type = null;
         }
 
-        public override bool Apply(Element element, List<List<BaseMatch>> baseMatches, Element[] result)
+        public DFSEdgeMatch(ParsedPatternNode node, int indexInMap)
+        {
+            if (indexInMap != -1) { 
+                this.repeatedVariable = true; 
+                this.anonnymous = false; 
+            }
+            this.positionOfRepeatedField = indexInMap;
+            this.type = node.table;
+            this.edgeType = node.edgeType;
+        }
+
+        public override bool Apply(Element element, Element[] scope)
         {
             if (element == null) return false;
             else if (!(element is Edge)) return false;
-            else return CheckCommonConditions(element, baseMatches, result);
+            else return CheckCommonConditions(element, scope);
         }
 
         public EdgeType GetEdgeType() => this.edgeType;
@@ -281,9 +234,9 @@ namespace QueryEngine
 
         public override bool Equals(object obj)
         {
-            if (obj is EdgeMatch)
+            if (obj is DFSEdgeMatch)
             {
-                var o = obj as EdgeMatch;
+                var o = obj as DFSEdgeMatch;
                 if (o.edgeType != this.edgeType) return false;
                 if (this.GetTable() != o.GetTable()) return false;
                 return true;
@@ -300,16 +253,28 @@ namespace QueryEngine
 
     interface IPattern
     {
+        /*
+        bool Apply(Element element);
+        int IndexOfCurrentPattern();
+        int indexOfCurrentMatchNode();
 
+        int PatternCount();
+        int NodeCountInCurrentPattern();
+         */
     }
+    
     class DFSPattern : IPattern
     {
-        private List<List<BaseMatch>> pattern;
-
+        private List<List<DFSBaseMatch>> Patterns;
+        private int CurrentPattern;
+        private int CurrentMatchNode;
+        private Element[] Scope;
 
         public DFSPattern(VariableMap map, List<ParsedPattern> parsedPatterns)
         {
+            this.Patterns = new List<List<DFSBaseMatch>>();
             this.CreatePattern(parsedPatterns, map);
+            this.Scope = new Element[map.GetCount()];
         }
 
 
@@ -325,19 +290,23 @@ namespace QueryEngine
         /// <param name="variableMap"> Query map of variables (empty) </param>
         private void CreatePattern(List<ParsedPattern> parsedPatterns, VariableMap variableMap)
         {
-            var orderedPatterns = OrderPatterns(parsedPatterns);
+            var orderedPatterns = OrderParsedPatterns(parsedPatterns);
 
+            // For every Parsed Pattern
+            for (int i = 0; i < parsedPatterns.Count; i++)
+            {
+                // Try to split it.
+                var firstPart = parsedPatterns[i].SplitParsedPattern();       
+                
+                // If the parsed pattern was splited
+                // Add both parts into the real Pattern
+                if ( firstPart != null)
+                {
+                    this.Patterns.Add(CreateChain(firstPart.Pattern, variableMap));
+                }
+                this.Patterns.Add(CreateChain(parsedPatterns[i].Pattern, variableMap));
 
-
-
-
-
-
-            Console.ReadLine();
-
-
-
-            
+            }
         }
 
         /// <summary>
@@ -350,7 +319,7 @@ namespace QueryEngine
         /// Their splitBy property remains set to Null.
         /// </summary>
         /// <param name="parsedPatterns"> Parser Pattern from MatchVisitor</param>
-        private List<ParsedPattern> OrderPatterns(List<ParsedPattern> parsedPatterns)
+        private List<ParsedPattern> OrderParsedPatterns(List<ParsedPattern> parsedPatterns)
         {
             List<ParsedPattern> result = new List<ParsedPattern>();
             bool[] usedPatterns = new bool[parsedPatterns.Count];
@@ -401,7 +370,68 @@ namespace QueryEngine
 
             return result;
         }
+
+
+        /// <summary>
+        /// Creates pattern chain used in searcher.
+        /// Also sets map for query.
+        /// </summary>
+        /// <param name="p"> Parsed pattern </param>
+        /// <param name="map"> Map to store info about veriables </param>
+        /// <returns></returns>
+        private List<DFSBaseMatch> CreateChain(List<ParsedPatternNode> p, VariableMap map) 
+        {
+            List<DFSBaseMatch> tmpChain = new List<DFSBaseMatch>();
+
+            // For each parsed pattern node
+            for (int i = 0; i < p.Count; i++)
+            {
+                var tmpNode = p[i];
+                int index = -1;
+                
+                // If it has not got a name, do not add it to map.
+                if (tmpNode.name != null)
+                {
+                    // Try if the variable is inside a dictionary
+                    if ( (index = map.GetVariablePosition(tmpNode.name)) == -1)
+                    {
+                        // If it is not, Add it there with the proper type and index.
+                        index = map.GetCount();
+                        map.AddVariable(tmpNode.name,index, tmpNode.table);
+                    }
+                }
+
+                // Create match node and add it to the chain.
+                if (tmpNode.isVertex)
+                      tmpChain.Add(CreateDFSBaseMatch(DFSBaseMatch.MatchType.Vertex, p[i], index));
+                else tmpChain.Add(CreateDFSBaseMatch(DFSBaseMatch.MatchType.Edge, p[i], index));
+            }
+            return tmpChain;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="type"> Type of match node</param>
+        /// <param name="node"> Prototype of the node </param>
+        /// <param name="indexInMap"> Index of its variable in scope </param>
+        /// <returns></returns>
+        private DFSBaseMatch CreateDFSBaseMatch(DFSBaseMatch.MatchType type, ParsedPatternNode node, int indexInMap)
+        {
+            switch (type)
+            {
+                case DFSBaseMatch.MatchType.Vertex:
+                    return new DFSVertexMatch(node, indexInMap);
+                case DFSBaseMatch.MatchType.Edge:
+                    return new DFSEdgeMatch(node, indexInMap);
+                default:
+                    throw new ArgumentException($"{this.GetType()} Trying to create Match type that does not exit.");
+            }
+        }
     }
+
+
+
 
 
 
@@ -411,6 +441,8 @@ namespace QueryEngine
     }
     class DFSPatternMatcher : IPatternMatcher
     {
+        public void Search() { }
+        /*
         Graph graph;
         List<List<BaseMatch>> pattern;
         List<BaseMatch> currentPattern;
@@ -597,10 +629,12 @@ namespace QueryEngine
                 index += pattern[i].Count;
             return index;
         }
+        */
     }
 
 
 
+    
 
     /// <summary>
     /// Class includes register of all the Matchers and their coresponding patterns.

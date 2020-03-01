@@ -40,8 +40,6 @@ namespace QueryEngine
                 throw new ArgumentException("Failed to parse every token.");
         }
 
-        public List<List<BaseMatch>> GetMatchPattern() { return this.match.GetPattern(); }
-
     }
 
 
@@ -70,12 +68,13 @@ namespace QueryEngine
         /// <param name="varName"> Name of variable to insert </param>
         /// <param name="position"> Position in flattened pattern </param>
         /// <param name="table"> Type of inserted variable </param>
-        public void AddVariable(string varName, int position, Table table) 
+        public void AddVariable(string varName,int position, Table table) 
         {
             if (this.variableMap.ContainsKey(varName)) throw new ArgumentException($"{this.GetType()} Variable is already in the Score.");
             else this.variableMap.Add(varName, Tuple.Create<int, Table>(position,table));
             
         }
+
 
         /// <summary>
         /// Returns positon of variable based on the name of the variable.
@@ -88,6 +87,7 @@ namespace QueryEngine
             else return -1;
         }
 
+        public int GetCount()  => this.variableMap.Count;
     }
 
 

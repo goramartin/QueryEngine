@@ -25,8 +25,8 @@ namespace QueryEngine
                 Console.WriteLine();
                 Console.WriteLine("Results:");
 
-                DFSPatternMatcher dfs = new DFSPatternMatcher(query.GetMatchPattern(), graph);
-                dfs.Search();
+               // DFSPatternMatcher dfs = new DFSPatternMatcher(query.GetMatchPattern(), graph);
+             //   dfs.Search();
 
                 Console.WriteLine();
                 Console.ReadLine();

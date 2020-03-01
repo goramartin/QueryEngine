@@ -908,7 +908,7 @@ namespace QueryEngine
         /// <param name="node">Identifier node </param>
         public void Visit(IdentifierNode node)
         {
-            ParsedPatternNode n = currentPattern.GetLastPasrsedPatternNode();
+            ParsedPatternNode n = currentPattern.GetLastParsedPatternNode();
            
             if (readingName)
             {
@@ -1123,14 +1123,19 @@ namespace QueryEngine
             this.splitBy = null;
         }
 
+        public ParsedPattern(List<ParsedPatternNode> pattern)
+        {
+            this.Pattern = pattern;
+            this.splitBy = null;
+        } 
+
         public void AddParsedPatternNode(ParsedPatternNode node)
         {
             this.Pattern.Add(node);
         }
 
         public int GetCount() => this.Pattern.Count;
-
-        public ParsedPatternNode GetLastPasrsedPatternNode() => this.Pattern[this.Pattern.Count - 1];
+        public ParsedPatternNode GetLastParsedPatternNode() => this.Pattern[this.Pattern.Count - 1];
 
         public bool TryFindEqualVariables(ParsedPattern other, out string name)
         {
@@ -1149,6 +1154,49 @@ namespace QueryEngine
             }
             name = "";
             return false;
+        }
+
+        /// <summary>
+        /// Splits ParsedPattern node into two ParsedPatterns. 
+        /// For example: (a) -> (b) -> (c) splited by var. b == (b) <- (a) , (b) -> (c)
+        /// </summary>
+        /// <returns> Returns the part before split variable (reverse order) or null if it is the first one. </returns>
+        public ParsedPattern SplitParsedPattern()
+        {
+        
+            if (this.splitBy == this.Pattern[0].name) return null;
+            else
+            {
+                int i = this.FindIndexOfSplitVariable();
+                if (i == 0 || i == -1) return null;
+                else
+                {
+                    var firstPart = new List<ParsedPatternNode>();
+                    for (int j = 0; j <= i; j++)
+                    {
+                        firstPart.Insert(0, this.Pattern[0].CloneReverse());
+                        if (j == i) break;
+                        else this.Pattern.RemoveAt(0);
+                    }
+                    return new ParsedPattern(firstPart);
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Finds index of split variable.
+        /// </summary>
+        /// <returns> Index of split variable, -1 for not containing </returns>
+        private int FindIndexOfSplitVariable()
+        {
+            if (this.splitBy == null) return -1;
+            //Find index of splitVariable
+            for (int i = 0; i < this.GetCount(); i++)
+            {
+                if (this.splitBy == this.Pattern[i].name) return i;
+            }
+            return -1;
         }
 
     }
@@ -1179,6 +1227,25 @@ namespace QueryEngine
         public Table GetTable() => this.table;
         public EdgeType GetEdgeType() => this.edgeType;
         public string GetName() => this.name;
+
+        /// <summary>
+        /// Creates copy of instance, reverses edges.
+        /// </summary>
+        /// <returns> Copy of this instance. </returns>
+        public ParsedPatternNode CloneReverse()
+        {
+            var clone = new ParsedPatternNode();
+
+            clone.isVertex = this.isVertex;
+            clone.name = this.name;
+            clone.table = this.table;
+            clone.isAnonymous = this.isAnonymous;
+
+            if (this.edgeType == EdgeType.InEdge) clone.edgeType = EdgeType.OutEdge;
+            else if (this.edgeType == EdgeType.OutEdge) clone.edgeType = EdgeType.InEdge;
+            else clone.edgeType = this.edgeType;
+            return clone;
+        }
 
         public override bool Equals(object obj)
         {
