@@ -82,18 +82,34 @@ namespace QueryEngine
 
 
 
-    //Class representing single step of pattern to match.
-    //Method apply returns true if the element can be added to final result.
+    /// <summary>
+    /// Class representing single step of pattern to match.
+    /// Method apply returns true if the element can be added to final result.
+    /// </summary>
     abstract class DFSBaseMatch
     {
-        public enum MatchType { Vertex, Edge};
+        public enum MatchType { Vertex, Edge };
         protected bool anonnymous;
         protected bool repeatedVariable;
         protected int positionOfRepeatedField;
         protected Table type;
 
+
+        /// <summary>
+        /// Gets an element that will be tested if it can be added to the result.
+        /// </summary>
+        /// <param name="element"> Element to be tested. </param>
+        /// <param name="scope"> Scope of variables in search context. </param>
+        /// <returns> True if element can be aplicable or false on refusal. </returns>
         public abstract bool Apply(Element element, Element[] scope);
 
+
+        /// <summary>
+        /// Called by descendants. Checks conditions that are indifferent to the descendant type.
+        /// </summary>
+        /// <param name="element"> Element to be tested.</param>
+        /// <param name="scope"> Scope of variables in search context. </param>
+        /// <returns>True if element can be aplicable or false on refusal.</returns>
         protected bool CheckCommonConditions(Element element, Element[] scope)
         {
             // Check type, comparing references to tables.
@@ -123,7 +139,6 @@ namespace QueryEngine
 
                         // if the variable is occupied in its slot
                         if (this.positionOfRepeatedField == i && tmpEl != null) return false;
-
 
                     }
                     
@@ -259,16 +274,24 @@ namespace QueryEngine
 
     interface IPattern
     {
-        /*
         bool Apply(Element element);
-        int IndexOfCurrentPattern();
-        int indexOfCurrentMatchNode();
+        void PrepareNext();
+        void PreparePrevious();
 
-        int PatternCount();
-        int NodeCountInCurrentPattern();
-         */
+        bool isLastNodeInCurrentPattern();
+        bool isLastPattern();
+
+
+
+        int GetIndexOfCurrentPattern();
+        int GetIndexOfCurrentMatchNode();
+
+        int GetPatternCount();
+        int GetCurrentPatternCount();
+
+        Element GetConnection();
     }
-    
+
     class DFSPattern : IPattern
     {
         private List<List<DFSBaseMatch>> Patterns;
@@ -286,7 +309,7 @@ namespace QueryEngine
             this.CurrentPattern = 0;
         }
 
-
+        #region PatternCreation
 
         /// <summary>
         /// Creates pattern from Parsed Pattern made by match visitor, also creates a map for variables
@@ -382,7 +405,6 @@ namespace QueryEngine
             return result;
         }
 
-
         /// <summary>
         /// Creates pattern chain used in searcher.
         /// Also sets map for query.
@@ -439,6 +461,61 @@ namespace QueryEngine
                 default:
                     throw new ArgumentException($"{this.GetType()} Trying to create Match type that does not exit.");
             }
+        }
+
+        #endregion PatternCreation
+    
+
+        public bool Apply(Element element)
+        {
+            return this.Patterns[this.CurrentPattern][this.CurrentMatchNode].Apply(element, this.Scope);
+        }
+        public void PrepareNext()
+        {
+            // sets
+            throw new NotImplementedException();
+        }
+        public void PreparePrevious()
+        {
+            // unsets
+            throw new NotImplementedException();
+        }
+        public Element GetConnection()
+        {
+            throw new NotImplementedException();
+        }
+
+
+
+        public bool isLastNodeInCurrentPattern()
+        {
+            return (this.Patterns[this.CurrentPattern].Count - 1) == this.CurrentMatchNode ? true : false;
+        }
+
+        public bool isLastPattern()
+        {
+            return this.CurrentPattern == (this.Patterns.Count - 1) ? true : false;
+        }
+
+        public int GetIndexOfCurrentPattern()
+        {
+            return this.CurrentPattern;
+        }
+
+        public int GetIndexOfCurrentMatchNode()
+        {
+            return this.CurrentMatchNode;
+        }
+
+        public int GetPatternCount()
+        {
+            return this.Patterns.Count;
+        }
+
+
+        public int GetCurrentPatternCount()
+        {
+            return this.Patterns[this.CurrentPattern].Count;
         }
     }
 

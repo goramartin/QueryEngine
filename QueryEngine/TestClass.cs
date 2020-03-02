@@ -32,7 +32,6 @@ namespace QueryEngine
             var map = new VariableMap();
             var select = new SelectObject(tokens);
             var match = new MatchObject(tokens, map, g);
-
             select.CheckCorrectnessOfSelect(map);
 
             Console.ReadLine();
