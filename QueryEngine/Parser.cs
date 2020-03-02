@@ -1137,9 +1137,15 @@ namespace QueryEngine
         public int GetCount() => this.Pattern.Count;
         public ParsedPatternNode GetLastParsedPatternNode() => this.Pattern[this.Pattern.Count - 1];
 
-        public bool TryFindEqualVariables(ParsedPattern other, out string name)
+        /// <summary>
+        /// Searches for the same variable inside two Parsed Patterns.
+        /// </summary>
+        /// <param name="other"> Parsed Pattern to be searched for similar variables. </param>
+        /// <param name="name"> Name of the first same variable. </param>
+        /// <returns> True if found, False when not found the same variable. </returns>
+        public bool TryFindEqualVariable(ParsedPattern other, out string name)
         {
-            // For each variable in current pattern check equality for variables in subsequent pattern
+            // For each variable in current pattern check equality for variables in the other pattern
             for (int k = 0; k < this.Pattern.Count; k++)
             {
                 for (int l = 0; l < other.Pattern.Count; l++)
@@ -1158,29 +1164,61 @@ namespace QueryEngine
 
         /// <summary>
         /// Splits ParsedPattern node into two ParsedPatterns. 
-        /// For example: (a) -> (b) -> (c) splited by var. b == (b) <- (a) , (b) -> (c)
+        /// Instance on which we split, the pattern is reduced from the beginning.
+        /// The new build pattern (the nodes taken into account from the reduction from the instance) is build in a reversed order.
+        /// For example: (a) -> (b) -> (c) splited by var. b == (b) <- (a) , (b) -> (c).
+        /// Split is done only if the splitVariable is not located in on the first index of the pattern.
+        /// If the variable is located in the end of the pattern, the pattern is only reversed inplace.
         /// </summary>
         /// <returns> Returns the part before split variable (reverse order) or null if it is the first one. </returns>
         public ParsedPattern SplitParsedPattern()
         {
-        
-            if (this.splitBy == this.Pattern[0].name) return null;
+            int i = this.FindIndexOfSplitVariable();
+            if (i == 0 || i == -1) return null;
             else
             {
-                int i = this.FindIndexOfSplitVariable();
-                if (i == 0 || i == -1) return null;
-                else
-                {
-                    var firstPart = new List<ParsedPatternNode>();
-                    for (int j = 0; j <= i; j++)
-                    {
-                        firstPart.Insert(0, this.Pattern[0].CloneReverse());
-                        if (j == i) break;
-                        else this.Pattern.RemoveAt(0);
-                    }
-                    return new ParsedPattern(firstPart);
-                }
+                if (i == this.Pattern.Count - 1) return this.SplitInPlace(i);
+                else return this.SplitIntoTwo(i); 
             }
+            
+        }
+
+        /// <summary>
+        /// Intead of spliting into one normal part and the other empty part.
+        /// We only reverse order of the nodes in the pattern of this instance.
+        /// </summary>
+        /// <param name="i"> Index of split variable </param>
+        /// <returns> The same instance as the caller. </returns>
+        private ParsedPattern SplitInPlace(int i)
+        {
+            for (int j = i-1; j >= 0; j--)
+            {
+                // i is index of the last node
+                // Invariant length of pattern stays same
+                var tmp = this.Pattern[j];
+                this.Pattern.RemoveAt(j);
+
+                if (tmp.isVertex) this.Pattern.Add(tmp);
+                else this.Pattern.Add(tmp.CloneReverse());
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Splits the pattern of this instance into two
+        /// </summary>
+        /// <param name="i"> Index of split variable </param>
+        /// <returns> New instance of Parsed Pattern </returns>
+        private ParsedPattern SplitIntoTwo(int i)
+        {
+            var firstPart = new List<ParsedPatternNode>();
+            for (int j = 0; j <= i; j++)
+            {
+                firstPart.Insert(0, this.Pattern[0].CloneReverse());
+                if (j == i) break;
+                else this.Pattern.RemoveAt(0);
+            }
+            return new ParsedPattern(firstPart);
         }
 
 

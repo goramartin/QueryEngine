@@ -115,6 +115,7 @@ namespace QueryEngine
                     for (int i = 0; i < scope.Length; i++)
                     {
                         Element tmpEl = scope[i];
+                        if (tmpEl == null) continue; // Protection against touching null with below statement
 
                         // The element occupies different variable
                         if (this.positionOfRepeatedField != i && tmpEl.GetID() == element.GetID()) return false;
@@ -125,7 +126,7 @@ namespace QueryEngine
 
                     }
                     
-                    // The element can be used, place him into the scope and return true;
+                    // The element can be used, place him into the scope
                      scope[this.positionOfRepeatedField] = element;
                 }
             } 
@@ -143,16 +144,17 @@ namespace QueryEngine
         
         /// <summary>
         /// Returns whether the variable representing this match node is empty or occupied.
+        /// Notice that the function is called only if we have valid index -> never if the index is -1.
         /// </summary>
-        /// <param name="elements"></param>
+        /// <param name="scope"> Scope of searcher </param>
         /// <returns> True on empty </returns>
-        public bool IsFirstAppereance(Element[] elements)
+        public bool IsFirstAppereance(Element[] scope)
         {
-            if (elements[this.positionOfRepeatedField] == null) return true;
+            if (scope[this.positionOfRepeatedField] == null) return true;
             else return false;
         }
 
-        public void SetType(Table t) => this.type = t;
+        public void SetType(Table table) => this.type = table;
         public Table GetTable() => this.type;
         
 
@@ -213,10 +215,13 @@ namespace QueryEngine
 
         public DFSEdgeMatch(ParsedPatternNode node, int indexInMap)
         {
-            if (indexInMap != -1) { 
-                this.repeatedVariable = true; 
-                this.anonnymous = false; 
+            if (indexInMap != -1)
+            {
+                this.repeatedVariable = true;
+                this.anonnymous = false;
             }
+            else this.anonnymous = true;
+
             this.positionOfRepeatedField = indexInMap;
             this.type = node.table;
             this.edgeType = node.edgeType;
@@ -275,6 +280,9 @@ namespace QueryEngine
             this.Patterns = new List<List<DFSBaseMatch>>();
             this.CreatePattern(parsedPatterns, map);
             this.Scope = new Element[map.GetCount()];
+
+            this.CurrentMatchNode = 0;
+            this.CurrentPattern = 0;
         }
 
 
@@ -292,11 +300,13 @@ namespace QueryEngine
         {
             var orderedPatterns = OrderParsedPatterns(parsedPatterns);
 
+
+            Console.ReadLine();
             // For every Parsed Pattern
             for (int i = 0; i < parsedPatterns.Count; i++)
             {
                 // Try to split it.
-                var firstPart = parsedPatterns[i].SplitParsedPattern();       
+                var firstPart = orderedPatterns[i].SplitParsedPattern();       
                 
                 // If the parsed pattern was splited
                 // Add both parts into the real Pattern
@@ -304,7 +314,7 @@ namespace QueryEngine
                 {
                     this.Patterns.Add(CreateChain(firstPart.Pattern, variableMap));
                 }
-                this.Patterns.Add(CreateChain(parsedPatterns[i].Pattern, variableMap));
+                this.Patterns.Add(CreateChain(orderedPatterns[i].Pattern, variableMap));
 
             }
         }
@@ -329,11 +339,11 @@ namespace QueryEngine
             for (int i = 0; i < parsedPatterns.Count; i++)
             {
                 var currentParsedPattern = parsedPatterns[i];
-                // Take subsequent patterns
+                // Take all following patterns
                 for (int j = i + 1; j < parsedPatterns.Count; j++)
                 {
                     var otherParsedPattern = parsedPatterns[j];
-                    if (currentParsedPattern.TryFindEqualVariables(otherParsedPattern, out string varName))
+                    if (currentParsedPattern.TryFindEqualVariable(otherParsedPattern, out string varName))
                     {
                         if (!usedPatterns[i] && !usedPatterns[j])
                         {
@@ -376,17 +386,17 @@ namespace QueryEngine
         /// Creates pattern chain used in searcher.
         /// Also sets map for query.
         /// </summary>
-        /// <param name="p"> Parsed pattern </param>
+        /// <param name="patternNodes"> Parsed pattern </param>
         /// <param name="map"> Map to store info about veriables </param>
         /// <returns></returns>
-        private List<DFSBaseMatch> CreateChain(List<ParsedPatternNode> p, VariableMap map) 
+        private List<DFSBaseMatch> CreateChain(List<ParsedPatternNode> patternNodes, VariableMap map) 
         {
             List<DFSBaseMatch> tmpChain = new List<DFSBaseMatch>();
 
             // For each parsed pattern node
-            for (int i = 0; i < p.Count; i++)
+            for (int i = 0; i < patternNodes.Count; i++)
             {
-                var tmpNode = p[i];
+                var tmpNode = patternNodes[i];
                 int index = -1;
                 
                 // If it has not got a name, do not add it to map.
@@ -396,15 +406,16 @@ namespace QueryEngine
                     if ( (index = map.GetVariablePosition(tmpNode.name)) == -1)
                     {
                         // If it is not, Add it there with the proper type and index.
+                        // Note: Table can be null
                         index = map.GetCount();
-                        map.AddVariable(tmpNode.name,index, tmpNode.table);
+                        map.AddVariable(tmpNode.name, index, tmpNode.table);
                     }
                 }
 
                 // Create match node and add it to the chain.
                 if (tmpNode.isVertex)
-                      tmpChain.Add(CreateDFSBaseMatch(DFSBaseMatch.MatchType.Vertex, p[i], index));
-                else tmpChain.Add(CreateDFSBaseMatch(DFSBaseMatch.MatchType.Edge, p[i], index));
+                      tmpChain.Add(CreateDFSBaseMatch(DFSBaseMatch.MatchType.Vertex, patternNodes[i], index));
+                else tmpChain.Add(CreateDFSBaseMatch(DFSBaseMatch.MatchType.Edge, patternNodes[i], index));
             }
             return tmpChain;
         }

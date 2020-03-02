@@ -9,7 +9,10 @@ using System.IO;
 namespace QueryEngine
 {
 
-    //Query represents query information, carrying it in each of the query main words.
+    /// <summary>
+    /// Query represents query information, carrying it in each of the query main words.
+    /// 
+    /// </summary>
     class Query
     {
         VariableMap variableMap;
