@@ -263,6 +263,7 @@ namespace QueryEngine
             if (CheckToken(position, Token.TokenType.Asterix, tokens))
             {
                 variableNode.AddName(new IdentifierNode("*"));
+                IncrementPosition();
             }
             else
             {
@@ -270,17 +271,17 @@ namespace QueryEngine
                 Node name = ParseIdentifierExrp(tokens);
                 if (name == null) return null;
                 else variableNode.AddName(name);
-            }
 
-            IncrementPosition();
-            //Case of property name .PropName , if there is dot, there must follow identifier.
-            if ((CheckToken(position, Token.TokenType.Dot, tokens)))
-            {
                 IncrementPosition();
-                Node identifierNode = ParseIdentifierExrp(tokens);
-                if (identifierNode == null) throw new ArgumentException("VariableParser, exprected Indentifier after dot.");
-                else variableNode.AddProperty(identifierNode);
-                IncrementPosition();
+                //Case of property name .PropName , if there is dot, there must follow identifier.
+                if ((CheckToken(position, Token.TokenType.Dot, tokens)))
+                {
+                    IncrementPosition();
+                    Node identifierNode = ParseIdentifierExrp(tokens);
+                    if (identifierNode == null) throw new ArgumentException("VariableParser, exprected Indentifier after dot.");
+                    else variableNode.AddProperty(identifierNode);
+                    IncrementPosition();
+                }
             }
 
             //Comma signals there is another variable, next variablenode must follow.

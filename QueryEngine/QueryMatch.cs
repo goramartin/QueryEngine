@@ -39,6 +39,7 @@ namespace QueryEngine
             // Change if necessary just for testing 
             this.Matcher = MatchFactory.CreateMatcher("DFS");
             this.Pattern = MatchFactory.CreatePattern("DFS", "SIMPLE", variableMap, result);
+       
         }
 
         /// <summary>

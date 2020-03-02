@@ -36,7 +36,7 @@ namespace QueryEngine
             this.match = new MatchObject(tokens, variableMap, graph);
 
             // Check correctness of select part
-            select.CheckCorrectnessOfSelect(graph, variableMap);
+            select.CheckCorrectnessOfSelect(variableMap);
 
             // Check if it successfully parsed every token.
             if (tokens.Count != Parser.GetPosition())
@@ -90,7 +90,21 @@ namespace QueryEngine
             else return -1;
         }
 
+
+        /// <summary>
+        /// Copy of Dictionary method TryGetValue
+        /// </summary>
+        /// <param name="name"> Key </param>
+        /// <param name="tuple"> Value </param>
+        /// <returns> True on retrieval of value </returns>
+        public bool TryGetValue(string name, out Tuple<int, Table> tuple)
+        {
+            return this.variableMap.TryGetValue(name, out tuple);
+        }
+
         public int GetCount()  => this.variableMap.Count;
+
+        
     }
 
 

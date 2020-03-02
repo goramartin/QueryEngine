@@ -33,15 +33,24 @@ namespace QueryEngine
 
         public List<SelectVariable> GetSelectVariables() => this.selectVariables;
 
-        // to do
-        public void CheckCorrectnessOfSelect(Graph graph, VariableMap variableMap)
+        /// <summary>
+        /// Checks correctness of given print expression.
+        /// </summary>
+        /// <param name="variableMap"> Map of variables </param>
+        public void CheckCorrectnessOfSelect(VariableMap variableMap)
         {
+            for (int i = 0; i < this.selectVariables.Count; i++)
+            {
+                if (this.selectVariables[i].name == "*") continue;
 
-
-
-
-
-
+                if (variableMap.TryGetValue(this.selectVariables[i].name,
+                                            out Tuple<int, Table> tuple))
+                {
+                    if (tuple.Item2 !=null && !tuple.Item2.ContainsProperty(this.selectVariables[i].propName))
+                            throw new ArgumentException($"{this.GetType()} Select expression contains variable that is not defined");
+                }
+                else throw new ArgumentException($"{this.GetType()} Select expression contains variable that is not defined");
+            }
         }
     }
     class SelectVariable
