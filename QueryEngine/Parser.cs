@@ -1024,7 +1024,7 @@ namespace QueryEngine
     /// They hold next property that leads to a next vertex/edge or match divider.
     /// Match divider servers as a separator of multiple patterns in query.
     /// </summary>
-    enum EdgeType { NotEdge, InEdge, OutEdge, AnyEdge };
+    
     class EdgeNode : CommomMatchNode
     {
         EdgeType type;

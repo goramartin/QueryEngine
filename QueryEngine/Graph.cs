@@ -22,6 +22,7 @@ namespace QueryEngine
     /// Base class for edges and nodes.
     /// Table represents the table where is the element stored.
     /// Position is location inside a vertex list or node list.
+    /// NOTICE id of can be same for vertex and edge.
     /// </summary>
      abstract class Element
     {
@@ -34,6 +35,12 @@ namespace QueryEngine
 
         public Table GetTable() => this.table;
         public int GetID() => this.id;
+
+        public override int GetHashCode()
+        {
+            return this.id;
+        }
+
     }
 
     /// <summary>
@@ -87,6 +94,23 @@ namespace QueryEngine
         public int GetInEdgesStartPosition() => this.inEdgesStartPosition;
         public int GetInEdgesEndPosition() => this.inEdgesEndPosition;
 
+        public void GetRangeOfOutEdges(out int start, out int end)
+        {
+            start = this.GetOutEdgesStartPosition();
+            end = this.GetOutEdgesEndPosition();
+        }
+
+        public void GetRangeOfInEdges(out int start, out int end)
+        {
+            start = this.GetInEdgesStartPosition();
+            end = this.GetInEdgesEndPosition();
+        }
+
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
 
     }
 
@@ -95,8 +119,10 @@ namespace QueryEngine
     /// Edge represents edge in a graph. The type of an edge is based on the list that contains the list.
     /// Each edge has an end vertex, that is which vertex the edge is leading to.
     /// </summary>
+    enum EdgeType { NotEdge, InEdge, OutEdge, AnyEdge };
     class Edge : Element
     {
+        public EdgeType edgeType;
         public Vertex endVertex;
 
         public Edge()
@@ -110,7 +136,45 @@ namespace QueryEngine
         public void AddEndVertex(Vertex vertex) => this.endVertex = vertex;
         public Vertex GetEndVertex() => this.endVertex;
         public int GetPositionInEdges() => this.positionInList;
+
+        public EdgeType GetEdgeType() => this.edgeType;
+        public void SetEdgeType(EdgeType type) => this.edgeType = type;
+
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+
     }
+
+    class InEdge : Edge
+    {
+        public InEdge() : base()
+        {
+            this.edgeType = EdgeType.InEdge;
+        }
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+    }
+
+    class OutEdge : Edge
+    {
+        public OutEdge() : base()
+        {
+            this.edgeType = EdgeType.OutEdge;
+        }
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+    }
+
+
 
     /// <summary>
     /// The class serves only for holder purpose during creation inside Processor.
@@ -118,8 +182,8 @@ namespace QueryEngine
     /// </summary>
     class EdgeListHolder
     {
-        public List<Edge> outEdges;
-        public List<Edge> inEdges;
+        public List<OutEdge> outEdges;
+        public List<InEdge> inEdges;
 
         public EdgeListHolder() {this.outEdges = null; this.inEdges = null; }
     }
@@ -134,8 +198,8 @@ namespace QueryEngine
         public Dictionary<string, Table> NodeTables;
         public Dictionary<string, Table> EdgeTables;
         public List<Vertex> vertices;
-        public List<Edge> outEdges;
-        public List<Edge> inEdges;
+        public List<OutEdge> outEdges;
+        public List<InEdge> inEdges;
 
         public Graph(string[] args)
         {
@@ -152,10 +216,12 @@ namespace QueryEngine
         }
 
 
-     
+
         /// <summary>
-        /// Loads all tables (types) from a file.
+        /// Loads table types from a file. 
         /// </summary>
+        /// <param name="filename"> A file containing definitions of tables. </param>
+        /// <returns> Dictionary of tables. </returns>
         private Dictionary<string, Table> LoadTables(string filename)
         {
             var reader = new Reader(filename);
@@ -166,6 +232,10 @@ namespace QueryEngine
         private void LoadEdgeTables(string filename) => this.EdgeTables = LoadTables(filename);
         private void LoadNodeTables(string filename) => this.NodeTables = LoadTables(filename);
 
+        /// <summary>
+        /// Loads all vetices from a file.
+        /// </summary>
+        /// <param name="filename"> File containing data of vertices. </param>
         private void LoadVertices(string filename)
         {
             var reader = new WordReader(filename);
@@ -175,6 +245,11 @@ namespace QueryEngine
             this.vertices = creator.Create();
         }
 
+
+        /// <summary>
+        /// Loads all vetices from a file.
+        /// </summary>
+        /// <param name="filename"> File containing data of edges. </param>
         private void LoadEdges(string filename)
         {
             var reader = new WordReader(filename);
@@ -185,27 +260,11 @@ namespace QueryEngine
             this.outEdges = result.outEdges;
             this.inEdges = result.inEdges;
         }
-      
 
 
         public List<Vertex> GetAllVertices() => this.vertices;
-        public List<Edge> GetAllOutEdges() => this.outEdges;
-        public List<Edge> GetAllInEdges() => this.inEdges;
+        public List<OutEdge> GetAllOutEdges() => this.outEdges;
+        public List<InEdge> GetAllInEdges() => this.inEdges;
 
-        //TODO put somewhere else
-        public void GetRangeToLastEdgeOfVertex(bool isOut, int positionOfVertex, out int start, out int end)
-        {
-            Vertex vertex = vertices[positionOfVertex];
-            if (isOut)
-            {
-                start = vertex.GetOutEdgesStartPosition();
-                end = vertex.GetOutEdgesEndPosition();
-            }
-            else
-            {
-                start = vertex.GetInEdgesStartPosition();
-                end = vertex.GetInEdgesEndPosition();
-            }
-        }
     }
 }

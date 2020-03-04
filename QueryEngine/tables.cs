@@ -37,8 +37,9 @@ namespace QueryEngine
         // Properties pertaining to a table.
         public List<Property> properties;
         
-        // Represents nodes inside a table. An index represents also an index inside the property lists. 
-        public List<int> IDs;
+        // Represents nodes inside a table. An index represents also an index inside the property lists.
+        // First int is an id of a node inside the table, and second int is the position inside the table.
+        public Dictionary<int,int> IDs;
 
         public Table(string tableName)
         {
@@ -48,14 +49,23 @@ namespace QueryEngine
             { 
                 this.IRI = tableName;
                 this.properties = new List<Property>();
-                this.IDs = new List<int>();
+                this.IDs = new Dictionary<int, int>();
             }
         }
 
         public int GetPropertyCount() { return this.properties.Count;  }
 
-        //TODO check if the id is there.
-        public void AddID(int id) { this.IDs.Add(id); }
+        /// <summary>
+        /// Adds id of a node into the table. Each id is bound with the position inside the table.
+        /// Tuple int, int is ment for: First int is the id of the node and the second int is the position inside this table.
+        /// </summary>
+        /// <param name="id"> Id of a node. </param>
+        public void AddID(int id) 
+        {
+            if (this.IDs.ContainsKey(id))
+                throw new ArgumentException($"{this.GetType()} Table {this.IRI} already contains id of a node {id}.");
+            else this.IDs.Add(id, this.IDs.Count);
+        }
 
         /// <summary>
         /// Checks whether a given property name is set on a table.

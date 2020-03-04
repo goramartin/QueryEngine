@@ -88,11 +88,39 @@ namespace QueryEngine
     /// </summary>
     abstract class DFSBaseMatch
     {
-        public enum MatchType { Vertex, Edge };
         protected bool anonnymous;
         protected bool repeatedVariable;
         protected int positionOfRepeatedField;
         protected Table type;
+
+        public DFSBaseMatch()
+        {
+            this.anonnymous = true;
+            this.positionOfRepeatedField = -1;
+            this.repeatedVariable = false;
+            this.type = null;
+        }
+
+        /// <summary>
+        /// Constructor for each DFS Match object.
+        /// </summary>
+        /// <param name="node"> Node containing data of the match object. </param>
+        /// <param name="indexInMap"> Index in the map of variables. (-1 if the the variable is anonymous.) </param>
+        protected DFSBaseMatch(ParsedPatternNode node, int indexInMap)
+        {
+            if (indexInMap != -1)
+            {
+                this.repeatedVariable = true;
+                this.anonnymous = false;
+            }
+            else
+            {
+                this.repeatedVariable = false;
+                this.anonnymous = true;
+            }
+            this.positionOfRepeatedField = indexInMap;
+            this.type = node.table;
+        }
 
 
         /// <summary>
@@ -101,16 +129,17 @@ namespace QueryEngine
         /// <param name="element"> Element to be tested. </param>
         /// <param name="scope"> Scope of variables in search context. </param>
         /// <returns> True if element can be aplicable or false on refusal. </returns>
-        public abstract bool Apply(Element element, Element[] scope);
+        public abstract bool Apply(Element element, Dictionary<int, Element> map, Dictionary<Element, bool> used);
 
 
         /// <summary>
         /// Called by descendants. Checks conditions that are indifferent to the descendant type.
         /// </summary>
-        /// <param name="element"> Element to be tested.</param>
-        /// <param name="scope"> Scope of variables in search context. </param>
+        /// <param name="element"> Elemented to be tested. </param>
+        /// <param name="map"> Scope of variables in search context.</param>
+        /// <param name="used"> Variables used in the search (dep. on if the match object is Edge or Vertex). </param>
         /// <returns>True if element can be aplicable or false on refusal.</returns>
-        protected bool CheckCommonConditions(Element element, Element[] scope)
+        protected bool CheckCommonConditions(Element element, Dictionary<int, Element> map, Dictionary<Element, bool> used)
         {
             // Check type, comparing references to tables.
             if ((this.type != null) && (this.type != element.GetTable())) return false;
@@ -121,29 +150,24 @@ namespace QueryEngine
             // It is repetition of variable before
             if (this.repeatedVariable)
             {
-                // The variable was used, check if it has got the same id.
-                if (!this.IsFirstAppereance(scope))
+                // Check if any element occupies variable rep. by this match object.
+                if (map.TryGetValue(this.positionOfRepeatedField, out Element tmpEl))
                 {
-                    if (scope[positionOfRepeatedField].GetID() != element.GetID()) return false;
-                    else { /* empty else no other option*/ }
+                    // It contains el. 
+                    // Check if the elemets are same.
+                    if (tmpEl.GetID() != element.GetID()) return false;
+                    else { /* Empty else -> returns true at the end */ }
 
-                } else // Else check if the element can be used at the variable ( check other variables for similarity )
+                } else // The dict does not contain the element.
                 {
-                    for (int i = 0; i < scope.Length; i++)
+                    // Check if the element is used for another variable.
+                    if (used.ContainsKey(element)) return false;
+                    // Add it to the map and to the used elements.
+                    else
                     {
-                        Element tmpEl = scope[i];
-                        if (tmpEl == null) continue; // Protection against touching null with below statement
-
-                        // The element occupies different variable
-                        if (this.positionOfRepeatedField != i && tmpEl.GetID() == element.GetID()) return false;
-
-                        // if the variable is occupied in its slot
-                        if (this.positionOfRepeatedField == i && tmpEl != null) return false;
-
+                        map.Add(this.positionOfRepeatedField, element);
+                        used.Add(element, true);
                     }
-                    
-                    // The element can be used, place him into the scope
-                     scope[this.positionOfRepeatedField] = element;
                 }
             } 
 
@@ -164,10 +188,9 @@ namespace QueryEngine
         /// </summary>
         /// <param name="scope"> Scope of searcher </param>
         /// <returns> True on empty </returns>
-        public bool IsFirstAppereance(Element[] scope)
+        public bool IsFirstAppereance(Dictionary<int, Element> map)
         {
-            if (scope[this.positionOfRepeatedField] == null) return true;
-            else return false;
+            return !map.ContainsKey(this.positionOfRepeatedField);
         }
 
         public void SetType(Table table) => this.type = table;
@@ -175,103 +198,114 @@ namespace QueryEngine
         
 
     }
+
     class DFSVertexMatch : DFSBaseMatch
     {
-        public DFSVertexMatch()
-        {
-            this.anonnymous = true;
-            this.positionOfRepeatedField = -1;
-            this.repeatedVariable = false;
-            this.type = null;
-        }
+        public DFSVertexMatch() : base()
+        { }
+        
+        public DFSVertexMatch(ParsedPatternNode node, int indexInMap) : base(node, indexInMap)
+        { }
 
-        public DFSVertexMatch(ParsedPatternNode node, int indexInMap)
-        {
-            if (indexInMap != -1)
-            {
-                this.repeatedVariable = true;
-                this.anonnymous = false;
-            }
-            this.positionOfRepeatedField = indexInMap;
-            this.type = node.table;
-        }
-
-        public override bool Apply(Element element,Element[] scope)
+        public override bool Apply(Element element, Dictionary<int, Element> map, Dictionary<Element, bool> used)
         {
             if (element == null) return false;
             else if (!(element is Vertex)) return false;
-            else return CheckCommonConditions(element, scope);
-        }
-
-
-        public override bool Equals(object obj)
-        {
-            if (obj is DFSVertexMatch)
-            {
-                var o = obj as DFSVertexMatch;
-                if (this.GetTable() != o.GetTable()) return false;
-                return true;
-            }
-            return false;
-
+            else return CheckCommonConditions(element, map, used);
         }
 
     }
-    class DFSEdgeMatch : DFSBaseMatch
+
+    abstract class DFSEdgeMatch : DFSBaseMatch
     {
-        protected EdgeType edgeType;
+        public DFSEdgeMatch() : base()
+        { }
 
-        public DFSEdgeMatch()
+        public DFSEdgeMatch(ParsedPatternNode node, int indexInMap) : base(node, indexInMap)
+        { }
+
+        public abstract EdgeType GetEdgeType();
+
+        /// <summary>
+        /// Sets type of last matched edge.
+        /// Must be called only on AnyEdge type.
+        /// </summary>
+        public abstract void SetLastEdgeType(EdgeType type);
+
+
+        /// <summary>
+        /// Returns type of last matched edge.
+        /// Must be called only on AnyEdge type.
+        /// </summary>
+        public abstract EdgeType GetLastEdgeType();
+
+    }
+
+    class DFSInEdgeMatch : DFSEdgeMatch
+    {
+        public DFSInEdgeMatch() : base()
+        { }
+        public DFSInEdgeMatch(ParsedPatternNode node, int indexInMap) : base(node, indexInMap)
+        { }
+
+        public override EdgeType GetEdgeType() => EdgeType.InEdge;
+        public override void SetLastEdgeType(EdgeType type) { /* Empty body */ }
+        public override EdgeType GetLastEdgeType() => EdgeType.InEdge;
+      
+        public override bool Apply(Element element, Dictionary<int, Element> map, Dictionary<Element, bool> used)
         {
-            this.anonnymous = true;
-            this.positionOfRepeatedField = -1;
-            this.repeatedVariable = false;
-            this.type = null;
+            if (element == null) return false;
+            else if (!(element is InEdge)) return false;
+            else return CheckCommonConditions(element, map, used);
         }
 
-        public DFSEdgeMatch(ParsedPatternNode node, int indexInMap)
-        {
-            if (indexInMap != -1)
-            {
-                this.repeatedVariable = true;
-                this.anonnymous = false;
-            }
-            else this.anonnymous = true;
+    }
+    class DFSOutEdgeMatch : DFSEdgeMatch
+    {
+        public DFSOutEdgeMatch() : base()
+        { }
+        public DFSOutEdgeMatch(ParsedPatternNode node, int indexInMap) : base(node, indexInMap)
+        { }
 
-            this.positionOfRepeatedField = indexInMap;
-            this.type = node.table;
-            this.edgeType = node.edgeType;
+        public override EdgeType GetEdgeType() => EdgeType.OutEdge;
+        public override void SetLastEdgeType(EdgeType type) { /* Empty body */ }
+        public override EdgeType GetLastEdgeType() => EdgeType.OutEdge;
+
+        public override bool Apply(Element element, Dictionary<int, Element> map, Dictionary<Element, bool> used)
+        {
+            if (element == null) return false;
+            else if (!(element is OutEdge)) return false;
+            else return CheckCommonConditions(element, map, used);
         }
 
-        public override bool Apply(Element element, Element[] scope)
+    }
+
+    class DFSAnyEdgeMatch : DFSEdgeMatch
+    {
+        protected EdgeType lastEdgeType;
+
+        public DFSAnyEdgeMatch() : base()
+        { }
+        public DFSAnyEdgeMatch(ParsedPatternNode node, int indexInMap) : base(node, indexInMap)
+        { }
+
+        public override EdgeType GetEdgeType() => EdgeType.AnyEdge;
+        public override void SetLastEdgeType(EdgeType type) => this.lastEdgeType = type;
+        public override EdgeType GetLastEdgeType() => this.lastEdgeType;
+
+        public override bool Apply(Element element, Dictionary<int, Element> map, Dictionary<Element, bool> used)
         {
             if (element == null) return false;
             else if (!(element is Edge)) return false;
-            else return CheckCommonConditions(element, scope);
+            else return CheckCommonConditions(element, map, used);
         }
-
-        public EdgeType GetEdgeType() => this.edgeType;
-        public void SetEdgeType(EdgeType type) => this.edgeType = type;
-
-        public override bool Equals(object obj)
-        {
-            if (obj is DFSEdgeMatch)
-            {
-                var o = obj as DFSEdgeMatch;
-                if (o.edgeType != this.edgeType) return false;
-                if (this.GetTable() != o.GetTable()) return false;
-                return true;
-            }
-            return false;
-
-        }
-
     }
 
 
 
-
-
+    /// <summary>
+    /// Basic interface for each pattern.
+    /// </summary>
     interface IPattern
     {
         bool Apply(Element element);
@@ -282,29 +316,62 @@ namespace QueryEngine
         bool isLastPattern();
 
 
-
         int GetIndexOfCurrentPattern();
         int GetIndexOfCurrentMatchNode();
 
         int GetPatternCount();
         int GetCurrentPatternCount();
 
-        Element GetConnection();
+        int GetAllNodeCount();
+
     }
 
-    class DFSPattern : IPattern
+    /// <summary>
+    /// Interface neccessary for each DFS pattern.
+    /// </summary>
+    interface IDFSPattern : IPattern
+    {
+        Element GetConnection();
+        EdgeType GetEdgeType();
+
+        EdgeType GetLastEdgeType();
+        void SetLastEdgeType(EdgeType type);
+    }
+
+
+    /// <summary>
+    /// Class that implements basic DFS pattern.
+    /// Creates it self from parsed pattern.
+    /// </summary>
+    class DFSPattern : IDFSPattern
     {
         private List<List<DFSBaseMatch>> Patterns;
         private int CurrentPattern;
         private int CurrentMatchNode;
-        private Element[] Scope;
+
+        /// <summary>
+        /// Map of variables that maps strings (names of variables) is map for the whole query.
+        /// We need to ensure that the indexes when retrieved are the same. 
+        /// Integer here is the positionOfRepeated variable (index in Map of variables.)
+        /// </summary>
+        private Dictionary<int, Element> Scope;
+
+        /// <summary>
+        /// We need two dictionaries to check if elements rep. other variables.
+        /// Problem is that id of a vertex and id of a edge can be the same -> that why to dicts.
+        /// </summary>
+        private Dictionary<Element, bool> MatchedVarsVertices;
+        private Dictionary<Element, bool> MatchedVarsEdges;
+
 
         public DFSPattern(VariableMap map, List<ParsedPattern> parsedPatterns)
         {
             this.Patterns = new List<List<DFSBaseMatch>>();
             this.CreatePattern(parsedPatterns, map);
-            this.Scope = new Element[map.GetCount()];
-
+            
+            this.Scope = new Dictionary<int, Element>();
+            this.MatchedVarsEdges = new Dictionary<Element, bool>();
+            this.MatchedVarsVertices = new Dictionary<Element, bool>();
             this.CurrentMatchNode = 0;
             this.CurrentPattern = 0;
         }
@@ -436,9 +503,7 @@ namespace QueryEngine
                 }
 
                 // Create match node and add it to the chain.
-                if (tmpNode.isVertex)
-                      tmpChain.Add(CreateDFSBaseMatch(DFSBaseMatch.MatchType.Vertex, patternNodes[i], index));
-                else tmpChain.Add(CreateDFSBaseMatch(DFSBaseMatch.MatchType.Edge, patternNodes[i], index));
+                tmpChain.Add(CreateDFSBaseMatch(tmpNode.edgeType, patternNodes[i], index));
             }
             return tmpChain;
         }
@@ -450,14 +515,18 @@ namespace QueryEngine
         /// <param name="node"> Prototype of the node </param>
         /// <param name="indexInMap"> Index of its variable in scope </param>
         /// <returns></returns>
-        private DFSBaseMatch CreateDFSBaseMatch(DFSBaseMatch.MatchType type, ParsedPatternNode node, int indexInMap)
+        private DFSBaseMatch CreateDFSBaseMatch(EdgeType edgeType, ParsedPatternNode node, int indexInMap)
         {
-            switch (type)
+            switch (edgeType)
             {
-                case DFSBaseMatch.MatchType.Vertex:
+                case EdgeType.NotEdge:
                     return new DFSVertexMatch(node, indexInMap);
-                case DFSBaseMatch.MatchType.Edge:
-                    return new DFSEdgeMatch(node, indexInMap);
+                case EdgeType.InEdge:
+                    return new DFSAnyEdgeMatch(node, indexInMap);
+                case EdgeType.OutEdge:
+                    return new DFSOutEdgeMatch(node, indexInMap);
+                case EdgeType.AnyEdge:
+                    return new DFSAnyEdgeMatch(node, indexInMap);
                 default:
                     throw new ArgumentException($"{this.GetType()} Trying to create Match type that does not exit.");
             }
@@ -465,10 +534,18 @@ namespace QueryEngine
 
         #endregion PatternCreation
     
-
+        /// <summary>
+        /// Calls apply on match object, based on the current object we choose which dict will be passed into the apply method.
+        /// We know that the sequence is vertex - edge - vertex, that is to say, vertex positions is divisible by 2.
+        /// </summary>
+        /// <param name="element"> Element to be tested. </param>
+        /// <returns> True if the element can be applied, false if it cannot be applied. </returns>
         public bool Apply(Element element)
         {
-            return this.Patterns[this.CurrentPattern][this.CurrentMatchNode].Apply(element, this.Scope);
+            if ((this.CurrentMatchNode % 2) == 0)
+               return this.Patterns[this.CurrentPattern][this.CurrentMatchNode].Apply(element, this.Scope, this.MatchedVarsVertices);
+            else
+                return this.Patterns[this.CurrentPattern][this.CurrentMatchNode].Apply(element, this.Scope, this.MatchedVarsEdges);
         }
         public void PrepareNext()
         {
@@ -482,6 +559,7 @@ namespace QueryEngine
         }
         public Element GetConnection()
         {
+            // get if the node is connected 
             throw new NotImplementedException();
         }
 
@@ -517,6 +595,32 @@ namespace QueryEngine
         {
             return this.Patterns[this.CurrentPattern].Count;
         }
+
+        public int GetAllNodeCount()
+        {
+            int Count = 0;
+            for (int i = 0; i < this.Patterns.Count; i++)
+            {
+                Count += this.Patterns[i].Count;
+            }
+            return Count;
+        }
+
+        public EdgeType GetEdgeType()
+        {
+            return ((DFSEdgeMatch)(this.Patterns[this.CurrentPattern][this.CurrentMatchNode])).GetEdgeType();
+        }
+
+        public EdgeType GetLastEdgeType()
+        {
+            return ((DFSEdgeMatch)(this.Patterns[this.CurrentPattern][this.CurrentMatchNode])).GetLastEdgeType();
+        }
+
+        public void SetLastEdgeType(EdgeType type)
+        {
+           ((DFSEdgeMatch)(this.Patterns[this.CurrentPattern][this.CurrentMatchNode])).SetLastEdgeType(type);
+        }
+
     }
 
 
@@ -531,6 +635,7 @@ namespace QueryEngine
     class DFSPatternMatcher : IPatternMatcher
     {
         public void Search() { }
+
         /*
         Graph graph;
         List<List<BaseMatch>> pattern;
@@ -540,6 +645,15 @@ namespace QueryEngine
         bool processingInEdge; //valid only when any edge is wanted 
         int patternIndex;
         int currentPatternIndex;
+
+        /*
+        Graph graph;
+        IPattern pattern;
+        List<Element> result;
+        bool processingVertex;
+        bool processingInEdge; //valid only when any edge is wanted 
+        
+
 
         public DFSPatternMatcher(List<List<BaseMatch>> p, Graph g)
         {
@@ -626,10 +740,9 @@ namespace QueryEngine
                 EdgeType edgeType = ((EdgeMatch)currentPattern[currentPatternIndex]).GetEdgeType();
 
                 Element nextElement = null;
-                int p = ((Vertex)lastElement).GetPositionInVertices();
-                if (edgeType == EdgeType.InEdge) nextElement = ProcessInEdge(p, lastUsedEdge);
-                else if (edgeType == EdgeType.OutEdge) nextElement = ProcessOutEdge(p, lastUsedEdge);
-                else nextElement = ProcessAnyEdge(p, lastUsedEdge);
+                if (edgeType == EdgeType.InEdge) nextElement = ProcessInEdge((Vertex)lastElement, lastUsedEdge);
+                else if (edgeType == EdgeType.OutEdge) nextElement = ProcessOutEdge((Vertex)lastElement, lastUsedEdge);
+                else nextElement = ProcessAnyEdge((Vertex)lastElement, lastUsedEdge);
 
                 processingVertex = false;
                 return nextElement;
@@ -674,34 +787,83 @@ namespace QueryEngine
             }
         }
 
-        private Element FindNextEdge(int start, int end, List<Edge> edges, Element lastUsedEdge)
+        /// <summary>
+        /// Returns a next inward edge to be processed of the given vertex.
+        /// </summary>
+        /// <param name="vertex"> Edges of the vertex will be searched. </param>
+        /// <param name="lastUsedEdge"> Last used edge of the vertex. </param>
+        /// <returns> Next inward edge of the vertex. </returns>
+        private Element ProcessInEdge(Vertex vertex, Element lastUsedEdge)
         {
-            if (start == -1) return null;
-            else if (lastUsedEdge == null) return edges[start];
-            else if (end - 1 == lastUsedEdge.positionInList) return null;
-            else return edges[lastUsedEdge.positionInList + 1];
+            vertex.GetRangeOfInEdges(out int start, out int end);
+            return FindNextEdge<InEdge>(start, end, graph.GetAllInEdges(), lastUsedEdge);
         }
-        private Element ProcessInEdge(int p, Element last)
+
+        /// <summary>
+        /// Returns a next outward edge to be processed of the given vertex.
+        /// </summary>
+        /// <param name="vertex"> Edges of the vertex will be searched. </param>
+        /// <param name="lastUsedEdge"> Last used edge of the vertex. </param>
+        /// <returns> Next outward edge of the vertex. </returns>
+        private Element ProcessOutEdge(Vertex vertex, Element lastUsedEdge)
         {
-            graph.GetRangeToLastEdgeOfVertex(isOut: false, p, out int start, out int end);
-            return FindNextEdge(start, end, graph.GetAllInEdges(), last);
+            vertex.GetRangeOfOutEdges(out int start, out int end);
+            return FindNextEdge<OutEdge>(start, end, graph.GetAllOutEdges(), lastUsedEdge);
         }
-        private Element ProcessOutEdge(int p, Element last)
+
+        /// <summary>
+        /// Returns a next edge to be processed of the given vertex.
+        /// </summary>
+        /// <param name="vertex"> Edges of the vertex will be searched. </param>
+        /// <param name="lastUsedEdge"> Last used edge of the vertex. </param>
+        /// <returns> Next edge of the vertex. </returns>
+        private Element ProcessAnyEdge(Vertex vertex, Element lastUsedEdge)
         {
-            graph.GetRangeToLastEdgeOfVertex(isOut: true, p, out int start, out int end);
-            return FindNextEdge(start, end, graph.GetAllOutEdges(), last);
-        }
-        private Element ProcessAnyEdge(int p, Element last)
-        {
-            Element e = null;
+
+            // to do Error when we jump to the next pattern and then back we always try to go into in edges with the edge from the other list 
+            // fix each edge should know it is type
+            Element nextEdge = null;
             if (processingInEdge)
             {
-                e = ProcessInEdge(p, last);
-                if (e == null) { last = null; processingInEdge = false; }
+                nextEdge = ProcessInEdge(vertex, lastUsedEdge);
+                if (nextEdge == null) { 
+                    lastUsedEdge = null;
+                    processingInEdge = false; 
+                }
             }
-            if (!processingInEdge) e = ProcessOutEdge(p, last);
-            return e;
+            if (!processingInEdge) nextEdge = ProcessOutEdge(vertex, lastUsedEdge);
+            return nextEdge;
+
         }
+
+        /// <summary>
+        /// Returns next edge to process. We expect the the last used edge is from the list.
+        /// </summary>
+        /// <param name="start"> Index of a first edge of the processed vertex. -1 that the vertex does not have edges. </param>
+        /// <param name="end"> Index of a last edge of the processed vertex. </param>
+        /// <param name="edges"> All edges (in or out) of the graph. </param>
+        /// <param name="lastUsedEdge"> Last processed edge of the processed vertex. Null signifies that no edge of the vertex was processed. </param>
+        /// <returns></returns>
+        private Element FindNextEdge<T>(int start, int end, List<T> edges, Element lastUsedEdge) where T:Edge
+        {
+            // The processed vertex have not got edges.
+            if (start == -1) return null;
+            // No edge was used from the processed vertex -> pick the first one.
+            else if (lastUsedEdge == null) return edges[start];
+            // The Last processed Edge was the last edge of the vertex -> can not pick more edges.
+            else if (end - 1 == lastUsedEdge.positionInList) return null;
+            // There are more non processed edges of the vertex -> pick the following one from the edge list.
+            else return edges[lastUsedEdge.positionInList + 1];
+        }
+
+
+
+
+
+
+
+
+
         private void AddToResult(Element element, int index)
         {
             index = GetAbsolutePosition(index);
@@ -718,7 +880,7 @@ namespace QueryEngine
                 index += pattern[i].Count;
             return index;
         }
-        */
+    */
     }
 
 
@@ -795,7 +957,6 @@ namespace QueryEngine
             else throw new ArgumentException("MatchFactory: Failed to load type from  Pattern registry.");
         }
     }
-
 }
 
 

@@ -271,15 +271,15 @@ namespace QueryEngine
         EdgeListHolder holder = new EdgeListHolder();
 
         List<Vertex> vertices;
-        List<Edge> outEdges;
-        List<Edge> inEdges;
+        List<OutEdge> outEdges;
+        List<InEdge> inEdges;
         
         Dictionary<string, Table> edgeTables;
-        List<Edge>[] incomingEdgesTable; // each vertex has a set of inwards edges
+        List<InEdge>[] incomingEdgesTable; // each vertex has a set of inwards edges
         
         bool finished;
-        Edge incomingEdge;
-        Edge outEdge;
+        InEdge incomingEdge;
+        OutEdge outEdge;
 
         enum State { ID, Type, Parameters, EdgeFromID, EdgeToID };
         State state;
@@ -287,8 +287,8 @@ namespace QueryEngine
 
         public EdgeListProcessor()
         {
-            this.outEdges = new List<Edge>();
-            this.inEdges = new List<Edge>();
+            this.outEdges = new List<OutEdge>();
+            this.inEdges = new List<InEdge>();
             this.finished = false;
             this.state = State.ID;
             this.paramsToReadLeft = 0;
@@ -353,7 +353,7 @@ namespace QueryEngine
             if (!int.TryParse(param, out id))
                 throw new ArgumentException($"{this.GetType()} Reading wrong node ID. ID is not a number.");
 
-            this.outEdge = new Edge();
+            this.outEdge = new OutEdge();
             this.outEdge.SetPositionInEdges(outEdges.Count);
             this.outEdge.AddID(id);
             this.state = State.Type;
@@ -383,7 +383,7 @@ namespace QueryEngine
         {
             Vertex fromVertex = FindVertex(param);
             if (!fromVertex.HasOutEdges()) fromVertex.SetOutEdgesStartPosition(outEdges.Count);
-            this.incomingEdge = new Edge();
+            this.incomingEdge = new InEdge();
             this.incomingEdge.AddEndVertex(fromVertex);
             this.state = State.EdgeToID;
         }
@@ -495,10 +495,10 @@ namespace QueryEngine
         /// </summary>
         private void InicialiseInEdgesTables()
         {
-            this.incomingEdgesTable = new List<Edge>[vertices.Count];
+            this.incomingEdgesTable = new List<InEdge>[vertices.Count];
             for (int i = 0; i < incomingEdgesTable.Length; i++)
             {
-                incomingEdgesTable[i] = new List<Edge>();
+                incomingEdgesTable[i] = new List<InEdge>();
             }
         }
 
