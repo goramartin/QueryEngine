@@ -309,8 +309,12 @@ namespace QueryEngine
     interface IPattern
     {
         bool Apply(Element element);
-        void PrepareNext();
-        void PreparePrevious();
+
+        void PrepareNextSubPattern();
+        void PreparePreviousSubPattern();
+
+        void PrepareNextNode();
+        void PreparePreviousNode();
 
         bool isLastNodeInCurrentPattern();
         bool isLastPattern();
@@ -318,6 +322,7 @@ namespace QueryEngine
 
         int GetIndexOfCurrentPattern();
         int GetIndexOfCurrentMatchNode();
+        int GetOverAllIndex();
 
         int GetPatternCount();
         int GetCurrentPatternCount();
@@ -346,8 +351,9 @@ namespace QueryEngine
     class DFSPattern : IDFSPattern
     {
         private List<List<DFSBaseMatch>> Patterns;
-        private int CurrentPattern;
-        private int CurrentMatchNode;
+        private int CurrentPatternIndex;
+        private int CurrentMatchNodeIndex;
+        private int OverAllIndex;
 
         /// <summary>
         /// Map of variables that maps strings (names of variables) is map for the whole query.
@@ -372,8 +378,9 @@ namespace QueryEngine
             this.Scope = new Dictionary<int, Element>();
             this.MatchedVarsEdges = new Dictionary<Element, bool>();
             this.MatchedVarsVertices = new Dictionary<Element, bool>();
-            this.CurrentMatchNode = 0;
-            this.CurrentPattern = 0;
+            this.CurrentMatchNodeIndex = 0;
+            this.CurrentPatternIndex = 0;
+            this.OverAllIndex = 0;
         }
 
         #region PatternCreation
@@ -542,17 +549,29 @@ namespace QueryEngine
         /// <returns> True if the element can be applied, false if it cannot be applied. </returns>
         public bool Apply(Element element)
         {
-            if ((this.CurrentMatchNode % 2) == 0)
-               return this.Patterns[this.CurrentPattern][this.CurrentMatchNode].Apply(element, this.Scope, this.MatchedVarsVertices);
+            if ((this.CurrentMatchNodeIndex % 2) == 0)
+               return this.Patterns[this.CurrentPatternIndex][this.CurrentMatchNodeIndex].Apply(element, this.Scope, this.MatchedVarsVertices);
             else
-                return this.Patterns[this.CurrentPattern][this.CurrentMatchNode].Apply(element, this.Scope, this.MatchedVarsEdges);
+                return this.Patterns[this.CurrentPatternIndex][this.CurrentMatchNodeIndex].Apply(element, this.Scope, this.MatchedVarsEdges);
         }
-        public void PrepareNext()
+
+        public void PrepareNextSubPattern()
+        {
+
+        }
+
+        public void PreparePreviousSubPattern()
+        {
+
+
+        }
+
+        public void PrepareNextNode()
         {
             // sets
             throw new NotImplementedException();
         }
-        public void PreparePrevious()
+        public void PreparePreviousNode()
         {
             // unsets
             throw new NotImplementedException();
@@ -567,22 +586,22 @@ namespace QueryEngine
 
         public bool isLastNodeInCurrentPattern()
         {
-            return (this.Patterns[this.CurrentPattern].Count - 1) == this.CurrentMatchNode ? true : false;
+            return (this.Patterns[this.CurrentPatternIndex].Count - 1) == this.CurrentMatchNodeIndex ? true : false;
         }
 
         public bool isLastPattern()
         {
-            return this.CurrentPattern == (this.Patterns.Count - 1) ? true : false;
+            return this.CurrentPatternIndex == (this.Patterns.Count - 1) ? true : false;
         }
 
         public int GetIndexOfCurrentPattern()
         {
-            return this.CurrentPattern;
+            return this.CurrentPatternIndex;
         }
 
         public int GetIndexOfCurrentMatchNode()
         {
-            return this.CurrentMatchNode;
+            return this.CurrentMatchNodeIndex;
         }
 
         public int GetPatternCount()
@@ -593,7 +612,7 @@ namespace QueryEngine
 
         public int GetCurrentPatternCount()
         {
-            return this.Patterns[this.CurrentPattern].Count;
+            return this.Patterns[this.CurrentPatternIndex].Count;
         }
 
         public int GetAllNodeCount()
@@ -608,19 +627,23 @@ namespace QueryEngine
 
         public EdgeType GetEdgeType()
         {
-            return ((DFSEdgeMatch)(this.Patterns[this.CurrentPattern][this.CurrentMatchNode])).GetEdgeType();
+            return ((DFSEdgeMatch)(this.Patterns[this.CurrentPatternIndex][this.CurrentMatchNodeIndex])).GetEdgeType();
         }
 
         public EdgeType GetLastEdgeType()
         {
-            return ((DFSEdgeMatch)(this.Patterns[this.CurrentPattern][this.CurrentMatchNode])).GetLastEdgeType();
+            return ((DFSEdgeMatch)(this.Patterns[this.CurrentPatternIndex][this.CurrentMatchNodeIndex])).GetLastEdgeType();
         }
 
         public void SetLastEdgeType(EdgeType type)
         {
-           ((DFSEdgeMatch)(this.Patterns[this.CurrentPattern][this.CurrentMatchNode])).SetLastEdgeType(type);
+           ((DFSEdgeMatch)(this.Patterns[this.CurrentPatternIndex][this.CurrentMatchNodeIndex])).SetLastEdgeType(type);
         }
 
+        public int GetOverAllIndex()
+        {
+            return this.OverAllIndex;
+        }
     }
 
 
@@ -638,156 +661,238 @@ namespace QueryEngine
     /// </summary>
     class DFSPatternMatcher : IPatternMatcher
     {
-        public void Search() { }
-
-        /*
-        Graph graph;
-        List<List<BaseMatch>> pattern;
-        List<BaseMatch> currentPattern;
-        Element[] result;
-        bool processingVertex;
-        bool processingInEdge; //valid only when any edge is wanted 
-        int patternIndex;
-        int currentPatternIndex;
-        */
-      
         Graph graph;
         IDFSPattern pattern;
-        List<Element> result;
+        Element[] result;
         bool processingVertex;
-       // bool processingInEdge; //valid only when any edge is wanted now stored in pattern in self
         
         public DFSPatternMatcher(IDFSPattern pattern, Graph graph)
         {
             this.graph = graph;
-            this.result = new List<Element>();
+            this.result = new Element[pattern.GetAllNodeCount()];
             this.pattern = pattern;
         }
 
         public void Search()
         {
-            patternIndex = 0;
-            currentPattern = pattern[patternIndex];
-            int[] lastUsedVertices = new int[pattern.Count - 1];
-            int lastUsedVertex = -1;
+            int[] lastUsedIndeces = new int[pattern.GetPatternCount() - 1];
+            int lastUsedIndex = -1;
+
             while (true)
             {
-                if (lastUsedVertex == -1) lastUsedVertex = DFS(0, false);
-                else lastUsedVertex = DFS(lastUsedVertex, true);
-                if (lastUsedVertex == -1)
+                // -1 meaning that next conjunction will start from the beginning. 
+                if (lastUsedIndex == -1) lastUsedIndex = DFSStartOfCunjunction(0, false);
+                // Else it uses last used index in that conjunction.
+                else lastUsedIndex = DFSStartOfCunjunction(lastUsedIndex, true);
+                
+                // - 1 one finished whole pattern or going down
+                if (lastUsedIndex == -1)
                 {
-                    if (patternIndex == 0) break;
-                    patternIndex--;
-                    lastUsedVertex = lastUsedVertices[patternIndex];
-                    currentPattern = pattern[patternIndex];
+                    if (pattern.GetIndexOfCurrentPattern() == 0) break; // end
+                    pattern.PrepareNextSubPattern();
+                    lastUsedIndex = lastUsedIndeces[pattern.GetIndexOfCurrentPattern()];
                 }
-                else
+                else // pick next pattern
                 {
-                    lastUsedVertices[patternIndex] = lastUsedVertex;
-                    patternIndex++;
-                    currentPattern = pattern[patternIndex];
-                    lastUsedVertex = -1;
+                    lastUsedIndeces[pattern.GetIndexOfCurrentPattern()] = lastUsedIndex;
+                    pattern.PrepareNextSubPattern();
+                    lastUsedIndex = -1;
                 }
             }
         }
 
-        public int DFS(int position, bool cameFromUp)
+        /// <summary>
+        /// Initiates iteration over one connected pattern.
+        /// </summary>
+        /// <param name="lastIndex"> Last index from last iteration. </param>
+        /// <param name="cameFromUp"> If we came from a different conjunction. </param>
+        /// <returns> Last used index. </returns>
+        public int DFSStartOfCunjunction(int lastIndex, bool cameFromUp)
         {
             var vertices = graph.GetAllVertices();
-            for (int i = position; i < vertices.Count; i++)
+            processingVertex = true;
+            for (int i = lastIndex; i < vertices.Count; i++)
             {
-                processingVertex = true;
-                processingInEdge = true;
                 Element nextElement = vertices[i];
-                currentPatternIndex = 0;
                 if (cameFromUp)
                 {
                     nextElement = null;
-                    currentPatternIndex = currentPattern.Count - 1;
                     cameFromUp = false;
                 }
+                
+                // Iteration over the connected chains.
                 while (true)
                 {
-                    bool success = currentPattern[currentPatternIndex].Apply(nextElement, pattern, result);
-                    if (success)
+                    var canContinue = DFSMainLoop(nextElement);
+                    
+                    // If there is another chains
+                    if (canContinue) 
                     {
-                        AddToResult(nextElement, currentPatternIndex);//to do
-                        if ((currentPattern.Count - 1) == currentPatternIndex) //last position in current pattern
+                        // Prepare the next chain.
+                        pattern.PrepareNextSubPattern();
+
+                        // If the new chain is not connected, that means there is another conjunction.
+                        // Otherwise we take the element from the connection and start new dfs chain with that element.
+                        if ((nextElement = pattern.GetConnection()) != null) continue;
+                        else return i;
+
+                    } else 
+                    {
+                        // If there are no more chains or we are simply returning
+                        // If we are at the starting chain of conjunction we let main for loop pick next starting vertex.
+                        if ((pattern.GetConnection()) == null) break;
+                        else
                         {
-                            if (patternIndex == pattern.Count - 1) //last pattern from patterns
-                            {
-                                result.Print();
-                                nextElement = null;
-                                continue;
-                            }
-                            else return i;
+                            // If we are connected to the before pattern, we will initiate returning.
+                            pattern.PreparePreviousSubPattern();
+                            nextElement = null;
                         }
-                        currentPatternIndex++;
-                        nextElement = DoDFSForward(nextElement, null);
-                    }
-                    else
-                    {
-                        nextElement = DoDFSBack(nextElement);
-                        if (currentPatternIndex <= 0) break;
                     }
                 }
             }
             return -1;
         }
 
-        private Element DoDFSForward(Element lastElement, Edge lastUsedEdge)
+        /// <summary>
+        /// Main loop of the dfs, always consumes one sub pattern from pattern.
+        /// When it returns we expect the sub pattern to be empty of full.
+        /// </summary>
+        /// <param name="nextElement"> Element to start on. </param>
+        /// <returns> True if there is another pattern, False if it is returning. </returns>
+        private bool DFSMainLoop(Element nextElement)
+        {
+            while (true)
+            {
+                // Try to apply the new element to the pattern.
+                bool success = pattern.Apply(nextElement);
+                if (success)
+                {
+                    // If it is the last node in the pattern, we check if it is the last pattern.
+                    AddToResult(nextElement);
+                    if (pattern.isLastNodeInCurrentPattern())
+                    {
+                        if (pattern.isLastPattern())
+                        {
+                            // Setting null here makes it to fail on it and it is forced to dfs back.
+                            result.Print();
+                            nextElement = null;
+                            continue;
+                        }
+                        else return true; // The i is set when we return from the above pattern so we can start iteration from this point.
+                    }
+                    pattern.PrepareNextNode();
+                    nextElement = DoDFSForward(nextElement, null);
+                }
+                else
+                {
+                    nextElement = DoDFSBack(nextElement);
+                    if (pattern.GetIndexOfCurrentMatchNode() <= 0) break; // Continues in the main cycle.
+                }
+            }
+            return false;
+        }
+
+
+
+
+        /// <summary>
+        /// Method seaches for the next element to match.
+        /// If the last matched element is vertex we look for an edge.
+        /// If the last matched element is edge we just take the end vertex.
+        /// Last used edge is filled only when calling from dfs back.
+        /// In this case we do not add anything to the result.
+        /// </summary>
+        /// <param name="lastUsedElement"> Last matched Element. </param>
+        /// <param name="lastUsedEdge"> Last matched edge. </param>
+        /// <returns> Next element that will be tried to applied. </returns>
+        private Element DoDFSForward(Element lastUsedElement, Edge lastUsedEdge)
         {
             if (processingVertex)
             {
-                EdgeType edgeType = ((EdgeMatch)currentPattern[currentPatternIndex]).GetEdgeType();
-
-                Element nextElement = null;
-                if (edgeType == EdgeType.InEdge) nextElement = ProcessInEdge((Vertex)lastElement, lastUsedEdge);
-                else if (edgeType == EdgeType.OutEdge) nextElement = ProcessOutEdge((Vertex)lastElement, lastUsedEdge);
-                else nextElement = ProcessAnyEdge((Vertex)lastElement, lastUsedEdge);
+                EdgeType edgeType = pattern.GetEdgeType();
+                Edge nextEdge = FindNextEdge(edgeType, (Vertex)lastUsedElement, lastUsedEdge);
 
                 processingVertex = false;
-                return nextElement;
+                return nextEdge;
             }
             else
             {
                 processingVertex = true;
-                return ((Edge)lastElement).endVertex;
+                return ((Edge)lastUsedElement).endVertex;
             }
         }
 
-        //When processing the vertex, we failed to add the vertex, that means we need to go down in the pattern,
-        //but also remove the edge we came with to the vertex. So we return null, next loop in algorithm fails on adding edge, so the edge gets removed.
-        //When processing edge, we get the last used edge, remove it from results (Note there can be no edge). 
-        //We try to do dfs from the vertex the edge started from with the edge we got from results before. If it returns edge we can continue 
-        //trying to apply edge on the same index in pattern. If it is null we need to remove the vertex because there are no more available edges.
-        //In order to do that we go down in pattern and return null, so the algorithm fail on adding vertex so it jumps here again.
-        private Element DoDFSBack(Element element)
+
+        /// <summary>
+        /// Processing Vertex:
+        /// We are returning from the dfs.
+        /// When processing the vertex, we failed to add the vertex to the pattern, 
+        /// that means we need to go down in the pattern and also remove the edge we came with to the vertex. 
+        /// In order to do so, we will return null, next loop in algorithm fails on adding edge, so the edge gets removed.
+        /// 
+        /// Processing Edge:
+        /// When processing edge, we get the last used edge from the result, remove it from results.
+        /// (Note there can be no edge, eg: we failed to add one at all.)
+        /// We take the edge (null or normal edge) and try to do dfs from the vertex the edge started from 
+        /// If it returns a new edge we can continue trying to apply the edge on the same index in pattern.
+        /// If it is null we need to remove also the vertex because there are no more available edges from this vertex.
+        /// In order to do that we go down in pattern and return null, so the algorithm fail 
+        /// on adding vertex so it jumps here again.
+        /// </summary>
+        /// <param name="lastElement"> Last element we failed on. </param>
+        /// <returns>  Element to continue in the search. </returns>
+        private Element DoDFSBack(Element lastElement)
         {
             if (processingVertex)
             {
-                RemoveFromResult(currentPatternIndex);
-                currentPatternIndex--;
+                ClearCurrentFromResult();
+                pattern.PreparePreviousNode();
                 processingVertex = false;
                 return null;
             }
             else
             {
-                Edge lastUsedEdge = (Edge)result[GetAbsolutePosition(currentPatternIndex)];
-                if (element == null) element = lastUsedEdge;
-                RemoveFromResult(currentPatternIndex);
+                // Take the edge on the current position. (Edge that was matched before, can be null if no edge was there.)
+                Element lastUsedEdgeInResult = (Edge)result[pattern.GetOverAllIndex()];
+                
+                // lastElement is null only when we are returning from the removed vertex, we take the last used edge in the result.
+                // Else we always use the newest edge we failed on. 
+                if (lastElement == null) lastElement = lastUsedEdgeInResult;
+                
+                // Clears the last used edge, or does nothing.
+                ClearCurrentFromResult();
 
+                // Try to find new edge from the last vertex.
                 processingVertex = true; //To jump into dfs.
                 Element nextElement =
-                    DoDFSForward(result[GetAbsolutePosition(currentPatternIndex) - 1], (Edge)element);
+                    DoDFSForward((Vertex)result[pattern.GetOverAllIndex()-1], (Edge)lastElement);
+                
+                // If no edge was found, we want to remove also the last vertex. (because we consumed all of his edges)
+                // Returning null in this position removes the vertex in the next cycle of the main algorithm.
+                // Else we continue in searching with the new edge on the same index.
                 if (nextElement == null)
                 {
-                    currentPatternIndex--;
+                    pattern.PreparePreviousNode();
                     processingVertex = true;
-                }
-                return nextElement;
+                    return null;
+                } else return nextElement;
             }
         }
+
+        /// <summary>
+        /// Finds next edge based on given type.
+        /// </summary>
+        /// <param name="edgeType"> Type of edge. </param>
+        /// <param name="vertex"> Vertex that the edge is coming from. </param>
+        /// <param name="lastUsedEdge"> Possibly, last used edge of the vertex. </param>
+        /// <returns> Next edge. </returns>
+        private Edge FindNextEdge(EdgeType edgeType, Vertex lastUsedVertex, Edge lastUsedEdge)
+        {
+            if (edgeType == EdgeType.InEdge) return FindInEdge(lastUsedVertex, lastUsedEdge);
+            else if (edgeType == EdgeType.OutEdge) return FindOutEdge(lastUsedVertex, lastUsedEdge);
+            else return FindAnyEdge(lastUsedVertex, lastUsedEdge);
+        }
+
 
         /// <summary>
         /// Returns a next inward edge to be processed of the given vertex.
@@ -795,10 +900,10 @@ namespace QueryEngine
         /// <param name="vertex"> Edges of the vertex will be searched. </param>
         /// <param name="lastUsedEdge"> Last used edge of the vertex. </param>
         /// <returns> Next inward edge of the vertex. </returns>
-        private Element ProcessInEdge(Vertex vertex, Element lastUsedEdge)
+        private Edge FindInEdge(Vertex vertex, Edge lastUsedEdge)
         {
             vertex.GetRangeOfInEdges(out int start, out int end);
-            return FindNextEdge<InEdge>(start, end, graph.GetAllInEdges(), lastUsedEdge);
+            return GetNextEdge<InEdge>(start, end, graph.GetAllInEdges(), lastUsedEdge);
         }
 
         /// <summary>
@@ -807,10 +912,10 @@ namespace QueryEngine
         /// <param name="vertex"> Edges of the vertex will be searched. </param>
         /// <param name="lastUsedEdge"> Last used edge of the vertex. </param>
         /// <returns> Next outward edge of the vertex. </returns>
-        private Element ProcessOutEdge(Vertex vertex, Element lastUsedEdge)
+        private Edge FindOutEdge(Vertex vertex, Edge lastUsedEdge)
         {
             vertex.GetRangeOfOutEdges(out int start, out int end);
-            return FindNextEdge<OutEdge>(start, end, graph.GetAllOutEdges(), lastUsedEdge);
+            return GetNextEdge<OutEdge>(start, end, graph.GetAllOutEdges(), lastUsedEdge);
         }
 
         /// <summary>
@@ -821,13 +926,13 @@ namespace QueryEngine
         /// <param name="vertex"> Edges of the vertex will be searched for next possible. </param>
         /// <param name="lastUsedEdge"> Last used edge of the vertex. </param>
         /// <returns> Next edge of the vertex. </returns>
-        private Element ProcessAnyEdge(Vertex vertex, Element lastUsedEdge)
+        private Edge FindAnyEdge(Vertex vertex, Edge lastUsedEdge)
         {
-            Element nextEdge = null;
+            Edge nextEdge = null;
             // Searching can start newly -> last edge type == not edge (after reseting) or we are processing in edge.
             if (pattern.GetLastEdgeType() == EdgeType.NotEdge || pattern.GetLastEdgeType() == EdgeType.InEdge)
             {
-                nextEdge = ProcessInEdge(vertex, lastUsedEdge);
+                nextEdge = FindInEdge(vertex, lastUsedEdge);
                 if (nextEdge == null)
                 {
                     lastUsedEdge = null;
@@ -837,7 +942,9 @@ namespace QueryEngine
             }
 
             // After we tried using inEdges we look for out edges.
-            if (pattern.GetLastEdgeType() == EdgeType.OutEdge) nextEdge = ProcessOutEdge(vertex, lastUsedEdge);
+            if (pattern.GetLastEdgeType() == EdgeType.OutEdge) nextEdge = FindOutEdge(vertex, lastUsedEdge);
+
+            //After we searched all out edges, the state should be reset and lastedge type set to not edge 
             return nextEdge;
         }
 
@@ -848,8 +955,9 @@ namespace QueryEngine
         /// <param name="end"> Index of a last edge of the processed vertex. </param>
         /// <param name="edges"> All edges (in or out) of the graph. </param>
         /// <param name="lastUsedEdge"> Last processed edge of the processed vertex. Null signifies that no edge of the vertex was processed. </param>
-        /// <returns></returns>
-        private Element FindNextEdge<T>(int start, int end, List<T> edges, Element lastUsedEdge) where T:Edge
+        /// <returns> Next edge.  </returns>
+        /// <typeparam name="T"> Type of edge that the list is filled with. </typeparam>
+        private Edge GetNextEdge<T>(int start, int end, List<T> edges, Edge lastUsedEdge) where T:Edge
         {
             // The processed vertex have not got edges.
             if (start == -1) return null;
@@ -861,35 +969,23 @@ namespace QueryEngine
             else return edges[lastUsedEdge.positionInList + 1];
         }
 
-
-
-
-
-
-
-
-
-        private void AddToResult(Element element, int index)
+        /// <summary>
+        /// Adds element to the result.
+        /// </summary>
+        /// <param name="element">Element to be added to result.</param>
+        private void AddToResult(Element element)
         {
-            index = GetAbsolutePosition(index);
-            this.result[index] = element;
+            result[pattern.GetOverAllIndex()] = element;
         }
-        private void RemoveFromResult(int index)
+
+        /// <summary>
+        /// Removes the last element from the result.
+        /// </summary>
+        private void ClearCurrentFromResult()
         {
-            index = GetAbsolutePosition(index);
-            this.result[index] = null;
-        }
-        private int GetAbsolutePosition(int index)
-        {
-            for (int i = 0; i < patternIndex; i++)
-                index += pattern[i].Count;
-            return index;
-        }
-   
+            result[pattern.GetOverAllIndex()] = null;
+        }   
     }
-
-
-
     
 
     /// <summary>
