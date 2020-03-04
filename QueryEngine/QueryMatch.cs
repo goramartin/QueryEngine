@@ -522,7 +522,7 @@ namespace QueryEngine
                 case EdgeType.NotEdge:
                     return new DFSVertexMatch(node, indexInMap);
                 case EdgeType.InEdge:
-                    return new DFSAnyEdgeMatch(node, indexInMap);
+                    return new DFSInEdgeMatch(node, indexInMap);
                 case EdgeType.OutEdge:
                     return new DFSOutEdgeMatch(node, indexInMap);
                 case EdgeType.AnyEdge:
@@ -632,6 +632,10 @@ namespace QueryEngine
     {
         void Search();
     }
+
+    /// <summary>
+    /// Class represents DFS search that accepts patterns with IDFSPattern interface
+    /// </summary>
     class DFSPatternMatcher : IPatternMatcher
     {
         public void Search() { }
@@ -645,21 +649,19 @@ namespace QueryEngine
         bool processingInEdge; //valid only when any edge is wanted 
         int patternIndex;
         int currentPatternIndex;
-
-        /*
+        */
+      
         Graph graph;
-        IPattern pattern;
+        IDFSPattern pattern;
         List<Element> result;
         bool processingVertex;
-        bool processingInEdge; //valid only when any edge is wanted 
+       // bool processingInEdge; //valid only when any edge is wanted now stored in pattern in self
         
-
-
-        public DFSPatternMatcher(List<List<BaseMatch>> p, Graph g)
+        public DFSPatternMatcher(IDFSPattern pattern, Graph graph)
         {
-            this.graph = g;
-            this.result = new Element[p.GetCount()];
-            this.pattern = p;
+            this.graph = graph;
+            this.result = new List<Element>();
+            this.pattern = pattern;
         }
 
         public void Search()
@@ -813,27 +815,30 @@ namespace QueryEngine
 
         /// <summary>
         /// Returns a next edge to be processed of the given vertex.
+        /// Fixed erros when returning to from another pattern caused using different edge types.
+        /// Notice that this method is called only when matching type Any of the edge.
         /// </summary>
-        /// <param name="vertex"> Edges of the vertex will be searched. </param>
+        /// <param name="vertex"> Edges of the vertex will be searched for next possible. </param>
         /// <param name="lastUsedEdge"> Last used edge of the vertex. </param>
         /// <returns> Next edge of the vertex. </returns>
         private Element ProcessAnyEdge(Vertex vertex, Element lastUsedEdge)
         {
-
-            // to do Error when we jump to the next pattern and then back we always try to go into in edges with the edge from the other list 
-            // fix each edge should know it is type
             Element nextEdge = null;
-            if (processingInEdge)
+            // Searching can start newly -> last edge type == not edge (after reseting) or we are processing in edge.
+            if (pattern.GetLastEdgeType() == EdgeType.NotEdge || pattern.GetLastEdgeType() == EdgeType.InEdge)
             {
                 nextEdge = ProcessInEdge(vertex, lastUsedEdge);
-                if (nextEdge == null) { 
+                if (nextEdge == null)
+                {
                     lastUsedEdge = null;
-                    processingInEdge = false; 
+                    pattern.SetLastEdgeType(EdgeType.OutEdge);
                 }
+                else pattern.SetLastEdgeType(EdgeType.InEdge);
             }
-            if (!processingInEdge) nextEdge = ProcessOutEdge(vertex, lastUsedEdge);
-            return nextEdge;
 
+            // After we tried using inEdges we look for out edges.
+            if (pattern.GetLastEdgeType() == EdgeType.OutEdge) nextEdge = ProcessOutEdge(vertex, lastUsedEdge);
+            return nextEdge;
         }
 
         /// <summary>
@@ -880,7 +885,7 @@ namespace QueryEngine
                 index += pattern[i].Count;
             return index;
         }
-    */
+   
     }
 
 
