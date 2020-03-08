@@ -34,6 +34,11 @@ namespace QueryEngine
             var match = new MatchObject(tokens, map, g);
             select.CheckCorrectnessOfSelect(map);
 
+
+            match.Matcher.Search();
+
+
+
             Console.ReadLine();
            /*
 

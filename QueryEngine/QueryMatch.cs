@@ -14,8 +14,8 @@ namespace QueryEngine
     /// </summary>
     class MatchObject
     {
-        private IPatternMatcher Matcher;
-        private IPattern Pattern;
+        public  IPatternMatcher Matcher;
+        public  IPattern Pattern;
 
         /// <summary>
         /// Creates Match expression
@@ -37,8 +37,8 @@ namespace QueryEngine
 
             // Create  matcher and pattern based on the name of matcher and pattern
             // Change if necessary just for testing 
-            this.Matcher = MatchFactory.CreateMatcher("DFS");
             this.Pattern = MatchFactory.CreatePattern("DFS", "SIMPLE", variableMap, result);
+            this.Matcher = MatchFactory.CreateMatcher("DFS", Pattern, graph);
        
         }
 
@@ -74,6 +74,7 @@ namespace QueryEngine
         }
 
         public IPattern GetPattern() => this.Pattern;
+        public IPatternMatcher GetMatcher() => this.Matcher;
     }
 
 
@@ -88,8 +89,11 @@ namespace QueryEngine
     /// </summary>
     abstract class DFSBaseMatch
     {
+        // The match is anonymous if it does not represent any variable.
         protected bool anonnymous;
-        protected bool repeatedVariable;
+        // Is true if the match object represents a variable that has it is first appereance.
+        protected bool firstAppereance;
+        // Represents index in scope if it is not anonymous.
         protected int positionOfRepeatedField;
         protected Table type;
 
@@ -97,8 +101,8 @@ namespace QueryEngine
         {
             this.anonnymous = true;
             this.positionOfRepeatedField = -1;
-            this.repeatedVariable = false;
             this.type = null;
+            this.firstAppereance = true;
         }
 
         /// <summary>
@@ -106,18 +110,12 @@ namespace QueryEngine
         /// </summary>
         /// <param name="node"> Node containing data of the match object. </param>
         /// <param name="indexInMap"> Index in the map of variables. (-1 if the the variable is anonymous.) </param>
-        protected DFSBaseMatch(ParsedPatternNode node, int indexInMap)
+        protected DFSBaseMatch(ParsedPatternNode node, int indexInMap, bool isFirst)
         {
-            if (indexInMap != -1)
-            {
-                this.repeatedVariable = true;
-                this.anonnymous = false;
-            }
-            else
-            {
-                this.repeatedVariable = false;
-                this.anonnymous = true;
-            }
+            if (indexInMap != -1) this.anonnymous = false;
+            else this.anonnymous = true;
+
+            this.firstAppereance = isFirst;
             this.positionOfRepeatedField = indexInMap;
             this.type = node.table;
         }
@@ -146,9 +144,7 @@ namespace QueryEngine
 
             // It is anonnymous, then it can match any vertex/edge.
             if (this.anonnymous) return true;
-
-            // It is repetition of variable before
-            if (this.repeatedVariable)
+            else  // it is a variable 
             {
                 // Check if any element occupies variable rep. by this match object.
                 if (map.TryGetValue(this.positionOfRepeatedField, out Element tmpEl))
@@ -174,29 +170,15 @@ namespace QueryEngine
             return true;
         }
 
-        public void SetAnnonymous(bool b) => this.anonnymous = b;
-        public bool IsAnonnymous() => this.anonnymous;
-        
-        public void SetRepeated(bool b) => this.repeatedVariable = b;
-        public void SetPositionOfRepeatedField(int p) => this.positionOfRepeatedField = p;
         public int GetPositionOfRepeatedField() => this.positionOfRepeatedField;
-        public bool IsRepeated() => this.repeatedVariable;
-        
-        /// <summary>
-        /// Returns whether the variable representing this match node is empty or occupied.
-        /// Notice that the function is called only if we have valid index -> never if the index is -1.
-        /// </summary>
-        /// <param name="scope"> Scope of searcher </param>
-        /// <returns> True on empty </returns>
-        public bool IsFirstAppereance(Dictionary<int, Element> map)
-        {
-            return !map.ContainsKey(this.positionOfRepeatedField);
-        }
-
-        public void SetType(Table table) => this.type = table;
         public Table GetTable() => this.type;
-        
+        public bool IsAnonnymous() => this.anonnymous;
 
+        /// <summary>
+        /// Returns whether the variable represented by this match objects is seen for the first time.
+        /// </summary>
+        public bool IsFirstAppereance() => this.firstAppereance;
+        
     }
 
     class DFSVertexMatch : DFSBaseMatch
@@ -204,7 +186,7 @@ namespace QueryEngine
         public DFSVertexMatch() : base()
         { }
         
-        public DFSVertexMatch(ParsedPatternNode node, int indexInMap) : base(node, indexInMap)
+        public DFSVertexMatch(ParsedPatternNode node, int indexInMap, bool isFirst) : base(node, indexInMap, isFirst)
         { }
 
         public override bool Apply(Element element, Dictionary<int, Element> map, Dictionary<Element, bool> used)
@@ -221,7 +203,7 @@ namespace QueryEngine
         public DFSEdgeMatch() : base()
         { }
 
-        public DFSEdgeMatch(ParsedPatternNode node, int indexInMap) : base(node, indexInMap)
+        public DFSEdgeMatch(ParsedPatternNode node, int indexInMap, bool isFirst) : base(node, indexInMap, isFirst)
         { }
 
         public abstract EdgeType GetEdgeType();
@@ -245,7 +227,7 @@ namespace QueryEngine
     {
         public DFSInEdgeMatch() : base()
         { }
-        public DFSInEdgeMatch(ParsedPatternNode node, int indexInMap) : base(node, indexInMap)
+        public DFSInEdgeMatch(ParsedPatternNode node, int indexInMap, bool isFirst) : base(node, indexInMap, isFirst)
         { }
 
         public override EdgeType GetEdgeType() => EdgeType.InEdge;
@@ -264,7 +246,7 @@ namespace QueryEngine
     {
         public DFSOutEdgeMatch() : base()
         { }
-        public DFSOutEdgeMatch(ParsedPatternNode node, int indexInMap) : base(node, indexInMap)
+        public DFSOutEdgeMatch(ParsedPatternNode node, int indexInMap, bool isFirst) : base(node, indexInMap, isFirst)
         { }
 
         public override EdgeType GetEdgeType() => EdgeType.OutEdge;
@@ -286,7 +268,7 @@ namespace QueryEngine
 
         public DFSAnyEdgeMatch() : base()
         { }
-        public DFSAnyEdgeMatch(ParsedPatternNode node, int indexInMap) : base(node, indexInMap)
+        public DFSAnyEdgeMatch(ParsedPatternNode node, int indexInMap, bool isFirst) : base(node, indexInMap, isFirst)
         { }
 
         public override EdgeType GetEdgeType() => EdgeType.AnyEdge;
@@ -495,22 +477,24 @@ namespace QueryEngine
             {
                 var tmpNode = patternNodes[i];
                 int index = -1;
-                
+                bool isFirst = true;
+
                 // If it has not got a name, do not add it to map.
                 if (tmpNode.name != null)
                 {
                     // Try if the variable is inside a dictionary
-                    if ( (index = map.GetVariablePosition(tmpNode.name)) == -1)
+                    if ((index = map.GetVariablePosition(tmpNode.name)) == -1)
                     {
                         // If it is not, Add it there with the proper type and index.
                         // Note: Table can be null
                         index = map.GetCount();
                         map.AddVariable(tmpNode.name, index, tmpNode.table);
                     }
+                    else isFirst = false;
                 }
 
                 // Create match node and add it to the chain.
-                tmpChain.Add(CreateDFSBaseMatch(tmpNode.edgeType, patternNodes[i], index));
+                tmpChain.Add(CreateDFSBaseMatch(tmpNode.edgeType, patternNodes[i], index, isFirst));
             }
             return tmpChain;
         }
@@ -522,18 +506,18 @@ namespace QueryEngine
         /// <param name="node"> Prototype of the node </param>
         /// <param name="indexInMap"> Index of its variable in scope </param>
         /// <returns></returns>
-        private DFSBaseMatch CreateDFSBaseMatch(EdgeType edgeType, ParsedPatternNode node, int indexInMap)
+        private DFSBaseMatch CreateDFSBaseMatch(EdgeType edgeType, ParsedPatternNode node, int indexInMap, bool isFirst)
         {
             switch (edgeType)
             {
                 case EdgeType.NotEdge:
-                    return new DFSVertexMatch(node, indexInMap);
+                    return new DFSVertexMatch(node, indexInMap, isFirst);
                 case EdgeType.InEdge:
-                    return new DFSInEdgeMatch(node, indexInMap);
+                    return new DFSInEdgeMatch(node, indexInMap, isFirst);
                 case EdgeType.OutEdge:
-                    return new DFSOutEdgeMatch(node, indexInMap);
+                    return new DFSOutEdgeMatch(node, indexInMap, isFirst);
                 case EdgeType.AnyEdge:
-                    return new DFSAnyEdgeMatch(node, indexInMap);
+                    return new DFSAnyEdgeMatch(node, indexInMap, isFirst);
                 default:
                     throw new ArgumentException($"{this.GetType()} Trying to create Match type that does not exit.");
             }
@@ -555,31 +539,68 @@ namespace QueryEngine
                 return this.Patterns[this.CurrentPatternIndex][this.CurrentMatchNodeIndex].Apply(element, this.Scope, this.MatchedVarsEdges);
         }
 
+        /// <summary>
+        /// Algorithm should ensure that the method is not called after last pattern.
+        /// </summary>
         public void PrepareNextSubPattern()
         {
-
+            this.CurrentPatternIndex++;
+            this.CurrentMatchNodeIndex = 0;
         }
 
+        /// <summary>
+        /// Algorithm should ensure that the method is not called after first pattern.
+        /// </summary>
         public void PreparePreviousSubPattern()
         {
-
-
+            this.CurrentPatternIndex--;
+            this.CurrentMatchNodeIndex = this.GetCurrentPatternCount() - 1;
         }
 
+        /// <summary>
+        /// The algorithm should ensure that the method is not called after the last match node.
+        /// </summary>
         public void PrepareNextNode()
         {
-            // sets
-            throw new NotImplementedException();
+            this.CurrentMatchNodeIndex++;
+            this.OverAllIndex++;
         }
+
+        /// <summary>
+        /// Prepares previous node.
+        /// If the current node is not anonymous, we need to reset variable inside the scope and
+        /// also from the sideways scope. 
+        /// </summary>
         public void PreparePreviousNode()
         {
-            // unsets
-            throw new NotImplementedException();
+            var tmpNode = this.Patterns[this.CurrentPatternIndex][this.CurrentMatchNodeIndex];
+            if (tmpNode.IsFirstAppereance() && !tmpNode.IsAnonnymous())
+            {
+                if (this.Scope.TryGetValue(tmpNode.GetPositionOfRepeatedField(), out Element tmpElement))
+                {
+                    this.Scope.Remove(tmpNode.GetPositionOfRepeatedField());
+                    if ((this.CurrentMatchNodeIndex % 2) == 0)
+                        this.MatchedVarsVertices.Remove(tmpElement);
+                    else this.MatchedVarsEdges.Remove(tmpElement);
+                }
+            }
+            this.CurrentMatchNodeIndex--;
+            this.OverAllIndex--;
         }
+
+        /// <summary>
+        /// Gets variable representing this match object.
+        /// </summary>
+        /// <returns> Null if anonymous/first appearance else element from scope. </returns>
         public Element GetConnection()
         {
-            // get if the node is connected 
-            throw new NotImplementedException();
+            var tmpNode = this.Patterns[this.CurrentPatternIndex][this.CurrentMatchNodeIndex];
+            if (tmpNode.IsAnonnymous()) return null;
+            else
+            {
+                if (tmpNode.IsFirstAppereance()) return null;
+                else return Scope[tmpNode.GetPositionOfRepeatedField()];
+            }
         }
 
 
@@ -725,7 +746,7 @@ namespace QueryEngine
                 {
                     var canContinue = DFSMainLoop(nextElement);
                     
-                    // If there is another chains
+                    // If there is more chains
                     if (canContinue) 
                     {
                         // Prepare the next chain.
@@ -988,6 +1009,10 @@ namespace QueryEngine
     }
     
 
+
+
+
+
     /// <summary>
     /// Class includes register of all the Matchers and their coresponding patterns.
     //  Enables to create instance of a Matcher/Pattern based on a string token.
@@ -1034,7 +1059,7 @@ namespace QueryEngine
             }
         }
 
-        public static IPatternMatcher CreateMatcher(string matcher)
+        public static IPatternMatcher CreateMatcher(string matcher, IPattern pattern, Graph graph)
         {
             if (!MatcherRegistry.ContainsKey(matcher))
                 throw new ArgumentException("MatchFactory: Matcher Token not found.");
@@ -1042,7 +1067,7 @@ namespace QueryEngine
             Type matcherType = null;
             if (MatcherRegistry.TryGetValue(matcher, out matcherType))
             {
-                return (IPatternMatcher)Activator.CreateInstance(matcherType);
+                return (IPatternMatcher)Activator.CreateInstance(matcherType, pattern, graph);
             }
             else throw new ArgumentException("MatchFactory: Failed to load type from Matcher registry.");
         }
