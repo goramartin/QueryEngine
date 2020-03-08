@@ -178,6 +178,38 @@ namespace QueryEngine
         /// Returns whether the variable represented by this match objects is seen for the first time.
         /// </summary>
         public bool IsFirstAppereance() => this.firstAppereance;
+
+        /// <summary>
+        /// Unsets variable from scope and used elements.
+        /// </summary>
+        /// <param name="map"> Scope of the search algorithm. </param>
+        /// <param name="used"> Used elements (edges/vertices. </param>
+        public void UnsetVariable(Dictionary<int, Element> map, Dictionary<Element, bool> used)
+        {
+            if (this.firstAppereance && !this.anonnymous)
+            {
+                if (map.TryGetValue(this.positionOfRepeatedField, out Element tmpElement))
+                {
+                    map.Remove(this.positionOfRepeatedField);
+                    used.Remove(tmpElement);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets element corresponding to this match object.
+        /// </summary>
+        /// <param name="map"> Scope of the search algorithm. </param>
+        /// <returns> Null if no element is used, else element of this match object. </returns>
+        public Element GetVariable(Dictionary<int, Element> map)
+        {
+            if (this.anonnymous) return null;
+            else
+            {
+                if (this.firstAppereance) return null;
+                else return map[this.positionOfRepeatedField];
+            }
+        }
         
     }
 
@@ -546,6 +578,7 @@ namespace QueryEngine
         {
             this.CurrentPatternIndex++;
             this.CurrentMatchNodeIndex = 0;
+            this.OverAllIndex++;
         }
 
         /// <summary>
@@ -555,6 +588,7 @@ namespace QueryEngine
         {
             this.CurrentPatternIndex--;
             this.CurrentMatchNodeIndex = this.GetCurrentPatternCount() - 1;
+            this.OverAllIndex--;
         }
 
         /// <summary>
@@ -574,18 +608,17 @@ namespace QueryEngine
         public void PreparePreviousNode()
         {
             var tmpNode = this.Patterns[this.CurrentPatternIndex][this.CurrentMatchNodeIndex];
-            if (tmpNode.IsFirstAppereance() && !tmpNode.IsAnonnymous())
+            if ((this.CurrentMatchNodeIndex % 2) == 1)
             {
-                if (this.Scope.TryGetValue(tmpNode.GetPositionOfRepeatedField(), out Element tmpElement))
-                {
-                    this.Scope.Remove(tmpNode.GetPositionOfRepeatedField());
-                    if ((this.CurrentMatchNodeIndex % 2) == 0)
-                        this.MatchedVarsVertices.Remove(tmpElement);
-                    else this.MatchedVarsEdges.Remove(tmpElement);
-                }
+                tmpNode.UnsetVariable(this.Scope, this.MatchedVarsEdges);
+                ((DFSEdgeMatch)tmpNode).SetLastEdgeType(EdgeType.NotEdge);
+            } else tmpNode.UnsetVariable(this.Scope, this.MatchedVarsVertices);
+
+            if (this.CurrentMatchNodeIndex != 0)
+            {
+                this.OverAllIndex--;
+                this.CurrentMatchNodeIndex--;
             }
-            this.CurrentMatchNodeIndex--;
-            this.OverAllIndex--;
         }
 
         /// <summary>
@@ -594,13 +627,7 @@ namespace QueryEngine
         /// <returns> Null if anonymous/first appearance else element from scope. </returns>
         public Element GetConnection()
         {
-            var tmpNode = this.Patterns[this.CurrentPatternIndex][this.CurrentMatchNodeIndex];
-            if (tmpNode.IsAnonnymous()) return null;
-            else
-            {
-                if (tmpNode.IsFirstAppereance()) return null;
-                else return Scope[tmpNode.GetPositionOfRepeatedField()];
-            }
+            return this.Patterns[this.CurrentPatternIndex][this.CurrentMatchNodeIndex].GetVariable(this.Scope);
         }
 
 
@@ -694,9 +721,12 @@ namespace QueryEngine
             this.pattern = pattern;
         }
 
+
         public void Search()
         {
-            int[] lastUsedIndeces = new int[pattern.GetPatternCount() - 1];
+            int[] lastUsedIndeces = new int[pattern.GetPatternCount()];
+            lastUsedIndeces.Populate(-1);
+
             int lastUsedIndex = -1;
 
             while (true)
@@ -706,17 +736,17 @@ namespace QueryEngine
                 // Else it uses last used index in that conjunction.
                 else lastUsedIndex = DFSStartOfCunjunction(lastUsedIndex, true);
                 
-                // - 1 one finished whole pattern or going down
+                // - 1 one finished whole pattern -> going down or we finished searching
                 if (lastUsedIndex == -1)
                 {
                     if (pattern.GetIndexOfCurrentPattern() == 0) break; // end
-                    pattern.PrepareNextSubPattern();
+                    pattern.PreparePreviousSubPattern();
                     lastUsedIndex = lastUsedIndeces[pattern.GetIndexOfCurrentPattern()];
                 }
                 else // pick next pattern
                 {
                     lastUsedIndeces[pattern.GetIndexOfCurrentPattern()] = lastUsedIndex;
-                    pattern.PrepareNextSubPattern();
+                    //pattern.PrepareNextSubPattern();
                     lastUsedIndex = -1;
                 }
             }
@@ -731,9 +761,9 @@ namespace QueryEngine
         public int DFSStartOfCunjunction(int lastIndex, bool cameFromUp)
         {
             var vertices = graph.GetAllVertices();
-            processingVertex = true;
             for (int i = lastIndex; i < vertices.Count; i++)
             {
+                processingVertex = true;
                 Element nextElement = vertices[i];
                 if (cameFromUp)
                 {
@@ -807,7 +837,14 @@ namespace QueryEngine
                 else
                 {
                     nextElement = DoDFSBack(nextElement);
-                    if (pattern.GetIndexOfCurrentMatchNode() <= 0) break; // Continues in the main cycle.
+                    if (pattern.GetIndexOfCurrentMatchNode() <= 0) // now it should never happen-1 one if it fails on matching the first vertex.
+                    {
+                        this.ClearCurrentFromResult();
+                        pattern.PreparePreviousNode();
+                        //if (pattern.GetIndexOfCurrentMatchNode() == 0) pattern.PreparePreviousNode(); // If it returns from matching, we must unset the first vertex of the pattern.
+
+                        break;
+                    } // Continues in the main cycle.
                 }
             }
             return false;
@@ -890,7 +927,7 @@ namespace QueryEngine
                 
                 // If no edge was found, we want to remove also the last vertex. (because we consumed all of his edges)
                 // Returning null in this position removes the vertex in the next cycle of the main algorithm.
-                // Else we continue in searching with the new edge on the same index.
+                // Else we continue in searching with the new edge on the same index of the match node.
                 if (nextElement == null)
                 {
                     pattern.PreparePreviousNode();
