@@ -84,8 +84,10 @@ namespace QueryEngine
 
 
     /// <summary>
-    /// Class representing single step of pattern to match.
+    /// Class representing single step in search algorithm.
+    /// Every step, an element is tried to be applied through the apply method.
     /// Method apply returns true if the element can be added to final result.
+    /// Descendants share certain conditions when applying such as Type, Variable name, Edge type...
     /// </summary>
     abstract class DFSBaseMatch
     {
@@ -110,6 +112,7 @@ namespace QueryEngine
         /// </summary>
         /// <param name="node"> Node containing data of the match object. </param>
         /// <param name="indexInMap"> Index in the map of variables. (-1 if the the variable is anonymous.) </param>
+        /// <param name="isFirst"> Indicates whether its first appearance of the variable. </param>
         protected DFSBaseMatch(ParsedPatternNode node, int indexInMap, bool isFirst)
         {
             if (indexInMap != -1) this.anonnymous = false;
@@ -132,6 +135,8 @@ namespace QueryEngine
 
         /// <summary>
         /// Called by descendants. Checks conditions that are indifferent to the descendant type.
+        /// Checks correctes of type of the aplied elements. 
+        /// Also directs seting of map and used elements.
         /// </summary>
         /// <param name="element"> Elemented to be tested. </param>
         /// <param name="map"> Scope of variables in search context.</param>
@@ -175,7 +180,7 @@ namespace QueryEngine
         public bool IsAnonnymous() => this.anonnymous;
 
         /// <summary>
-        /// Returns whether the variable represented by this match objects is seen for the first time.
+        /// Returns whether the variable represented by this match objects is encountered for the first time.
         /// </summary>
         public bool IsFirstAppereance() => this.firstAppereance;
 
@@ -296,6 +301,11 @@ namespace QueryEngine
 
     class DFSAnyEdgeMatch : DFSEdgeMatch
     {
+        /// <summary>
+        /// Variable is used inside search algorithm. To remember which list of edges was used last time.
+        /// Solves problem when the search algorithm jumps back from different dfs chain -> we need to remember also the type
+        /// not just last used edge on this node.
+        /// </summary>
         protected EdgeType lastEdgeType;
 
         public DFSAnyEdgeMatch() : base()
@@ -365,6 +375,9 @@ namespace QueryEngine
     /// <summary>
     /// Class that implements basic DFS pattern.
     /// Creates it self from parsed pattern.
+    /// Pattern is represented by the lists of matching nodes,
+    /// also it remembers the state of the matched variables and state
+    /// which nodes and chains should be matched.
     /// </summary>
     class DFSPattern : IDFSPattern
     {
@@ -560,7 +573,8 @@ namespace QueryEngine
         }
 
         #endregion PatternCreation
-    
+        // Should be moved somewhere else or made separate into abstract class.
+
         /// <summary>
         /// Calls apply on match object, based on the current object we choose which dict will be passed into the apply method.
         /// We know that the sequence is vertex - edge - vertex, that is to say, vertex positions is divisible by 2.
@@ -577,6 +591,7 @@ namespace QueryEngine
 
         /// <summary>
         /// Algorithm should ensure that the method is not called after last pattern.
+        /// Prepares subsequent pattern. That is, increment pattern index and set current node index to 0;
         /// </summary>
         public void PrepareNextSubPattern()
         {
@@ -587,6 +602,7 @@ namespace QueryEngine
 
         /// <summary>
         /// Algorithm should ensure that the method is not called after first pattern.
+        /// Prepares previous pattern, reduces pattern index and sets current node index to last node in the pattern.
         /// </summary>
         public void PreparePreviousSubPattern()
         {
@@ -597,6 +613,7 @@ namespace QueryEngine
 
         /// <summary>
         /// The algorithm should ensure that the method is not called after the last match node.
+        /// Moves indeces to the next match node.
         /// </summary>
         public void PrepareNextNode()
         {
@@ -607,7 +624,8 @@ namespace QueryEngine
         /// <summary>
         /// Prepares previous node.
         /// If the current node is not anonymous, we need to reset variable inside the scope and
-        /// also from the sideways scope. 
+        /// also from the sideways scope. The unset method can be called even if the variable is not set,
+        /// in that case the outcomes are none.
         /// </summary>
         public void PreparePreviousNode()
         {
@@ -618,6 +636,11 @@ namespace QueryEngine
                 this.CurrentMatchNodeIndex--;
             }
         }
+
+        /// <summary>
+        /// Unsets the variable representing current match node.
+        /// Both from scope and used elements.
+        /// </summary>
         public void UnsetCurrentVariable()
         {
             var tmpNode = this.Patterns[this.CurrentPatternIndex][this.CurrentMatchNodeIndex];
@@ -625,6 +648,11 @@ namespace QueryEngine
                 tmpNode.UnsetVariable(this.Scope, this.MatchedVarsEdges);
             else tmpNode.UnsetVariable(this.Scope, this.MatchedVarsVertices);
         }
+
+        /// <summary>
+        /// Unsets last edge type on the current match node.
+        /// Always unsets it to NotEdge.
+        /// </summary>
         public void UnsetLastEdgeType()
         {
             ((DFSEdgeMatch)this.Patterns[this.CurrentPatternIndex][this.CurrentMatchNodeIndex]).SetLastEdgeType(EdgeType.NotEdge);
@@ -726,7 +754,14 @@ namespace QueryEngine
     }
 
     /// <summary>
-    /// Class represents DFS search that accepts patterns with IDFSPattern interface
+    /// Class represents DFS search that accepts patterns with IDFSPattern interface.
+    /// The search is separated into conjuctions from pattern. That is to say, each conjuction has got
+    /// one starting pattern chain, from that chain we connect subsequent chains based on matched variables from this chain.
+    /// Simply each conjunction represents chains that can be connected by certain variables.
+    /// 
+    /// Algorithm tries to start search from every vertex on each conjunction.
+    /// Bear in mind, that variables of each separate conjunction disregarding its connection to the others is 
+    /// dependent on the matched variables from the other conjunctions.
     /// </summary>
     class DFSPatternMatcher : IPatternMatcher
     {
@@ -742,7 +777,12 @@ namespace QueryEngine
             this.pattern = pattern;
         }
 
-
+        /// <summary>
+        /// Method initiates search from every conjunction.
+        /// Once one conjunction is finished filling its chains, it returns  an index of last used vertex.
+        /// That index is then stored and once we jump to another junctions and return back later on, we use this index
+        /// to continue in the previous conjunction.
+        /// </summary>
         public void Search()
         {
             int[] lastUsedIndeces = new int[pattern.GetPatternCount()];
@@ -752,19 +792,19 @@ namespace QueryEngine
 
             while (true)
             {
-                // -1 meaning that next conjunction will start from the beginning. 
+                // -1 meaning that next conjunction search will start from the beginning of vertix list. 
                 if (lastUsedIndex == -1) lastUsedIndex = DFSStartOfCunjunction(0, false);
                 // Else it uses last used index in that conjunction.
                 else lastUsedIndex = DFSStartOfCunjunction(lastUsedIndex, true);
                 
-                // - 1 one finished whole pattern -> going down or we finished searching
+                // - 1 one finished whole pattern -> need to prepare previous pattern or we have finished searching
                 if (lastUsedIndex == -1)
                 {
-                    if (pattern.GetIndexOfCurrentPattern() == 0) break; // end
+                    if (pattern.GetIndexOfCurrentPattern() == 0) break; // end of search
                     pattern.PreparePreviousSubPattern();
                     lastUsedIndex = lastUsedIndeces[pattern.GetIndexOfCurrentPattern()];
                 }
-                else // pick next pattern
+                else // Pick next pattern and save last used vertex
                 {
                     lastUsedIndeces[pattern.GetIndexOfCurrentPattern()] = lastUsedIndex;
                     pattern.PrepareNextSubPattern();
@@ -775,6 +815,16 @@ namespace QueryEngine
 
         /// <summary>
         /// Initiates iteration over one connected pattern.
+        /// We try to start search from each vertex in the graph.
+        /// Algorithm is divided into filling up chains.
+        /// Once one chain is filled/depleted we return from main search loop.
+        /// Filled: We check whether next pattern in part of the conjuntion or there is another conjunction.
+        /// If there is another conjunction we return the index of the last used vertex that will be later used to init this conjunction search.
+        /// Otherwise we prepare next sub pattern chain and pick an element that connects that pattern, it will be immediately matched.
+        /// Depleted: It is check if current pattern chain is starting point of a conjunction, if it is we either pick next vertex from the graph
+        /// or we just return -1, that is we finished searching this conjunction.
+        /// If it is not the starting point, we simply prepare previous sub pattern and set next element to null,
+        /// which will lead to dfs backwards once the main loop is started.
         /// </summary>
         /// <param name="lastIndex"> Last index from last iteration. </param>
         /// <param name="cameFromUp"> If we came from a different conjunction. </param>
@@ -830,7 +880,7 @@ namespace QueryEngine
         /// When it returns we expect the sub pattern to be empty of full.
         /// </summary>
         /// <param name="nextElement"> Element to start on. </param>
-        /// <returns> True if there is another pattern, False if it is returning. </returns>
+        /// <returns> True if there is another pattern (Filled), False if it is returning.(Empty) </returns>
         private bool DFSMainLoop(Element nextElement)
         {
             while (true)
@@ -845,12 +895,13 @@ namespace QueryEngine
                     {
                         if (pattern.isLastPattern())
                         {
-                            // Setting null here makes it to fail on it and it is forced to dfs back.
+                            // Setting null here makes it to fail on next iteration and it is forced to dfs back.
                             result.Print();
                             nextElement = null;
                             continue;
                         }
-                        else return true; // The i is set when we return from the above pattern so we can start iteration from this point.
+                        // There is more patterns to fill.
+                        else return true; 
                     }
                     pattern.PrepareNextNode();
                     nextElement = DoDFSForward(nextElement, null);
@@ -858,12 +909,15 @@ namespace QueryEngine
                 else
                 {
                     nextElement = DoDFSBack(nextElement);
-                    if (pattern.GetIndexOfCurrentMatchNode() <= 0) // now it should never happen-1 one if it fails on matching the first vertex.
-                    {
+
+                    // Check if we came back from top, meaning we finished all possible matches in this chain.
+                    if (pattern.GetIndexOfCurrentMatchNode() <= 0) 
+                    { 
+                        // The 0th variable must be unset here, because we cant anticipate if we failed on 0th match or somewhere else.
                         this.ClearCurrentFromResult();
                         pattern.PreparePreviousNode();
                         break;
-                    } // Continues in the main cycle.
+                    }
                 }
             }
             return false;
@@ -904,19 +958,19 @@ namespace QueryEngine
         /// Processing Vertex:
         /// We are returning from the dfs.
         /// When processing the vertex, we failed to add the vertex to the pattern, 
-        /// that means we need to go down in the pattern and also remove the edge we came with to the vertex. 
+        /// that means we need to go down in the pattern and also remove the edge we came from to the vertex. 
         /// In order to do so, we will return null, next loop in algorithm fails on adding edge, so the edge gets removed.
         /// 
         /// Processing Edge:
-        /// When processing edge, we get the last used edge from the result, remove it from results.
+        /// When processing edge, we get the last used edge from the result and remove it from result.
         /// (Note there can be no edge, eg: we failed to add one at all.)
         /// We take the edge (null or normal edge) and try to do dfs from the vertex the edge started from 
         /// If it returns a new edge we can continue trying to apply the edge on the same index in pattern.
         /// If it is null we need to remove also the vertex because there are no more available edges from this vertex.
         /// In order to do that we go down in pattern and return null, so the algorithm fail 
-        /// on adding vertex so it jumps here again.
+        /// on adding vertex so it jumps here again and so on.
         /// </summary>
-        /// <param name="lastElement"> Last element we failed on. </param>
+        /// <param name="lastElement"> Last element we failed on. Used only if it was an edge. </param>
         /// <returns>  Element to continue in the search. </returns>
         private Element DoDFSBack(Element lastElement)
         {
@@ -936,14 +990,14 @@ namespace QueryEngine
                 // Else we always use the newest edge we failed on. 
                 if (lastElement == null) lastElement = lastUsedEdgeInResult;
                 
-                // Clears the last used edge, or does nothing.
-                // I need to clean the scope so that i can apply next possible edge
+                // Clears the last used edge from result, or does nothing (no edge was there).
+                // It needs to clean the scope so that it can apply next possible edge if one is found.
                 ClearCurrentFromResult();
                 pattern.UnsetCurrentVariable();
 
 
                 // Try to find new edge from the last vertex.
-                processingVertex = true; //To jump into dfs.
+                processingVertex = true; // To jump into dfs forward.
                 Element nextElement =
                     DoDFSForward((Vertex)result[pattern.GetOverAllIndex()-1], (Edge)lastElement);
                 
@@ -952,7 +1006,8 @@ namespace QueryEngine
                 // Else we continue in searching with the new edge on the same index of the match node.
                 if (nextElement == null)
                 {
-                    pattern.UnsetLastEdgeType();
+                    // Before we move back, it must unsets last edge type of current match node.
+                    pattern.UnsetLastEdgeType(); 
                     pattern.PreparePreviousNode();
                     processingVertex = true;
                     return null;
@@ -1001,7 +1056,7 @@ namespace QueryEngine
 
         /// <summary>
         /// Returns a next edge to be processed of the given vertex.
-        /// Fixed erros when returning to from another pattern caused using different edge types.
+        /// Fixed errors when returning to from another pattern which caused using different edge types and infinite loop.
         /// Notice that this method is called only when matching type Any of the edge.
         /// </summary>
         /// <param name="vertex"> Edges of the vertex will be searched for next possible. </param>
@@ -1022,10 +1077,9 @@ namespace QueryEngine
                 else pattern.SetLastEdgeType(EdgeType.InEdge);
             }
 
-            // After we tried using inEdges we look for out edges.
+            // After we tried using inEdges we look out for out edges.
             if (pattern.GetLastEdgeType() == EdgeType.OutEdge) nextEdge = FindOutEdge(vertex, lastUsedEdge);
-
-            //After we searched all out edges, the state should be reset and lastedge type set to not edge 
+            
             return nextEdge;
         }
 
@@ -1069,13 +1123,9 @@ namespace QueryEngine
     }
     
 
-
-
-
-
     /// <summary>
     /// Class includes register of all the Matchers and their coresponding patterns.
-    //  Enables to create instance of a Matcher/Pattern based on a string token.
+    ///  Enables to create instance of a Matcher/Pattern based on a string token.
     /// </summary>
     static class MatchFactory
     {
