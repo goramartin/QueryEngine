@@ -1,4 +1,13 @@
-﻿using System;
+﻿
+/**
+ * This file contains definitions of search algorithm and its components.
+ * So far there is only and dfs algorithm.
+ *
+ * 
+ **/ 
+
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,8 +15,6 @@ using System.Threading.Tasks;
 
 namespace QueryEngine
 {
-
-
     /// <summary>
     /// Match represents pattern to match in main match algorithm also it checks th correctness of the pattern when creating it.
     /// The pattern is created from List of Parsed Patterns passed from Visitor that processes Match expression.
@@ -39,7 +46,7 @@ namespace QueryEngine
             // Change if necessary just for testing 
             this.Pattern = MatchFactory.CreatePattern("DFS", "SIMPLE", variableMap, result);
             this.Matcher = MatchFactory.CreateMatcher("DFS", Pattern, graph);
-       
+
         }
 
         /// <summary>
@@ -73,6 +80,7 @@ namespace QueryEngine
             if (tmpDict.Count == 0) throw new ArgumentException($"{this.GetType()} No given variable in the query.");
         }
 
+        //just for testing
         public IPattern GetPattern() => this.Pattern;
         public IPatternMatcher GetMatcher() => this.Matcher;
     }
@@ -212,7 +220,9 @@ namespace QueryEngine
             else
             {
                 if (this.firstAppereance) return null;
-                else return map[this.positionOfRepeatedField];
+                else if (map.ContainsKey(this.positionOfRepeatedField))
+                    return map[this.positionOfRepeatedField];
+                else throw new ArgumentException($"{ this.GetType()} Map does not contain desired variable.");
             }
         }
         
@@ -245,18 +255,7 @@ namespace QueryEngine
 
         public abstract EdgeType GetEdgeType();
 
-        /// <summary>
-        /// Sets type of last matched edge.
-        /// Must be called only on AnyEdge type.
-        /// </summary>
-        public abstract void SetLastEdgeType(EdgeType type);
-
-
-        /// <summary>
-        /// Returns type of last matched edge.
-        /// Must be called only on AnyEdge type.
-        /// </summary>
-        public abstract EdgeType GetLastEdgeType();
+      
 
     }
 
@@ -268,8 +267,6 @@ namespace QueryEngine
         { }
 
         public override EdgeType GetEdgeType() => EdgeType.InEdge;
-        public override void SetLastEdgeType(EdgeType type) { /* Empty body */ }
-        public override EdgeType GetLastEdgeType() => EdgeType.InEdge;
       
         public override bool Apply(Element element, Dictionary<int, Element> map, Dictionary<Element, bool> used)
         {
@@ -287,8 +284,6 @@ namespace QueryEngine
         { }
 
         public override EdgeType GetEdgeType() => EdgeType.OutEdge;
-        public override void SetLastEdgeType(EdgeType type) { /* Empty body */ }
-        public override EdgeType GetLastEdgeType() => EdgeType.OutEdge;
 
         public override bool Apply(Element element, Dictionary<int, Element> map, Dictionary<Element, bool> used)
         {
@@ -301,21 +296,12 @@ namespace QueryEngine
 
     class DFSAnyEdgeMatch : DFSEdgeMatch
     {
-        /// <summary>
-        /// Variable is used inside search algorithm. To remember which list of edges was used last time.
-        /// Solves problem when the search algorithm jumps back from different dfs chain -> we need to remember also the type
-        /// not just last used edge on this node.
-        /// </summary>
-        protected EdgeType lastEdgeType;
-
         public DFSAnyEdgeMatch() : base()
         { }
         public DFSAnyEdgeMatch(ParsedPatternNode node, int indexInMap, bool isFirst) : base(node, indexInMap, isFirst)
         { }
 
         public override EdgeType GetEdgeType() => EdgeType.AnyEdge;
-        public override void SetLastEdgeType(EdgeType type) => this.lastEdgeType = type;
-        public override EdgeType GetLastEdgeType() => this.lastEdgeType;
 
         public override bool Apply(Element element, Dictionary<int, Element> map, Dictionary<Element, bool> used)
         {
@@ -363,13 +349,10 @@ namespace QueryEngine
         Element GetCurrentChainConnection();
         Element GetNextChainConnection();
         EdgeType GetEdgeType();
-
-        EdgeType GetLastEdgeType();
-        void SetLastEdgeType(EdgeType type);
-
         void UnsetCurrentVariable();
-        void UnsetLastEdgeType();
     }
+
+
 
 
     /// <summary>
@@ -405,7 +388,7 @@ namespace QueryEngine
         {
             this.Patterns = new List<List<DFSBaseMatch>>();
             this.CreatePattern(parsedPatterns, map);
-            
+
             this.Scope = new Dictionary<int, Element>();
             this.MatchedVarsEdges = new Dictionary<Element, bool>();
             this.MatchedVarsVertices = new Dictionary<Element, bool>();
@@ -413,8 +396,6 @@ namespace QueryEngine
             this.CurrentPatternIndex = 0;
             this.OverAllIndex = 0;
         }
-
-        #region PatternCreation
 
         /// <summary>
         /// Creates pattern from Parsed Pattern made by match visitor, also creates a map for variables
@@ -425,7 +406,7 @@ namespace QueryEngine
         /// </summary>
         /// <param name="parsedPatterns"> Pattern created by Match Visitor </param>
         /// <param name="variableMap"> Query map of variables (empty) </param>
-        private void CreatePattern(List<ParsedPattern> parsedPatterns, VariableMap variableMap)
+        protected void CreatePattern(List<ParsedPattern> parsedPatterns, VariableMap variableMap)
         {
             var orderedPatterns = OrderParsedPatterns(parsedPatterns);
 
@@ -435,11 +416,11 @@ namespace QueryEngine
             for (int i = 0; i < parsedPatterns.Count; i++)
             {
                 // Try to split it.
-                var firstPart = orderedPatterns[i].SplitParsedPattern();       
-                
+                var firstPart = orderedPatterns[i].SplitParsedPattern();
+
                 // If the parsed pattern was splited
                 // Add both parts into the real Pattern
-                if ( firstPart != null)
+                if (firstPart != null)
                 {
                     this.Patterns.Add(CreateChain(firstPart.Pattern, variableMap));
                 }
@@ -458,7 +439,7 @@ namespace QueryEngine
         /// Their splitBy property remains set to Null.
         /// </summary>
         /// <param name="parsedPatterns"> Parser Pattern from MatchVisitor</param>
-        private List<ParsedPattern> OrderParsedPatterns(List<ParsedPattern> parsedPatterns)
+        protected List<ParsedPattern> OrderParsedPatterns(List<ParsedPattern> parsedPatterns)
         {
             List<ParsedPattern> result = new List<ParsedPattern>();
             bool[] usedPatterns = new bool[parsedPatterns.Count];
@@ -510,6 +491,8 @@ namespace QueryEngine
             return result;
         }
 
+
+        #region PatternCreation
         /// <summary>
         /// Creates pattern chain used in searcher.
         /// Also sets map for query.
@@ -517,7 +500,7 @@ namespace QueryEngine
         /// <param name="patternNodes"> Parsed pattern </param>
         /// <param name="map"> Map to store info about veriables </param>
         /// <returns></returns>
-        private List<DFSBaseMatch> CreateChain(List<ParsedPatternNode> patternNodes, VariableMap map) 
+        protected List<DFSBaseMatch> CreateChain(List<ParsedPatternNode> patternNodes, VariableMap map)
         {
             List<DFSBaseMatch> tmpChain = new List<DFSBaseMatch>();
 
@@ -555,7 +538,7 @@ namespace QueryEngine
         /// <param name="node"> Prototype of the node </param>
         /// <param name="indexInMap"> Index of its variable in scope </param>
         /// <returns></returns>
-        private DFSBaseMatch CreateDFSBaseMatch(EdgeType edgeType, ParsedPatternNode node, int indexInMap, bool isFirst)
+        protected DFSBaseMatch CreateDFSBaseMatch(EdgeType edgeType, ParsedPatternNode node, int indexInMap, bool isFirst)
         {
             switch (edgeType)
             {
@@ -572,8 +555,7 @@ namespace QueryEngine
             }
         }
 
-        #endregion PatternCreation
-        // Should be moved somewhere else or made separate into abstract class.
+#endregion PatternCreation
 
         /// <summary>
         /// Calls apply on match object, based on the current object we choose which dict will be passed into the apply method.
@@ -649,15 +631,7 @@ namespace QueryEngine
             else tmpNode.UnsetVariable(this.Scope, this.MatchedVarsVertices);
         }
 
-        /// <summary>
-        /// Unsets last edge type on the current match node.
-        /// Always unsets it to NotEdge.
-        /// </summary>
-        public void UnsetLastEdgeType()
-        {
-            ((DFSEdgeMatch)this.Patterns[this.CurrentPatternIndex][this.CurrentMatchNodeIndex]).SetLastEdgeType(EdgeType.NotEdge);
-        }
-
+        
 
         /// <summary>
         ///  Gets starting element of the current chain.
@@ -724,16 +698,6 @@ namespace QueryEngine
         public EdgeType GetEdgeType()
         {
             return ((DFSEdgeMatch)(this.Patterns[this.CurrentPatternIndex][this.CurrentMatchNodeIndex])).GetEdgeType();
-        }
-
-        public EdgeType GetLastEdgeType()
-        {
-            return ((DFSEdgeMatch)(this.Patterns[this.CurrentPatternIndex][this.CurrentMatchNodeIndex])).GetLastEdgeType();
-        }
-
-        public void SetLastEdgeType(EdgeType type)
-        {
-           ((DFSEdgeMatch)(this.Patterns[this.CurrentPatternIndex][this.CurrentMatchNodeIndex])).SetLastEdgeType(type);
         }
 
         public int GetOverAllIndex()
@@ -1007,7 +971,6 @@ namespace QueryEngine
                 if (nextElement == null)
                 {
                     // Before we move back, it must unsets last edge type of current match node.
-                    pattern.UnsetLastEdgeType(); 
                     pattern.PreparePreviousNode();
                     processingVertex = true;
                     return null;
@@ -1065,21 +1028,13 @@ namespace QueryEngine
         private Edge FindAnyEdge(Vertex vertex, Edge lastUsedEdge)
         {
             Edge nextEdge = null;
-            // Searching can start newly -> last edge type == not edge (after reseting) or we are processing in edge.
-            if (pattern.GetLastEdgeType() == EdgeType.NotEdge || pattern.GetLastEdgeType() == EdgeType.InEdge)
+            if (lastUsedEdge == null || lastUsedEdge.edgeType == EdgeType.InEdge)
             {
                 nextEdge = FindInEdge(vertex, lastUsedEdge);
-                if (nextEdge == null)
-                {
-                    lastUsedEdge = null;
-                    pattern.SetLastEdgeType(EdgeType.OutEdge);
-                }
-                else pattern.SetLastEdgeType(EdgeType.InEdge);
+                if (nextEdge == null) lastUsedEdge = null;
+                else return nextEdge;
             }
-
-            // After we tried using inEdges we look out for out edges.
-            if (pattern.GetLastEdgeType() == EdgeType.OutEdge) nextEdge = FindOutEdge(vertex, lastUsedEdge);
-            
+            nextEdge = FindOutEdge(vertex, lastUsedEdge);
             return nextEdge;
         }
 
@@ -1192,6 +1147,7 @@ namespace QueryEngine
             }
             else throw new ArgumentException("MatchFactory: Failed to load type from  Pattern registry.");
         }
+
     }
 }
 
