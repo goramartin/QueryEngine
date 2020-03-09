@@ -350,11 +350,15 @@ namespace QueryEngine
     /// </summary>
     interface IDFSPattern : IPattern
     {
-        Element GetConnection();
+        Element GetCurrentChainConnection();
+        Element GetNextChainConnection();
         EdgeType GetEdgeType();
 
         EdgeType GetLastEdgeType();
         void SetLastEdgeType(EdgeType type);
+
+        void UnsetCurrentVariable();
+        void UnsetLastEdgeType();
     }
 
 
@@ -607,27 +611,43 @@ namespace QueryEngine
         /// </summary>
         public void PreparePreviousNode()
         {
-            var tmpNode = this.Patterns[this.CurrentPatternIndex][this.CurrentMatchNodeIndex];
-            if ((this.CurrentMatchNodeIndex % 2) == 1)
-            {
-                tmpNode.UnsetVariable(this.Scope, this.MatchedVarsEdges);
-                ((DFSEdgeMatch)tmpNode).SetLastEdgeType(EdgeType.NotEdge);
-            } else tmpNode.UnsetVariable(this.Scope, this.MatchedVarsVertices);
-
+            this.UnsetCurrentVariable();
             if (this.CurrentMatchNodeIndex != 0)
             {
                 this.OverAllIndex--;
                 this.CurrentMatchNodeIndex--;
             }
         }
+        public void UnsetCurrentVariable()
+        {
+            var tmpNode = this.Patterns[this.CurrentPatternIndex][this.CurrentMatchNodeIndex];
+            if ((this.CurrentMatchNodeIndex % 2) == 1)
+                tmpNode.UnsetVariable(this.Scope, this.MatchedVarsEdges);
+            else tmpNode.UnsetVariable(this.Scope, this.MatchedVarsVertices);
+        }
+        public void UnsetLastEdgeType()
+        {
+            ((DFSEdgeMatch)this.Patterns[this.CurrentPatternIndex][this.CurrentMatchNodeIndex]).SetLastEdgeType(EdgeType.NotEdge);
+        }
+
 
         /// <summary>
-        /// Gets variable representing this match object.
+        ///  Gets starting element of the current chain.
         /// </summary>
         /// <returns> Null if anonymous/first appearance else element from scope. </returns>
-        public Element GetConnection()
+        public Element GetCurrentChainConnection()
         {
-            return this.Patterns[this.CurrentPatternIndex][this.CurrentMatchNodeIndex].GetVariable(this.Scope);
+            return this.Patterns[this.CurrentPatternIndex][0].GetVariable(this.Scope);
+        }
+
+        /// <summary>
+        /// Gets starting element of the next chain.
+        /// This method is called only when there is another pattern.
+        /// </summary>
+        /// <returns>Null if anonymous/first appearance else element from scope. </returns>
+        public Element GetNextChainConnection()
+        {
+            return this.Patterns[this.CurrentPatternIndex+1][0].GetVariable(this.Scope);
         }
 
 
@@ -692,6 +712,7 @@ namespace QueryEngine
         {
             return this.OverAllIndex;
         }
+
     }
 
 
@@ -746,7 +767,7 @@ namespace QueryEngine
                 else // pick next pattern
                 {
                     lastUsedIndeces[pattern.GetIndexOfCurrentPattern()] = lastUsedIndex;
-                    //pattern.PrepareNextSubPattern();
+                    pattern.PrepareNextSubPattern();
                     lastUsedIndex = -1;
                 }
             }
@@ -779,19 +800,19 @@ namespace QueryEngine
                     // If there is more chains
                     if (canContinue) 
                     {
-                        // Prepare the next chain.
-                        pattern.PrepareNextSubPattern();
-
                         // If the new chain is not connected, that means there is another conjunction.
                         // Otherwise we take the element from the connection and start new dfs chain with that element.
-                        if ((nextElement = pattern.GetConnection()) != null) continue;
+                        if ((nextElement = pattern.GetNextChainConnection()) != null) 
+                        {
+                            pattern.PrepareNextSubPattern();
+                            continue; 
+                        }
                         else return i;
-
                     } else 
                     {
                         // If there are no more chains or we are simply returning
                         // If we are at the starting chain of conjunction we let main for loop pick next starting vertex.
-                        if ((pattern.GetConnection()) == null) break;
+                        if ((pattern.GetCurrentChainConnection()) == null) break;
                         else
                         {
                             // If we are connected to the before pattern, we will initiate returning.
@@ -841,8 +862,6 @@ namespace QueryEngine
                     {
                         this.ClearCurrentFromResult();
                         pattern.PreparePreviousNode();
-                        //if (pattern.GetIndexOfCurrentMatchNode() == 0) pattern.PreparePreviousNode(); // If it returns from matching, we must unset the first vertex of the pattern.
-
                         break;
                     } // Continues in the main cycle.
                 }
@@ -918,7 +937,10 @@ namespace QueryEngine
                 if (lastElement == null) lastElement = lastUsedEdgeInResult;
                 
                 // Clears the last used edge, or does nothing.
+                // I need to clean the scope so that i can apply next possible edge
                 ClearCurrentFromResult();
+                pattern.UnsetCurrentVariable();
+
 
                 // Try to find new edge from the last vertex.
                 processingVertex = true; //To jump into dfs.
@@ -930,6 +952,7 @@ namespace QueryEngine
                 // Else we continue in searching with the new edge on the same index of the match node.
                 if (nextElement == null)
                 {
+                    pattern.UnsetLastEdgeType();
                     pattern.PreparePreviousNode();
                     processingVertex = true;
                     return null;
