@@ -10,7 +10,9 @@ namespace QueryEngine
 {
     class QueryEngine
     {
-     
+        public static int ThreadsPerQuery = 1;
+        public static bool Parallel = false;
+
         private static void Run(string[] args, TextReader reader, TextWriter writer)
         {
             //Every query needs valid SELECT and MATCH expr.

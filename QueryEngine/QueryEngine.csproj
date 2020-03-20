@@ -43,14 +43,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Creators.cs" />
+    <Compile Include="DB\Creators.cs" />
+    <Compile Include="DFSearchObjects\DFSBaseMatches.cs" />
+    <Compile Include="DFSearchObjects\DFSPattern.cs" />
+    <Compile Include="DFSearchObjects\DFSPatternMatcher.cs" />
     <Compile Include="Extensions.cs" />
-    <Compile Include="QueryMatch.cs" />
-    <Compile Include="Parser.cs" />
-    <Compile Include="Query.cs" />
-    <Compile Include="QuerySelect.cs" />
-    <Compile Include="Tables.cs" />
-    <Compile Include="Graph.cs" />
+    <Compile Include="QueryObjects\QueryResults.cs" />
+    <Compile Include="QueryObjects\QueryMatch.cs" />
+    <Compile Include="Parser\Parser.cs" />
+    <Compile Include="QueryObjects\Query.cs" />
+    <Compile Include="QueryObjects\QuerySelect.cs" />
+    <Compile Include="DB\Tables.cs" />
+    <Compile Include="DB\Graph.cs" />
     <Compile Include="Reader.cs" />
     <Compile Include="QueryEngine.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -73,5 +77,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

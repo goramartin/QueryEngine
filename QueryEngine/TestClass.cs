@@ -29,9 +29,11 @@ namespace QueryEngine
               if (item.type == Token.TokenType.Identifier) Console.WriteLine(item.strValue) ;
            }
 
+            var results = new QueryResults();
+
             var map = new VariableMap();
             var select = new SelectObject(tokens);
-            var match = new MatchObject(tokens, map, g);
+            var match = new MatchObject(tokens, map, g, results);
             select.CheckCorrectnessOfSelect(map);
 
 

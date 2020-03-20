@@ -18,6 +18,7 @@ namespace QueryEngine
         VariableMap variableMap;
         SelectObject select;
         MatchObject match;
+        QueryResults results;
 
         /// <summary>
         /// 
@@ -33,7 +34,9 @@ namespace QueryEngine
             Parser.ResetPosition();
             this.variableMap = new VariableMap();
             this.select = new SelectObject(tokens);
-            this.match = new MatchObject(tokens, variableMap, graph);
+            
+            results = new QueryResults();
+            this.match = new MatchObject(tokens, variableMap, graph, results);
 
             // Check correctness of select part
             select.CheckCorrectnessOfSelect(variableMap);
