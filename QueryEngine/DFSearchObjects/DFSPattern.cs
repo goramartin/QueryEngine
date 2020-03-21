@@ -23,15 +23,14 @@ namespace QueryEngine
         bool isLastPattern();
 
 
-        int GetIndexOfCurrentPattern();
-        int GetIndexOfCurrentMatchNode();
-        int GetOverAllIndex();
+        int CurrentPatternIndex { get; }
+        int CurrentMatchNodeIndex { get; }
+        int OverAllIndex { get; }
 
-        int GetPatternCount();
-        int GetCurrentPatternCount();
-
-        int GetAllNodeCount();
-
+        int PatternCount { get; }
+        int CurrentPatternCount { get; }
+        
+        int AllNodeCount { get; }
     }
 
     /// <summary>
@@ -59,9 +58,24 @@ namespace QueryEngine
     class DFSPattern : IDFSPattern
     {
         private List<List<DFSBaseMatch>> Patterns;
-        private int CurrentPatternIndex;
-        private int CurrentMatchNodeIndex;
-        private int OverAllIndex;
+        public int CurrentPatternIndex { get; private set; }
+        public int CurrentMatchNodeIndex { get; private set; }
+        public int OverAllIndex { get; private set; }
+        public int PatternCount { get => this.Patterns.Count; }
+        public int CurrentPatternCount { get => this.Patterns[this.CurrentPatternIndex].Count; }
+        public int AllNodeCount 
+        { 
+            get
+            {
+                int Count = 0;
+                for (int i = 0; i < this.Patterns.Count; i++)
+                {
+                    Count += this.Patterns[i].Count;
+                }
+                return Count;
+            }
+        }
+
 
         /// <summary>
         /// Map of variables that maps strings (names of variables) is map for the whole query.
@@ -269,7 +283,7 @@ namespace QueryEngine
         public void PreparePreviousSubPattern()
         {
             this.CurrentPatternIndex--;
-            this.CurrentMatchNodeIndex = this.GetCurrentPatternCount() - 1;
+            this.CurrentMatchNodeIndex = this.CurrentPatternCount - 1;
             this.OverAllIndex--;
         }
 
@@ -344,45 +358,10 @@ namespace QueryEngine
             return this.CurrentPatternIndex == (this.Patterns.Count - 1) ? true : false;
         }
 
-        public int GetIndexOfCurrentPattern()
-        {
-            return this.CurrentPatternIndex;
-        }
-
-        public int GetIndexOfCurrentMatchNode()
-        {
-            return this.CurrentMatchNodeIndex;
-        }
-
-        public int GetPatternCount()
-        {
-            return this.Patterns.Count;
-        }
-
-
-        public int GetCurrentPatternCount()
-        {
-            return this.Patterns[this.CurrentPatternIndex].Count;
-        }
-
-        public int GetAllNodeCount()
-        {
-            int Count = 0;
-            for (int i = 0; i < this.Patterns.Count; i++)
-            {
-                Count += this.Patterns[i].Count;
-            }
-            return Count;
-        }
-
+       
         public EdgeType GetEdgeType()
         {
             return ((DFSEdgeMatch)(this.Patterns[this.CurrentPatternIndex][this.CurrentMatchNodeIndex])).GetEdgeType();
-        }
-
-        public int GetOverAllIndex()
-        {
-            return this.OverAllIndex;
         }
 
         public IDFSPattern Clone()

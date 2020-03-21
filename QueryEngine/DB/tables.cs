@@ -35,11 +35,11 @@ namespace QueryEngine
         }
 
         // Properties pertaining to a table.
-        public List<Property> properties;
+        public List<Property> properties { get; private set;}
         
         // Represents nodes inside a table. An index represents also an index inside the property lists.
         // First int is an id of a node inside the table, and second int is the position inside the table.
-        public Dictionary<int,int> IDs;
+        public Dictionary<int,int> IDs { get; private set; }
 
         public Table(string tableName)
         {

@@ -326,7 +326,7 @@ namespace QueryEngine
                         ProcessEdgeType(param); 
                         break;
                     case State.Parameters:
-                        ProcessParams(param, this.outEdge.table);
+                        ProcessParams(param, this.outEdge.Table);
                         break;
                     case State.EdgeFromID:
                         ProcessEdgeFromID(param);
@@ -354,8 +354,8 @@ namespace QueryEngine
                 throw new ArgumentException($"{this.GetType()} Reading wrong node ID. ID is not a number.");
 
             this.outEdge = new OutEdge();
-            this.outEdge.SetPositionInEdges(outEdges.Count);
-            this.outEdge.AddID(id);
+            this.outEdge.PositionInList = outEdges.Count;
+            this.outEdge.ID = id;
             this.state = State.Type;
         }
         
@@ -369,7 +369,7 @@ namespace QueryEngine
             Table table;
             edgeTables.TryGetValue(param, out table);
             this.outEdge.AddTable(table);
-            this.outEdge.table.AddID(this.outEdge.id);
+            this.outEdge.Table.AddID(this.outEdge.ID);
             this.state = State.EdgeFromID;
         }
         
@@ -382,9 +382,9 @@ namespace QueryEngine
         private void ProcessEdgeFromID(string param) 
         {
             Vertex fromVertex = FindVertex(param);
-            if (!fromVertex.HasOutEdges()) fromVertex.SetOutEdgesStartPosition(outEdges.Count);
+            if (!fromVertex.HasOutEdges()) fromVertex.OutEdgesStartPosition = outEdges.Count;
             this.incomingEdge = new InEdge();
-            this.incomingEdge.AddEndVertex(fromVertex);
+            this.incomingEdge.EndVertex = fromVertex;
             this.state = State.EdgeToID;
         }
 
@@ -396,13 +396,13 @@ namespace QueryEngine
         private void ProcessEdgeToID(string param)
         {
             Vertex endVertex = FindVertex(param);
-            this.outEdge.AddEndVertex(endVertex);
+            this.outEdge.EndVertex = endVertex;
 
-            this.incomingEdge.AddTable(this.outEdge.table);
-            this.incomingEdge.AddID(this.outEdge.id);
-            this.incomingEdgesTable[endVertex.GetPositionInVertices()].Add(this.incomingEdge);
+            this.incomingEdge.AddTable(this.outEdge.Table);
+            this.incomingEdge.AddID(this.outEdge.ID);
+            this.incomingEdgesTable[endVertex.PositionInList].Add(this.incomingEdge);
             
-            this.paramsToReadLeft = this.outEdge.table.GetPropertyCount();
+            this.paramsToReadLeft = this.outEdge.Table.GetPropertyCount();
             FinishParams();
 
         }
@@ -448,7 +448,7 @@ namespace QueryEngine
             int id = 0;
             if (!int.TryParse(param, out id))
                 throw new ArgumentException($"{this.GetType()} Reading wrong node ID. ID is not a number.");
-            Vertex vertex = this.vertices.Find(x => x.id == id);
+            Vertex vertex = this.vertices.Find(x => x.ID == id);
             if (vertex == null) throw new ArgumentException($"{this.GetType()} ID is not found in vertices.");
             return vertex;
         }
@@ -467,7 +467,7 @@ namespace QueryEngine
             {
                 int c = incomingEdgesTable[i].Count;
                 if (c == 0) continue;
-                vertices[i].SetInEdgesStartPosition(count);
+                vertices[i].InEdgesStartPosition = count;
                 for (int k = 0; k < c; k++)
                     inEdges.Add(incomingEdgesTable[i][k]);
                 count += c;
@@ -485,7 +485,7 @@ namespace QueryEngine
         {
             for (int i = 0; i < inEdges.Count; i++)
             {
-                inEdges[i].SetPositionInEdges(i);
+                inEdges[i].PositionInList = i;
             }
         }
 
@@ -509,8 +509,8 @@ namespace QueryEngine
         {
             for (int i = 0; i < vertices.Count; i++)
             {
-                vertices[i].outEdgesEndPosition = FindEndPositionOfEdges(isOut: true, i);
-                vertices[i].inEdgesEndPosition = FindEndPositionOfEdges(isOut: false, i);
+                vertices[i].OutEdgesEndPosition = FindEndPositionOfEdges(isOut: true, i);
+                vertices[i].InEdgesEndPosition = FindEndPositionOfEdges(isOut: false, i);
             }
         }
        
@@ -529,7 +529,7 @@ namespace QueryEngine
             for (int k = p + 1; k < vertices.Count; k++)
             {
                 Vertex v = vertices[k];
-                int t = isOut ? v.outEdgesStartPosition : v.inEdgesStartPosition;
+                int t = isOut ? v.OutEdgesStartPosition : v.InEdgesStartPosition;
                 if (t != -1) return t;
             }
 
@@ -588,7 +588,7 @@ namespace QueryEngine
                     ProcessNodeType(param);
                     break;
                 case State.Parameters:
-                    ProcessParams(param, this.vertex.table);
+                    ProcessParams(param, this.vertex.Table);
                     break;
                 default:
                     throw new ArgumentException($"{this.GetType()} Expected different state.");
@@ -614,7 +614,7 @@ namespace QueryEngine
                 throw new ArgumentException($"{this.GetType()} Reading wrong node ID. ID is not a number.");
 
             this.vertex = new Vertex();
-            this.vertex.SetPositionInVertices(vertices.Count);
+            this.vertex.PositionInList = vertices.Count;
             this.vertex.AddID(id);
             this.state = State.Type;
         }
@@ -632,9 +632,9 @@ namespace QueryEngine
             Table table;
             nodeTables.TryGetValue(param, out table);
             this.vertex.AddTable(table);
-            this.vertex.table.AddID(this.vertex.id);
+            this.vertex.Table.AddID(this.vertex.ID);
 
-            this.paramsToReadLeft = this.vertex.table.GetPropertyCount();
+            this.paramsToReadLeft = this.vertex.Table.GetPropertyCount();
             FinishParams();
 
         }

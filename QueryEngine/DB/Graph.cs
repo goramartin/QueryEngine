@@ -26,19 +26,18 @@ namespace QueryEngine
     /// </summary>
      abstract class Element
     {
-        public int id;
-        public Table table;
-        public int positionInList;
+        public int ID { get; internal set; }
+        public Table Table { get; internal set; }
+        public int PositionInList { get; internal set; }
 
-        public void AddID(int id) => this.id = id;
-        public void AddTable(Table table) => this.table = table;
+        public void AddID(int id) => this.ID = id;
+        public void AddTable(Table table) => this.Table = table;
 
-        public Table GetTable() => this.table;
-        public int GetID() => this.id;
+
 
         public override int GetHashCode()
         {
-            return this.id;
+            return this.ID;
         }
 
     }
@@ -52,58 +51,46 @@ namespace QueryEngine
     /// </summary>
     class Vertex : Element
     {
-        public int outEdgesStartPosition;
-        public int outEdgesEndPosition;
-        public int inEdgesStartPosition;
-        public int inEdgesEndPosition;
+        public int OutEdgesStartPosition { get; internal set; }
+        public int OutEdgesEndPosition { get; internal set; }
+        public int InEdgesStartPosition { get; internal set; }
+        public int InEdgesEndPosition { get; internal set; }
         public Vertex(int id, Table table)
         {
-            this.id = id;
-            this.table = table;
-            this.outEdgesStartPosition = -1;
-            this.outEdgesEndPosition = -1;
-            this.inEdgesStartPosition = -1;
-            this.inEdgesEndPosition= -1;
-            this.positionInList = -1;
+            this.ID = id;
+            this.Table = table;
+            this.OutEdgesStartPosition = -1;
+            this.OutEdgesEndPosition = -1;
+            this.InEdgesStartPosition = -1;
+            this.InEdgesEndPosition= -1;
+            this.PositionInList = -1;
         }
 
         public Vertex()
         {
-            this.id = -1;
-            this.table = null;
-            this.outEdgesStartPosition = -1;
-            this.outEdgesEndPosition = -1;
-            this.inEdgesStartPosition = -1;
-            this.inEdgesEndPosition = -1;
-            this.positionInList = -1; ;
+            this.ID = -1;
+            this.Table = null;
+            this.OutEdgesStartPosition = -1;
+            this.OutEdgesEndPosition = -1;
+            this.InEdgesStartPosition = -1;
+            this.InEdgesEndPosition = -1;
+            this.PositionInList = -1; ;
 
         }
 
-        public void SetPositionInVertices(int position) => this.positionInList = position;
-        public void SetOutEdgesStartPosition(int position) => this.outEdgesStartPosition = position;
-        public void SetOutEdgesEndPosition(int count) => this.outEdgesEndPosition = count;
-        public void SetInEdgesStartPosition(int position) => this.inEdgesStartPosition = position;
-        public void SetInEdgesEndPosition(int count) => this.inEdgesEndPosition = count;
-
-        public bool HasOutEdges() { if (this.outEdgesStartPosition == -1) return false; else return true; }
-        public bool HasInEdges() { if (this.inEdgesStartPosition == -1) return false; else return true; }
-        
-        public int GetPositionInVertices() => this.positionInList;
-        public int GetOutEdgesStartPosition() => this.outEdgesStartPosition;
-        public int GetOutEdgesEndPosition() => this.outEdgesEndPosition;
-        public int GetInEdgesStartPosition() => this.inEdgesStartPosition;
-        public int GetInEdgesEndPosition() => this.inEdgesEndPosition;
+        public bool HasOutEdges() { if (this.OutEdgesStartPosition == -1) return false; else return true; }
+        public bool HasInEdges() { if (this.InEdgesStartPosition == -1) return false; else return true; }
 
         public void GetRangeOfOutEdges(out int start, out int end)
         {
-            start = this.GetOutEdgesStartPosition();
-            end = this.GetOutEdgesEndPosition();
+            start = this.OutEdgesStartPosition;
+            end = this.OutEdgesEndPosition;
         }
 
         public void GetRangeOfInEdges(out int start, out int end)
         {
-            start = this.GetInEdgesStartPosition();
-            end = this.GetInEdgesEndPosition();
+            start = this.InEdgesStartPosition;
+            end = this.InEdgesEndPosition;
         }
 
 
@@ -122,38 +109,27 @@ namespace QueryEngine
     enum EdgeType { NotEdge, InEdge, OutEdge, AnyEdge };
     class Edge : Element
     {
-        public EdgeType edgeType;
-        public Vertex endVertex;
+        public EdgeType EdgeType { get; internal set; }
+        public Vertex EndVertex { get; internal set; }
 
         public Edge()
         {
-            this.id = -1;
-            this.table = null;
-            this.endVertex = null;
+            this.ID = -1;
+            this.Table = null;
+            this.EndVertex = null;
         }
-
-        public void SetPositionInEdges(int p) => this.positionInList = p;
-        public void AddEndVertex(Vertex vertex) => this.endVertex = vertex;
-        public Vertex GetEndVertex() => this.endVertex;
-        public int GetPositionInEdges() => this.positionInList;
-
-        public EdgeType GetEdgeType() => this.edgeType;
-        public void SetEdgeType(EdgeType type) => this.edgeType = type;
-
 
         public override int GetHashCode()
         {
             return base.GetHashCode();
         }
-
-
     }
 
     class InEdge : Edge
     {
         public InEdge() : base()
         {
-            this.edgeType = EdgeType.InEdge;
+            this.EdgeType = EdgeType.InEdge;
         }
         public override int GetHashCode()
         {
@@ -166,7 +142,7 @@ namespace QueryEngine
     {
         public OutEdge() : base()
         {
-            this.edgeType = EdgeType.OutEdge;
+            this.EdgeType = EdgeType.OutEdge;
         }
         public override int GetHashCode()
         {

@@ -18,9 +18,9 @@ namespace QueryEngine
     /// </summary>
     class MatchObject
     {
-        public  IPatternMatcher Matcher;
-        public  IPattern Pattern;
-        QueryResults queryResults;
+        private  IPatternMatcher Matcher;
+        private  IPattern Pattern;
+        public QueryResults queryResults;
 
         /// <summary>
         /// Creates Match expression
@@ -49,12 +49,12 @@ namespace QueryEngine
             {
                 this.Pattern = MatchFactory.CreatePattern("DFSSingleThread", "SIMPLE", variableMap, result);
                 this.Matcher = MatchFactory.CreateMatcher("DFSSingleThread", Pattern, graph, queryResults, 0);
-                // to do call set starting vertices
+                // to do call set vertices
             }
             else 
             {
                 this.Pattern = MatchFactory.CreatePattern("DFSParallel", "SIMPLE", variableMap, result);
-                this.Matcher = MatchFactory.CreateMatcher("DFSParallel", Pattern, graph, queryResults, 0);
+                this.Matcher = MatchFactory.CreateMatcher("DFSParallel", Pattern, graph, queryResults);
             }
         }
 
@@ -149,7 +149,7 @@ namespace QueryEngine
             }
         }
 
-        public static IPatternMatcher CreateMatcher(string matcher, IPattern pattern, Graph graph, QueryResults results, int resultIndex)
+        public static IPatternMatcher CreateMatcher(string matcher, params object[] parameters) //IPattern pattern, Graph graph, QueryResults results, int resultIndex)
         {
             if (!MatcherRegistry.ContainsKey(matcher))
                 throw new ArgumentException("MatchFactory: Matcher Token not found.");
@@ -157,17 +157,17 @@ namespace QueryEngine
             Type matcherType = null;
             if (MatcherRegistry.TryGetValue(matcher, out matcherType))
             {
-                return (IPatternMatcher)Activator.CreateInstance(matcherType, pattern, graph, results, resultIndex);
+                return (IPatternMatcher)Activator.CreateInstance(matcherType, parameters);
             }
             else throw new ArgumentException("MatchFactory: Failed to load type from Matcher registry.");
         }
 
-        public static IPattern CreatePattern(string matcher, string pattern, VariableMap map, List<ParsedPattern> parsedPatterns)
+        public static IPattern CreatePattern(string matcher, string pattern, params object[] parameters)
         {
             if (MatcherPatternRegistry.TryGetValue(matcher, out Dictionary<string, Type> pDict))
             {
                 if (pDict.TryGetValue(pattern, out Type patternType)) 
-                 return (IPattern)Activator.CreateInstance(patternType, map, parsedPatterns);
+                 return (IPattern)Activator.CreateInstance(patternType, parameters);
                 else throw new ArgumentException("MatchFactory: Failed to load type from  Pattern registry.");
             }
             else throw new ArgumentException("MatchFactory: Failed to load type from  Pattern registry.");

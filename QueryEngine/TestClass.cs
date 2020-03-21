@@ -37,7 +37,7 @@ namespace QueryEngine
             select.CheckCorrectnessOfSelect(map);
 
 
-            match.Matcher.Search();
+            match.GetMatcher().Search();
 
 
 
@@ -104,14 +104,14 @@ namespace QueryEngine
 
            foreach (var item in g.vertices)
            {
-               Console.WriteLine("ID:"+item.id);
-               Console.WriteLine("TableIRI:" + item.table.IRI);
-               Console.WriteLine("OutSP:" + item.outEdgesStartPosition);
-                Console.WriteLine("OutEP:" + item.outEdgesEndPosition);
+               Console.WriteLine("ID:"+item.ID);
+               Console.WriteLine("TableIRI:" + item.Table.IRI);
+               Console.WriteLine("OutSP:" + item.OutEdgesStartPosition);
+                Console.WriteLine("OutEP:" + item.OutEdgesEndPosition);
 
-                Console.WriteLine("InSP:" + item.inEdgesStartPosition);
-                Console.WriteLine("INEP:" + item.inEdgesEndPosition);
-               Console.WriteLine("P:" +item.GetPositionInVertices());
+                Console.WriteLine("InSP:" + item.InEdgesStartPosition);
+                Console.WriteLine("INEP:" + item.InEdgesEndPosition);
+               Console.WriteLine("P:" +item.PositionInList);
                Console.WriteLine();
            }
 
@@ -126,18 +126,18 @@ namespace QueryEngine
             
             foreach (var item in g.outEdges)
            {
-               Console.WriteLine("ID:" + item.id);
-               Console.WriteLine("TableIRI:" + item.table.IRI);
-               Console.WriteLine("EndVertexID:" + item.endVertex.id);
+               Console.WriteLine("ID:" + item.ID);
+               Console.WriteLine("TableIRI:" + item.Table.IRI);
+               Console.WriteLine("EndVertexID:" + item.EndVertex.ID);
                Console.WriteLine();
            }
            Console.WriteLine();
            Console.WriteLine("InEdges");
            foreach (var item in g.inEdges)
            {
-               Console.WriteLine("ID:" + item.id);
-               Console.WriteLine("TableIRI:" + item.table.IRI);
-               Console.WriteLine("EndVertexID:" + item.endVertex.id);
+               Console.WriteLine("ID:" + item.ID);
+               Console.WriteLine("TableIRI:" + item.Table.IRI);
+               Console.WriteLine("EndVertexID:" + item.EndVertex.ID);
                Console.WriteLine();
            }
            Console.ReadLine();

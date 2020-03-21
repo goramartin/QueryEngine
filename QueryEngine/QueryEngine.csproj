@@ -48,6 +48,9 @@
     <Compile Include="DFSearchObjects\DFSPattern.cs" />
     <Compile Include="DFSearchObjects\DFSPatternMatcher.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="Parser\ParsedPattern.cs" />
+    <Compile Include="Parser\ParseTreeNodes.cs" />
+    <Compile Include="Parser\Visitors.cs" />
     <Compile Include="QueryObjects\QueryResults.cs" />
     <Compile Include="QueryObjects\QueryMatch.cs" />
     <Compile Include="Parser\Parser.cs" />

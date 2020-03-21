@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace QueryEngine
 {
@@ -13,16 +14,17 @@ namespace QueryEngine
 
     interface ISingleThreadMatcher : IPatternMatcher
     {
-        void SetStartingVertices(List<Element> vertices);
+        void SetStartingVertices(List<Vertex> vertices);
     }
 
-    interface IParalelMatcher : IPatternMatcher
+    interface IParallelMatcher : IPatternMatcher
     {
 
     }
 
 
     /// <summary>
+    /// This instance should be created only inside parallel dfs searcher
     /// Class represents DFS search that accepts patterns with IDFSPattern interface.
     /// The search is separated into conjuctions from pattern. That is to say, each conjuction has got
     /// one starting pattern chain, from that chain we connect subsequent chains based on matched variables from this chain.
@@ -34,22 +36,29 @@ namespace QueryEngine
     /// </summary>
     class DFSPatternMatcher : ISingleThreadMatcher
     {
-        Graph graph;
-        IDFSPattern pattern;
-        Element[] result;
-        bool processingVertex;
-        int resultIndex; // Based on thread
-        List<Element> startingVertices;
-        QueryResults results;
+        private Graph graph;
+        private IDFSPattern pattern;
+        private Element[] result;
+        private bool processingVertex;
+        private int resultIndex; // Based on thread, implicitly 0
+        private List<Vertex> startingVertices;
+        private QueryResults results;
 
+        /// <summary>
+        /// Starting vertices are implicitly set to entire graph.
+        /// </summary>
+        /// <param name="pattern"> Pattern to find.</param>
+        /// <param name="graph"> Graph to search. </param>
+        /// <param name="results"> Object to store found results. </param>
+        /// <param name="resultIndex"> Index to store results on. =>0 </param>
         public DFSPatternMatcher(IDFSPattern pattern, Graph graph, QueryResults results, int resultIndex)
         {
             this.graph = graph;
-            this.result = new Element[pattern.GetAllNodeCount()];
+            this.result = new Element[pattern.AllNodeCount];
             this.pattern = pattern;
             this.results = results;
             this.resultIndex = resultIndex;
-            this.startingVertices = null;
+            this.startingVertices = graph.vertices;
         }
 
         /// <summary>
@@ -60,7 +69,7 @@ namespace QueryEngine
         /// </summary>
         public void Search()
         {
-            int[] lastUsedIndeces = new int[pattern.GetPatternCount()];
+            int[] lastUsedIndeces = new int[pattern.PatternCount];
             lastUsedIndeces.Populate(-1);
 
             int lastUsedIndex = -1;
@@ -75,13 +84,13 @@ namespace QueryEngine
                 // - 1 one finished whole pattern -> need to prepare previous pattern or we have finished searching
                 if (lastUsedIndex == -1)
                 {
-                    if (pattern.GetIndexOfCurrentPattern() == 0) break; // end of search
+                    if (pattern.CurrentPatternIndex == 0) break; // end of search
                     pattern.PreparePreviousSubPattern();
-                    lastUsedIndex = lastUsedIndeces[pattern.GetIndexOfCurrentPattern()];
+                    lastUsedIndex = lastUsedIndeces[pattern.CurrentPatternIndex];
                 }
                 else // Pick next pattern and save last used vertex
                 {
-                    lastUsedIndeces[pattern.GetIndexOfCurrentPattern()] = lastUsedIndex;
+                    lastUsedIndeces[pattern.CurrentPatternIndex] = lastUsedIndex;
                     pattern.PrepareNextSubPattern();
                     lastUsedIndex = -1;
                 }
@@ -187,7 +196,7 @@ namespace QueryEngine
                     nextElement = DoDFSBack(nextElement);
 
                     // Check if we came back from top, meaning we finished all possible matches in this chain.
-                    if (pattern.GetIndexOfCurrentMatchNode() <= 0)
+                    if (pattern.CurrentMatchNodeIndex <= 0)
                     {
                         // The 0th variable must be unset here, because we cant anticipate if we failed on 0th match or somewhere else.
                         this.ClearCurrentFromResult();
@@ -225,7 +234,7 @@ namespace QueryEngine
             else
             {
                 processingVertex = true;
-                return ((Edge)lastUsedElement).endVertex;
+                return ((Edge)lastUsedElement).EndVertex;
             }
         }
 
@@ -260,7 +269,7 @@ namespace QueryEngine
             else
             {
                 // Take the edge on the current position. (Edge that was matched before, can be null if no edge was there.)
-                Element lastUsedEdgeInResult = (Edge)result[pattern.GetOverAllIndex()];
+                Element lastUsedEdgeInResult = (Edge)result[pattern.OverAllIndex];
 
                 // lastElement is null only when we are returning from the removed vertex, we take the last used edge in the result.
                 // Else we always use the newest edge we failed on. 
@@ -275,7 +284,7 @@ namespace QueryEngine
                 // Try to find new edge from the last vertex.
                 processingVertex = true; // To jump into dfs forward.
                 Element nextElement =
-                    DoDFSForward((Vertex)result[pattern.GetOverAllIndex() - 1], (Edge)lastElement);
+                    DoDFSForward((Vertex)result[pattern.OverAllIndex - 1], (Edge)lastElement);
 
                 // If no edge was found, we want to remove also the last vertex. (because we consumed all of his edges)
                 // Returning null in this position removes the vertex in the next cycle of the main algorithm.
@@ -341,7 +350,7 @@ namespace QueryEngine
         private Edge FindAnyEdge(Vertex vertex, Edge lastUsedEdge)
         {
             Edge nextEdge = null;
-            if (lastUsedEdge == null || lastUsedEdge.edgeType == EdgeType.InEdge)
+            if (lastUsedEdge == null || lastUsedEdge.EdgeType == EdgeType.InEdge)
             {
                 nextEdge = FindInEdge(vertex, lastUsedEdge);
                 if (nextEdge == null) lastUsedEdge = null;
@@ -367,9 +376,9 @@ namespace QueryEngine
             // No edge was used from the processed vertex -> pick the first one.
             else if (lastUsedEdge == null) return edges[start];
             // The Last processed Edge was the last edge of the vertex -> can not pick more edges.
-            else if (end - 1 == lastUsedEdge.positionInList) return null;
+            else if (end - 1 == lastUsedEdge.PositionInList) return null;
             // There are more non processed edges of the vertex -> pick the following one from the edge list.
-            else return edges[lastUsedEdge.positionInList + 1];
+            else return edges[lastUsedEdge.PositionInList + 1];
         }
 
         /// <summary>
@@ -378,7 +387,7 @@ namespace QueryEngine
         /// <param name="element">Element to be added to result.</param>
         private void AddToResult(Element element)
         {
-            result[pattern.GetOverAllIndex()] = element;
+            result[pattern.OverAllIndex] = element;
         }
 
         /// <summary>
@@ -386,27 +395,57 @@ namespace QueryEngine
         /// </summary>
         private void ClearCurrentFromResult()
         {
-            result[pattern.GetOverAllIndex()] = null;
+            result[pattern.OverAllIndex] = null;
         }
 
-        public void SetStartingVertices(List<Element> vertices)
+        private List<Vertex> PickConjunctionStartingVertices()
         {
-            if (vertices == null || vertices.Count == 0) throw new ArgumentException($"{this.GetType()} Starting vertices are empty.");
+            if (this.pattern.CurrentPatternIndex == 0 && this.pattern.CurrentMatchNodeIndex == 0)
+                return this.startingVertices;
+            else return this.graph.vertices;
+        }
+
+        public void SetStartingVertices(List<Vertex> vertices)
+        {
+            if (vertices == null || vertices.Count == 0) 
+                throw new ArgumentException($"{this.GetType()} Starting vertices are empty.");
             else this.startingVertices = vertices;
         }
     }
 
-
-    class DFSParallelPatternMatcher : IParalelMatcher
+    class DFSParallelPatternMatcher : IParallelMatcher
     {
-        public DFSParallelPatternMatcher(IDFSPattern pattern, Graph graph, QueryResults results, int resultIndex)
+        Thread[] threads;
+        ISingleThreadMatcher[] matchers;
+
+        public DFSParallelPatternMatcher(IDFSPattern pattern, Graph graph, QueryResults results)
         {
+
+
+
+
         }
 
         public void Search()
         {
             throw new NotImplementedException();
         }
+
+
+        private static void Work(object o)
+        {
+
+        }
+
+        private class Job 
+        { 
+
+
+
+        }
+
+
+
     }
 
 }

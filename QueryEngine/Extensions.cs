@@ -12,7 +12,7 @@ namespace QueryEngine
         {
             for (int i = 0; i < tmp.Length; i++)
             {
-                Console.Write("{0} ", tmp[i].GetID());
+                Console.Write("{0} ", tmp[i].ID);
             }
             Console.WriteLine();
             Console.WriteLine(":");

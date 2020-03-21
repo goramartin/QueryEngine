@@ -16,19 +16,19 @@ namespace QueryEngine
     abstract class DFSBaseMatch
     {
         // The match is anonymous if it does not represent any variable.
-        protected bool anonnymous;
+        readonly bool IsAnonnymous;
         // Is true if the match object represents a variable that has it is first appereance.
-        protected bool firstAppereance;
+        readonly bool IsFirstAppereance;
         // Represents index in scope if it is not anonymous.
-        protected int positionOfRepeatedField;
-        protected Table type;
+        readonly int PositionOfRepeatedField;
+        readonly Table Table;
 
         public DFSBaseMatch()
         {
-            this.anonnymous = true;
-            this.positionOfRepeatedField = -1;
-            this.type = null;
-            this.firstAppereance = true;
+            this.IsAnonnymous = true;
+            this.PositionOfRepeatedField = -1;
+            this.Table = null;
+            this.IsFirstAppereance = true;
         }
 
         /// <summary>
@@ -39,12 +39,12 @@ namespace QueryEngine
         /// <param name="isFirst"> Indicates whether its first appearance of the variable. </param>
         protected DFSBaseMatch(ParsedPatternNode node, int indexInMap, bool isFirst)
         {
-            if (indexInMap != -1) this.anonnymous = false;
-            else this.anonnymous = true;
+            if (indexInMap != -1) this.IsAnonnymous = false;
+            else this.IsAnonnymous = true;
 
-            this.firstAppereance = isFirst;
-            this.positionOfRepeatedField = indexInMap;
-            this.type = node.table;
+            this.IsFirstAppereance = isFirst;
+            this.PositionOfRepeatedField = indexInMap;
+            this.Table = node.table;
         }
 
 
@@ -69,18 +69,18 @@ namespace QueryEngine
         protected bool CheckCommonConditions(Element element, Dictionary<int, Element> map, Dictionary<Element, bool> used)
         {
             // Check type, comparing references to tables.
-            if ((this.type != null) && (this.type != element.GetTable())) return false;
+            if ((this.Table != null) && (this.Table != element.Table)) return false;
 
             // It is anonnymous, then it can match any vertex/edge.
-            if (this.anonnymous) return true;
+            if (this.IsAnonnymous) return true;
             else  // it is a variable 
             {
                 // Check if any element occupies variable rep. by this match object.
-                if (map.TryGetValue(this.positionOfRepeatedField, out Element tmpEl))
+                if (map.TryGetValue(this.PositionOfRepeatedField, out Element tmpEl))
                 {
                     // It contains el. 
                     // Check if the elemets are same.
-                    if (tmpEl.GetID() != element.GetID()) return false;
+                    if (tmpEl.ID != element.ID) return false;
                     else { /* Empty else -> returns true at the end */ }
 
                 }
@@ -91,7 +91,7 @@ namespace QueryEngine
                     // Add it to the map and to the used elements.
                     else
                     {
-                        map.Add(this.positionOfRepeatedField, element);
+                        map.Add(this.PositionOfRepeatedField, element);
                         used.Add(element, true);
                     }
                 }
@@ -100,15 +100,6 @@ namespace QueryEngine
             return true;
         }
 
-        public int GetPositionOfRepeatedField() => this.positionOfRepeatedField;
-        public Table GetTable() => this.type;
-        public bool IsAnonnymous() => this.anonnymous;
-
-        /// <summary>
-        /// Returns whether the variable represented by this match objects is encountered for the first time.
-        /// </summary>
-        public bool IsFirstAppereance() => this.firstAppereance;
-
         /// <summary>
         /// Unsets variable from scope and used elements.
         /// </summary>
@@ -116,11 +107,11 @@ namespace QueryEngine
         /// <param name="used"> Used elements (edges/vertices. </param>
         public void UnsetVariable(Dictionary<int, Element> map, Dictionary<Element, bool> used)
         {
-            if (this.firstAppereance && !this.anonnymous)
+            if (this.IsFirstAppereance && !this.IsAnonnymous)
             {
-                if (map.TryGetValue(this.positionOfRepeatedField, out Element tmpElement))
+                if (map.TryGetValue(this.PositionOfRepeatedField, out Element tmpElement))
                 {
-                    map.Remove(this.positionOfRepeatedField);
+                    map.Remove(this.PositionOfRepeatedField);
                     used.Remove(tmpElement);
                 }
             }
@@ -133,19 +124,19 @@ namespace QueryEngine
         /// <returns> Null if no element is used, else element of this match object. </returns>
         public Element GetVariable(Dictionary<int, Element> map)
         {
-            if (this.anonnymous) return null;
+            if (this.IsAnonnymous) return null;
             else
             {
-                if (this.firstAppereance) return null;
-                else if (map.ContainsKey(this.positionOfRepeatedField))
-                    return map[this.positionOfRepeatedField];
+                if (this.IsFirstAppereance) return null;
+                else if (map.ContainsKey(this.PositionOfRepeatedField))
+                    return map[this.PositionOfRepeatedField];
                 else throw new ArgumentException($"{ this.GetType()} Map does not contain desired variable.");
             }
         }
 
 
         /// <summary>
-        /// 
+        /// Factory for base matches
         /// </summary>
         /// <param name="type"> Type of match node</param>
         /// <param name="node"> Prototype of the node </param>
