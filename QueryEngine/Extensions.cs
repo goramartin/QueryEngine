@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace QueryEngine
 {
@@ -10,12 +11,13 @@ namespace QueryEngine
     {
         public static void Print(this Element[] tmp)
         {
+            string tmpString = "Thread: " + Thread.CurrentThread.ManagedThreadId.ToString() + " result: ";
             for (int i = 0; i < tmp.Length; i++)
             {
-                Console.Write("{0} ", tmp[i].ID);
+                tmpString +=  " " + tmp[i].ID.ToString();
             }
-            Console.WriteLine();
-            Console.WriteLine(":");
+            
+            Console.WriteLine(tmpString);
         }
 
         public static void Populate<T>(this T[] arr, T value)

@@ -115,7 +115,7 @@ namespace QueryEngine
         /// <returns> Last used index. </returns>
         public int DFSStartOfCunjunction(int lastIndex, bool cameFromUp)
         {
-            var vertices = graph.GetAllVertices();
+            var vertices = this.PickConjunctionStartingVertices();
             for (int i = lastIndex; i < vertices.Count; i++)
             {
                 processingVertex = true;
@@ -400,7 +400,8 @@ namespace QueryEngine
 
         private List<Vertex> PickConjunctionStartingVertices()
         {
-            if (this.pattern.CurrentPatternIndex == 0 && this.pattern.CurrentMatchNodeIndex == 0)
+            if (this.pattern.CurrentPatternIndex == 0 && 
+                (this.pattern.CurrentMatchNodeIndex == 0 || this.pattern.isLastNodeInCurrentPattern()))
                 return this.startingVertices;
             else return this.graph.vertices;
         }
@@ -408,42 +409,169 @@ namespace QueryEngine
         public void SetStartingVertices(List<Vertex> vertices)
         {
             if (vertices == null || vertices.Count == 0) 
-                throw new ArgumentException($"{this.GetType()} Starting vertices are empty.");
+                throw new ArgumentException($"{this.GetType()} Starting vertices are empty on thread {Thread.CurrentThread.ManagedThreadId} .");
             else this.startingVertices = vertices;
         }
     }
 
+
+
+
+
+    /// <summary>
+    /// Serves as a paraller searcher. Contains threads and matchers.
+    /// </summary>
     class DFSParallelPatternMatcher : IParallelMatcher
     {
-        Thread[] threads;
-        ISingleThreadMatcher[] matchers;
+        Thread[] Threads;
+        ISingleThreadMatcher[] Matchers;
+        Graph Graph;
 
         public DFSParallelPatternMatcher(IDFSPattern pattern, Graph graph, QueryResults results)
         {
+            this.Graph = graph;
+            this.Threads = new Thread[QueryEngine.ThreadsPerQuery];
+            this.Matchers = new ISingleThreadMatcher[QueryEngine.ThreadsPerQuery];
+            
+            for (int i = 0; i < QueryEngine.ThreadsPerQuery; i++)
+            {
+                this.Threads[i] = new Thread(DFSParallelPatternMatcher.Work);
 
-
-
-
+                this.Matchers[i] = (ISingleThreadMatcher)MatchFactory
+                                   .CreateMatcher("DFSSingleThread",                // Type of Matcher 
+                                                  i==0 ? pattern : pattern.Clone(), // Cloning of pattern (one was already created)
+                                                  graph,                            
+                                                  results, 
+                                                  i);                               // Index where to store thread results
+                //
+            }
         }
 
+
+        /// <summary>
+        /// Creates jobs for threads and starts them. 
+        /// The main thread waits for all the searchers to finish.
+        /// </summary>
         public void Search()
         {
-            throw new NotImplementedException();
+            // creation of jobs, seting threads to run and waiting to finish
+            var distributor = new VertexDistributor(this.Graph.GetAllVertices(), 3);
+
+            //Create jobs and assign them to threads and run the thread.
+            for (int i = 0; i < this.Threads.Length; i++)
+            {
+                Job tmpJob = new Job(distributor, this.Matchers[i]);
+                this.Threads[i].Start(tmpJob);
+            }
+
+            // Wait for all working threads.
+            for (int i = 0; i < this.Threads.Length; i++)
+            {
+                this.Threads[i].Join();
+            }
+
         }
 
 
+        /// <summary>
+        /// Method passed to a thread.
+        /// A thread asks for a new starting vertices for his matcher.
+        /// If there are no more vertices the method ends.
+        /// </summary>
+        /// <param name="o"> Class containing matcher and distributor. </param>
         private static void Work(object o)
         {
+            Job job = (Job)o;
 
+            while (true)
+            {
+                List<Vertex> startingVertices = null;
+
+                lock (job.Distributor)
+                {
+                    startingVertices = job.Distributor.DistributeVertices();
+                }
+
+                if (startingVertices == null) break;
+                else
+                {
+                    job.Matcher.SetStartingVertices(startingVertices);
+                    job.Matcher.Search();
+                }
+            }
         }
 
+        /// <summary>
+        /// A Class serves as a parameter to paramethrisised method passed to a thread. 
+        /// </summary>
         private class Job 
-        { 
+        {
+            public VertexDistributor Distributor;
+            public ISingleThreadMatcher Matcher;
 
-
-
+            public Job(VertexDistributor vD, ISingleThreadMatcher m)
+            {
+                this.Distributor = vD;
+                this.Matcher = m;
+            }
         }
 
+
+        /// <summary>
+        /// Classes serves as a distributor of vertices to threads.
+        /// Each thread will be given certain amount of vertices to process.
+        /// Working with this class is critical section where multiple threads can meet.
+        /// Locking should be done.
+        /// </summary>
+        private class VertexDistributor
+        {
+            List<Vertex> Vertices;
+            int VerticesPerRound;
+            int FirstFreeIndex;
+
+            public VertexDistributor(List<Vertex> vertices, int verticesPerRound)
+            {
+                this.Vertices = vertices;
+                this.VerticesPerRound = verticesPerRound;
+                this.FirstFreeIndex = 0;
+            }
+
+
+            /// <summary>
+            /// Method is called from within Work inside each thread.
+            /// Always returns portion of graph vertices.
+            /// </summary>
+            /// <returns> Null if no more vertices to distribute or list of vertices from a graph.</returns>
+            public List<Vertex> DistributeVertices()
+            {
+                List<Vertex> distributedVertices = null;
+
+                string tmp = String.Concat("Thread: " + Thread.CurrentThread.ManagedThreadId + " asked for vertices. State of distributor " + this.FirstFreeIndex +".");
+
+
+                // No more vertices to distribute
+                if (this.FirstFreeIndex >= this.Vertices.Count) { Console.WriteLine( tmp + " Returning Null."); return null; }
+                // We can distribute last portion of vertices
+                else if (this.FirstFreeIndex + this.VerticesPerRound >= this.Vertices.Count)
+                {
+                    distributedVertices = this.Vertices.GetRange(this.FirstFreeIndex, this.Vertices.Count - this.FirstFreeIndex);
+                    this.FirstFreeIndex += this.VerticesPerRound;
+                } else // There are still more vertices to distribute 
+                {
+                    distributedVertices = this.Vertices.GetRange(this.FirstFreeIndex, this.VerticesPerRound);
+                    this.FirstFreeIndex += this.VerticesPerRound;
+                }
+
+                tmp += " Returning ";
+                for (int i = 0; i < distributedVertices.Count; i++)
+                {
+                    tmp += " " + distributedVertices[i].ID;
+                }
+                Console.WriteLine(tmp);
+
+                return distributedVertices;
+            }
+        }
 
 
     }

@@ -45,17 +45,8 @@ namespace QueryEngine
 
             // Create  matcher and pattern based on the name of matcher and pattern
             // Change if necessary just for testing 
-            if (!QueryEngine.Parallel)
-            {
-                this.Pattern = MatchFactory.CreatePattern("DFSSingleThread", "SIMPLE", variableMap, result);
-                this.Matcher = MatchFactory.CreateMatcher("DFSSingleThread", Pattern, graph, queryResults, 0);
-                // to do call set vertices
-            }
-            else 
-            {
-                this.Pattern = MatchFactory.CreatePattern("DFSParallel", "SIMPLE", variableMap, result);
-                this.Matcher = MatchFactory.CreateMatcher("DFSParallel", Pattern, graph, queryResults);
-            }
+            this.Pattern = MatchFactory.CreatePattern("DFSParallel", "SIMPLE", variableMap, result);
+            this.Matcher = MatchFactory.CreateMatcher("DFSParallel", Pattern, graph, queryResults);
         }
 
         /// <summary>
