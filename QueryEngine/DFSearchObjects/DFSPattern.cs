@@ -93,6 +93,9 @@ namespace QueryEngine
 
         private DFSPattern(List<List<DFSBaseMatch>> dFSBaseMatches)
         {
+            if (dFSBaseMatches == null || dFSBaseMatches.Count == 0) 
+                throw new ArgumentException($"{this.GetType()} passed null or empty matches.");
+
             this.Patterns = dFSBaseMatches;
             this.Scope = new Dictionary<int, Element>();
             this.MatchedVarsEdges = new Dictionary<Element, bool>();
@@ -104,6 +107,9 @@ namespace QueryEngine
 
         public DFSPattern(VariableMap map, List<ParsedPattern> parsedPatterns)
         {
+            if (parsedPatterns == null || parsedPatterns.Count == 0) 
+                throw new ArgumentException($"{this.GetType()} passed null or empty parsed pattern.");
+
             this.Patterns = new List<List<DFSBaseMatch>>();
             this.CreatePattern(parsedPatterns, map);
 
@@ -128,7 +134,6 @@ namespace QueryEngine
         {
             var orderedPatterns = OrderParsedPatterns(parsedPatterns);
 
-
             Console.ReadLine();
             // For every Parsed Pattern
             for (int i = 0; i < parsedPatterns.Count; i++)
@@ -143,8 +148,14 @@ namespace QueryEngine
                     this.Patterns.Add(CreateChain(firstPart.Pattern, variableMap));
                 }
                 this.Patterns.Add(CreateChain(orderedPatterns[i].Pattern, variableMap));
-
             }
+
+            // Check that each subpattern has at least one element.
+            for (int i = 0; i < this.Patterns.Count; i++)
+            {
+                if (this.Patterns[i].Count == 0) throw new ArgumentException($"{this.GetType()} one of the patterns is empty.");
+            }
+
         }
 
         /// <summary>

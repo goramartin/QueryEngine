@@ -38,7 +38,11 @@ namespace QueryEngine
         }
 
         public List<SelectVariable> GetResult()
-        { return this.result; }
+        {
+            if (this.result == null || this.result.Count == 0) 
+                throw new ArgumentException($"{this.GetType()} final result is empty or null");
+             return this.result; 
+        }
 
 
         /// <summary>
@@ -50,7 +54,7 @@ namespace QueryEngine
         {
             node.next.Accept(this);
             if (result.Count < 1)
-                throw new ArgumentException("SelectVisitor, failed to parse select expr.");
+                throw new ArgumentException($"{ this.GetType()}, failed to parse select expr.");
         }
 
 
@@ -66,7 +70,7 @@ namespace QueryEngine
             addingName = true;
             result.Add(new SelectVariable());
             if (node.name == null)
-                throw new ArgumentException("SelectVisitor, could not parse variable name.");
+                throw new ArgumentException($"{this.GetType()}, could not parse variable name.");
             else
             {
                 // Jump to identifier node with string value of name 
@@ -93,14 +97,14 @@ namespace QueryEngine
             if (addingName)
             {
                 if (!result[result.Count - 1].TrySetName(node.value))
-                    throw new ArgumentException("SelectVisitor, could not set name to variable.");
+                    throw new ArgumentException($"{this.GetType()}, could not set name to variable.");
             }
             //If it try assign propname, it also must always be success, 
             //because it could not be assigned before this.
             else
             {
                 if (!result[result.Count - 1].TrySetPropName(node.value))
-                    throw new ArgumentException("SelectVisitor, could not set propname to variable.");
+                    throw new ArgumentException($"{this.GetType()}, could not set propname to variable.");
             }
 
         }
@@ -165,7 +169,7 @@ namespace QueryEngine
             for (int i = 0; i < result.Count; i++)
             {
                 if (result[i].GetCount() <= 0)
-                    throw new ArgumentException("MatchVisitor, failed to parse match expr.");
+                    throw new ArgumentException($"{this.GetType()}, failed to parse match expr.");
             }
         }
 
@@ -202,7 +206,7 @@ namespace QueryEngine
 
             if (node.variable != null) node.variable.Accept(this);
             if (node.next == null)
-                throw new ArgumentException("MatchVisitor, missing end vertex from edge.");
+                throw new ArgumentException($"{this.GetType()}, missing end vertex from edge.");
             else node.next.Accept(this);
 
         }
@@ -260,7 +264,7 @@ namespace QueryEngine
         {
             //Try find the table of the variable, it has to be always valid table name.
             if (!d.TryGetValue(node.value, out Table table))
-                throw new ArgumentException("MatchVisitor, could not parse Table name.");
+                throw new ArgumentException($"{this.GetType()}, could not parse Table name.");
             else n.table = table;
         }
 

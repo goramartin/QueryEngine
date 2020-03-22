@@ -147,7 +147,7 @@ namespace QueryEngine
                     ProcessRightMark(param);
                     break;
                 default:
-                    throw new ArgumentException("TableCreator, Expected different state.");
+                    throw new ArgumentException($"{this.GetType()}, expected different state.");
             }
         }
 
@@ -160,20 +160,20 @@ namespace QueryEngine
 
         private void ProcessLeftSquaredBrace(string param)
         {
-            if (param != "[") throw new ArgumentException("Failed to parse types of table, expected [.");
+            if (param != "[") throw new ArgumentException($"{this.GetType()}, failed to parse types of table, expected [.");
             this.state = State.LeftBracket;
         }
 
         private void ProcessLeftBracket(string param)
         { 
-            if (param != "{") throw new ArgumentException($"{this.GetType()} Expected left Bracket");
+            if (param != "{") throw new ArgumentException($"{this.GetType()}, expected left Bracket");
             this.lastState = State.LeftBracket;
             this.state = State.LeftMark;
         }
 
         private void ProcessLeftMark(string param)
         {
-            if (param != "\"") throw new ArgumentException(($"{this.GetType()} Expected left quotations."));
+            if (param != "\"") throw new ArgumentException(($"{this.GetType()}, expected left quotations."));
 
             if (this.lastState == State.LeftBracket) this.state = State.Kind;
             else if (this.lastState == State.Kind) this.state = State.Name;
@@ -185,7 +185,7 @@ namespace QueryEngine
         private void ProcessKind(string param)
         {
             if (param != "Kind") 
-                throw new ArgumentException($"{this.GetType()} Expected Kind");
+                throw new ArgumentException($"{this.GetType()}, expected Kind");
             this.lastState = State.Kind;
             this.state = State.RightMark;
         }
@@ -194,7 +194,7 @@ namespace QueryEngine
         private void ProcessRightMark(string param)
         {
             if (param != "\"")
-                throw new ArgumentException($"{this.GetType()} Expected \"");
+                throw new ArgumentException($"{this.GetType()}, expected \"");
             if ((lastState == State.Kind) || (lastState == State.PropName)) this.state = State.DoubleDot;
             else this.state = State.Comma;
         }
@@ -202,7 +202,7 @@ namespace QueryEngine
 
         private void ProcessDoubleDot(string param)
         {
-            if (param != ":") throw new ArgumentException($"{this.GetType()} Expected :");
+            if (param != ":") throw new ArgumentException($"{this.GetType()}, expected :");
             this.state = State.LeftMark;
         }
 
@@ -214,7 +214,7 @@ namespace QueryEngine
         {
             this.newTable = new Table(param);
             if (this.dict.ContainsKey(param)) 
-                throw new ArgumentException($"{this.GetType()} Adding table that exists.");
+                throw new ArgumentException($"{this.GetType()}, adding table that exists. Table = {param}");
             else this.dict.Add(param, this.newTable);
             this.lastState = State.Name;
             this.state = State.RightMark;
@@ -335,7 +335,7 @@ namespace QueryEngine
                         ProcessEdgeToID(param);
                         break;
                     default:
-                       throw new ArgumentException($"{this.GetType()} Expected different state.");
+                       throw new ArgumentException($"{this.GetType()}, expected different state.");
                 }
         }
 
@@ -351,7 +351,7 @@ namespace QueryEngine
 
             int id = 0;
             if (!int.TryParse(param, out id))
-                throw new ArgumentException($"{this.GetType()} Reading wrong node ID. ID is not a number.");
+                throw new ArgumentException($"{this.GetType()}, reading wrong node ID. ID is not a number. ID = {param}");
 
             this.outEdge = new OutEdge();
             this.outEdge.PositionInList = outEdges.Count;
@@ -447,9 +447,9 @@ namespace QueryEngine
         {
             int id = 0;
             if (!int.TryParse(param, out id))
-                throw new ArgumentException($"{this.GetType()} Reading wrong node ID. ID is not a number.");
+                throw new ArgumentException($"{this.GetType()}, reading wrong node ID. ID is not a number. ID = {param}");
             Vertex vertex = this.vertices.Find(x => x.ID == id);
-            if (vertex == null) throw new ArgumentException($"{this.GetType()} ID is not found in vertices.");
+            if (vertex == null) throw new ArgumentException($"{this.GetType()}, ID is not found in vertices. ID = {id}");
             return vertex;
         }
 
@@ -591,7 +591,7 @@ namespace QueryEngine
                     ProcessParams(param, this.vertex.Table);
                     break;
                 default:
-                    throw new ArgumentException($"{this.GetType()} Expected different state.");
+                    throw new ArgumentException($"{this.GetType()}, expected different state.");
             }
         }
 
@@ -611,7 +611,7 @@ namespace QueryEngine
 
             int id = 0;
             if (!int.TryParse(param, out id))
-                throw new ArgumentException($"{this.GetType()} Reading wrong node ID. ID is not a number.");
+                throw new ArgumentException($"{this.GetType()}, reading wrong node ID. ID is not a number. ID = {param}");
 
             this.vertex = new Vertex();
             this.vertex.PositionInList = vertices.Count;

@@ -44,7 +44,7 @@ namespace QueryEngine
         public Table(string tableName)
         {
             if (tableName == null) 
-                throw new ArgumentException($"{this.GetType()} Table name not inicalised.");
+                throw new ArgumentException($"{this.GetType()}, table name not inicalised.");
             else
             { 
                 this.IRI = tableName;
@@ -59,11 +59,11 @@ namespace QueryEngine
         /// Adds id of a node into the table. Each id is bound with the position inside the table.
         /// Tuple int, int is ment for: First int is the id of the node and the second int is the position inside this table.
         /// </summary>
-        /// <param name="id"> Id of a node. </param>
+        /// <param name="id"> Unique id of a node. </param>
         public void AddID(int id) 
         {
             if (this.IDs.ContainsKey(id))
-                throw new ArgumentException($"{this.GetType()} Table {this.IRI} already contains id of a node {id}.");
+                throw new ArgumentException($"{this.GetType()}, table {this.IRI} already contains id of a node {id}.");
             else this.IDs.Add(id, this.IDs.Count);
         }
 
@@ -88,12 +88,12 @@ namespace QueryEngine
         public void AddNewProperty(Property newProp)
         {
             if (properties == null || newProp == null) 
-                throw new ArgumentException($"{this.GetType()} Failed to add Property, list or prop not inicialised.");
+                throw new ArgumentException($"{this.GetType()}, failed to add Property, list or prop not inicialised.");
            
             foreach (var item in properties)
             {
                 if (newProp.IRI == item.IRI) 
-                    throw new ArgumentException($"{this.GetType()} Adding property that already exists.");
+                    throw new ArgumentException($"{this.GetType()}, adding property that already exists. Prop name = {newProp.IRI}");
             }
             this.properties.Add(newProp);
         }
@@ -137,7 +137,7 @@ namespace QueryEngine
         public Property(string propName) 
         {
             if (propName == null) 
-                throw new ArgumentException($"{this.GetType()} Property<T> name not inicalised.");
+                throw new ArgumentException($"{this.GetType()}, property name not inicalised.");
             else
             {
                 this.propHolder = new List<T>();
@@ -203,23 +203,29 @@ namespace QueryEngine
 
          private static void RegisterProperty(string token, Type type)
         {
+            if (token == null || type == null)
+                throw new ArgumentException($"PropertyFactory, cannot register null type or null token.");
+
             if (registry.ContainsKey(token))
-                throw new ArgumentException("PropertyFactory: Property Type already registered.");
+                throw new ArgumentException($"PropertyFactory, property Type already registered. Token = {token}");
 
             registry.Add(token, type);
         }
 
         public static Property CreateProperty(string token, string name)
         {
+            if (token == null || name == null)
+                throw new ArgumentException($"PropertyFactory, passed null name or null token.");
+
             if (!registry.ContainsKey(token)) 
-                throw new ArgumentException("PropertyFactory: Token not found.");
+                throw new ArgumentException($"PropertyFactory, token not found. Token = {token}.");
 
             Type propType = null;
             if (registry.TryGetValue(token, out propType))
             {
                 return (Property)Activator.CreateInstance(propType, name);
             }
-            else throw new ArgumentException("PropertyFactory: Failed to load type from registry.");
+            else throw new ArgumentException($"PropertyFactory, failed to load type from registry. Type = {name}.");
 
         }
     }

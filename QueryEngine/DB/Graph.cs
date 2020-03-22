@@ -57,6 +57,11 @@ namespace QueryEngine
         public int InEdgesEndPosition { get; internal set; }
         public Vertex(int id, Table table)
         {
+            if (id <= 0)
+                throw new ArgumentException($"{this.GetType()}, passed wrong id to constructor.");
+            if (table == null)
+                throw new ArgumentException($"{this.GetType()}, passed null as a table to constructor.");
+
             this.ID = id;
             this.Table = table;
             this.OutEdgesStartPosition = -1;
@@ -191,8 +196,6 @@ namespace QueryEngine
             this.LoadEdges("Edges.txt");
         }
 
-
-
         /// <summary>
         /// Loads table types from a file. 
         /// </summary>
@@ -203,7 +206,12 @@ namespace QueryEngine
             var reader = new Reader(filename);
             var processor = new TableDictProcessor();
             var creator = new CreatorFromFile<Dictionary<string, Table>>(reader, processor);
-            return creator.Create();
+            var tmpTables = creator.Create();
+            
+            if (tmpTables.Count == 0) 
+                throw new ArgumentException($"{this.GetType()}, tables of the graph are empty. Filename = {filename}" );
+
+            return tmpTables;
         }
         private void LoadEdgeTables(string filename) => this.EdgeTables = LoadTables(filename);
         private void LoadNodeTables(string filename) => this.NodeTables = LoadTables(filename);
@@ -219,6 +227,9 @@ namespace QueryEngine
             processor.PassParameters(NodeTables);
             var creator = new CreatorFromFile<List<Vertex>>(reader, processor);
             this.vertices = creator.Create();
+
+            if (this.vertices.Count == 0) 
+                throw new ArgumentException($"{this.GetType()}, vertices of the graph are empty. Filename = {filename}");
         }
 
 
@@ -235,6 +246,12 @@ namespace QueryEngine
             var result = creator.Create();
             this.outEdges = result.outEdges;
             this.inEdges = result.inEdges;
+
+            if (this.outEdges.Count == 0) 
+                throw new ArgumentException($"{this.GetType()} Out edges of the graph are empty. Filename = {filename}");
+            if (this.inEdges.Count == 0) 
+                throw new ArgumentException($"{this.GetType()} In edges of the graph are empty. Filename = {filename}");
+
         }
 
 

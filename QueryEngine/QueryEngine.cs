@@ -10,7 +10,7 @@ namespace QueryEngine
 {
     class QueryEngine
     {
-        public static int ThreadsPerQuery = 2;
+        public static int ThreadsPerQuery = 1;
 
         private static void Run(string[] args, TextReader reader, TextWriter writer)
         {
@@ -42,17 +42,19 @@ namespace QueryEngine
 
         static void Main(string[] args)
         {
-           /* try
-            {
-               Run(args, Console.In, Console.Out);
-            }
-            catch (Exception e )
-            {
-                Console.WriteLine( e.Message);
-                Console.ReadLine();
-                Console.ReadLine();
-            }
-            */
+            /* try
+             {
+                if (QueryEngine.ThreadsPerQuery <= 0) throw new Exception("Cannot start a query with <= 0 threads.");
+                Run(args, Console.In, Console.Out);
+             }
+             catch (Exception e )
+             {
+                 Console.WriteLine( e.Message);
+             }
+             */
+
+            if (QueryEngine.ThreadsPerQuery <= 0) 
+                throw new Exception("Cannot start a query with <= 0 threads.");
             TestClass.Run();
             
         }

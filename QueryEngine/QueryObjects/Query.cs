@@ -27,6 +27,8 @@ namespace QueryEngine
         /// <param name="graph"> Graph to be conduct a query on. </param>
         public Query(TextReader reader, Graph graph)
         {
+            if (reader == null || graph == null) throw new ArgumentException($"{this.GetType()} Passed null as a reader or graph.");
+
             // Create tokens from console.
             List<Token> tokens = Tokenizer.Tokenize(reader);
 
@@ -43,7 +45,7 @@ namespace QueryEngine
 
             // Check if it successfully parsed every token.
             if (tokens.Count != Parser.GetPosition())
-                throw new ArgumentException("Failed to parse every token.");
+                throw new ArgumentException("Failed to parse every token for Query.");
         }
 
     }
@@ -62,7 +64,6 @@ namespace QueryEngine
     class VariableMap
     {
         private Dictionary<string, Tuple<int, Table> > variableMap;
-
         public VariableMap(Dictionary<string, Tuple<int, Table>> sv)=> this.variableMap = sv;
         public VariableMap() => this.variableMap = new Dictionary<string, Tuple<int, Table>>();
 
@@ -76,11 +77,11 @@ namespace QueryEngine
         /// <param name="table"> Type of inserted variable </param>
         public void AddVariable(string varName,int position, Table table) 
         {
-            if (this.variableMap.ContainsKey(varName)) throw new ArgumentException($"{this.GetType()} Variable is already in the Score.");
+            if (this.variableMap.ContainsKey(varName)) 
+                throw new ArgumentException($"{this.GetType()} Variable is already in the Score. Name = {varName}.");
             else this.variableMap.Add(varName, Tuple.Create<int, Table>(position,table));
             
         }
-
 
         /// <summary>
         /// Returns positon of variable based on the name of the variable.

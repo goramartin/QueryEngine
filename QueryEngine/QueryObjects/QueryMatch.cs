@@ -31,6 +31,9 @@ namespace QueryEngine
         /// <param name="results"> Place to store search results. </param>
         public MatchObject(List<Token> tokens, VariableMap variableMap, Graph graph, QueryResults queryResults)
         {
+            if (tokens == null || variableMap == null || graph == null || queryResults == null)
+                throw new ArgumentNullException($"{this.GetType()}, passing null arguments to the constructor.");
+
             this.queryResults = queryResults;
 
             // Create parse tree of match part of query and
@@ -71,13 +74,15 @@ namespace QueryEngine
                     if (!tmpDict.TryGetValue(name, out ParsedPatternNode node)) tmpDict.Add(name, tmpPattern[j]);
                     else
                     {   // Compare the two variables with the same name.
-                        if (!node.Equals(tmpPattern[j])) throw new ArgumentException($"{this.GetType()} Variables from Match expr are not matching.");
+                        if (!node.Equals(tmpPattern[j])) 
+                            throw new ArgumentException($"{this.GetType()}, variables from Match expr are not matching.");
                         else continue;
                     }
                 }
             }
             // Check if at least one variable was found.
-            if (tmpDict.Count == 0) throw new ArgumentException($"{this.GetType()} No given variable in the query.");
+            if (tmpDict.Count == 0) 
+                throw new ArgumentException($"{this.GetType()}, no given variable in the query.");
         }
 
         //just for testing
@@ -118,8 +123,12 @@ namespace QueryEngine
 
         private static void RegisterMatcher(string matcher, Type type)
         {
+            if (matcher == null || type == null)
+                throw new ArgumentNullException($"MatchFactory, cannot register null type or null token.");
+
+
             if (MatcherRegistry.ContainsKey(matcher))
-                throw new ArgumentException("MatchFactory: Matcher Type already registered.");
+                throw new ArgumentException($"MatchFactory, matcher Type already registered. Matcher = {matcher}. ");
 
             MatcherRegistry.Add(matcher, type);
         }
@@ -127,10 +136,14 @@ namespace QueryEngine
 
         private static void RegisterPatternToMatcher(string matcher, string pattern, Type patternType)
         {
+            if (matcher == null|| pattern == null || patternType == null)
+                throw new ArgumentNullException($"MatchFactory, cannot register null type or null token.");
+
+
             if (MatcherPatternRegistry.TryGetValue(matcher, out Dictionary<string,Type> pDict))
             {
                 if (pDict.TryGetValue(pattern, out Type value))
-                    throw new ArgumentException("MatchFactory: Pattern Type already registered to Matcher.");
+                    throw new ArgumentException($"MatchFactory, pattern Type already registered to Matcher. Pattern = {pattern}.");
                 else pDict.Add(pattern, patternType); 
 
             } else {
@@ -142,19 +155,22 @@ namespace QueryEngine
 
         public static IPatternMatcher CreateMatcher(string matcher, params object[] parameters) //IPattern pattern, Graph graph, QueryResults results, int resultIndex)
         {
-            if (!MatcherRegistry.ContainsKey(matcher))
-                throw new ArgumentException("MatchFactory: Matcher Token not found.");
+            if (matcher == null)
+                throw new ArgumentNullException($"MatchFactory, cannot access null type or null token.");
 
             Type matcherType = null;
             if (MatcherRegistry.TryGetValue(matcher, out matcherType))
             {
                 return (IPatternMatcher)Activator.CreateInstance(matcherType, parameters);
             }
-            else throw new ArgumentException("MatchFactory: Failed to load type from Matcher registry.");
+            else throw new ArgumentException($"MatchFactory: Failed to load type from Matcher registry. Matcher = {matcher}.");
         }
 
         public static IPattern CreatePattern(string matcher, string pattern, params object[] parameters)
         {
+            if (matcher == null || pattern == null)
+                throw new ArgumentNullException($"MatchFactory, cannot access null type or null token.");
+
             if (MatcherPatternRegistry.TryGetValue(matcher, out Dictionary<string, Type> pDict))
             {
                 if (pDict.TryGetValue(pattern, out Type patternType)) 

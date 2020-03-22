@@ -53,6 +53,9 @@ namespace QueryEngine
         /// <param name="resultIndex"> Index to store results on. =>0 </param>
         public DFSPatternMatcher(IDFSPattern pattern, Graph graph, QueryResults results, int resultIndex)
         {
+            if (pattern == null || graph == null || results == null) 
+                throw new ArgumentException($"{this.GetType()}, passed null to a constructor.");
+
             this.graph = graph;
             this.result = new Element[pattern.AllNodeCount];
             this.pattern = pattern;
@@ -409,7 +412,7 @@ namespace QueryEngine
         public void SetStartingVertices(List<Vertex> vertices)
         {
             if (vertices == null || vertices.Count == 0) 
-                throw new ArgumentException($"{this.GetType()} Starting vertices are empty on thread {Thread.CurrentThread.ManagedThreadId} .");
+                throw new ArgumentException($"{this.GetType()}, starting vertices are empty on thread {Thread.CurrentThread.ManagedThreadId} .");
             else this.startingVertices = vertices;
         }
     }
@@ -483,20 +486,26 @@ namespace QueryEngine
         {
             Job job = (Job)o;
 
-            while (true)
+            if (QueryEngine.ThreadsPerQuery == 1)
             {
-                List<Vertex> startingVertices = null;
-
-                lock (job.Distributor)
+                job.Matcher.Search(); // Starting vertices implicitly set to entire graph.
+            } else
+            {
+                while (true)
                 {
-                    startingVertices = job.Distributor.DistributeVertices();
-                }
+                    List<Vertex> startingVertices = null;
 
-                if (startingVertices == null) break;
-                else
-                {
-                    job.Matcher.SetStartingVertices(startingVertices);
-                    job.Matcher.Search();
+                    lock (job.Distributor)
+                    {
+                        startingVertices = job.Distributor.DistributeVertices();
+                    }
+
+                    if (startingVertices == null) break;
+                    else
+                    {
+                        job.Matcher.SetStartingVertices(startingVertices);
+                        job.Matcher.Search();
+                    }
                 }
             }
         }
@@ -531,8 +540,14 @@ namespace QueryEngine
 
             public VertexDistributor(List<Vertex> vertices, int verticesPerRound)
             {
-                this.Vertices = vertices;
-                this.VerticesPerRound = verticesPerRound;
+                if (vertices == null || vertices.Count == 0) 
+                    throw new ArgumentException($"{this.GetType()} creating with 0 vertices.");
+                else this.Vertices = vertices;
+                
+                if (verticesPerRound <= 0) 
+                    throw new ArgumentException($"{this.GetType()} creating with 0 rounds.");
+                else this.VerticesPerRound = verticesPerRound;
+                
                 this.FirstFreeIndex = 0;
             }
 
@@ -546,11 +561,8 @@ namespace QueryEngine
             {
                 List<Vertex> distributedVertices = null;
 
-                string tmp = String.Concat("Thread: " + Thread.CurrentThread.ManagedThreadId + " asked for vertices. State of distributor " + this.FirstFreeIndex +".");
-
-
                 // No more vertices to distribute
-                if (this.FirstFreeIndex >= this.Vertices.Count) { Console.WriteLine( tmp + " Returning Null."); return null; }
+                if (this.FirstFreeIndex >= this.Vertices.Count) return null;
                 // We can distribute last portion of vertices
                 else if (this.FirstFreeIndex + this.VerticesPerRound >= this.Vertices.Count)
                 {
@@ -561,13 +573,6 @@ namespace QueryEngine
                     distributedVertices = this.Vertices.GetRange(this.FirstFreeIndex, this.VerticesPerRound);
                     this.FirstFreeIndex += this.VerticesPerRound;
                 }
-
-                tmp += " Returning ";
-                for (int i = 0; i < distributedVertices.Count; i++)
-                {
-                    tmp += " " + distributedVertices[i].ID;
-                }
-                Console.WriteLine(tmp);
 
                 return distributedVertices;
             }

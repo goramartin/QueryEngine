@@ -47,9 +47,9 @@ namespace QueryEngine
                                             out Tuple<int, Table> tuple))
                 {
                     if (tuple.Item2 !=null && !tuple.Item2.ContainsProperty(this.selectVariables[i].propName))
-                            throw new ArgumentException($"{this.GetType()} Select expression contains variable that is not defined");
+                            throw new ArgumentException($"{this.GetType()}, select expression contains variable that is not defined");
                 }
-                else throw new ArgumentException($"{this.GetType()} Select expression contains variable that is not defined");
+                else throw new ArgumentException($"{this.GetType()}, select expression contains variable that is not defined");
             }
         }
     }
