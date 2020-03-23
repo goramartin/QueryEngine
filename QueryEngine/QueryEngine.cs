@@ -55,7 +55,7 @@ namespace QueryEngine
 
             if (QueryEngine.ThreadsPerQuery <= 0) 
                 throw new Exception("Cannot start a query with <= 0 threads.");
-            TestClass.Run();
+            TestClass.RunTest();
             
         }
 
