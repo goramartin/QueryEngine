@@ -20,7 +20,7 @@ namespace QueryEngine
     {
         private  IPatternMatcher Matcher;
         private  IPattern Pattern;
-        public QueryResults queryResults;
+        public IResultStorage queryResults;
 
         /// <summary>
         /// Creates Match expression
@@ -29,12 +29,11 @@ namespace QueryEngine
         /// <param name="graph"> Graph to be conduct a query on. </param>
         /// <param name="variableMap"> Empty map of variables. </param>
         /// <param name="results"> Place to store search results. </param>
-        public MatchObject(List<Token> tokens, VariableMap variableMap, Graph graph, QueryResults queryResults)
+        public MatchObject(List<Token> tokens, VariableMap variableMap, Graph graph)
         {
-            if (tokens == null || variableMap == null || graph == null || queryResults == null)
+            if (tokens == null || variableMap == null || graph == null)
                 throw new ArgumentNullException($"{this.GetType()}, passing null arguments to the constructor.");
 
-            this.queryResults = queryResults;
 
             // Create parse tree of match part of query and
             // create a shallow pattern
@@ -49,7 +48,12 @@ namespace QueryEngine
             // Create  matcher and pattern based on the name of matcher and pattern
             // Change if necessary just for testing 
             this.Pattern = MatchFactory.CreatePattern("DFSParallel", "SIMPLE", variableMap, result);
-            this.Matcher = MatchFactory.CreateMatcher("DFSParallel", Pattern, graph, queryResults);
+            
+            // Now we have got enough information about results. 
+            // After creating pattern the variable map is filled and we know extend of the results.
+            this.queryResults = new QueryResults(variableMap.GetCount(), QueryEngine.ThreadsPerQuery);
+
+            this.Matcher = MatchFactory.CreateMatcher("DFSParallel", Pattern, graph, this.queryResults);
         }
 
         /// <summary>

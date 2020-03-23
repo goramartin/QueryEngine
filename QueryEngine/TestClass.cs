@@ -29,15 +29,23 @@ namespace QueryEngine
               if (item.type == Token.TokenType.Identifier) Console.WriteLine(item.strValue) ;
            }
 
-            var results = new QueryResults();
-
             var map = new VariableMap();
             var select = new SelectObject(tokens);
-            var match = new MatchObject(tokens, map, g, results);
+            var match = new MatchObject(tokens, map, g);
             select.CheckCorrectnessOfSelect(map);
 
 
             match.GetMatcher().Search();
+
+            var tmp = match.queryResults;
+
+
+            Console.WriteLine("Results Ids");
+
+            foreach (var item in tmp)
+            {
+                item.Print();
+            }
 
 
 

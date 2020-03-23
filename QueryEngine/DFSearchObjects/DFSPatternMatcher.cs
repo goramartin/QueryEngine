@@ -19,7 +19,6 @@ namespace QueryEngine
 
     interface IParallelMatcher : IPatternMatcher
     {
-
     }
 
 
@@ -40,14 +39,12 @@ namespace QueryEngine
         private IDFSPattern pattern;
         private Element[] result;
         private bool processingVertex;
-        private int resultIndex; // Based on thread, implicitly 0
-        private List<Vertex> startingVertices;
-
+        private int threadIndex; // Based on thread, implicitly 0
         private int startVerticesIndex;
         private int startVerticesEndIndex;
 
 
-        private QueryResults results;
+        private IResultStorage queryResults;
 
         /// <summary>
         /// Starting vertices are implicitly set to entire graph.
@@ -55,8 +52,8 @@ namespace QueryEngine
         /// <param name="pattern"> Pattern to find.</param>
         /// <param name="graph"> Graph to search. </param>
         /// <param name="results"> Object to store found results. </param>
-        /// <param name="resultIndex"> Index to store results on. =>0 </param>
-        public DFSPatternMatcher(IDFSPattern pattern, Graph graph, QueryResults results, int resultIndex)
+        /// <param name="threadIndex"> Index to store results on. => 0 </param>
+        public DFSPatternMatcher(IDFSPattern pattern, Graph graph, IResultStorage results, int threadIndex)
         {
             if (pattern == null || graph == null || results == null) 
                 throw new ArgumentException($"{this.GetType()}, passed null to a constructor.");
@@ -64,9 +61,8 @@ namespace QueryEngine
             this.graph = graph;
             this.result = new Element[pattern.AllNodeCount];
             this.pattern = pattern;
-            this.results = results;
-            this.resultIndex = resultIndex;
-            this.startingVertices = graph.vertices;
+            this.queryResults = results;
+            this.threadIndex = threadIndex;
 
             //implicit
             this.startVerticesIndex = 0;
@@ -129,7 +125,6 @@ namespace QueryEngine
         public int DFSStartOfCunjunction(int lastIndex, bool cameFromUp)
         {
             var vertices = this.graph.vertices;
-            
             //for (int i = lastIndex; i < vertices.Count; i++)
             for (int i = this.PickConjunctionStartIndex(lastIndex, cameFromUp); i < this.PickConjunctionEndIndex(); i++)
             {
@@ -197,6 +192,7 @@ namespace QueryEngine
                         {
                             // Setting null here makes it to fail on next iteration and it is forced to dfs back.
                             result.Print();
+                            StoreResult();
                             nextElement = null;
                             continue;
                         }
@@ -441,6 +437,18 @@ namespace QueryEngine
             else return this.graph.vertices.Count;
         }
 
+        /// <summary>
+        /// Stores matched variables into result class based on columns and thread index.
+        /// </summary>
+        private void StoreResult()
+        {
+            var scope = this.pattern.GetMatchedVariables();
+
+            for (int i = 0; i < this.queryResults.ColumnCount; i++)
+            {
+                this.queryResults.AddElement(scope[i], i, this.threadIndex);
+            }
+        }
 
         /// <summary>
         /// Method sets range of vertices for the first conjunction in the pattern.
@@ -457,6 +465,9 @@ namespace QueryEngine
                 this.startVerticesEndIndex = end;
             }
         }
+
+
+
     }
 
 
@@ -472,7 +483,7 @@ namespace QueryEngine
         ISingleThreadMatcher[] Matchers;
         Graph Graph;
 
-        public DFSParallelPatternMatcher(IDFSPattern pattern, Graph graph, QueryResults results)
+        public DFSParallelPatternMatcher(IDFSPattern pattern, Graph graph, IResultStorage results)
         {
             this.Graph = graph;
             this.Threads = new Thread[QueryEngine.ThreadsPerQuery];

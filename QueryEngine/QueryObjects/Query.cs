@@ -37,8 +37,7 @@ namespace QueryEngine
             this.variableMap = new VariableMap();
             this.select = new SelectObject(tokens);
             
-            results = new QueryResults();
-            this.match = new MatchObject(tokens, variableMap, graph, results);
+            this.match = new MatchObject(tokens, variableMap, graph);
 
             // Check correctness of select part
             select.CheckCorrectnessOfSelect(variableMap);

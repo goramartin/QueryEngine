@@ -31,6 +31,8 @@ namespace QueryEngine
         int CurrentPatternCount { get; }
         
         int AllNodeCount { get; }
+
+        Dictionary<int, Element> GetMatchedVariables();
     }
 
     /// <summary>
@@ -121,6 +123,7 @@ namespace QueryEngine
             this.OverAllIndex = 0;
         }
 
+ #region PatternCreation
         /// <summary>
         /// Creates pattern from Parsed Pattern made by match visitor, also creates a map for variables
         /// during pattern matching.
@@ -221,7 +224,6 @@ namespace QueryEngine
         }
 
 
-        #region PatternCreation
         /// <summary>
         /// Creates pattern chain used in searcher.
         /// Also sets map for query.
@@ -379,6 +381,11 @@ namespace QueryEngine
         {
             var tmpPattern = new DFSPattern(this.Patterns);
             return tmpPattern;
+        }
+
+        public Dictionary<int, Element> GetMatchedVariables()
+        {
+            return this.Scope;
         }
     }
 
