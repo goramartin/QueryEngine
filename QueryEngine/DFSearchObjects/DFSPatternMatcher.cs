@@ -14,7 +14,7 @@ namespace QueryEngine
 
     interface ISingleThreadMatcher : IPatternMatcher
     {
-        void SetStartingVertices(List<Vertex> vertices);
+        void SetStartingVerticesIndeces(int start, int end);
     }
 
     interface IParallelMatcher : IPatternMatcher
@@ -42,6 +42,11 @@ namespace QueryEngine
         private bool processingVertex;
         private int resultIndex; // Based on thread, implicitly 0
         private List<Vertex> startingVertices;
+
+        private int startVerticesIndex;
+        private int startVerticesEndIndex;
+
+
         private QueryResults results;
 
         /// <summary>
@@ -62,6 +67,11 @@ namespace QueryEngine
             this.results = results;
             this.resultIndex = resultIndex;
             this.startingVertices = graph.vertices;
+
+            //implicit
+            this.startVerticesIndex = 0;
+            this.startVerticesEndIndex = graph.vertices.Count;
+
         }
 
         /// <summary>
@@ -118,8 +128,10 @@ namespace QueryEngine
         /// <returns> Last used index. </returns>
         public int DFSStartOfCunjunction(int lastIndex, bool cameFromUp)
         {
-            var vertices = this.PickConjunctionStartingVertices();
-            for (int i = lastIndex; i < vertices.Count; i++)
+            var vertices = this.graph.vertices;
+            
+            //for (int i = lastIndex; i < vertices.Count; i++)
+            for (int i = this.PickConjunctionStartIndex(lastIndex, cameFromUp); i < this.PickConjunctionEndIndex(); i++)
             {
                 processingVertex = true;
                 Element nextElement = vertices[i];
@@ -401,19 +413,49 @@ namespace QueryEngine
             result[pattern.OverAllIndex] = null;
         }
 
-        private List<Vertex> PickConjunctionStartingVertices()
+
+
+        /// <summary>
+        /// Based on which conjunction we are filling we set set its starting vertices.
+        /// If it is the first conjunction in the pattern we iterate over vertices received from vertex distributor.
+        /// </summary>
+        /// <returns> Starting index of the conjunction. </returns>
+        private int PickConjunctionStartIndex(int lastIndex, bool cameFromUp)
         {
             if (this.pattern.CurrentPatternIndex == 0 && 
                 (this.pattern.CurrentMatchNodeIndex == 0 || this.pattern.isLastNodeInCurrentPattern()))
-                return this.startingVertices;
-            else return this.graph.vertices;
+                return cameFromUp ? lastIndex : this.startVerticesIndex;
+            else return lastIndex;
         }
 
-        public void SetStartingVertices(List<Vertex> vertices)
+        /// <summary>
+        /// Based on which conjunction we are filling we set set its starting vertices.
+        /// If it is the first conjunction in the pattern we iterate over vertices received from vertex distributor.
+        /// </summary>
+        /// <returns> Ending index of the conjunction. </returns>
+        private int PickConjunctionEndIndex()
         {
-            if (vertices == null || vertices.Count == 0) 
+            if (this.pattern.CurrentPatternIndex == 0 &&
+                (this.pattern.CurrentMatchNodeIndex == 0 || this.pattern.isLastNodeInCurrentPattern()))
+                return this.startVerticesEndIndex;
+            else return this.graph.vertices.Count;
+        }
+
+
+        /// <summary>
+        /// Method sets range of vertices for the first conjunction in the pattern.
+        /// </summary>
+        /// <param name="start"> Starting index.</param>
+        /// <param name="end"> Ending index. </param>
+        public void SetStartingVerticesIndeces(int start, int end)
+        {
+            if (start < 0 || end < 0)
                 throw new ArgumentException($"{this.GetType()}, starting vertices are empty on thread {Thread.CurrentThread.ManagedThreadId} .");
-            else this.startingVertices = vertices;
+            else
+            {
+                this.startVerticesIndex = start;
+                this.startVerticesEndIndex = end;
+            }
         }
     }
 
@@ -458,7 +500,7 @@ namespace QueryEngine
         public void Search()
         {
             // creation of jobs, seting threads to run and waiting to finish
-            var distributor = new VertexDistributor(this.Graph.GetAllVertices(), 3);
+            var distributor = new VertexDistributor(this.Graph.GetAllVertices());
 
             //Create jobs and assign them to threads and run the thread.
             for (int i = 0; i < this.Threads.Length; i++)
@@ -485,25 +527,26 @@ namespace QueryEngine
         private static void Work(object o)
         {
             Job job = (Job)o;
-
+            
             if (QueryEngine.ThreadsPerQuery == 1)
             {
-                job.Matcher.Search(); // Starting vertices implicitly set to entire graph.
+               job.Matcher.Search(); // Starting indeces implicitly set to entire graph.
             } else
-            {
+                {
                 while (true)
                 {
-                    List<Vertex> startingVertices = null;
+                    int start;
+                    int end;
 
                     lock (job.Distributor)
                     {
-                        startingVertices = job.Distributor.DistributeVertices();
+                        job.Distributor.DistributeVertices(out start, out end);
                     }
 
-                    if (startingVertices == null) break;
+                    if (start == -1 || end == -1) break;
                     else
                     {
-                        job.Matcher.SetStartingVertices(startingVertices);
+                        job.Matcher.SetStartingVerticesIndeces(start, end);
                         job.Matcher.Search();
                     }
                 }
@@ -511,7 +554,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// A Class serves as a parameter to paramethrisised method passed to a thread. 
+        /// A Class serves as a parameter to paramethrisised method passed to a thread.  
         /// </summary>
         private class Job 
         {
@@ -535,20 +578,14 @@ namespace QueryEngine
         private class VertexDistributor
         {
             List<Vertex> Vertices;
-            int VerticesPerRound;
-            int FirstFreeIndex;
+            static int VerticesPerRound = 3;
+            int NextFreeIndex;
 
-            public VertexDistributor(List<Vertex> vertices, int verticesPerRound)
+            public VertexDistributor(List<Vertex> vertices)
             {
                 if (vertices == null || vertices.Count == 0) 
                     throw new ArgumentException($"{this.GetType()} creating with 0 vertices.");
                 else this.Vertices = vertices;
-                
-                if (verticesPerRound <= 0) 
-                    throw new ArgumentException($"{this.GetType()} creating with 0 rounds.");
-                else this.VerticesPerRound = verticesPerRound;
-                
-                this.FirstFreeIndex = 0;
             }
 
 
@@ -556,25 +593,30 @@ namespace QueryEngine
             /// Method is called from within Work inside each thread.
             /// Always returns portion of graph vertices.
             /// </summary>
-            /// <returns> Null if no more vertices to distribute or list of vertices from a graph.</returns>
-            public List<Vertex> DistributeVertices()
+            /// <returns> Starting index and ending index of a round or start/end set to -1 is no more vertices are to be distribute.</returns>
+            public void DistributeVertices(out int start, out int end)
             {
-                List<Vertex> distributedVertices = null;
+                int tmpEndOfRound = Interlocked.Add(ref this.NextFreeIndex, VertexDistributor.VerticesPerRound);
+                int tmpStartOfRound = tmpEndOfRound - VertexDistributor.VerticesPerRound;
 
-                // No more vertices to distribute
-                if (this.FirstFreeIndex >= this.Vertices.Count) return null;
-                // We can distribute last portion of vertices
-                else if (this.FirstFreeIndex + this.VerticesPerRound >= this.Vertices.Count)
+                // First index is beyond the size of the array of vertices.
+                if (tmpStartOfRound >= this.Vertices.Count)
                 {
-                    distributedVertices = this.Vertices.GetRange(this.FirstFreeIndex, this.Vertices.Count - this.FirstFreeIndex);
-                    this.FirstFreeIndex += this.VerticesPerRound;
-                } else // There are still more vertices to distribute 
+                    start = -1;
+                    end = -1;
+                // Return all vertices to the end of the list. Returned round is smaller because there is not enough vertices. 
+                } else if (tmpEndOfRound >= this.Vertices.Count)
                 {
-                    distributedVertices = this.Vertices.GetRange(this.FirstFreeIndex, this.VerticesPerRound);
-                    this.FirstFreeIndex += this.VerticesPerRound;
+                    start = tmpStartOfRound;
+                    end = this.Vertices.Count;
+                // Return normal size round.
+                } else
+                {
+                    start = tmpStartOfRound;
+                    end = tmpEndOfRound;
                 }
 
-                return distributedVertices;
+                Console.WriteLine("Thread: "  + Thread.CurrentThread.ManagedThreadId + " asked for vertices and gets start = " + start + " , end = " + end+ ".");
             }
         }
 

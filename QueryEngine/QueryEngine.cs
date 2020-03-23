@@ -10,7 +10,7 @@ namespace QueryEngine
 {
     class QueryEngine
     {
-        public static int ThreadsPerQuery = 1;
+        public static int ThreadsPerQuery = 2;
 
         private static void Run(string[] args, TextReader reader, TextWriter writer)
         {
