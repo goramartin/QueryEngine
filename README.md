@@ -1,5 +1,5 @@
 # QueryEngine
-Is a query program for graphs. It gets three files, schemas for edges and vertices, and lastly file with particular nodes and edges.Then the user is asked to enter a query. (Query language is a subset of PGQL). So far it prints only ID's as they were matched during searching in graph.
+Is a query program for graphs. It gets four files, schemas for edges and vertices, and lastly files with particular nodes and edges. Then, the user is asked to enter a query. (Query language is a subset of PGQL). So far it prints only ID's as they were matched during searching in graph.
 
 ## Input files
 
