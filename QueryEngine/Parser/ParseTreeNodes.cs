@@ -1,4 +1,13 @@
-﻿using System;
+﻿
+/*
+ * This file includes definitions of nodes used to create a parse tree of the query.
+ * Nodes are used by a Parser to create the parse tree.
+ */
+
+
+
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;

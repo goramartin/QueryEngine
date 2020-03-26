@@ -1,8 +1,6 @@
 ﻿
 /**
- *  This file contains definitions of Tokens, Tokenizers, Parsers and assiciated classes,
- *  those are... nodes that the Parser uses to create parsing tree and visitors to 
- *  process the parsing tree.
+ *  This file contains definitions of Tokens, Tokenizers and Parser.
  * 
  * Parsing is done via Deep descend parsing (Top to bottom).
  * The whole query expression forms a single tree. Each parser method (ParseSelectExpr, ParseMatchExpr...)
