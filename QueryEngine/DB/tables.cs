@@ -10,6 +10,8 @@
  * Properties are form from an abstract type Property that is visible from within a table.
  * Generic properties extend Property, and specialisations are created separately. 
  * Properties are created with a help of an Activator class based on a passed name.
+ * 
+ * This file contains also static factory for creation of tables.
  */
 using System;
 using System.Collections.Generic;
