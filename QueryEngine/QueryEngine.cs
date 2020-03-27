@@ -44,7 +44,8 @@ namespace QueryEngine
         {
             /* try
              {
-                if (QueryEngine.ThreadsPerQuery <= 0) throw new Exception("Cannot start a query with <= 0 threads.");
+                if (QueryEngine.ThreadsPerQuery <= 0) 
+                    throw new Exception("Cannot start a query with <= 0 threads.");
                 Run(args, Console.In, Console.Out);
              }
              catch (Exception e )

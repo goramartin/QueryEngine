@@ -30,7 +30,7 @@ namespace QueryEngine
             Match, Select,
 
             Asterix, Dot, DoubleDot, Comma, Dash, Less, Greater, LeftParen, RightParen, LeftBrace, RightBrace,
-            Identifier,
+            Identifier, AsLabel
         }
         public readonly string strValue;
         public TokenType type;
@@ -169,6 +169,8 @@ namespace QueryEngine
             RegisterToken("SELECT", Token.TokenType.Select);
             RegisterToken("match", Token.TokenType.Match);
             RegisterToken("select", Token.TokenType.Select);
+            RegisterToken("AS", Token.TokenType.AsLabel);
+            RegisterToken("as", Token.TokenType.AsLabel);
         }
 
     }
@@ -218,7 +220,7 @@ namespace QueryEngine
             else
             {
                 IncrementPosition();
-                Node node = ParseVariableExpr(tokens);
+                Node node = ParseVarExprForSelectExpr(tokens);
                 if (node == null) throw new ArgumentException("Failed to parse Select Expresion.");
                 selectNode.AddNext(node);
             }
@@ -252,47 +254,89 @@ namespace QueryEngine
 
         /// <summary>
         /// Parses list of variables that is Name.Prop, Name2, *, Name3.Prop3 
+        /// There can be either only * or variable references.
         /// </summary>
         /// <param name="tokens"> Tokens to parse </param>
         /// <returns> Chain of variable nodes </returns>
-        static private Node ParseVariableExpr(List<Token> tokens)
+        static private Node ParseVarExprForSelectExpr(List<Token> tokens)
         {
-            VariableNode variableNode = new VariableNode();
+            VariableNode variableNode = null;
 
             // (*)
             if (CheckToken(position, Token.TokenType.Asterix, tokens))
             {
+                variableNode = new VariableNode();
                 variableNode.AddName(new IdentifierNode("*"));
                 IncrementPosition();
+                return variableNode;
             }
             else
             {
-                //Expecting identifier.
-                Node name = ParseIdentifierExrp(tokens);
-                if (name == null) return null;
-                else variableNode.AddName(name);
+                return ParseVarExprForSelectExprNoAsterix(tokens);
+            }
+        }
 
+        /// <summary>
+        /// Parsing of reference variables in select expression: var.PropName AS Label
+        /// </summary>
+        /// <param name="tokens"> Tokens to parse. </param>
+        /// <returns> Chain of variable nodes. </returns>
+        static private Node ParseVarExprForSelectExprNoAsterix(List<Token> tokens)
+        {
+            VariableNode variableNode = new VariableNode();
+            variableNode.AddName(ParseIdentVariableForSelectExpr(tokens));
+
+            IncrementPosition();
+            // Case of property name .PropName , if there is dot, there must follow identifier.
+            // If there is a prop name we can use labels "AS label"
+            if ((CheckToken(position, Token.TokenType.Dot, tokens)))
+            {
                 IncrementPosition();
-                //Case of property name .PropName , if there is dot, there must follow identifier.
-                if ((CheckToken(position, Token.TokenType.Dot, tokens)))
+                variableNode.AddProperty(ParseIdentVariableForSelectExpr(tokens));
+                IncrementPosition();
+
+                if (CheckToken(position, Token.TokenType.AsLabel, tokens))
                 {
                     IncrementPosition();
-                    Node identifierNode = ParseIdentifierExrp(tokens);
-                    if (identifierNode == null) throw new ArgumentException("VariableParser, exprected Indentifier after dot.");
-                    else variableNode.AddProperty(identifierNode);
+                    variableNode.AddLabel(ParseIdentVariableForSelectExpr(tokens));
                     IncrementPosition();
                 }
             }
 
-            //Comma signals there is another variable, next variablenode must follow.
+            // Comma signals there is another variable, next variablenode must follow.
             if (CheckToken(position, Token.TokenType.Comma, tokens))
             {
                 IncrementPosition();
-                Node nextVariableNode = ParseVariableExpr(tokens);
-                if (nextVariableNode == null) throw new ArgumentException("VariableParser, exprected Indentifier after comma.");
-                else variableNode.AddNext(nextVariableNode);
+                variableNode.AddNext(ParseNextVariableForSelectExprNoAsterix(tokens));
             }
             return variableNode;
+        }
+
+        /// <summary>
+        /// Parses next variable node.
+        /// </summary>
+        /// <param name="tokens"> Tokens to parse. </param>
+        /// <returns> Chain of variable nodes. </returns>
+        static private Node ParseNextVariableForSelectExprNoAsterix(List<Token> tokens)
+        {
+            Node nextVariableNode = ParseVarExprForSelectExprNoAsterix(tokens);
+            if (nextVariableNode == null)
+                throw new ArgumentException("VariableParser, exprected Indentifier after comma.");
+            else return nextVariableNode;
+        }
+
+        /// <summary>
+        /// Parses name of variable (before .)
+        /// </summary>
+        /// <param name="tokens"> Tokens to parse. </param>
+        /// <returns> Identifier node with variable name. </returns>
+        static private Node ParseIdentVariableForSelectExpr(List<Token> tokens)
+        {
+            // Expecting identifier.
+            Node ident = ParseIdentifierExrp(tokens);
+            if (ident == null)
+                throw new ArgumentNullException("VariableParser, failed to parse ident.");
+            return ident;
         }
 
         /// <summary>
@@ -312,7 +356,6 @@ namespace QueryEngine
          * Parsing Match expression is done with combination of parsing variables enclosed in 
          * vertex or edge.
          */
-
 
         /// <summary>
         /// Parses variable enclosed in vertex or edge.
@@ -381,7 +424,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Parses edge expression altogether with enclosed variable  -[...]- / <-[...]- / -[...]->
+        /// Parses edge expression altogether with enclosed variable 
         /// </summary>
         /// <param name="tokens"> Tokens to parse </param>
         /// <returns> Edge node </returns>
@@ -597,7 +640,9 @@ namespace QueryEngine
         /// <summary>
         /// Checks if the token is head of any edge
         /// </summary>
-        /// <param name="p"> position of token </param>
+        /// <param name="first"> First position to try. </param>
+        /// <param name="second"> Second position to try. </param>
+        /// <param name="third"> Third position to try. </param>
         /// <param name="tokens"> Tokens to parse </param>
         /// <returns> True on match with -[...]"->"  token </returns>
         static private bool CheckOutEdgeHeadForward(int first, int second, int third, List<Token> tokens)
@@ -615,7 +660,7 @@ namespace QueryEngine
         /// </summary>
         /// <param name="p"> position of token </param>
         /// <param name="tokens"> Tokens to parse </param>
-        /// <returns> True on match with <- token </returns>
+        /// <returns> True on match with token </returns>
         static private bool CheckInEdgeHead(int p, List<Token> tokens)
         {
             if (CheckToken(p, Token.TokenType.Less, tokens) &&

@@ -117,7 +117,7 @@ namespace QueryEngine {
     {
         public Node name;
         public Node propName;
-
+        public Node label; 
         public void AddName(Node n)
         {
             this.name = n;
@@ -128,9 +128,14 @@ namespace QueryEngine {
             this.propName = p;
         }
 
+        public void AddLabel(Node l)
+        {
+            this.label = l;
+        }
+
         public bool IsEmpty()
         {
-            if ((name == null) && (propName == null))
+            if ((name == null) && (propName == null) && (label== null))
             {
                 return true;
             }
@@ -142,6 +147,7 @@ namespace QueryEngine {
             visitor.Visit(this);
         }
     }
+
     class IdentifierNode : Node
     {
         public string value { get; private set; }

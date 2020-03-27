@@ -66,7 +66,8 @@ namespace QueryEngine
         /// Gets an element that will be tested if it can be added to the result.
         /// </summary>
         /// <param name="element"> Element to be tested. </param>
-        /// <param name="scope"> Scope of variables in search context. </param>
+        /// <param name="map"> Scope of variables in search context. </param>
+        /// <param name="used"> A scope containing elements from map but in reversed dictionary. </param>
         /// <returns> True if element can be aplicable or false on refusal. </returns>
         public abstract bool Apply(Element element, Dictionary<int, Element> map, Dictionary<Element, bool> used);
 
@@ -152,9 +153,10 @@ namespace QueryEngine
         /// <summary>
         /// Factory for base matches
         /// </summary>
-        /// <param name="type"> Type of match node</param>
+        /// <param name="edgeType"> Type of edge node</param>
         /// <param name="node"> Prototype of the node </param>
         /// <param name="indexInMap"> Index of its variable in scope </param>
+        /// <param name="isFirst"> If the match node represents variable that appears for the first time.</param>
         /// <returns></returns>
         public static DFSBaseMatch CreateDFSBaseMatch(EdgeType edgeType, ParsedPatternNode node, int indexInMap, bool isFirst)
         {

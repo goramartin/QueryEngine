@@ -21,10 +21,10 @@ using System.IO;
 namespace QueryEngine
 {
      /// <summary>
-    // Class representing single node type.
-    // Encompasses table of properties pertaining to the type. 
-    // List IDs consists of added nodes into the table. Values of the node we can find 
-    // on the same position in the properties.
+     /// Class representing single node type.
+     /// Encompasses table of properties pertaining to the type. 
+     /// List IDs consists of added nodes into the table. Values of the node we can find 
+     /// on the same position in the properties.
      /// </summary>
     class Table
     {
@@ -184,7 +184,7 @@ namespace QueryEngine
 
     /// <summary>
     /// Class includes register of all the property types.
-    //  Enables to create instance of a property based on a string token.
+    ///  Enables to create instance of a property based on a string token.
     /// </summary>
     static class PropertyFactory
     {

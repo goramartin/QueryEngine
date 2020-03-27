@@ -14,7 +14,6 @@ namespace QueryEngine
     {
         private List<SelectVariable> selectVariables;
 
-
         /// <summary>
         /// Creates Select expression
         /// </summary>
@@ -35,21 +34,27 @@ namespace QueryEngine
 
         /// <summary>
         /// Checks correctness of given print expression.
+        /// There must be either * or variable references with their properties.
         /// </summary>
-        /// <param name="variableMap"> Map of variables </param>
+        /// <param name="variableMap"> Map of variables. </param>
         public void CheckCorrectnessOfSelect(VariableMap variableMap)
         {
-            for (int i = 0; i < this.selectVariables.Count; i++)
+            if (this.selectVariables[0].name == "*")
             {
-                if (this.selectVariables[i].name == "*") continue;
-
-                if (variableMap.TryGetValue(this.selectVariables[i].name,
-                                            out Tuple<int, Table> tuple))
+                if (this.selectVariables.Count > 1)
+                    throw new ArgumentException($"{this.GetType()}, select expression cannot have another variable while habing *");
+            }
+            else
+            {
+                for (int i = 0; i < this.selectVariables.Count; i++) 
                 {
-                    if (tuple.Item2 !=null && !tuple.Item2.ContainsProperty(this.selectVariables[i].propName))
-                            throw new ArgumentException($"{this.GetType()}, select expression contains variable that is not defined");
+                    if (variableMap.TryGetValue(this.selectVariables[i].name, out Tuple<int, Table> tuple))
+                    {
+                        if (tuple.Item2 !=null && !tuple.Item2.ContainsProperty(this.selectVariables[i].propName))
+                                throw new ArgumentException($"{this.GetType()}, select expression contains variable that is not defined");
+                    }
+                    else throw new ArgumentException($"{this.GetType()}, select expression contains variable that is not defined");
                 }
-                else throw new ArgumentException($"{this.GetType()}, select expression contains variable that is not defined");
             }
         }
     }
@@ -57,6 +62,7 @@ namespace QueryEngine
     {
         public string name { get; private set; }
         public string propName { get; private set; }
+        public string label { get; private set; }
 
         public bool TrySetName(string n)
         {
@@ -68,9 +74,16 @@ namespace QueryEngine
             if (this.propName == null) { this.propName = n; return true; }
             else return false;
         }
+
+        public bool TrySetLabel(string l)
+        {
+            if (this.label == null) { this.label = l; return true; }
+            else return false;
+        }
+
         public bool IsEmpty()
         {
-            if ((this.name == null) && (this.propName == null)) return true;
+            if ((this.name == null) && (this.propName == null) && (this.label == null)) return true;
             else return false;
         }
     }

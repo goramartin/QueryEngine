@@ -21,7 +21,7 @@ namespace QueryEngine
         private Dictionary<string, Tuple<int, Table>> variableMap;
         public VariableMap(Dictionary<string, Tuple<int, Table>> sv) => this.variableMap = sv;
         public VariableMap() => this.variableMap = new Dictionary<string, Tuple<int, Table>>();
-
+      
         public Dictionary<string, Tuple<int, Table>> GetvariableMapVariables() => this.variableMap;
 
         /// <summary>

@@ -36,12 +36,10 @@ namespace QueryEngine
     class SelectVisitor : IVisitor<List<SelectVariable>>
     {
         List<SelectVariable> result;
-        bool addingName; // Whether adding name or property, TRUE for adding name 
 
         public SelectVisitor()
         {
             result = new List<SelectVariable>();
-            addingName = true;
         }
 
         public List<SelectVariable> GetResult()
@@ -74,7 +72,6 @@ namespace QueryEngine
         /// <param name="node"> Variable node </param>
         public void Visit(VariableNode node)
         {
-            addingName = true;
             result.Add(new SelectVariable());
             if (node.name == null)
                 throw new ArgumentException($"{this.GetType()}, could not parse variable name.");
@@ -82,10 +79,12 @@ namespace QueryEngine
             {
                 // Jump to identifier node with string value of name 
                 node.name.Accept(this);
-                addingName = false;
-
                 // If the propname is set, jump to identifier node of property
-                if (node.propName != null) node.propName.Accept(this);
+                if (node.propName != null)
+                {
+                    node.propName.Accept(this);
+                    if (node.label != null) node.label.Accept(this);
+                }
             }
 
             if (node.next == null) return;
@@ -94,26 +93,15 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Obtains string value of variable or property. 
+        /// Obtains string value of variable or property or label.
         /// </summary>
         /// <param name="node"> Identifier node </param>
         public void Visit(IdentifierNode node)
         {
-            //If adding name it must be successful, otherwise it is failed parsing.
-            //There is always one object in results, count -1 can never undergo limit.
-            if (addingName)
-            {
-                if (!result[result.Count - 1].TrySetName(node.value))
-                    throw new ArgumentException($"{this.GetType()}, could not set name to variable.");
-            }
-            //If it try assign propname, it also must always be success, 
-            //because it could not be assigned before this.
-            else
-            {
-                if (!result[result.Count - 1].TrySetPropName(node.value))
-                    throw new ArgumentException($"{this.GetType()}, could not set propname to variable.");
-            }
-
+            if (result[result.Count - 1].TrySetName(node.value)) return;
+            else if (result[result.Count - 1].TrySetPropName(node.value)) return;
+            else if (result[result.Count - 1].TrySetLabel(node.value)) return;
+            else throw new ArgumentException($"{this.GetType()}, could not parse name.");
         }
 
         //Can never appear.  

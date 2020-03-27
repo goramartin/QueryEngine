@@ -89,7 +89,6 @@ namespace QueryEngine
                 Console.WriteLine("EndVertexID:" + item.EndVertex.ID);
                 Console.WriteLine();
             }
-            Console.ReadLine();
 
 
         }
@@ -105,6 +104,11 @@ namespace QueryEngine
                 Console.WriteLine(item.type);
                 if (item.type == Token.TokenType.Identifier) Console.WriteLine(item.strValue);
             }
+
+
+
+
+
 
             var map = new VariableMap();
             var select = new SelectObject(tokens);

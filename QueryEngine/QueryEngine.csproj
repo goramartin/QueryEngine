@@ -22,6 +22,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Debug\QueryEngine.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -58,6 +59,7 @@
     <Compile Include="QueryObjects\QuerySelect.cs" />
     <Compile Include="DB\Tables.cs" />
     <Compile Include="DB\Graph.cs" />
+    <Compile Include="QueryObjects\QueryVariableMap.cs" />
     <Compile Include="Reader.cs" />
     <Compile Include="QueryEngine.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
