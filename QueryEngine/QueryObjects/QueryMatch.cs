@@ -37,7 +37,6 @@ namespace QueryEngine
         /// <param name="tokens"> Tokens to be parsed. (Expecting first token to be a Match token.)</param>
         /// <param name="graph"> Graph to be conduct a query on. </param>
         /// <param name="variableMap"> Empty map of variables. </param>
-        /// <param name="results"> Place to store search results. </param>
         public MatchObject(List<Token> tokens, VariableMap variableMap, Graph graph)
         {
             if (tokens == null || variableMap == null || graph == null)

@@ -7,8 +7,8 @@
  * (Connected, that means that they share a variable.)
  * This allows the search algorithm iterate over chains and choose the right vertices to start search for the 
  * particular pattern without repeating any unneccessary iterations. Also if the same variable occurs,
- * the chain might be split into two chains  (a) <- (b) -> (c) where the repeating variable is b
- * New chains will be (b) -> (a), (b) -> (c). This helps search algorithm connect chains together.
+ * the chain might be split into two chains  (a) - (b) - (c) where the repeating variable is b
+ * New chains will be (b) - (a), (b) - (c). This helps search algorithm connect chains together.
  * Creation of the pattern is described in constructor.
  * 
  */
@@ -146,7 +146,7 @@ namespace QueryEngine
         /// during pattern matching.
         /// Given pattern is check for correctness and ordered so each connected patterns go after each 
         /// Then the resulting pattern is created. Patterns to be splited are splited into two based on split variable.
-        /// For example: (a) -> (b) -> (c) splited by var. b == (b) <- (a) , (b) -> (c)
+        /// For example: (a) - (b) - (c) splited by var. b == (b) - (a) , (b) - (c)
         /// </summary>
         /// <param name="parsedPatterns"> Pattern created by Match Visitor </param>
         /// <param name="variableMap"> Query map of variables (empty) </param>

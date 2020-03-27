@@ -341,7 +341,7 @@ namespace QueryEngine
         /// Finds next edge based on given type.
         /// </summary>
         /// <param name="edgeType"> Type of edge. </param>
-        /// <param name="vertex"> Vertex that the edge is coming from. </param>
+        /// <param name="lastUsedVertex"> Vertex that the edge is coming from. </param>
         /// <param name="lastUsedEdge"> Possibly, last used edge of the vertex. </param>
         /// <returns> Next edge. </returns>
         private Edge FindNextEdge(EdgeType edgeType, Vertex lastUsedVertex, Edge lastUsedEdge)

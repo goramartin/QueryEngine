@@ -3,8 +3,8 @@
  * This file includes definitions of parsed pattern that is later on used for creating pattern 
  * that is used in search algorithm.
  * PGQL syntax for match section is done via "chains" connected with commas.
- * e.g. MATCH (x) -> (y), (y) <- (p)
- * First chain is (x) -> (y) and the second one is (y) <- (p).
+ * e.g. MATCH (x) - (y), (y) - (p)
+ * First chain is (x) - (y) and the second one is (y) - (p).
  * Parsed pattern is class that encapsulated one chain of the pattern and allows certain operations 
  * to make working with the pattern more easily. Such as splitting.
  * Parsed pattern nodes are used to form a specified object of the chains e.g vertices and edges.
@@ -79,7 +79,7 @@ namespace QueryEngine
         /// Splits ParsedPattern node into two ParsedPatterns. 
         /// Instance on which we split, the pattern is reduced from the beginning.
         /// The new build pattern (the nodes taken into account from the reduction from the instance) is build in a reversed order.
-        /// For example: (a) -> (b) -> (c) splited by var. b == (b) <- (a) , (b) -> (c).
+        /// For example: (a) - (b) - (c) splited by var. b == (b) - (a) , (b) - (c).
         /// Split is done only if the splitVariable is not located in on the first index of the pattern.
         /// If the variable is located in the end of the pattern, the pattern is only reversed inplace.
         /// </summary>

@@ -356,7 +356,6 @@ namespace QueryEngine
          * Parsing Match expression is done with combination of parsing variables enclosed in 
          * vertex or edge.
          */
-
         /// <summary>
         /// Parses variable enclosed in vertex or edge.
         /// Expects  Name:Type / Name / :Type / (nothing)
