@@ -42,7 +42,6 @@ namespace QueryEngine
             if (tokens == null || variableMap == null || graph == null)
                 throw new ArgumentNullException($"{this.GetType()}, passing null arguments to the constructor.");
 
-
             // Create parse tree of match part of query and
             // create a shallow pattern
             MatchNode matchNode = Parser.ParseMatchExpr(tokens);
