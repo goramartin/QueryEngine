@@ -111,7 +111,7 @@ namespace QueryEngine
 
 
             var map = new VariableMap();
-            var select = new SelectObject(tokens, "file", "markdown", "test");
+            var select = new SelectObject(tokens, "console", "simple");
             var match = new MatchObject(tokens, map, g, 2, 2);
             select.CheckCorrectnessOfSelect(map);
 

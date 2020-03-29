@@ -61,7 +61,7 @@ namespace QueryEngine
                 {
                     if (variableMap.TryGetValue(this.selectVariables[i].name, out Tuple<int, Table> tuple))
                     {
-                        if (tuple.Item2 !=null && !tuple.Item2.ContainsProperty(this.selectVariables[i].propName))
+                        if (tuple.Item2 !=null && this.selectVariables[i].propName !=null && !tuple.Item2.ContainsProperty(this.selectVariables[i].propName))
                                 throw new ArgumentException($"{this.GetType()}, select expression contains variable that is not defined");
                         
                     }
@@ -108,7 +108,23 @@ namespace QueryEngine
             printVars = new List<PrinterVariable>();
             for (int i = 0; i < this.selectVariables.Count; i++)
             {
-                printVars.Add(PrinterVariable.PrinterVariableFactory(this.selectVariables[i],map));
+                // it havent got set a property but defined type
+                if (this.selectVariables[i].propName == null && map[this.selectVariables[i].name].Item2 != null)
+                {
+                    Table table = map[this.selectVariables[i].name].Item2;
+                    // For each property of that table create a new separe select variable.
+                    // That defines separate columns in a printed table.
+                    for (int j = 0; j < table.GetPropertyCount(); j++)
+                    {
+                        var tmp = new SelectVariable();
+                        tmp.TrySetName(this.selectVariables[i].name);
+                        tmp.TrySetPropName(table.Properties[j].IRI);
+                        printVars.Add(PrinterVariable.PrinterVariableFactory(tmp, map));
+                    }
+                }else
+                {
+                    printVars.Add(PrinterVariable.PrinterVariableFactory(this.selectVariables[i],map));
+                }
             }
 
             return printVars;

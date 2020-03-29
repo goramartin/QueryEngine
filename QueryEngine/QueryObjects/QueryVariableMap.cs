@@ -22,7 +22,10 @@ namespace QueryEngine
         private Dictionary<string, Tuple<int, Table>> variableMap;
         public VariableMap() => this.variableMap = new Dictionary<string, Tuple<int, Table>>();
       
-
+        public Tuple<int, Table> this[string str]
+        {
+            get { return this.variableMap[str]; }
+        }
 
         /// <summary>
         /// Adds variable to the dictionary.
