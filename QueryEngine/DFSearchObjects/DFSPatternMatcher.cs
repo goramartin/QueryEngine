@@ -502,22 +502,31 @@ namespace QueryEngine
 
     /// <summary>
     /// Serves as a paraller searcher. Contains threads and matchers.
+    /// Class contains definitions of jobs for threads and vertex distributor.
+    /// If only one thread is used for matching the single thread variant is used otherwise the multithread variant is used.
     /// </summary>
     class DFSParallelPatternMatcher : IParallelMatcher
     {
         Thread[] Threads;
         ISingleThreadMatcher[] Matchers;
         Graph Graph;
+        int DistributorVerticesPerRound;
 
-        public DFSParallelPatternMatcher(IDFSPattern pattern, Graph graph, IResultStorage results)
+        public DFSParallelPatternMatcher(IDFSPattern pattern, Graph graph, IResultStorage results, int threadCount, int verticesPerThread = 1)
         {
+            if (threadCount <= 0 || verticesPerThread <= 0) 
+                throw new ArgumentException($"{this.GetType()}, invalid number of threads or vertices per thread.");
+
+            this.DistributorVerticesPerRound = verticesPerThread;
             this.Graph = graph;
-            this.Threads = new Thread[QueryEngine.ThreadsPerQuery];
-            this.Matchers = new ISingleThreadMatcher[QueryEngine.ThreadsPerQuery];
+            this.Threads = new Thread[threadCount];
+            this.Matchers = new ISingleThreadMatcher[threadCount];
             
-            for (int i = 0; i < QueryEngine.ThreadsPerQuery; i++)
+            for (int i = 0; i < threadCount; i++)
             {
-                this.Threads[i] = new Thread(DFSParallelPatternMatcher.Work);
+                if (threadCount > 1)
+                    this.Threads[i] = new Thread(DFSParallelPatternMatcher.WorkMultiThread);
+                else this.Threads[i] = new Thread(DFSParallelPatternMatcher.WorkSingleThread);
 
                 this.Matchers[i] = (ISingleThreadMatcher)MatchFactory
                                    .CreateMatcher("DFSSingleThread",                // Type of Matcher 
@@ -536,16 +545,23 @@ namespace QueryEngine
         /// </summary>
         public void Search()
         {
-            // creation of jobs, seting threads to run and waiting to finish
-            var distributor = new VertexDistributor(this.Graph.GetAllVertices());
-
-            //Create jobs and assign them to threads and run the thread.
-            for (int i = 0; i < this.Threads.Length; i++)
+            if (this.Threads.Length == 1)
             {
-                Job tmpJob = new Job(distributor, this.Matchers[i]);
-                this.Threads[i].Start(tmpJob);
-            }
+                JobSingleThread tmpJob = new JobSingleThread(this.Matchers[0]);
+                this.Threads[0].Start(tmpJob);
 
+            } else
+            {
+                // creation of jobs, seting threads to run and waiting to finish
+                var distributor = new VertexDistributor(this.Graph.GetAllVertices(), this.DistributorVerticesPerRound);
+                //Create jobs and assign them to threads and run the thread.
+                for (int i = 0; i < this.Threads.Length; i++)
+                {
+                    JobMultiThread tmpJob = new JobMultiThread(distributor, this.Matchers[i]);
+                    this.Threads[i].Start(tmpJob);
+                }
+            }
+            
             // Wait for all working threads.
             for (int i = 0; i < this.Threads.Length; i++)
             {
@@ -554,53 +570,77 @@ namespace QueryEngine
 
         }
 
-
         /// <summary>
         /// Method passed to a thread.
+        /// Matcher implicitly iterates over entire graph.
+        /// </summary>
+        /// <param name="o"> Class containing matcher. </param>
+        private static void WorkSingleThread(object o)
+        {
+            JobSingleThread job = (JobSingleThread)o;
+            job.Matcher.Search(); // Starting indeces implicitly set to entire graph.
+        }
+
+
+        /// <summary>
+        /// Method passed to threads.
         /// A thread asks for a new starting vertices for his matcher.
         /// If there are no more vertices the method ends.
         /// </summary>
         /// <param name="o"> Class containing matcher and distributor. </param>
-        private static void Work(object o)
+        private static void WorkMultiThread(object o)
         {
-            Job job = (Job)o;
+            JobMultiThread job = (JobMultiThread)o;
             
-            if (QueryEngine.ThreadsPerQuery == 1)
+            while (true)
             {
-               job.Matcher.Search(); // Starting indeces implicitly set to entire graph.
-            } else
-                {
-                while (true)
-                {
-                    int start;
-                    int end;
+                int start;
+                int end;
 
-                    lock (job.Distributor)
-                    {
-                        job.Distributor.DistributeVertices(out start, out end);
-                    }
+                lock (job.Distributor)
+                {
+                    job.Distributor.DistributeVertices(out start, out end);
+                }
 
-                    if (start == -1 || end == -1) break;
-                    else
-                    {
-                        job.Matcher.SetStartingVerticesIndeces(start, end);
-                        job.Matcher.Search();
-                    }
+                if (start == -1 || end == -1) break;
+                else
+                {
+                    job.Matcher.SetStartingVerticesIndeces(start, end);
+                    job.Matcher.Search();
                 }
             }
+            
         }
 
         /// <summary>
-        /// A Class serves as a parameter to paramethrisised method passed to a thread.  
+        /// A Class serves as a parameter to paramethrisised method passed to a thread.
+        /// Contains vertex distributor and matcher.
+        /// Used when multiple threads can be used to search graph.
         /// </summary>
-        private class Job 
+        private class JobMultiThread 
         {
             public VertexDistributor Distributor;
             public ISingleThreadMatcher Matcher;
 
-            public Job(VertexDistributor vD, ISingleThreadMatcher m)
+            public JobMultiThread(VertexDistributor vD, ISingleThreadMatcher m)
             {
                 this.Distributor = vD;
+                this.Matcher = m;
+            }
+        }
+
+
+        /// <summary>
+        /// A Class serves as a parameter to paramethrisised method passed to a thread.
+        /// Contains matcher.
+        /// Used when a single thread is used to search graph.
+        /// </summary>
+        private class JobSingleThread
+        {
+            public ISingleThreadMatcher Matcher;
+
+            public JobSingleThread(ISingleThreadMatcher m)
+            {
                 this.Matcher = m;
             }
         }
@@ -615,14 +655,19 @@ namespace QueryEngine
         private class VertexDistributor
         {
             List<Vertex> Vertices;
-            static int VerticesPerRound = 3;
+            int VerticesPerRound = 3;
             int NextFreeIndex;
 
-            public VertexDistributor(List<Vertex> vertices)
+            public VertexDistributor(List<Vertex> vertices, int verticesPerRound)
             {
-                if (vertices == null || vertices.Count == 0) 
-                    throw new ArgumentException($"{this.GetType()} creating with 0 vertices.");
-                else this.Vertices = vertices;
+                if (vertices == null || vertices.Count == 0 || verticesPerRound <= 0) 
+                    throw new ArgumentException($"{this.GetType()} creating with 0 vertices or empty rounds.");
+                else 
+                {
+                    this.VerticesPerRound = verticesPerRound;         
+                    this.Vertices = vertices;
+                }
+
             }
 
 
@@ -633,8 +678,8 @@ namespace QueryEngine
             /// <returns> Starting index and ending index of a round or start/end set to -1 is no more vertices are to be distribute.</returns>
             public void DistributeVertices(out int start, out int end)
             {
-                int tmpEndOfRound = Interlocked.Add(ref this.NextFreeIndex, VertexDistributor.VerticesPerRound);
-                int tmpStartOfRound = tmpEndOfRound - VertexDistributor.VerticesPerRound;
+                int tmpEndOfRound = Interlocked.Add(ref this.NextFreeIndex, this.VerticesPerRound);
+                int tmpStartOfRound = tmpEndOfRound - this.VerticesPerRound;
 
                 // First index is beyond the size of the array of vertices.
                 if (tmpStartOfRound >= this.Vertices.Count)

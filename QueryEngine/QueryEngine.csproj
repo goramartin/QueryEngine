@@ -52,6 +52,9 @@
     <Compile Include="Parser\ParsedPattern.cs" />
     <Compile Include="Parser\ParseTreeNodes.cs" />
     <Compile Include="Parser\Visitors.cs" />
+    <Compile Include="Printer\Formater.cs" />
+    <Compile Include="Printer\Printer.cs" />
+    <Compile Include="Printer\PrintVariables.cs" />
     <Compile Include="QueryObjects\QueryResults.cs" />
     <Compile Include="QueryObjects\QueryMatch.cs" />
     <Compile Include="Parser\Parser.cs" />

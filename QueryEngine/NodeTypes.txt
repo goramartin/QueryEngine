@@ -1,9 +1,9 @@
 ﻿[
 {
-"Kind": "Person"
-},
-{
-"Kind": "Friend"
+"Kind": "Person",
+"Name": "string",
+"LastName": "string",
+"Age": "integer"
 }
 ]
 

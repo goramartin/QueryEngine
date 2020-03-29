@@ -416,7 +416,7 @@ namespace QueryEngine
         private void ProcessParams(string param, Table table)
         {
             int accessedPropertyPosition = table.GetPropertyCount() - this.paramsToReadLeft;
-            table.properties[accessedPropertyPosition].ParsePropFromStringToList(param);
+            table.Properties[accessedPropertyPosition].ParsePropFromStringToList(param);
 
             this.paramsToReadLeft--;
             FinishParams();
@@ -648,7 +648,7 @@ namespace QueryEngine
         {
             // Get position of accessed property and insert given parameter to appropriate list.
             int accessedPropertyPosition = table.GetPropertyCount() - this.paramsToReadLeft;
-            table.properties[accessedPropertyPosition].ParsePropFromStringToList(param);
+            table.Properties[accessedPropertyPosition].ParsePropFromStringToList(param);
 
             this.paramsToReadLeft--;
             FinishParams();

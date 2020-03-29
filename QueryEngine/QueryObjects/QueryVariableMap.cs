@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,13 +17,12 @@ namespace QueryEngine
     /// Each variable is inserted only once despite possible multiple occurences of the same variable.
     /// The main purpose of the variableMap is to obtain Elements that is the repetition does not change the desired value.
     /// </summary>
-    class VariableMap
+    class VariableMap : IEnumerable<KeyValuePair<string, Tuple<int, Table>>>
     {
         private Dictionary<string, Tuple<int, Table>> variableMap;
-        public VariableMap(Dictionary<string, Tuple<int, Table>> sv) => this.variableMap = sv;
         public VariableMap() => this.variableMap = new Dictionary<string, Tuple<int, Table>>();
       
-        public Dictionary<string, Tuple<int, Table>> GetvariableMapVariables() => this.variableMap;
+
 
         /// <summary>
         /// Adds variable to the dictionary.
@@ -62,5 +62,15 @@ namespace QueryEngine
         }
 
         public int GetCount() => this.variableMap.Count;
+
+        public IEnumerator<KeyValuePair<string, Tuple<int,Table>>> GetEnumerator()
+        {
+            return this.variableMap.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
+        }
     }
 }

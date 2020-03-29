@@ -10,18 +10,17 @@ namespace QueryEngine
 {
     class QueryEngine
     {
-        public static int ThreadsPerQuery = 2;
 
         private static void Run(string[] args, TextReader reader, TextWriter writer)
         {
             //Every query needs valid SELECT and MATCH expr.
             //Every query must end with semicolon ';'.
-            Graph graph = new Graph(args);
+            Graph graph = new Graph();
             
             while (true)
             {
                 Console.WriteLine("Enter Query:");
-                Query query = new Query(reader, graph);
+                //Query query = new Query(reader, graph);
               
                 Console.WriteLine();
                 Console.WriteLine("Results:");
@@ -54,8 +53,6 @@ namespace QueryEngine
              }
              */
 
-            if (QueryEngine.ThreadsPerQuery <= 0) 
-                throw new Exception("Cannot start a query with <= 0 threads.");
             TestClass.RunTest();
             
         }

@@ -11,7 +11,6 @@
  * This file also contains definitoin of static factory for matcher and pattern.
  * */
 
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,14 +21,17 @@ namespace QueryEngine
 {
 
     /// <summary>
-    /// Match represents pattern to match in main match algorithm also it checks th correctness of the pattern when creating it.
+    /// Contains Matcher to match pattern in graph.
+    /// Also contains pattern to match in main match algorithm also it checks th correctness of the pattern when creating it.
     /// The pattern is created from List of Parsed Patterns passed from Visitor that processes Match expression.
+    /// When creating the variable map is filled when constructor of pattern is called and query results are appropriately created
+    /// based on number of threads passed and columns which are stored in created pattern.
     /// </summary>
     class MatchObject
     {
         private  IPatternMatcher Matcher;
         private  IPattern Pattern;
-        public IResultStorage queryResults;
+        private  IResultStorage queryResults;
 
         /// <summary>
         /// Creates Match expression
@@ -37,7 +39,9 @@ namespace QueryEngine
         /// <param name="tokens"> Tokens to be parsed. (Expecting first token to be a Match token.)</param>
         /// <param name="graph"> Graph to be conduct a query on. </param>
         /// <param name="variableMap"> Empty map of variables. </param>
-        public MatchObject(List<Token> tokens, VariableMap variableMap, Graph graph)
+        /// <param name="ThreadCount"> Number of threads used for matching.</param>
+        /// <param name="VerticesPerRound"> Number of vertices one thread gets per round. Used only if more than one thread is used.</param>
+        public MatchObject(List<Token> tokens, VariableMap variableMap, Graph graph, int ThreadCount, int VerticesPerRound = 1 )
         {
             if (tokens == null || variableMap == null || graph == null)
                 throw new ArgumentNullException($"{this.GetType()}, passing null arguments to the constructor.");
@@ -58,9 +62,9 @@ namespace QueryEngine
             
             // Now we have got enough information about results. 
             // After creating pattern the variable map is filled and we know extend of the results.
-            this.queryResults = new QueryResults(variableMap.GetCount(), QueryEngine.ThreadsPerQuery);
+            this.queryResults = new QueryResults(variableMap.GetCount(), ThreadCount);
 
-            this.Matcher = MatchFactory.CreateMatcher("DFSParallel", Pattern, graph, this.queryResults);
+            this.Matcher = MatchFactory.CreateMatcher("DFSParallel", Pattern, graph, this.queryResults, ThreadCount, VerticesPerRound);
         }
 
         /// <summary>
@@ -96,9 +100,16 @@ namespace QueryEngine
                 throw new ArgumentException($"{this.GetType()}, no given variable in the query.");
         }
 
-        //just for testing
-        public IPattern GetPattern() => this.Pattern;
-        public IPatternMatcher GetMatcher() => this.Matcher;
+
+        /// <summary>
+        /// Starts searching of the graph.
+        /// </summary>
+        /// <returns> Results of search algorithm </returns>
+        public IResultStorage Search()
+        {
+            this.Matcher.Search();
+            return this.queryResults;
+        }
     }
 
 

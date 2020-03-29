@@ -19,7 +19,7 @@ namespace QueryEngine
             {
                 Console.WriteLine("Key:" + item.Key);
                 Console.WriteLine("TableIri:" + item.Value.IRI);
-                foreach (var ite in item.Value.properties)
+                foreach (var ite in item.Value.Properties)
                 {
                     Console.WriteLine("PropertyIRI:" + ite.IRI);
                     Console.WriteLine("PropertyType:" + ite.GetType());
@@ -36,7 +36,7 @@ namespace QueryEngine
             {
                 Console.WriteLine("Key:" + item.Key);
                 Console.WriteLine("TableIri:" + item.Value.IRI);
-                foreach (var ite in item.Value.properties)
+                foreach (var ite in item.Value.Properties)
                 {
                     Console.WriteLine("PropertyIRI:" + ite.IRI);
                     Console.WriteLine("PropertyType:" + ite.GetType());
@@ -111,14 +111,13 @@ namespace QueryEngine
 
 
             var map = new VariableMap();
-            var select = new SelectObject(tokens);
-            var match = new MatchObject(tokens, map, g);
+            var select = new SelectObject(tokens, "file", "markdown", "test");
+            var match = new MatchObject(tokens, map, g, 2, 2);
             select.CheckCorrectnessOfSelect(map);
 
 
-            match.GetMatcher().Search();
+            var tmp = match.Search();
 
-            var tmp = match.queryResults;
 
 
             Console.WriteLine("Results Ids");
@@ -127,6 +126,8 @@ namespace QueryEngine
             {
                 item.Print();
             }
+
+            select.Print(tmp, map);
 
 
 
@@ -156,7 +157,7 @@ namespace QueryEngine
 
 
  
-           Graph g = new Graph( new string[]{ "" } );
+           Graph g = new Graph();
 
             //just for testing
             ///////////////////////////////////////

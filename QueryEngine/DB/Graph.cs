@@ -182,7 +182,7 @@ namespace QueryEngine
         public List<OutEdge> outEdges;
         public List<InEdge> inEdges;
 
-        public Graph(string[] args)
+        public Graph()
         {
             this.NodeTables = null;
             this.vertices = null;

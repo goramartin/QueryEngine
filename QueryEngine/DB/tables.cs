@@ -37,7 +37,7 @@ namespace QueryEngine
         }
 
         // Properties pertaining to a table.
-        public List<Property> properties { get; private set;}
+        public List<Property> Properties { get; private set;}
         
         // Represents nodes inside a table. An index represents also an index inside the property lists.
         // First int is an id of a node inside the table, and second int is the position inside the table.
@@ -50,12 +50,12 @@ namespace QueryEngine
             else
             { 
                 this.IRI = tableName;
-                this.properties = new List<Property>();
+                this.Properties = new List<Property>();
                 this.IDs = new Dictionary<int, int>();
             }
         }
 
-        public int GetPropertyCount() { return this.properties.Count;  }
+        public int GetPropertyCount() { return this.Properties.Count;  }
 
         /// <summary>
         /// Adds id of a node into the table. Each id is bound with the position inside the table.
@@ -73,14 +73,30 @@ namespace QueryEngine
         /// Checks whether a given property name is set on a table.
         /// </summary>
         /// <param name="iri">Property about to be searched for.</param>
+        /// <returns> True if found. </returns>
         public bool ContainsProperty(string iri)
         {
-            for (int i = 0; i < properties.Count; i++)
+            for (int i = 0; i < Properties.Count; i++)
             {
-                if (properties[i].IRI == iri) return true;
+                if (Properties[i].IRI == iri) return true;
             }
-            return false;
+            return false ;
         }
+
+        /// <summary>
+        /// Find index of given property on the table.
+        /// </summary>
+        /// <param name="iri"> String id of a searcher property. </param>
+        /// <returns> Index if found otherwise -1. </returns>
+        public int GetIndexOfProperty(string iri)
+        {
+            for (int i = 0; i < Properties.Count; i++)
+            {
+                if (Properties[i].IRI == iri) return i;
+            }
+            return -1;
+        }
+
 
         /// <summary>
         /// Adds new property into a table.
@@ -89,16 +105,34 @@ namespace QueryEngine
         /// <param name="newProp">Property to be added into a table.</param>
         public void AddNewProperty(Property newProp)
         {
-            if (properties == null || newProp == null) 
+            if (Properties == null || newProp == null) 
                 throw new ArgumentException($"{this.GetType()}, failed to add Property, list or prop not inicialised.");
            
-            foreach (var item in properties)
+            foreach (var item in Properties)
             {
                 if (newProp.IRI == item.IRI) 
                     throw new ArgumentException($"{this.GetType()}, adding property that already exists. Prop name = {newProp.IRI}");
             }
-            this.properties.Add(newProp);
+            this.Properties.Add(newProp);
         }
+
+
+        /// <summary>
+        /// Based on id of an element and property index, it reaches to the property array
+        /// and returns stored value as a string.
+        /// </summary>
+        /// <param name="elementId"> Id of an element inside a table. </param>
+        /// <param name="propertyIndex"> Index of accessed property. </param>
+        /// <returns> String value of value stored inside a property.</returns>
+        public string GetValueAsString(int elementId, int propertyIndex)
+        {
+            if (!this.IDs.TryGetValue(elementId, out int value))
+                throw new ArgumentException($"{this.GetType()}, element id = {elementId} not found in table.");
+
+            return this.Properties[propertyIndex].GetValueAsString(value);
+        }
+
+
     }
 
 
@@ -124,7 +158,18 @@ namespace QueryEngine
         /// <param name="strProp">Value that will be parsed into the correct format and inserted into the list.</param>
         public abstract void ParsePropFromStringToList(string strProp);
 
+        /// <summary>
+        /// Clears contents of a property array.
+        /// </summary>
         public abstract void ClearProperty();
+
+
+        /// <summary>
+        /// Returns string representation of a value stored on given index. 
+        /// </summary>
+        /// <param name="index"> Index of a value.</param>
+        /// <returns> String representation of a value on given index. </returns>
+        public abstract string GetValueAsString(int index);
     }
 
     /// <summary>
@@ -150,6 +195,11 @@ namespace QueryEngine
         public override void ClearProperty()
         {
             this.propHolder.Clear();
+        }
+
+        public override string GetValueAsString(int index)
+        {
+            return this.propHolder[index].ToString();
         }
     }
 
