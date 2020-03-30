@@ -1,4 +1,19 @@
-﻿
+﻿/*! \file
+  
+  File includes definition of tables and property types.
+  Each node has a pointer to a type, that is to say, a table.
+  Each table holds all the nodes of the same type.
+  Table has got one list,dictionary and a hash table, list for properties = named lists with values of a single type of a node,
+  dictionary of IDs, each object is a representation of a node, on that object lies the position index of the element in table.
+  On the same index we will find values of properties of the node in the property lists.
+  And a hash set for fast access to property labels.
+  
+  Properties are form from an abstract type Property that is visible from within a table.
+  Generic properties extend Property, and specialisations are created separately. 
+  Properties are created with a help of an Activator class based on a passed name.
+  
+  This file contains also static factory for creation of tables.
+ */
 
 using System;
 using System.Collections.Generic;

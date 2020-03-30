@@ -1,4 +1,12 @@
-﻿using System;
+﻿/*! \file 
+ 
+    This file contains definition of file readers.
+    These readers are used for loading a graph.
+
+ */
+
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;

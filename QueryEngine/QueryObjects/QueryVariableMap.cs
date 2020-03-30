@@ -1,4 +1,11 @@
-﻿using System;
+﻿/*! \file
+ 
+ This file contains definition of variable map.
+ Variable map stores information about variables defined in match expression.
+ */
+
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;

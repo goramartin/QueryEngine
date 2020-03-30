@@ -1,5 +1,14 @@
 ﻿
-
+/*! \file
+  This file includes definitions of parsed pattern that is later on used for creating pattern 
+  that is used in search algorithm.
+  PGQL syntax for match section is done via "chains" connected with commas.
+  e.g. MATCH (x) - (y), (y) - (p)
+  First chain is (x) - (y) and the second one is (y) - (p).
+  Parsed pattern is class that encapsulated one chain of the pattern and allows certain operations 
+  to make working with the pattern more easily. Such as splitting.
+  Parsed pattern nodes are used to form a specified object of the chains e.g vertices and edges.
+ */
 
 using System;
 using System.Collections.Generic;

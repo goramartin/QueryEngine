@@ -1,4 +1,15 @@
 ﻿
+/*! \file 
+  File includes definition of graph and its elements
+  Graph contains three lists... inward edges, outgoing edges and vertices.
+  Base class for nodes and edges is Element class, each element in a graph has got an ID and
+  a table (type). Also each element knows its position in the list where it is included. 
+  
+   Each vertex has got a positions for edges in edge lists, one positions for incoming edges and 
+   one for outgoing edges. Starting position means that on that position the edge from this vertex is leading and
+   end position means that on that position, edges from a consecutive vertex are starting.
+ 
+ */
 using System;
 using System.Collections.Generic;
 using System.Linq;

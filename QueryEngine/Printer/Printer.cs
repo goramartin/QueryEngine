@@ -1,4 +1,12 @@
-﻿using System;
+﻿
+/*! \file
+  
+    This file includes definition of a Printer.
+    Printer is used by a select object to print results with appropriate format.
+    Printer holds a formater and manages printing of results.
+*/
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;

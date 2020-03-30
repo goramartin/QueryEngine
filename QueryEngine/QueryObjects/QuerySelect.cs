@@ -1,4 +1,14 @@
-﻿using System;
+﻿
+/*! \file
+  
+    File contains definition of select object and select variable that is parsed from a select expression.
+    Select object is included inside Query class and prepresents printing of an input of a query.
+    Select object remembers the columns the user wants to print and creates an appropriate printer and formater
+    based on user needs.
+ */
+
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;

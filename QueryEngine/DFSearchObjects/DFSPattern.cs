@@ -1,4 +1,18 @@
 ﻿
+/*! \file
+  
+  This file includes definition of pattern used by a dfs match algorithm.
+  
+  Pattern itself is created from ParsedPattern nodes that visitor of match expression tree collects.
+  The chains are sorted and connected so that they form a connected pattern if the chains are connected.
+  (Connected, that means that they share a variable.)
+  This allows the search algorithm iterate over chains and choose the right vertices to start search for the 
+  particular pattern without repeating any unneccessary iterations. Also if the same variable occurs,
+  the chain might be split into two chains  (a) - (b) - (c) where the repeating variable is b
+  New chains will be (b) - (a), (b) - (c). This helps search algorithm connect chains together.
+  Creation of the pattern is described in constructor.
+ 
+ */
 
 
 

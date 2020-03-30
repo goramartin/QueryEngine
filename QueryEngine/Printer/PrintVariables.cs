@@ -1,4 +1,11 @@
-﻿using System;
+﻿
+/*! \file
+  
+    This file includes definitions of printer variables.
+    These variables define a column of a table that will be printer as a part of a select expression.
+ */
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;

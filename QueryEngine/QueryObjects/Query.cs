@@ -1,4 +1,13 @@
 ﻿
+/*! \file
+  This file includes definition of one query. 
+  This could be considered as a facade because it includes classes that form more complicated 
+  structures.
+  Query is formed by query objects, those are match object, select object ...
+  Those objects represents information parsed from the inputted query.
+  They also perform the duties that involves eg implementing search algorithm for match object or
+  printing results in defined fashion for select object.
+ */
 
 using System;
 using System.Collections.Generic;

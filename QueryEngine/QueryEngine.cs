@@ -1,4 +1,12 @@
-﻿using System;
+﻿
+/*! \file
+    
+    This file is an entry point of a program.
+    Contains static class of a query engine and provides a simple api for user defined queries.
+ */
+
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +16,12 @@ using System.IO;
 
 namespace QueryEngine
 {
+
+    /// <summary>
+    /// Entry point of a program.
+    /// Class represents main algorithm loop where user inputs queries and subsequently they are computed
+    /// and printed.
+    /// </summary>
     class QueryEngine
     {
 
@@ -79,7 +93,12 @@ namespace QueryEngine
             else return null; 
         }
 
-
+    /// <summary>
+    /// Main algorith.
+    /// Infinite loop when user inputs queries which are subsequently computed and results are printed.
+    /// </summary>
+    /// <param name="args"> Program arguments.</param>
+    /// <param name="reader"> Reader from which to read input. </param>
     private static void Run(string[] args, TextReader reader)
         {
             if (args.Length < 4) throw new ArgumentException("Wrong number of program parameters.");

@@ -1,4 +1,17 @@
 ﻿
+/*! \file
+  
+  This file includes defintion of match object.
+  This class should contain information from the query match expression that is,
+  pattern to search and algorithm to perform the search.
+  Note that during this class creating happens also definitions 
+  of variables to be used by the query, that means it fills the 
+  variable map of for the query. (creation of pattern)
+  
+  
+  This file also contains definitoin of static factory for matcher and pattern.
+*/
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
