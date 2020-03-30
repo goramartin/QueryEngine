@@ -48,7 +48,8 @@ Properties goes as there are in data scheme.
 
 The same rule apply except the edges must be sorted according to the vertex IDs. That is, if we have three vertices with ids 1 2 3.
 After double dot we expect edges that starts with FromVertexID 1, then edges with FromVertexID 2 and so on.
-Edges IDs and Vertices IDs do not collerate. There can be edge with id 1 and simultaneously vertex with id 1. 
+Edges IDs and Vertices IDs must be different. There can not be edge with id 1 and simultaneously vertex with id 1. The id must be unique
+in entire graph. 
 
 >Example
 

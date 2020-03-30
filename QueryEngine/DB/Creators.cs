@@ -157,7 +157,6 @@ namespace QueryEngine
             this.dict = (Dictionary<string, Table>)prms[0];
         }
 
-
         private void ProcessLeftSquaredBrace(string param)
         {
             if (param != "[") throw new ArgumentException($"{this.GetType()}, failed to parse types of table, expected [.");

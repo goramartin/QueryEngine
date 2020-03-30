@@ -108,64 +108,30 @@ namespace QueryEngine
             printVars = new List<PrinterVariable>();
             for (int i = 0; i < this.selectVariables.Count; i++)
             {
-                // it havent got set a property but defined type
-                if (this.selectVariables[i].propName == null && map[this.selectVariables[i].name].Item2 != null)
-                {
-                    Table table = map[this.selectVariables[i].name].Item2;
-                    // For each property of that table create a new separe select variable.
-                    // That defines separate columns in a printed table.
-                    for (int j = 0; j < table.GetPropertyCount(); j++)
-                    {
-                        var tmp = new SelectVariable();
-                        tmp.TrySetName(this.selectVariables[i].name);
-                        tmp.TrySetPropName(table.Properties[j].IRI);
-                        printVars.Add(PrinterVariable.PrinterVariableFactory(tmp, map));
-                    }
-                }else
-                {
-                    printVars.Add(PrinterVariable.PrinterVariableFactory(this.selectVariables[i],map));
-                }
+                if (this.selectVariables[i].propName == "id") this.selectVariables[i].propName = null;
+                 
+                printVars.Add(PrinterVariable.PrinterVariableFactory(this.selectVariables[i],map));
             }
 
             return printVars;
         }
 
         /// <summary>
-        /// Creates printer variable for every variable definec in match query.
+        /// Creates printer variable for every variable defined in match query.
         /// Select variables are also created with the names from variable map.
-        /// If the variable has defined type, each property is then splited.
+        /// This leads to printing id and a type of the variable into one column.
         /// </summary>
         /// <param name="map"> Map of variables.</param>
         /// <returns> List of print variables. </returns>
         private List<PrinterVariable> CreatePrintvariablesAsterix(VariableMap map)
         {
             var printVars = new List<PrinterVariable>();
-
             foreach (var item in map)
             {
-                // If the variable has defined type
-                if (item.Value.Item2 != null)
-                {
-                    Table table = item.Value.Item2;
-                    // For each property of that table create a new separe select variable.
-                    // That defines separate columns in a printed table.
-                    for (int i = 0; i < table.GetPropertyCount(); i++)
-                    {
-                        var tmp = new SelectVariable();
-                        tmp.TrySetName(item.Key);
-                        tmp.TrySetPropName(table.Properties[i].IRI);
-                        printVars.Add(PrinterVariable.PrinterVariableFactory(tmp, map));
-                    }
-                } else
-                {
                     var tmp = new SelectVariable();
                     tmp.TrySetName(item.Key);
                     printVars.Add(PrinterVariable.PrinterVariableFactory(tmp, map));
-                }
-
-
             }
-
             return printVars;
         }        
 
@@ -179,9 +145,9 @@ namespace QueryEngine
     /// </summary>
     class SelectVariable
     {
-        public string name { get; private set; }
-        public string propName { get; private set; }
-        public string label { get; private set; }
+        public string name { get; set; }
+        public string propName { get; set; }
+        public string label { get; set; }
 
         public bool TrySetName(string n)
         {

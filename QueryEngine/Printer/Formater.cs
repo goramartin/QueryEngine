@@ -15,7 +15,12 @@ namespace QueryEngine
         /// <summary>
         /// Endings of files based on format. 
         /// </summary>
-        public static Dictionary<string, string> fileEndings;
+        public static Dictionary<string, string> fileEndings { get; }
+
+        /// <summary>
+        /// Contains valid Formaters.
+        /// </summary>
+        public static HashSet<string> Formaters { get;  }
 
         protected StringBuilder stringBuilder;
         protected int columnCount { get; }
@@ -38,6 +43,10 @@ namespace QueryEngine
             fileEndings = new Dictionary<string, string>();
             fileEndings.Add("simple", ".txt");
             fileEndings.Add("markdown", ".md");
+
+            Formaters = new HashSet<string>();
+            Formaters.Add("simple");
+            Formaters.Add("markdown");
         }
 
         protected Formater()

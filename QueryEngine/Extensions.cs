@@ -9,7 +9,7 @@ namespace QueryEngine
 {
     static class ExtensionArray
     {
-        public static void Print(this Element[] tmp)
+        public static string ToString(this Element[] tmp)
         {
             string tmpString = "Thread: " + Thread.CurrentThread.ManagedThreadId.ToString() + " result: ";
             for (int i = 0; i < tmp.Length; i++)
@@ -17,7 +17,7 @@ namespace QueryEngine
                 tmpString +=  " " + tmp[i].ID.ToString();
             }
             
-            Console.WriteLine(tmpString);
+            return tmpString;
         }
 
         public static void Populate<T>(this T[] arr, T value)

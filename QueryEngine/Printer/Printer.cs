@@ -14,6 +14,11 @@ namespace QueryEngine
     abstract class Printer : IDisposable
     {
         /// <summary>
+        /// Contains valid printers.
+        /// </summary>
+        public static HashSet<string> Printers;
+
+        /// <summary>
         /// Defines how each row will look like. Each variable is one column which is equivalent to one value in a row.
         /// </summary>
         protected List<PrinterVariable> rowFormat;
@@ -25,6 +30,13 @@ namespace QueryEngine
         /// Defines where the printing will be done.
         /// </summary>
         protected TextWriter writer;
+
+        static Printer()
+        {
+            Printers = new HashSet<string>();
+            Printers.Add("console");
+            Printers.Add("file");
+        }
 
         protected Printer()
         {
@@ -118,7 +130,7 @@ namespace QueryEngine
 
             try
             {
-                this.writer = new StreamWriter(fileName + ending);
+                this.writer = File.AppendText(fileName + ending);
             }
             catch (IOException)
             {

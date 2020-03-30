@@ -30,6 +30,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
+using System.Diagnostics;
 
 namespace QueryEngine
 {
@@ -217,7 +218,7 @@ namespace QueryEngine
                         if (pattern.isLastPattern())
                         {
                             // Setting null here makes it to fail on next iteration and it is forced to dfs back.
-                            result.Print();
+                            Debug.WriteLine(result.ToString());
                             StoreResult();
                             nextElement = null;
                             continue;
@@ -698,7 +699,7 @@ namespace QueryEngine
                     end = tmpEndOfRound;
                 }
 
-                Console.WriteLine("Thread: "  + Thread.CurrentThread.ManagedThreadId + " asked for vertices and gets start = " + start + " , end = " + end+ ".");
+                Debug.WriteLine("Thread: "  + Thread.CurrentThread.ManagedThreadId + " asked for vertices and gets start = " + start + " , end = " + end+ ".");
             }
         }
 

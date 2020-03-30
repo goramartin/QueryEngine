@@ -3,9 +3,10 @@
  * File includes definition of tables and property types.
  * Each node has a pointer to a type, that is to say, a table.
  * Each table holds all the nodes of the same type.
- * Table has two lists, one for properties - names lists with values of a single type of a node,
- * list of IDs, each index is a representation of a node, on that index lies the real ID.
- * On the same index we will find values of properties of the node in the property lists. 
+ * Table has got one list,dictionary and a hash table, list for properties = named lists with values of a single type of a node,
+ * dictionary of IDs, each object is a representation of a node, on that object lies the position index of the element in table.
+ * On the same index we will find values of properties of the node in the property lists.
+ * And a hash set for fast access to property labels.
  * 
  * Properties are form from an abstract type Property that is visible from within a table.
  * Generic properties extend Property, and specialisations are created separately. 
@@ -36,9 +37,17 @@ namespace QueryEngine
             protected set => this.tableIri=value; 
         }
 
-        // Properties pertaining to a table.
-        public List<Property> Properties { get; private set;}
-        
+        /// <summary>
+        /// Properties pertaining to the table.
+        /// </summary>
+        public List<Property> Properties { get; private set; }
+
+        /// <summary>
+        /// Contains labels of properties for faster search and access.
+        /// string for a name of a property and stored integer represents index in a list properties.
+        /// </summary>
+        private Dictionary<string, int> PropertyLabels {  get; set; }
+
         // Represents nodes inside a table. An index represents also an index inside the property lists.
         // First int is an id of a node inside the table, and second int is the position inside the table.
         public Dictionary<int,int> IDs { get; private set; }
@@ -51,6 +60,7 @@ namespace QueryEngine
             { 
                 this.IRI = tableName;
                 this.Properties = new List<Property>();
+                this.PropertyLabels = new Dictionary<string, int>();
                 this.IDs = new Dictionary<int, int>();
             }
         }
@@ -70,31 +80,25 @@ namespace QueryEngine
         }
 
         /// <summary>
+        /// Gets position of an element in the table based its id.
+        /// </summary>
+        /// <param name="element"> Graph element.</param>
+        /// <returns> Position of a given element in the table. </returns>
+        public int GetElementPosition(Element element)
+        {
+            if (!this.IDs.TryGetValue(element.ID, out int value))
+                throw new ArgumentException($"{this.GetType()}, table {this.IRI} does not contains id of a node {element.ID}.");
+            return value;
+        }
+
+        /// <summary>
         /// Checks whether a given property name is set on a table.
         /// </summary>
         /// <param name="iri">Property about to be searched for.</param>
         /// <returns> True if found. </returns>
         public bool ContainsProperty(string iri)
         {
-            for (int i = 0; i < Properties.Count; i++)
-            {
-                if (Properties[i].IRI == iri) return true;
-            }
-            return false ;
-        }
-
-        /// <summary>
-        /// Find index of given property on the table.
-        /// </summary>
-        /// <param name="iri"> String id of a searcher property. </param>
-        /// <returns> Index if found otherwise -1. </returns>
-        public int GetIndexOfProperty(string iri)
-        {
-            for (int i = 0; i < Properties.Count; i++)
-            {
-                if (Properties[i].IRI == iri) return i;
-            }
-            return -1;
+            return this.PropertyLabels.ContainsKey(iri);
         }
 
 
@@ -105,31 +109,33 @@ namespace QueryEngine
         /// <param name="newProp">Property to be added into a table.</param>
         public void AddNewProperty(Property newProp)
         {
-            if (Properties == null || newProp == null) 
+            if (Properties == null || newProp == null)
                 throw new ArgumentException($"{this.GetType()}, failed to add Property, list or prop not inicialised.");
-           
-            foreach (var item in Properties)
+            else if (this.ContainsProperty(newProp.IRI))
+                throw new ArgumentException($"{this.GetType()}, adding property that already exists. Prop name = {newProp.IRI}");
+            else
             {
-                if (newProp.IRI == item.IRI) 
-                    throw new ArgumentException($"{this.GetType()}, adding property that already exists. Prop name = {newProp.IRI}");
+                this.PropertyLabels.Add(newProp.IRI, this.Properties.Count);
+                this.Properties.Add(newProp);
             }
-            this.Properties.Add(newProp);
         }
 
 
         /// <summary>
-        /// Based on id of an element and property index, it reaches to the property array
-        /// and returns stored value as a string.
+        /// Based on id of an element and property name, it reaches to the property array
+        /// and returns stored value as a string. 
         /// </summary>
         /// <param name="elementId"> Id of an element inside a table. </param>
-        /// <param name="propertyIndex"> Index of accessed property. </param>
-        /// <returns> String value of value stored inside a property.</returns>
-        public string GetValueAsString(int elementId, int propertyIndex)
+        /// <param name="propertyName"> Name of accessed property. </param>
+        /// <returns> String value of value stored inside a property or null if property does not exists.</returns>
+        public string TryGetElementValueAsString(int elementId, string propertyName)
         {
             if (!this.IDs.TryGetValue(elementId, out int value))
                 throw new ArgumentException($"{this.GetType()}, element id = {elementId} not found in table.");
 
-            return this.Properties[propertyIndex].GetValueAsString(value);
+            if (this.PropertyLabels.TryGetValue(propertyName, out int propIndex)) 
+                return this.Properties[propIndex].GetValueAsString(value);
+            else return "null";
         }
 
 

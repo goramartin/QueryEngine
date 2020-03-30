@@ -37,7 +37,7 @@ namespace QueryEngine
         /// <summary>
         /// Collects string values of given element and returns them in one concatenated string.
         /// If the variable represents name.prop then it returns only one property as string otherwise
-        /// it will create a concatenation of values of all properties on the given element.
+        /// it will create a concatenation of type and id of an element of all properties on the given element.
         /// </summary>
         /// <param name="element"> Element whose properties will be printed.</param>
         /// <returns> String representation of properties. </returns>
@@ -55,7 +55,7 @@ namespace QueryEngine
         {
             if (selectVariable.propName != null)
                 return new PrinterVariableProperty(selectVariable, map);
-            else return new PrinterVariableEveryProperty(selectVariable, map);
+            else return new PrinterVariableID(selectVariable, map);
         }
     }
 
@@ -65,21 +65,13 @@ namespace QueryEngine
     /// </summary>
     class PrinterVariableProperty : PrinterVariable
     {
-        /// <summary>
-        /// Index of a property that will be accessed during string request.
-        /// </summary>
-        public int PropertyIndex { get; protected set; }
-
+       
         public PrinterVariableProperty(SelectVariable selectVariable, VariableMap map) : base(selectVariable)
         {
             if (!map.TryGetValue(selectVariable.name, out Tuple<int, Table> tuple))
                 throw new ArgumentException($"{this.GetType()}, variable name does not exist. Name = {selectVariable.name}.");
 
             this.VariableIndex = tuple.Item1;
-            this.PropertyIndex = tuple.Item2.GetIndexOfProperty(selectVariable.propName);
-            
-            if (this.PropertyIndex == -1)
-                throw new ArgumentException($"{this.GetType()}, property name does not exist. Name = {selectVariable.propName}.");
         }
 
         /// <summary>
@@ -88,7 +80,7 @@ namespace QueryEngine
         /// <param name="element"> Graph element.</param>
         public override string GetSelectVariableAsString(Element element)
         {
-            return element.Table.GetValueAsString(element.ID, this.PropertyIndex);
+            return element.Table.TryGetElementValueAsString(element.ID, this.selectVariable.propName);
         }
 
         /// <summary>
@@ -103,16 +95,12 @@ namespace QueryEngine
 
     /// <summary>
     /// Class representing select expression var.
-    /// Gives a concatenation of all property values for a given element.
+    /// Gives concatenation of type of variable together with its id.
     /// </summary>
-    class PrinterVariableEveryProperty : PrinterVariable
+    class PrinterVariableID : PrinterVariable
     {
-        StringBuilder stringBuilder;
-
-
-        public PrinterVariableEveryProperty(SelectVariable selectVariable, VariableMap map) : base(selectVariable)
+        public PrinterVariableID(SelectVariable selectVariable, VariableMap map) : base(selectVariable)
         {
-            this.stringBuilder = new StringBuilder();
             if (!map.TryGetValue(selectVariable.name, out Tuple<int, Table> tuple))
                 throw new ArgumentException($"{this.GetType()}, variable name does not exist. Name = {selectVariable.name}.");
 
@@ -128,21 +116,13 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Concatenates property values into one string of given element.
+        /// Returns ID of an element together with type of variable.
         /// </summary>
         /// <param name="element"> Graph element. </param>
         /// <returns> String concatenation of the elements properties. </returns>
         public override string GetSelectVariableAsString(Element element)
         {
-            this.stringBuilder.Clear();
-
-            int propCount = element.Table.Properties.Count;
-            for (int i = 0; i < propCount ; i++)
-            {
-                this.stringBuilder.Append(element.Table.GetValueAsString(element.ID, i));
-                if (i+1 != propCount) this.stringBuilder.Append(' ');
-            }
-            return stringBuilder.ToString();
+            return element.ID.ToString();
         }
     }
 }

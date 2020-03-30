@@ -11,49 +11,123 @@ namespace QueryEngine
     class QueryEngine
     {
 
-        private static void Run(string[] args, TextReader reader, TextWriter writer)
+        /// <summary>
+        /// Parses argument that expects to be a thread count.
+        /// </summary>
+        /// <param name="param"> Application argument. </param>
+        /// <returns> Thread count.</returns>
+        private static int GetThreadCount(string param)
         {
-            //Every query needs valid SELECT and MATCH expr.
-            //Every query must end with semicolon ';'.
+            if (!Int32.TryParse(param, out int threadCount))
+                throw new ArgumentException("Failed to parse thread count.");
+            else if (threadCount <= 0) 
+                throw new ArgumentException("Thread count cannot be negative.");
+                    else return threadCount;
+        }
+
+        /// <summary>
+        /// Parses argument that expects to be a vertices per round.
+        /// </summary>
+        /// <param name="param"> Application argument. </param>
+        /// <returns> Vertices per round.</returns>
+        private static int GetVerticesPerhread(string param)
+        {
+            if (!Int32.TryParse(param, out int verticesPerThread))
+                throw new ArgumentException("Failed to parse vertices per thread.");
+            else if (verticesPerThread <= 0)
+                throw new ArgumentException("Vertices per thread cannot be negative.");
+            else return verticesPerThread;
+        }
+
+        /// <summary>
+        /// Parses argument that expects to be a printer type.
+        /// </summary>
+        /// <param name="param"> Application argument.</param>
+        /// <returns> Printer type. </returns>
+        private static string GetPrinter(string param)
+        {
+
+            if (!Printer.Printers.Contains(param))
+                throw new ArgumentException("Inputed printer that does not exists.");
+            else return param;
+        }
+
+        /// <summary>
+        /// Parses argument that expects to be a formater type.
+        /// </summary>
+        /// <param name="param"> Application argument.</param>
+        /// <returns> Formater type. </returns>
+        private static string GetFormater(string param)
+        {
+            if (!Formater.Formaters.Contains(param))
+                throw new ArgumentException("Inputed printer that does not exists.");
+            else return param;
+        }
+
+        /// <summary>
+        /// Parses argument that expects to be a file name.
+        /// </summary>
+        /// <param name="pars"> Application arguments.</param>
+        /// <returns> File name. </returns>
+        private static string GetFileName(string[] pars)
+        {
+            if (pars[2] == "file")
+            {
+                if (pars.Length < 5) throw new ArgumentException("Missing file name.");
+                else return pars[4];
+            }
+            else return null; 
+        }
+
+
+    private static void Run(string[] args, TextReader reader)
+        {
+            if (args.Length < 4) throw new ArgumentException("Wrong number of program parameters.");
+
+            // Parse program arguments
+            int ThreadCount = GetThreadCount(args[0]);
+            int VerticesPerThread = GetVerticesPerhread(args[1]);
+            string Printer = GetPrinter(args[2]);
+            string Formater = GetFormater(args[3]);
+            string FileName = GetFileName(args);
+            
+            // Load graph.
             Graph graph = new Graph();
             
+            //Every query needs valid SELECT and MATCH expr.
+            //Every query must end with semicolon ';'.
             while (true)
             {
                 Console.WriteLine("Enter Query:");
-                //Query query = new Query(reader, graph);
-              
+                Query query = new Query(reader, graph, ThreadCount,VerticesPerThread
+                                        ,Printer,Formater, FileName);
                 Console.WriteLine();
-                Console.WriteLine("Results:");
-
-               // DFSPatternMatcher dfs = new DFSPatternMatcher(query.GetMatchPattern(), graph);
-             //   dfs.Search();
-
-                Console.WriteLine();
+                query.ComputeQuery();
+                Console.WriteLine("Finished computing. Pres enter to continue...");
                 Console.ReadLine();
-                Console.WriteLine("Continue? y/n (single character answer):");
+                Console.WriteLine();
+                Console.WriteLine("Continue with another query? y/n (single character answer):");
                 string c;
                 c= (Console.ReadLine());
                 if (c[0] != 'y') break;
                 Console.Clear();
-
             }
         }
 
         static void Main(string[] args)
         {
-            /* try
+             try
              {
-                if (QueryEngine.ThreadsPerQuery <= 0) 
-                    throw new Exception("Cannot start a query with <= 0 threads.");
-                Run(args, Console.In, Console.Out);
+                Run(args, Console.In);
              }
              catch (Exception e )
              {
-                 Console.WriteLine( e.Message);
+                Console.WriteLine( e.Message);
+                Console.WriteLine("Press enter to close the application");
+                Console.ReadLine();
              }
-             */
 
-            TestClass.RunTest();
+            //TestClass.RunTest();
             
         }
 
