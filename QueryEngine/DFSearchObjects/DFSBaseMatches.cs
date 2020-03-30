@@ -1,17 +1,4 @@
 ﻿
-/**
- * This file includes definitions of match classes that form a pattern chains.
- * Each class represents one object that can be matched during search algorithm.
- * e.g. vertex and specific edge type.
- * 
- * Each class has got a method that tests element if it can be matched. If the element can be matched
- * they also make neccessary adjustments to the structures passed to those methods.
- * This class is directly connected to the dfs pattern class.
- * */
-
-
-
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -179,6 +166,10 @@ namespace QueryEngine
 
     }
 
+    /// <summary>
+    /// Defines vertex match node.
+    /// Description is provided inside abstract parent.
+    /// </summary>
     class DFSVertexMatch : DFSBaseMatch
     {
         public DFSVertexMatch() : base()
@@ -196,6 +187,10 @@ namespace QueryEngine
 
     }
 
+    /// <summary>
+    /// Defines vertex match node.
+    /// Description is provided inside abstract parent.
+    /// </summary>
     abstract class DFSEdgeMatch : DFSBaseMatch
     {
         public DFSEdgeMatch() : base()
@@ -210,6 +205,10 @@ namespace QueryEngine
 
     }
 
+    /// <summary>
+    /// Defines vertex match node.
+    /// Description is provided inside abstract parent.
+    /// </summary>
     class DFSInEdgeMatch : DFSEdgeMatch
     {
         public DFSInEdgeMatch() : base()
@@ -227,6 +226,11 @@ namespace QueryEngine
         }
 
     }
+
+    /// <summary>
+    /// Defines vertex match node.
+    /// Description is provided inside abstract parent.
+    /// </summary>
     class DFSOutEdgeMatch : DFSEdgeMatch
     {
         public DFSOutEdgeMatch() : base()

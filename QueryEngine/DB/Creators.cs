@@ -1,19 +1,5 @@
 ﻿
-/**
- * Contains definition of creators from file.
- * Takes a file and creates given type from the file.
- * Reading and building of the type is done in states.
- * The class creator takes reader (reads given file) and processor.
- * Processor is given words from a file and builds the class.
- * When reading is finished the processor is halted and the creator can
- * return desired object.
- * 
- *  There are three creators, for tables (same for edges and node tables),
- *  one that creates vertices from a data file and the third that creates list of 
- *  edges (in/out).
- * 
- * 
- */
+
 
 using System;
 using System.Collections.Generic;
@@ -108,7 +94,10 @@ namespace QueryEngine
             return this.dict;
         }
 
-        //Based on actual state process incoming word.
+        /// <summary>
+        /// A jump table which defines what method will be called in a given state.
+        /// </summary>
+        /// <param name="param"> Parameter to process. </param>
         public void Process(string param)
         {
             switch (state)
@@ -236,6 +225,10 @@ namespace QueryEngine
             }
         }
 
+        /// <summary>
+        /// Saves property name for a later usage.
+        /// </summary>
+        /// <param name="param"> Property name. </param>
         private void ProcessPropName(string param)
         {
             this.newPropName = param;
@@ -245,9 +238,10 @@ namespace QueryEngine
 
 
         /// <summary>
-        /// Processes property name.
-        /// Creates new proprty based on type.
+        /// Processes property type.
+        /// Creates new proprty based on type with a property name stored before.
         /// </summary>
+        /// <param name="param"> Property type. </param>
         private void ProcessPropType(string param)
         {
             Property newProp = PropertyFactory.CreateProperty(param, this.newPropName);
@@ -313,6 +307,10 @@ namespace QueryEngine
             InicialiseInEdgesTables();
         }
 
+        /// <summary>
+        /// A jump table which defines what method will be called in a given state.
+        /// </summary>
+        /// <param name="param"> Parameter to process. </param>
         public void Process(string param)
         {
           

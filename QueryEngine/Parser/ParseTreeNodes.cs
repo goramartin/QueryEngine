@@ -1,8 +1,4 @@
 ﻿
-/*
- * This file includes definitions of nodes used to create a parse tree of the query.
- * Nodes are used by a Parser to create the parse tree.
- */
 
 using System;
 using System.Collections.Generic;
@@ -148,6 +144,9 @@ namespace QueryEngine {
         }
     }
 
+    /// <summary>
+    /// Stores a indetifier as a string.
+    /// </summary>
     class IdentifierNode : Node
     {
         public string value { get; private set; }

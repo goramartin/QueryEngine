@@ -1,16 +1,4 @@
 ﻿
-/**
- * This file includes defintion of match object.
- * This class should contain information from the query match expression that is,
- * pattern to search and algorithm to perform the search.
- * Note that during this class creating happens also definitions 
- * of variables to be used by the query, that means it fills the 
- * variable map of for the query. (creation of pattern)
- * 
- * 
- * This file also contains definitoin of static factory for matcher and pattern.
- * */
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -125,9 +113,19 @@ namespace QueryEngine
     /// </summary>
     static class MatchFactory
     {
+        /// <summary>
+        /// Register of valid matchers.
+        /// </summary>
         static Dictionary<string, Type> MatcherRegistry;
+
+        /// <summary>
+        /// Register of valid patterns for a given matcher.
+        /// </summary>
         static Dictionary<string, Dictionary<string, Type>> MatcherPatternRegistry;
 
+        /// <summary>
+        /// Inicialises registries.
+        /// </summary>
         static MatchFactory()
         {
             MatcherRegistry = new Dictionary<string, Type>();
@@ -135,6 +133,9 @@ namespace QueryEngine
             InicialiseRegistry();
         }
 
+        /// <summary>
+        /// Fills registers with defined data.
+        /// </summary>
         private static void InicialiseRegistry()
         {
             RegisterMatcher("DFSSingleThread", typeof(DFSPatternMatcher));
@@ -143,6 +144,11 @@ namespace QueryEngine
             RegisterPatternToMatcher("DFSParallel", "SIMPLE", typeof(DFSPattern));
         }
 
+        /// <summary>
+        /// Register a matcher type. Checks if the matcher exists and throws on this occasion.
+        /// </summary>
+        /// <param name="matcher"> Matcher type. </param>
+        /// <param name="type"> Type to register matcher to. </param>
         private static void RegisterMatcher(string matcher, Type type)
         {
             if (matcher == null || type == null)
@@ -156,6 +162,12 @@ namespace QueryEngine
         }
 
 
+        /// <summary>
+        /// Registers a pattern to a given pattern.
+        /// </summary>
+        /// <param name="matcher"> Matcher type. </param>
+        /// <param name="pattern"> Pattern type. </param>
+        /// <param name="patternType"> Petter type instante to register. </param>
         private static void RegisterPatternToMatcher(string matcher, string pattern, Type patternType)
         {
             if (matcher == null|| pattern == null || patternType == null)
@@ -175,6 +187,12 @@ namespace QueryEngine
             }
         }
 
+        /// <summary>
+        /// Creates an instante of matcher based on a given matcher type.
+        /// </summary>
+        /// <param name="matcher"> Matcher type to craete.</param>
+        /// <param name="parameters"> Paramters for matcher constructor. </param>
+        /// <returns></returns>
         public static IPatternMatcher CreateMatcher(string matcher, params object[] parameters) //IPattern pattern, Graph graph, QueryResults results, int resultIndex)
         {
             if (matcher == null)
@@ -188,6 +206,13 @@ namespace QueryEngine
             else throw new ArgumentException($"MatchFactory: Failed to load type from Matcher registry. Matcher = {matcher}.");
         }
 
+        /// <summary>
+        /// Creates a pattern type based on given matcher type and pattern type.
+        /// </summary>
+        /// <param name="matcher"> Matcher type. </param>
+        /// <param name="pattern"> Pattern type. </param>
+        /// <param name="parameters"> Parameters for pattern constructor. </param>
+        /// <returns></returns>
         public static IPattern CreatePattern(string matcher, string pattern, params object[] parameters)
         {
             if (matcher == null || pattern == null)

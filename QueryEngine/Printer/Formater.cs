@@ -37,7 +37,9 @@ namespace QueryEngine
         
         protected TextWriter writer;
 
-
+        /// <summary>
+        /// Inicialises dictionaries with valid types and valid file endings.
+        /// </summary>
         static Formater()
         {
             fileEndings = new Dictionary<string, string>();
@@ -55,17 +57,41 @@ namespace QueryEngine
             this.columnsFilled = 0;
         }
 
+        /// <summary>
+        /// Base class construtor.
+        /// </summary>
+        /// <param name="columnCount">Column number of a printed table.</param>
+        /// <param name="writer"> Where to write output. </param>
         protected Formater(int columnCount, TextWriter writer): this()
         {
             this.columnCount = columnCount;
             this.writer = writer;
         }
 
+        /// <summary>
+        /// Formats header of a table.
+        /// </summary>
+        /// <param name="header">Header format. </param>
         public abstract void FormatHeader(List<PrinterVariable> header);
+        
+        /// <summary>
+        /// Adds a word to a row and formats it.
+        /// </summary>
+        /// <param name="word"> Word to format. </param>
         public abstract void AddToFormat(string word);
+        
+        /// <summary>
+        /// Flushed string builder to a writer.
+        /// </summary>
         public abstract void Flush();
 
-
+        /// <summary>
+        /// Formater factory.
+        /// </summary>
+        /// <param name="formater"> Formater type. </param>
+        /// <param name="columnCount"> Number of columns in a printed table. </param>
+        /// <param name="writer"> Output writer. </param>
+        /// <returns> Formater instance. </returns>
         public static Formater FormaterFactory(string formater, int columnCount, TextWriter writer)
         {
             if (writer == null) 
@@ -91,6 +117,10 @@ namespace QueryEngine
     {
         public SimpleFormater(int columnCount, TextWriter writer) : base(columnCount,writer) { }
 
+        /// <summary>
+        /// Adds word to a format and separates it with a space character. 
+        /// </summary>
+        /// <param name="word"> Word to add to a format. </param>
         public override void AddToFormat(string word)
         {
             this.stringBuilder.Append(word);
@@ -100,6 +130,12 @@ namespace QueryEngine
         }
 
 
+        /// <summary>
+        /// Formates a given header.
+        /// Each column is printed and below is printed a dash delimeter to separate
+        /// header and results.
+        /// </summary>
+        /// <param name="variables"> Header format. </param>
         public override void FormatHeader(List<PrinterVariable> variables)
         {
             for (int i = 0; i < variables.Count; i++)
@@ -109,6 +145,7 @@ namespace QueryEngine
                 this.PadWithChar(Formater.BaseColumnLength - tmp.Length, ' ');
             }
 
+           
             this.Flush();
 
             for (int i = 0; i < this.columnCount; i++)
@@ -118,6 +155,9 @@ namespace QueryEngine
             this.Flush();
         }
 
+        /// <summary>
+        /// Flushed string builder and prepares for printing next row.
+        /// </summary>
         public override void Flush()
         {
             this.writer.WriteLine(this.stringBuilder.ToString());
@@ -125,6 +165,11 @@ namespace QueryEngine
             this.columnsFilled = 0;
         }
 
+        /// <summary>
+        /// Adds given number of character to a string builder.
+        /// </summary>
+        /// <param name="count"> Number of characters. </param>
+        /// <param name="c"> Character to add. </param>
         private void PadWithChar(int count, char c)
         {
             if (count <= 0) return;
@@ -147,6 +192,11 @@ namespace QueryEngine
     {
         public MarkDownFormater(int columnCount, TextWriter writer) : base(columnCount, writer) { }
 
+
+        /// <summary>
+        /// Adds word to a format and separates it with a | character to end a column in markdown syntax.. 
+        /// </summary>
+        /// <param name="word"> Word to add to a format. </param>
         public override void AddToFormat(string word)
         {
             if (this.columnsFilled == 0) this.stringBuilder.Append('|');
@@ -158,7 +208,12 @@ namespace QueryEngine
             if (this.columnsFilled == this.columnCount) this.Flush();
         }
 
-
+        /// <summary>
+        /// Formates a given header.
+        /// Each column is printed and below is printed a dash delimeter to separate
+        /// header and results. Columns are also | separated on sides.
+        /// </summary>
+        /// <param name="variables"> Header format. </param>
         public override void FormatHeader(List<PrinterVariable> variables)
         {
             this.stringBuilder.Append('|');
@@ -177,7 +232,9 @@ namespace QueryEngine
             this.Flush();
         }
 
-
+        /// <summary>
+        /// Flushed string builder and prepares for printing next row.
+        /// </summary>
         public override void Flush()
         {
             this.writer.WriteLine(this.stringBuilder.ToString());

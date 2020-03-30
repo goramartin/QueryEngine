@@ -1,16 +1,4 @@
 ﻿
-/*
- * 
- * This file includes a class that hold results of query matcher. 
- * 
- * Each result consists of certain number of elements, those are variables defined in PGQL match section.
- * The number of elements in the result defines the number of columns. Each variable is stored inside its 
- * specific column. The column that it pertains to is the number stored inside variable map of the query.
- * That means, every column contains only the same variable (even types if they are defined).
- * 
- * One result of the search can be look as an array of those elements, where the number of elements in the 
- * array is the number of columns.
- */
 
 using System;
 using System.Collections;
@@ -21,7 +9,9 @@ using System.Threading.Tasks;
 
 namespace QueryEngine
 {
-
+    /// <summary>
+    /// Interface for class that stores results of queries.
+    /// </summary>
     interface IResultStorage : IEnumerable<Element[]>
     {
         void AddElement(Element element, int columnIndex, int threadIndex);
@@ -52,9 +42,23 @@ namespace QueryEngine
         /// </summary>
         private List<Element>[][] results;
         
+        /// <summary>
+        /// Number of threads that will be adding to the instance.
+        /// </summary>
         public int ThreadCount { get; private set; }
+
+        /// <summary>
+        /// Size of one result.
+        /// </summary>
         public int ColumnCount { get; private set; }
 
+        /// <summary>
+        /// Creates storage based on thread count and column count.
+        /// Column count represents number of variables of a search query and
+        /// thread count defines how many threads add results to this instance. 
+        /// </summary>
+        /// <param name="columnCount"> Number of variables in search query. </param>
+        /// <param name="threadCount"> Number of threads that add results to this instance.</param>
         public QueryResults(int columnCount, int threadCount)
         {
             if (columnCount <= 0 || threadCount <= 0)
@@ -122,6 +126,10 @@ namespace QueryEngine
             }
         }
 
+        /// <summary>
+        /// Calls generic methods.
+        /// </summary>
+        /// <returns> Generic Enumerator. </returns>
         IEnumerator IEnumerable.GetEnumerator()
         {
             return this.GetEnumerator();

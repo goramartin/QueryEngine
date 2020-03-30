@@ -1,19 +1,5 @@
 ﻿
-/**
- * File includes definition of tables and property types.
- * Each node has a pointer to a type, that is to say, a table.
- * Each table holds all the nodes of the same type.
- * Table has got one list,dictionary and a hash table, list for properties = named lists with values of a single type of a node,
- * dictionary of IDs, each object is a representation of a node, on that object lies the position index of the element in table.
- * On the same index we will find values of properties of the node in the property lists.
- * And a hash set for fast access to property labels.
- * 
- * Properties are form from an abstract type Property that is visible from within a table.
- * Generic properties extend Property, and specialisations are created separately. 
- * Properties are created with a help of an Activator class based on a passed name.
- * 
- * This file contains also static factory for creation of tables.
- */
+
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -203,6 +189,10 @@ namespace QueryEngine
             this.propHolder.Clear();
         }
 
+        /// <summary>
+        /// Gets value on given index as a string.
+        /// </summary>
+        /// <param name="index"> Index of a row. </param>
         public override string GetValueAsString(int index)
         {
             return this.propHolder[index].ToString();
@@ -211,10 +201,17 @@ namespace QueryEngine
 
 #region PropertySpecialisations
 
+    /// <summary>
+    /// String property specialisation.
+    /// </summary>
     class StringProperty : Property<string>
     {
         public StringProperty(string propName): base(propName) { }
 
+        /// <summary>
+        /// Stores given string into a column.
+        /// </summary>
+        /// <param name="strProp">Value to store. </param>
         public override void ParsePropFromStringToList(string strProp)
         {
             if (strProp == null) 
@@ -223,10 +220,17 @@ namespace QueryEngine
         }
     }
 
+    /// <summary>
+    /// Integer specialisation of a column.
+    /// </summary>
     class IntProperty : Property<int>
     {
         public IntProperty(string propName): base(propName) { }
 
+        /// <summary>
+        /// Tries to parse the number from a given string and stores it into a column.
+        /// </summary>
+        /// <param name="strProp">Value to store. </param>
         public override void ParsePropFromStringToList(string strProp)
         {
             int value = 0;
@@ -239,19 +243,29 @@ namespace QueryEngine
 #endregion PropertySpecialisations
 
     /// <summary>
+    /// Property factory.
     /// Class includes register of all the property types.
-    ///  Enables to create instance of a property based on a string token.
+    /// Enables to create instance of a property based on a string token.
     /// </summary>
     static class PropertyFactory
     {
+        /// <summary>
+        /// Register with valid value types.
+        /// </summary>
         static Dictionary<string, Type> registry;
         
+        /// <summary>
+        /// Inicialises registry.
+        /// </summary>
         static PropertyFactory()
         {
             registry = new Dictionary<string, Type>();
             InicialiseRegistry();
         }
 
+        /// <summary>
+        /// Inicialises registry with predefined values.
+        /// </summary>
         private static void InicialiseRegistry()
         {
             RegisterProperty("string", typeof(StringProperty));
@@ -259,6 +273,11 @@ namespace QueryEngine
 
         }
 
+        /// <summary>
+        /// Registers a property with a given token and bounds a given type to the string.
+        /// </summary>
+        /// <param name="token"> Property type. </param>
+        /// <param name="type"> Type of property type. </param>
          private static void RegisterProperty(string token, Type type)
         {
             if (token == null || type == null)
@@ -270,6 +289,12 @@ namespace QueryEngine
             registry.Add(token, type);
         }
 
+        /// <summary>
+        /// Creates an instance of a property based on a given token.
+        /// </summary>
+        /// <param name="token"> Property type </param>
+        /// <param name="name"> Type of a property type. </param>
+        /// <returns></returns>
         public static Property CreateProperty(string token, string name)
         {
             if (token == null || name == null)

@@ -12,9 +12,24 @@ namespace QueryEngine
     /// </summary>
     class SelectObject
     {
+        /// <summary>
+        /// List of arguments to print from a select expression.
+        /// </summary>
         private List<SelectVariable> selectVariables;
+        
+        /// <summary>
+        /// Type of printing format.
+        /// Used inside print method for factory method of formater.
+        /// </summary>
         string FormaterType { get; }
+        /// <summary>
+        /// Type of printer for printing results.
+        ///  Used inside print method for factory method of printer.
+        /// </summary>
         string PrinterType { get; }
+        /// <summary>
+        /// File name where to print results.
+        /// </summary>
         string FileName { get; }
 
 
@@ -40,12 +55,13 @@ namespace QueryEngine
             this.selectVariables = visitor.GetResult();
         }
 
-        public List<SelectVariable> GetSelectVariables() => this.selectVariables;
-
 
         /// <summary>
         /// Checks correctness of given print expression.
         /// There must be either * or variable references with their properties.
+        /// such as *, varName, varName.Property
+        /// If the variable has defined type, then user cannot access property that is not defined.
+        /// Otherwise can, but will print null.
         /// </summary>
         /// <param name="variableMap"> Map of variables. </param>
         public void CheckCorrectnessOfSelect(VariableMap variableMap)
@@ -57,6 +73,8 @@ namespace QueryEngine
             }
             else
             {
+                // For each select variable check if it is defined in the query and check if it has defined type
+                // If so check if the property access can be done.
                 for (int i = 0; i < this.selectVariables.Count; i++) 
                 {
                     if (variableMap.TryGetValue(this.selectVariables[i].name, out Tuple<int, Table> tuple))
@@ -145,27 +163,48 @@ namespace QueryEngine
     /// </summary>
     class SelectVariable
     {
+        /// <summary>
+        /// Name of variable.
+        /// </summary>
         public string name { get; set; }
+        /// <summary>
+        /// Property access to a variable.
+        /// </summary>
         public string propName { get; set; }
+        /// <summary>
+        /// Label as an alias for the expression.
+        /// </summary>
         public string label { get; set; }
 
+        /// <summary>
+        /// Tries to set a name, will set if name is set to null.
+        /// </summary>
         public bool TrySetName(string n)
         {
             if (this.name == null) { this.name = n; return true; }
             else return false;
         }
+        /// <summary>
+        /// Tries to set a property name, will set if property is set to null.
+        /// </summary>
         public bool TrySetPropName(string n)
         {
             if (this.propName == null) { this.propName = n; return true; }
             else return false;
         }
 
+        /// <summary>
+        /// Tries to set a laberl, will set if label is set to null.
+        /// </summary>
         public bool TrySetLabel(string l)
         {
             if (this.label == null) { this.label = l; return true; }
             else return false;
         }
 
+        /// <summary>
+        /// Check is the variable has no set contents.
+        /// </summary>
         public bool IsEmpty()
         {
             if ((this.name == null) && (this.propName == null) && (this.label == null)) return true;

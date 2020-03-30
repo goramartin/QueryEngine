@@ -1,15 +1,4 @@
 ﻿
-/**
- *  This file contains definitions of Tokens, Tokenizers and Parser.
- * 
- * Parsing is done via Deep descend parsing (Top to bottom).
- * The whole query expression forms a single tree. Each parser method (ParseSelectExpr, ParseMatchExpr...)
- * parses only the part corresponding to the query word and leaves the internal position of the next parsed token
- * to the next token after the last token parsed by methods above.
- * 
- * Visitors then create structures that are used to create query objects.
- * 
- */
 
 using System;
 using System.Collections.Generic;

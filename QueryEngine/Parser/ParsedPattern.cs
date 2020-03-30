@@ -1,14 +1,4 @@
 ﻿
-/**
- * This file includes definitions of parsed pattern that is later on used for creating pattern 
- * that is used in search algorithm.
- * PGQL syntax for match section is done via "chains" connected with commas.
- * e.g. MATCH (x) - (y), (y) - (p)
- * First chain is (x) - (y) and the second one is (y) - (p).
- * Parsed pattern is class that encapsulated one chain of the pattern and allows certain operations 
- * to make working with the pattern more easily. Such as splitting.
- * Parsed pattern nodes are used to form a specified object of the chains e.g vertices and edges.
- */
 
 
 using System;
@@ -20,10 +10,10 @@ using System.Threading.Tasks;
 namespace QueryEngine
 {
     /// <summary>
-    /// Class used to shallow parsing match expression.
+    /// Class used to shallow parsing of match expression.
     /// Pattern contains single nodes with their corresponding attributes collected when parsed.
-    /// Connections represents dictionary of other Parsed Patterns, where index is the index of pattern and string
-    /// is variable that the two patterns are connected by.
+    /// Can be splited by a certain parsed pattern node which contains given string variable
+    /// Is used when creating specialised pattern, such as DFS.
     /// </summary>
     class ParsedPattern
     {
@@ -156,6 +146,7 @@ namespace QueryEngine
     /// <summary>
     /// Represents single Node when parsing match expression.
     /// There is no need to create another type just for edge type as those will be created later.
+    /// Caries information about match node. 
     /// </summary>
     class ParsedPatternNode
     {

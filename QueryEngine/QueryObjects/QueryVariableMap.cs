@@ -19,9 +19,20 @@ namespace QueryEngine
     /// </summary>
     class VariableMap : IEnumerable<KeyValuePair<string, Tuple<int, Table>>>
     {
+     
+        /// <summary>
+        /// Map with information about defined variables.
+        /// </summary>
         private Dictionary<string, Tuple<int, Table>> variableMap;
+        
+        
         public VariableMap() => this.variableMap = new Dictionary<string, Tuple<int, Table>>();
       
+        /// <summary>
+        /// Indexer to ease access with string keys to a map.
+        /// </summary>
+        /// <param name="str"> Name of variable. </param>
+        /// <returns> Tuple with position of variable in result and its type. </returns>
         public Tuple<int, Table> this[string str]
         {
             get { return this.variableMap[str]; }
@@ -64,6 +75,7 @@ namespace QueryEngine
             return this.variableMap.TryGetValue(name, out tuple);
         }
 
+        /// <returns> Count of variables. </returns>
         public int GetCount() => this.variableMap.Count;
 
         public IEnumerator<KeyValuePair<string, Tuple<int,Table>>> GetEnumerator()
@@ -71,6 +83,9 @@ namespace QueryEngine
             return this.variableMap.GetEnumerator();
         }
 
+        /// <summary>
+        /// Calls generic method of get enumerator.
+        /// </summary>
         IEnumerator IEnumerable.GetEnumerator()
         {
             return this.GetEnumerator();

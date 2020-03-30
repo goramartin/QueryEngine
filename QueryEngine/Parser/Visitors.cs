@@ -1,10 +1,4 @@
 ﻿
-/**
- * This file includes definitions of visitor used to collect data from created parsed trees. 
- * Each query object has its own visitor.
- * Visitor iterates over nodes defined in ParseTreeNodes.cs
- */
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -104,19 +98,31 @@ namespace QueryEngine
             else throw new ArgumentException($"{this.GetType()}, could not parse name.");
         }
 
-        //Can never appear.  
+       
+        /// <summary>
+        /// Not implemented.
+        /// </summary>
         public void Visit(MatchDivider node)
         {
             throw new NotImplementedException();
         }
+        /// <summary>
+        /// Not implemented.
+        /// </summary>
         public void Visit(MatchNode node)
         {
             throw new NotImplementedException();
         }
+        /// <summary>
+        /// Not implemented.
+        /// </summary>
         public void Visit(VertexNode node)
         {
             throw new NotImplementedException();
         }
+        /// <summary>
+        /// Not implemented.
+        /// </summary>
         public void Visit(EdgeNode node)
         {
             throw new NotImplementedException();
@@ -276,7 +282,9 @@ namespace QueryEngine
             node.next.Accept(this);
         }
 
-        //Should never occur.
+        /// <summary>
+        /// Not implemented.
+        /// </summary>.
         public void Visit(SelectNode node)
         {
             throw new NotImplementedException();

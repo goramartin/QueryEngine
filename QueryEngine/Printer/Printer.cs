@@ -31,6 +31,9 @@ namespace QueryEngine
         /// </summary>
         protected TextWriter writer;
 
+        /// <summary>
+        /// Inicialises static dictionary of printer types.
+        /// </summary>
         static Printer()
         {
             Printers = new HashSet<string>();
@@ -79,6 +82,14 @@ namespace QueryEngine
         }
 
        
+        /// <summary>
+        /// Factory for printer class.
+        /// </summary>
+        /// <param name="printerType"> Printer type. </param>
+        /// <param name="rowFormat"> Format of a columns. </param>
+        /// <param name="formater"> Formater type. </param>
+        /// <param name="fileName"> File name if defined file printer. </param>
+        /// <returns> Printer instance. </returns>
         public static Printer PrinterFactory(string printerType, List<PrinterVariable> rowFormat, string formater, string fileName= null)
         {
             if (printerType == "console")
@@ -96,9 +107,13 @@ namespace QueryEngine
     /// </summary>
     class ConsolePrinter : Printer
     {
+        /// <summary>
+        /// Creates a console printer.
+        /// </summary>
+        /// <param name="rowFormat"> Format of a columns. </param>
+        /// <param name="formater"> Type of formater. </param>
         public ConsolePrinter( List<PrinterVariable> rowFormat, string formater) : base(rowFormat)
         {
-            
             try
             {
                 this.writer = Console.Out;
@@ -111,6 +126,9 @@ namespace QueryEngine
 
         }
 
+        /// <summary>
+        /// Flushed formater buffer and releases resources of writer.
+        /// </summary>
         public override void Dispose()
         {
             this.formater.Flush();
@@ -123,6 +141,12 @@ namespace QueryEngine
     /// </summary>
     class FilePrinter : Printer
     {
+        /// <summary>
+        /// Creates a file printer.
+        /// </summary>
+        /// <param name="rowFormat"> Format of a columns. </param>
+        /// <param name="formater"> Type of formater. </param>
+        /// <param name="fileName"> File to print into. </param>
         public FilePrinter(List<PrinterVariable> rowFormat, string formater, string fileName) : base(rowFormat)
         {
             if (!Formater.fileEndings.TryGetValue(formater, out string ending)) 
@@ -140,6 +164,9 @@ namespace QueryEngine
 
         }
 
+        /// <summary>
+        /// Flushed formater buffer and releases resources of writer.
+        /// </summary>
         public override void Dispose()
         {
             this.formater.Flush();

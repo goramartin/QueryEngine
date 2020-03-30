@@ -8,12 +8,12 @@ namespace QueryEngine
 {
 
     /// <summary>
-    /// Represents a holder of information about one select column.
+    /// Represents a holder of information about one column from a select expression.
     /// </summary>
     abstract class PrinterVariable
     {
         /// <summary>
-        /// Index of a variable that is printed during select at this print variable.
+        /// Index of a variable in array (result) that is printed during select at this print variable.
         /// </summary>
         public int VariableIndex { get; protected set; }
 
@@ -65,7 +65,14 @@ namespace QueryEngine
     /// </summary>
     class PrinterVariableProperty : PrinterVariable
     {
-       
+
+        /// <summary>
+        /// Creates a property print variable.
+        /// Check if the variable is defined.
+        /// </summary>
+        /// <param name="selectVariable"> Select variable containing information about printing.</param>
+        /// <param name="map"> Map containing all variables. </param>
+        /// <returns> Printer variable. </returns>
         public PrinterVariableProperty(SelectVariable selectVariable, VariableMap map) : base(selectVariable)
         {
             if (!map.TryGetValue(selectVariable.name, out Tuple<int, Table> tuple))
@@ -99,6 +106,14 @@ namespace QueryEngine
     /// </summary>
     class PrinterVariableID : PrinterVariable
     {
+
+        /// <summary>
+        /// Creates a id print variable.
+        /// Check if the variable is defined.
+        /// </summary>
+        /// <param name="selectVariable"> Select variable containing information about printing.</param>
+        /// <param name="map"> Map containing all variables. </param>
+        /// <returns> Printer variable. </returns>
         public PrinterVariableID(SelectVariable selectVariable, VariableMap map) : base(selectVariable)
         {
             if (!map.TryGetValue(selectVariable.name, out Tuple<int, Table> tuple))

@@ -1,25 +1,4 @@
 ﻿
-/**
- * This class includes definitions of dfs search algorithms used to find pattern defined in query match expression.
- * 
- * Algorithm is given a pattern to find and the algorithm iterates over elements of the graph and 
- * communicates with given pattern.
- * Chains of the pattern can form a connected chains (that is that some chains can be directly connected via
- * certain vairables). The connected chains from a conjunction and the search algorithm uses the connection to
- * avoid unneccessary iteration over graph elements. 
- * More about the algorithm can be found at the method definitions.
- * 
- * So far, there have been two types of dfs matches. One single threaded and one parallel. 
- * The one single threaded should not be used alone because it was made to be used by the parallel.
- * The parallel algorithm is lock-free algorithm, saving results have been made lock free thanks to 
- * storing result into their own place inside query result structure (thread index).
- * And division of work is done lock free thanks to interlocked class that allows to perform 
- * certain operation atomicaly.
- * 
- * 
- * */
-
-
 
 
 
@@ -34,11 +13,19 @@ using System.Diagnostics;
 
 namespace QueryEngine
 {
+
+    /// <summary>
+    /// Base interface for all matchers.
+    /// </summary>
     interface IPatternMatcher
     {
         void Search();
     }
 
+    /// <summary>
+    /// Single threaded matcher is used by a parallel matcher.
+    /// Represents one thread with a matcher.
+    /// </summary>
     interface ISingleThreadMatcher : IPatternMatcher
     {
         void SetStartingVerticesIndeces(int start, int end);
@@ -513,6 +500,15 @@ namespace QueryEngine
         Graph Graph;
         int DistributorVerticesPerRound;
 
+        /// <summary>
+        /// Creates a parallel matchers.
+        /// Inits arrays of threads and matchers based on thread count.
+        /// </summary>
+        /// <param name="pattern"> Pattern to match. </param>
+        /// <param name="graph"> Graph to search on.</param>
+        /// <param name="results"> Where to store results. </param>
+        /// <param name="threadCount"> Number of threads to search.</param>
+        /// <param name="verticesPerThread"> If more than one thread is used to search this defines number of vertices that will be distributed to threads during matching.</param>
         public DFSParallelPatternMatcher(IDFSPattern pattern, Graph graph, IResultStorage results, int threadCount, int verticesPerThread = 1)
         {
             if (threadCount <= 0 || verticesPerThread <= 0) 

@@ -1,17 +1,5 @@
 ﻿
-/**
- * This file includes definition of pattern used by a dfs match algorithm.
- * 
- * Pattern itself is created from ParsedPattern nodes that visitor of match expression tree collects.
- * The chains are sorted and connected so that they form a connected pattern if the chains are connected.
- * (Connected, that means that they share a variable.)
- * This allows the search algorithm iterate over chains and choose the right vertices to start search for the 
- * particular pattern without repeating any unneccessary iterations. Also if the same variable occurs,
- * the chain might be split into two chains  (a) - (b) - (c) where the repeating variable is b
- * New chains will be (b) - (a), (b) - (c). This helps search algorithm connect chains together.
- * Creation of the pattern is described in constructor.
- * 
- */
+
 
 
 
@@ -110,6 +98,10 @@ namespace QueryEngine
         private Dictionary<Element, bool> MatchedVarsVertices;
         private Dictionary<Element, bool> MatchedVarsEdges;
 
+        /// <summary>
+        /// Creates a pattern from a given matches. Used only inside clone method.
+        /// </summary>
+        /// <param name="dFSBaseMatches"> Pattern to match during search. </param>
         private DFSPattern(List<List<DFSBaseMatch>> dFSBaseMatches)
         {
             if (dFSBaseMatches == null || dFSBaseMatches.Count == 0) 
@@ -124,6 +116,14 @@ namespace QueryEngine
             this.OverAllIndex = 0;
         }
 
+        /// <summary>
+        /// Creates a pattern from parsed patterns.
+        /// Creation is done as follow: Ordering of patters (based on connection between chains)
+        /// then spliting is done if neccessary in order to make search alogirth linear then 
+        /// proper match nodes are created with match node factory.
+        /// </summary>
+        /// <param name="map"></param>
+        /// <param name="parsedPatterns"></param>
         public DFSPattern(VariableMap map, List<ParsedPattern> parsedPatterns)
         {
             if (parsedPatterns == null || parsedPatterns.Count == 0) 
@@ -376,8 +376,6 @@ namespace QueryEngine
             return this.Patterns[this.CurrentPatternIndex + 1][0].GetVariable(this.Scope);
         }
 
-
-
         public bool isLastNodeInCurrentPattern()
         {
             return (this.Patterns[this.CurrentPatternIndex].Count - 1) == this.CurrentMatchNodeIndex ? true : false;
@@ -388,18 +386,28 @@ namespace QueryEngine
             return this.CurrentPatternIndex == (this.Patterns.Count - 1) ? true : false;
         }
 
-       
+       /// <summary>
+       /// Returns edge type of a current match node.
+       /// </summary>
+       /// <returns></returns>
         public EdgeType GetEdgeType()
         {
             return ((DFSEdgeMatch)(this.Patterns[this.CurrentPatternIndex][this.CurrentMatchNodeIndex])).GetEdgeType();
         }
 
+        /// <summary>
+        /// Shallow copy of a pattern.
+        /// </summary>
         public IDFSPattern Clone()
         {
             var tmpPattern = new DFSPattern(this.Patterns);
             return tmpPattern;
         }
 
+        /// <summary>
+        /// Returns variables that have been matches so far.
+        /// </summary>
+        /// <returns></returns>
         public Dictionary<int, Element> GetMatchedVariables()
         {
             return this.Scope;

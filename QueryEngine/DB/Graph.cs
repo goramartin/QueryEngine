@@ -1,15 +1,4 @@
-﻿/**
- * File includes definition of graph and its elements
- * Graph contains three lists... inward edges, outgoing edges and vertices.
- * Base class for nodes and edges is Element class, each element in a graph has got an ID and
- * a table (type). Also each element knows its position in the list where it is included. 
- * 
- *  Each vertex has got a positions for edges in edge lists, one positions for incoming edges and 
- *  one for outgoing edges. Starting position means that on that position the edge from this vertex is leading and
- *  end position means that on that position, edges from a consecutive vertex are starting.
- * 
- */
-
+﻿
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,6 +17,9 @@ namespace QueryEngine
     {
         public int ID { get; internal set; }
         public Table Table { get; internal set; }
+        /// <summary>
+        /// Represents position in a enclosing structure.
+        /// </summary>
         public int PositionInList { get; internal set; }
 
         public void AddID(int id) => this.ID = id;
@@ -86,12 +78,21 @@ namespace QueryEngine
         public bool HasOutEdges() { if (this.OutEdgesStartPosition == -1) return false; else return true; }
         public bool HasInEdges() { if (this.InEdgesStartPosition == -1) return false; else return true; }
 
+        /// <summary>
+        /// Gets range of out edges of this vertex.
+        /// </summary>
+        /// <param name="start"> Starting position of its edges in a edge list.</param>
+        /// <param name="end"> Ending position of its edges in the same edge list.</param>
         public void GetRangeOfOutEdges(out int start, out int end)
         {
             start = this.OutEdgesStartPosition;
             end = this.OutEdgesEndPosition;
         }
-
+        /// <summary>
+        /// Gets range of in edges of this vertex.
+        /// </summary>
+        /// <param name="start"> Starting position of its edges in a edge list.</param>
+        /// <param name="end"> Ending position of its edges in the same edge list.</param>
         public void GetRangeOfInEdges(out int start, out int end)
         {
             start = this.InEdgesStartPosition;
@@ -130,6 +131,9 @@ namespace QueryEngine
         }
     }
 
+    /// <summary>
+    /// In specialisation of an edge.
+    /// </summary>
     class InEdge : Edge
     {
         public InEdge() : base()
@@ -143,6 +147,9 @@ namespace QueryEngine
 
     }
 
+    /// <summary>
+    /// Out specialisation of an edge.
+    /// </summary>
     class OutEdge : Edge
     {
         public OutEdge() : base()
@@ -182,6 +189,9 @@ namespace QueryEngine
         public List<OutEdge> outEdges;
         public List<InEdge> inEdges;
 
+        /// <summary>
+        /// Loads a graph from a files. Files should not be changed.
+        /// </summary>
         public Graph()
         {
             this.NodeTables = null;
@@ -203,7 +213,7 @@ namespace QueryEngine
         /// <returns> Dictionary of tables. </returns>
         private Dictionary<string, Table> LoadTables(string filename)
         {
-            var reader = new Reader(filename);
+            var reader = new TableFileReader(filename);
             var processor = new TableDictProcessor();
             var creator = new CreatorFromFile<Dictionary<string, Table>>(reader, processor);
             var tmpTables = creator.Create();
