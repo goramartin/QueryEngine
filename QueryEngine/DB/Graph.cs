@@ -119,11 +119,19 @@ namespace QueryEngine
     }
 
 
+    /*! \enum EdgeType
+	
+	Represents all possible types of edge in a graph.
+        Not an edge is a value that is used to create match object with before they are assigned a proper edge type.
+
+
+    */
+    enum EdgeType { NotEdge, InEdge, OutEdge, AnyEdge };
+
     /// <summary>
     /// Edge represents edge in a graph. The type of an edge is based on the list that contains the list.
     /// Each edge has an end vertex, that is which vertex the edge is leading to.
     /// </summary>
-    enum EdgeType { NotEdge, InEdge, OutEdge, AnyEdge };
     class Edge : Element
     {
         public EdgeType EdgeType { get; internal set; }
