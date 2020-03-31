@@ -6,6 +6,10 @@ using System.Threading.Tasks;
 
 namespace QueryEngine
 {
+    /// <summary>
+    /// Simple test class for dumping and facading query requests.
+    /// Not ment as a unit test class.
+    /// </summary>
     class TestClass
     {
         public static void DumpGraph(Graph g)
@@ -119,12 +123,11 @@ namespace QueryEngine
             var tmp = match.Search();
 
 
-
             Console.WriteLine("Results Ids");
 
             foreach (var item in tmp)
             {
-                Console.WriteLine(item.ToString());
+                Console.WriteLine(item.Print());
             }
 
             select.Print(tmp, map);
@@ -132,25 +135,8 @@ namespace QueryEngine
 
 
             Console.ReadLine();
-            /*
-
-            Query q = new Query(new SelectObject(k), new MatchObject(l), scope);
-            Console.WriteLine(q.CheckCorrectnessOfQuery());
-
-
-
-            Console.WriteLine();
-            DFSPatternMatcher dfs = new DFSPatternMatcher(l, g);
-            dfs.Search();
-
-
-
-            Console.ReadLine();
-
-            */
 
         }
-
 
         public static void RunTest()
         {

@@ -224,7 +224,7 @@ namespace QueryEngine
                         if (pattern.isLastPattern())
                         {
                             // Setting null here makes it to fail on next iteration and it is forced to dfs back.
-                            Debug.WriteLine(result.ToString());
+                            Debug.WriteLine(result.Print());
                             StoreResult();
                             nextElement = null;
                             continue;

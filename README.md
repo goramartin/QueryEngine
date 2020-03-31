@@ -81,11 +81,11 @@ Types of referrences:
 | Syntax      | Description |
 | ----------- | ----------- |
 | *      | Selects all variables from match expression       |
-|  x  | Selects a specified variable from match expression       |
+|  x  | Selects a specified variable from match expression, equivalent of id(x) function      |
 |  x.Name  | Selects a specified property of a specified variable     |
 
 Inside select expression can be either * or variable referrences. If the * is chosen, then all variables
-from a match expression are selected. Based on their defined type the columns are constructed. If a variable has got it's type defined, the * creates a separate column for each property of the type. Otherwise, there will be one column for the entire variable and it's values will be grouped into that column. The same effect is done even if we specify the variable with no defined type and vice versa. 
+from a match expression are selected. Selecting a variable with its name solely will cause the same effect as if a function id(x) was called, so the results is the unique id of an element. When selecting a property of a variable, if the variable has defined type and the accessed property does not exists it will throw an error, otherwise if it is unknown type, the accessing will generete null value.
 
 Each referrence is comma separated.
 

@@ -145,8 +145,8 @@ namespace QueryEngine
                 Console.WriteLine("Press enter to close the application");
                 Console.ReadLine();
              }
-
-            //TestClass.RunTest();
+             
+             //TestClass.RunTest();
             
         }
 

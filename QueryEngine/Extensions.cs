@@ -9,14 +9,13 @@ namespace QueryEngine
 {
     static class ExtensionArray
     {
-        public static string ToString(this Element[] tmp)
+        public static string Print(this Element[] tmp)
         {
             string tmpString = "Thread: " + Thread.CurrentThread.ManagedThreadId.ToString() + " result: ";
             for (int i = 0; i < tmp.Length; i++)
             {
                 tmpString +=  " " + tmp[i].ID.ToString();
             }
-            
             return tmpString;
         }
 
