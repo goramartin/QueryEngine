@@ -45,6 +45,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DB\Creators.cs" />
+    <Compile Include="DB\EdgeListsProcessor.cs" />
+    <Compile Include="DB\TableDictProcessor.cs" />
+    <Compile Include="DB\VerticesListProcessor.cs" />
     <Compile Include="DFSearchObjects\DFSBaseMatches.cs" />
     <Compile Include="DFSearchObjects\DFSPattern.cs" />
     <Compile Include="DFSearchObjects\DFSPatternMatcher.cs" />
