@@ -28,6 +28,7 @@ namespace QueryEngine
     {
         public int ID { get; internal set; }
         public Table Table { get; internal set; }
+        
         /// <summary>
         /// Represents position in a enclosing structure.
         /// </summary>
@@ -35,8 +36,6 @@ namespace QueryEngine
 
         public void AddID(int id) => this.ID = id;
         public void AddTable(Table table) => this.Table = table;
-
-
 
         public override int GetHashCode()
         {
@@ -204,6 +203,7 @@ namespace QueryEngine
     {
         public Dictionary<string, Table> NodeTables;
         public Dictionary<string, Table> EdgeTables;
+        public Dictionary<string, Type> Labels;
         public List<Vertex> vertices;
         public List<OutEdge> outEdges;
         public List<InEdge> inEdges;
@@ -221,6 +221,11 @@ namespace QueryEngine
 
             this.LoadNodeTables("NodeTypes.txt");
             this.LoadEdgeTables("EdgeTypes.txt");
+
+            this.Labels = new Dictionary<string, Type>();
+            this.AdjustLabels(this.EdgeTables);
+            this.AdjustLabels(this.NodeTables);
+
             this.LoadVertices("Nodes.txt");
             this.LoadEdges("Edges.txt");
         }
@@ -283,6 +288,35 @@ namespace QueryEngine
 
         }
 
+        /// <summary>
+        /// Adjust labels from all tables to a graph dictionary (Labels).
+        /// </summary>
+        /// <param name="tables"> Dictionaty of graph types. </param>
+        private void AdjustLabels(Dictionary<string, Table> tables)
+        {
+            foreach (var item in tables)
+            {
+                this.AddTableLabels(item.Value);
+            }
+        }
+
+
+        /// <summary>
+        /// Fills missing labels from a table to graph dictionary (Labels).
+        /// </summary>
+        /// <param name="table"> Table to take properties from. </param>
+        private void AddTableLabels(Table table)
+        {
+            for (int i = 0; i < table.Properties.Count; i++)
+            {
+                if (this.Labels.TryGetValue(table.Properties[i].IRI, out Type type))
+                {
+                    if (type != table.Properties[i].GetPropertyType())
+                        throw new ArgumentException($"{this.GetType()}, found two properties with the same name but discrepant types. Adjust input scheme.");
+                }
+                else this.Labels.Add(table.Properties[i].IRI, table.Properties[i].GetPropertyType());
+            }
+        }
 
         public List<Vertex> GetAllVertices() => this.vertices;
         public List<OutEdge> GetAllOutEdges() => this.outEdges;

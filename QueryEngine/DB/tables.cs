@@ -177,6 +177,11 @@ namespace QueryEngine
         /// <param name="index"> Index of a value.</param>
         /// <returns> String representation of a value on given index. </returns>
         public abstract string GetValueAsString(int index);
+
+        /// <summary>
+        /// Returns type of property.
+        /// </summary>
+        public abstract Type GetPropertyType();
     }
 
     /// <summary>
@@ -212,6 +217,15 @@ namespace QueryEngine
         {
             return this.propHolder[index].ToString();
         }
+
+        /// <summary>
+        /// Returns type of this property.
+        /// </summary>
+        public override Type GetPropertyType()
+        {
+            return typeof(T);
+        }
+
     }
 
 #region PropertySpecialisations
