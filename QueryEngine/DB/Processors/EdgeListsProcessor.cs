@@ -1,5 +1,16 @@
 ﻿/*! \file 
-  File includes definition of Edge list creator.
+  File includes definition of Edge list processor.
+
+  Processor creates lists of in edges and out edges, the return value is a holder for both lists.
+  Firstly, the in edges defined in a file are read. It is expected that the edges are sorted based
+  on the vertices input file in the same ascending order. That means if the first element is a vertex with id 1
+  the edges in the file are edges with the starting vertex of the id 1 and vice versa.
+
+  The file is expected to look like: ID TYPE FROMID TOID PROPERTIES
+  Type defines the table of the edge. And from id and to id forms the starting vertex id and the end vertex id.
+  Properties are inputed to the table defined in the TYPE.
+
+  States are singletons and flyweight since they do not contain any additional variables.
  */
 
 

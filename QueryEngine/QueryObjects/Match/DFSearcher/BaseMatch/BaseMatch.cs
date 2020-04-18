@@ -1,6 +1,4 @@
-﻿
-
-/*! \file 
+﻿/*! \file 
   
   This file includes definitions of match classes that form a pattern chains.
   Each class represents one object that can be matched during search algorithm.
@@ -11,6 +9,7 @@
   This class is directly connected to the dfs pattern class.
  */
 
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +18,6 @@ using System.Threading.Tasks;
 
 namespace QueryEngine
 {
-
     /// <summary>
     /// Class representing single step in search algorithm.
     /// Every step, an element is tried to be applied through the apply method.
@@ -156,8 +154,8 @@ namespace QueryEngine
         /// <param name="node"> Prototype of the node </param>
         /// <param name="indexInMap"> Index of its variable in scope </param>
         /// <param name="isFirst"> If the match node represents variable that appears for the first time.</param>
-        /// <returns></returns>
-        public static DFSBaseMatch CreateDFSBaseMatch(EdgeType edgeType, ParsedPatternNode node, int indexInMap, bool isFirst)
+        /// <returns> Base match node. </returns>
+        public static DFSBaseMatch DFSBaseMatchFactory(EdgeType edgeType, ParsedPatternNode node, int indexInMap, bool isFirst)
         {
             switch (edgeType)
             {
@@ -177,106 +175,4 @@ namespace QueryEngine
 
 
     }
-
-    /// <summary>
-    /// Defines vertex match node.
-    /// Description is provided inside abstract parent.
-    /// </summary>
-    class DFSVertexMatch : DFSBaseMatch
-    {
-        public DFSVertexMatch() : base()
-        { }
-
-        public DFSVertexMatch(ParsedPatternNode node, int indexInMap, bool isFirst) : base(node, indexInMap, isFirst)
-        { }
-
-        public override bool Apply(Element element, Dictionary<int, Element> map, Dictionary<Element, bool> used)
-        {
-            if (element == null) return false;
-            else if (!(element is Vertex)) return false;
-            else return CheckCommonConditions(element, map, used);
-        }
-
-    }
-
-    /// <summary>
-    /// Defines vertex match node.
-    /// Description is provided inside abstract parent.
-    /// </summary>
-    abstract class DFSEdgeMatch : DFSBaseMatch
-    {
-        public DFSEdgeMatch() : base()
-        { }
-
-        public DFSEdgeMatch(ParsedPatternNode node, int indexInMap, bool isFirst) : base(node, indexInMap, isFirst)
-        { }
-
-        public abstract EdgeType GetEdgeType();
-
-
-
-    }
-
-    /// <summary>
-    /// Defines vertex match node.
-    /// Description is provided inside abstract parent.
-    /// </summary>
-    class DFSInEdgeMatch : DFSEdgeMatch
-    {
-        public DFSInEdgeMatch() : base()
-        { }
-        public DFSInEdgeMatch(ParsedPatternNode node, int indexInMap, bool isFirst) : base(node, indexInMap, isFirst)
-        { }
-
-        public override EdgeType GetEdgeType() => EdgeType.InEdge;
-
-        public override bool Apply(Element element, Dictionary<int, Element> map, Dictionary<Element, bool> used)
-        {
-            if (element == null) return false;
-            else if (!(element is InEdge)) return false;
-            else return CheckCommonConditions(element, map, used);
-        }
-
-    }
-
-    /// <summary>
-    /// Defines vertex match node.
-    /// Description is provided inside abstract parent.
-    /// </summary>
-    class DFSOutEdgeMatch : DFSEdgeMatch
-    {
-        public DFSOutEdgeMatch() : base()
-        { }
-        public DFSOutEdgeMatch(ParsedPatternNode node, int indexInMap, bool isFirst) : base(node, indexInMap, isFirst)
-        { }
-
-        public override EdgeType GetEdgeType() => EdgeType.OutEdge;
-
-        public override bool Apply(Element element, Dictionary<int, Element> map, Dictionary<Element, bool> used)
-        {
-            if (element == null) return false;
-            else if (!(element is OutEdge)) return false;
-            else return CheckCommonConditions(element, map, used);
-        }
-
-    }
-
-    class DFSAnyEdgeMatch : DFSEdgeMatch
-    {
-        public DFSAnyEdgeMatch() : base()
-        { }
-        public DFSAnyEdgeMatch(ParsedPatternNode node, int indexInMap, bool isFirst) : base(node, indexInMap, isFirst)
-        { }
-
-        public override EdgeType GetEdgeType() => EdgeType.AnyEdge;
-
-        public override bool Apply(Element element, Dictionary<int, Element> map, Dictionary<Element, bool> used)
-        {
-            if (element == null) return false;
-            else if (!(element is Edge)) return false;
-            else return CheckCommonConditions(element, map, used);
-        }
-    }
-
-
 }

@@ -1,14 +1,15 @@
-﻿
-/*! \file 
-  File includes definition of graph and its elements
+﻿/*! \file 
+  File includes definition of graph.
   Graph contains three lists... inward edges, outgoing edges and vertices.
   Base class for nodes and edges is Element class, each element in a graph has got an ID and
   a table (type). Also each element knows its position in the list where it is included. 
   
-   Each vertex has got a positions for edges in edge lists, one positions for incoming edges and 
-   one for outgoing edges. Starting position means that on that position the edge from this vertex is leading and
-   end position means that on that position, edges from a consecutive vertex are starting.
+  Each vertex has got a positions for edges in edge lists, one positions for incoming edges and 
+  one for outgoing edges. Starting position means that on that position the edge from this vertex is leading and
+  end position means that on that position, edges from a consecutive vertex are starting.
  
+  Graph also contains a list of all labels from a data scheme input file to ensure a quick access to the label type.
+
  */
 using System;
 using System.Collections.Generic;
@@ -18,170 +19,8 @@ using System.Threading.Tasks;
 
 namespace QueryEngine
 {
-    /// <summary>
-    /// Base class for edges and nodes.
-    /// Table represents the table where is the element stored.
-    /// Position is location inside a vertex list or node list.
-    /// NOTICE id of can be same for vertex and edge.
-    /// </summary>
-     abstract class Element
-    {
-        public int ID { get; internal set; }
-        public Table Table { get; internal set; }
-        
-        /// <summary>
-        /// Represents position in a enclosing structure.
-        /// </summary>
-        public int PositionInList { get; internal set; }
 
-        public void AddID(int id) => this.ID = id;
-        public void AddTable(Table table) => this.Table = table;
-
-        public override int GetHashCode()
-        {
-            return this.ID;
-        }
-
-    }
-
-    /// <summary>
-    /// Vertex serves as a node in a graph.
-    /// Each vertex is stored in a vertex list in a graph.
-    /// TO each vertex there are two corresponding lists of edges, one list includes outgoing edges,
-    /// and the other one encompasses inwards edges.
-    /// If the vertex does now have any edges (in or out) the positions are set to -1.
-    /// </summary>
-    class Vertex : Element
-    {
-        public int OutEdgesStartPosition { get; internal set; }
-        public int OutEdgesEndPosition { get; internal set; }
-        public int InEdgesStartPosition { get; internal set; }
-        public int InEdgesEndPosition { get; internal set; }
-        public Vertex(int id, Table table)
-        {
-            if (id <= 0)
-                throw new ArgumentException($"{this.GetType()}, passed wrong id to constructor.");
-            if (table == null)
-                throw new ArgumentException($"{this.GetType()}, passed null as a table to constructor.");
-
-            this.ID = id;
-            this.Table = table;
-            this.OutEdgesStartPosition = -1;
-            this.OutEdgesEndPosition = -1;
-            this.InEdgesStartPosition = -1;
-            this.InEdgesEndPosition= -1;
-            this.PositionInList = -1;
-        }
-
-        public Vertex()
-        {
-            this.ID = -1;
-            this.Table = null;
-            this.OutEdgesStartPosition = -1;
-            this.OutEdgesEndPosition = -1;
-            this.InEdgesStartPosition = -1;
-            this.InEdgesEndPosition = -1;
-            this.PositionInList = -1; ;
-
-        }
-
-        public bool HasOutEdges() { if (this.OutEdgesStartPosition == -1) return false; else return true; }
-        public bool HasInEdges() { if (this.InEdgesStartPosition == -1) return false; else return true; }
-
-        /// <summary>
-        /// Gets range of out edges of this vertex.
-        /// </summary>
-        /// <param name="start"> Starting position of its edges in a edge list.</param>
-        /// <param name="end"> Ending position of its edges in the same edge list.</param>
-        public void GetRangeOfOutEdges(out int start, out int end)
-        {
-            start = this.OutEdgesStartPosition;
-            end = this.OutEdgesEndPosition;
-        }
-        /// <summary>
-        /// Gets range of in edges of this vertex.
-        /// </summary>
-        /// <param name="start"> Starting position of its edges in a edge list.</param>
-        /// <param name="end"> Ending position of its edges in the same edge list.</param>
-        public void GetRangeOfInEdges(out int start, out int end)
-        {
-            start = this.InEdgesStartPosition;
-            end = this.InEdgesEndPosition;
-        }
-
-
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
-    }
-
-
-    /*! \enum EdgeType
-	
-	Represents all possible types of edge in a graph.
-        Not an edge is a value that is used to create match object with before they are assigned a proper edge type.
-
-
-    */
-    enum EdgeType { NotEdge, InEdge, OutEdge, AnyEdge };
-
-    /// <summary>
-    /// Edge represents edge in a graph. The type of an edge is based on the list that contains the list.
-    /// Each edge has an end vertex, that is which vertex the edge is leading to.
-    /// </summary>
-    class Edge : Element
-    {
-        public EdgeType EdgeType { get; internal set; }
-        public Vertex EndVertex { get; internal set; }
-
-        public Edge()
-        {
-            this.ID = -1;
-            this.Table = null;
-            this.EndVertex = null;
-        }
-
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-    }
-
-    /// <summary>
-    /// In specialisation of an edge.
-    /// </summary>
-    class InEdge : Edge
-    {
-        public InEdge() : base()
-        {
-            this.EdgeType = EdgeType.InEdge;
-        }
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
-    }
-
-    /// <summary>
-    /// Out specialisation of an edge.
-    /// </summary>
-    class OutEdge : Edge
-    {
-        public OutEdge() : base()
-        {
-            this.EdgeType = EdgeType.OutEdge;
-        }
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-    }
-
-
-
+   
     /// <summary>
     /// The class serves only for holder purpose during creation inside Processor.
     /// It enables us to pass a all the the required graph lists from withing one function.

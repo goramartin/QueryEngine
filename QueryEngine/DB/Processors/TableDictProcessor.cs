@@ -1,5 +1,13 @@
 ﻿/*! \file 
-  File includes definition of table dictionary creator.
+  File includes definition of table dictionary processor.
+
+  Processor gets input strings and expects to be the given strings from a json array.
+  Processor creates a dictionaty of tables defined inside the json array.
+
+  Json array is expected to have object containing first property as a Kind with defines name of the table.
+  Subsequently there are expected to be a properties that define name of a table property and the type of the property.
+
+  States are singletons and flyweight since they do not encompass eny additional variables.
  */
 
 using System;
@@ -47,7 +55,7 @@ namespace QueryEngine
         /// <param name="param"> Parameter to process. </param>
         public void Process(string param)
         {
-            this.processorState.Process(this, param);
+           if (!this.finished) this.processorState.Process(this, param);
         }
 
         public void SetNewState(IProcessorState<Dictionary<string, Table>> state)

@@ -1,5 +1,4 @@
-﻿
-/*! \file
+﻿/*! \file
   
   This file includes definition of pattern used by a dfs match algorithm.
   
@@ -25,49 +24,6 @@ using System.Threading.Tasks;
 
 namespace QueryEngine
 {
-    /// <summary>
-    /// Basic interface for each pattern.
-    /// </summary>
-    interface IPattern
-    {
-        bool Apply(Element element);
-
-        void PrepareNextSubPattern();
-        void PreparePreviousSubPattern();
-
-        void PrepareNextNode();
-        void PreparePreviousNode();
-
-        bool isLastNodeInCurrentPattern();
-        bool isLastPattern();
-
-
-        int CurrentPatternIndex { get; }
-        int CurrentMatchNodeIndex { get; }
-        int OverAllIndex { get; }
-
-        int PatternCount { get; }
-        int CurrentPatternCount { get; }
-        
-        int AllNodeCount { get; }
-
-        Dictionary<int, Element> GetMatchedVariables();
-    }
-
-    /// <summary>
-    /// Interface neccessary for each DFS pattern.
-    /// </summary>
-    interface IDFSPattern : IPattern
-    {
-        Element GetCurrentChainConnection();
-        Element GetNextChainConnection();
-        EdgeType GetEdgeType();
-        void UnsetCurrentVariable();
-        IDFSPattern Clone();
-    }
-
-
-
 
     /// <summary>
     /// Class that implements basic DFS pattern.
@@ -288,7 +244,7 @@ namespace QueryEngine
                 }
 
                 // Create match node and add it to the chain.
-                tmpChain.Add(DFSBaseMatch.CreateDFSBaseMatch(tmpNode.edgeType, patternNodes[i], index, isFirst));
+                tmpChain.Add(DFSBaseMatch.DFSBaseMatchFactory(tmpNode.edgeType, patternNodes[i], index, isFirst));
             }
             return tmpChain;
         }

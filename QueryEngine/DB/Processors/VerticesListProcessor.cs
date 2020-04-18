@@ -1,5 +1,14 @@
 ﻿/*! \file 
-  File includes definition of vertices list creator.
+  File includes definition of vertices list processor.
+
+  Processor creates a list of vertices. The edges position for each vertex are not filled.
+  Processor expects the vertices to have a unique id, preferably sorted by ascending order.
+  The unput file should look like: ID TYPE PROPERTIES.
+  Properties are set to a table defined by a type and ID is a unique identifier in the entire graph.
+  Hence the ID is not direcly a property of the element.
+
+  States of a processor are singletons and flyweight since they do not encompass any additional varibales.
+
  */
 
 
@@ -49,7 +58,7 @@ namespace QueryEngine
 
         public void Process(string param)
         {
-            this.processorState.Process(this, param);
+            if (!this.finished) this.processorState.Process(this, param);
         }
 
         public void SetNewState(IProcessorState<List<Vertex>> state)
