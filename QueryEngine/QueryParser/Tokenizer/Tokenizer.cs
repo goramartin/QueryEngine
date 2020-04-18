@@ -149,6 +149,10 @@ namespace QueryEngine
             RegisterToken("select", Token.TokenType.Select);
             RegisterToken("AS", Token.TokenType.AsLabel);
             RegisterToken("as", Token.TokenType.AsLabel);
+            RegisterToken("BY", Token.TokenType.By);
+            RegisterToken("by", Token.TokenType.By);
+            RegisterToken("ORDER", Token.TokenType.Order);
+            RegisterToken("order", Token.TokenType.Order);
         }
 
     }

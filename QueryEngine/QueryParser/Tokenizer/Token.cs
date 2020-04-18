@@ -21,7 +21,7 @@ namespace QueryEngine
     {
         public enum TokenType
         {
-            Match, Select,
+            Match, Select, Order, By,
 
             Asterix, Dot, DoubleDot, Comma, Dash, Less, Greater, LeftParen, RightParen, LeftBrace, RightBrace,
             Identifier, AsLabel

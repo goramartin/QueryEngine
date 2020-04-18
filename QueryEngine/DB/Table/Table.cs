@@ -139,7 +139,28 @@ namespace QueryEngine
             else return "null";
         }
 
-
+        /// <summary>
+        /// Tries to get a value of a property based on index and the property name.
+        /// </summary>
+        /// <typeparam name="T"> Type of the accessed property. </typeparam>
+        /// <param name="id"> Id of an element in the table. </param>
+        /// <param name="propName"> Property name. </param>
+        /// <param name="value"> Where to store the value of the property. </param>
+        /// <returns>True of successful access otherwise false. </returns>
+        public bool TryGetPropertyValue<T>(int id, string propName, out T value)
+        {
+            if (!this.IDs.TryGetValue(id, out int elementPosition)) 
+                throw new ArgumentException($"{this.GetType()}, accessing element that is missing in the table. Element ID = {id}.");
+            else if (!this.PropertyLabels.TryGetValue(propName, out int propertyPosition))
+            {
+                value = default(T);
+                return false;
+            } else
+            {
+                value = ((Property<T>)(this.Properties[propertyPosition])).propHolder[elementPosition];
+                return true;
+            }
+        }
     }
 
 

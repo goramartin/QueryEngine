@@ -55,7 +55,7 @@
     <Compile Include="DB\Processors\VerticesListProcessor.cs" />
     <Compile Include="DB\Table\Property\Property.cs" />
     <Compile Include="DB\Table\Property\PropertyFactory.cs" />
-    <Compile Include="DB\Table\Property\PropetySpecialisations.cs" />
+    <Compile Include="DB\Table\Property\PropertySpecialisations.cs" />
     <Compile Include="QueryObjects\Match\DFSearcher\BaseMatch\BaseMatch.cs" />
     <Compile Include="QueryObjects\Match\DFSearcher\BaseMatch\SpecialisedBaseMatches.cs" />
     <Compile Include="QueryObjects\Match\DFSearcher\Matcher\Matcher.cs" />
