@@ -19,8 +19,10 @@ namespace QueryEngine
     /// Base class for variable reference.
     /// </summary>
     /// <typeparam name="T"> Type of return value. </typeparam>
-    abstract class VariableReference<T> : ExpressionReturnValueNode<T>
+    abstract class VariableReference<T> : ExpressionReturnValue<T>
     {
+        protected VariableReferenceNameHolder NameHolder { get; private set; }
+
         /// <summary>
         /// Index of a variable to be evaluated from a given result.
         /// </summary>
@@ -29,10 +31,17 @@ namespace QueryEngine
         /// <summary>
         /// Creates a variable reference.
         /// </summary>
+        /// <param name="nHolder"> Holder of string representation of the name. </param>
         /// <param name="varIndex"> Index of an element in a result during evaluation.</param>
-        public VariableReference(int varIndex) 
+        public VariableReference(VariableReferenceNameHolder nHolder, int varIndex) 
         {
+            this.NameHolder = nHolder;
             this.VariableIndex = varIndex;
+        }
+
+        public override string ToString()
+        {
+            return NameHolder.Name + (NameHolder.PropName != null ? ("." + NameHolder.PropName) : "");
         }
 
     }
@@ -52,9 +61,10 @@ namespace QueryEngine
         /// Creates a property reference based on index of an element from a result and an accessed
         /// property.
         /// </summary>
+        /// <param name="nHolder"> Holder of string representation of the name. </param>
         /// <param name="varIndex"> Index in a result during evaluation. </param>
         /// <param name="propName"> Name of an accessed property during evaluation. </param>
-        public VariablePropertyReference(int varIndex, string propName) : base(varIndex)
+        public VariablePropertyReference(VariableReferenceNameHolder nHolder, int varIndex, string propName) : base(nHolder, varIndex)
         {
             this.PropertyName = propName;
         }
@@ -78,7 +88,12 @@ namespace QueryEngine
     /// </summary>
     class VariableIDReference : VariableReference<int>
     {
-        public VariableIDReference(int varIndex) : base(varIndex) { }
+        /// <summary>
+        /// Constructs id reference.
+        /// </summary>
+        /// <param name="nHolder">Holder of string representation of the name.</param>
+        /// <param name="varIndex"> Index in a result during evaluation.</param>
+        public VariableIDReference(VariableReferenceNameHolder nHolder, int varIndex) : base(nHolder, varIndex) { }
 
         /// <summary>
         /// Accesses id of an element. This always succedes.
@@ -92,4 +107,47 @@ namespace QueryEngine
         }
     }
 
+
+
+    /// <summary>
+    /// Class is used as a holder for printing directives.
+    /// When select initialises printing the class will serve as a base information for printing headers.
+    /// </summary>
+    class VariableReferenceNameHolder
+    {
+        /// <summary>
+        /// Name of variable.
+        /// </summary>
+        public string Name { get; set; }
+        /// <summary>
+        /// Property access to a variable.
+        /// </summary>
+        public string PropName { get; set; }
+
+        /// <summary>
+        /// Tries to set a name, will set if name is set to null.
+        /// </summary>
+        public bool TrySetName(string n)
+        {
+            if (this.Name == null) { this.Name = n; return true; }
+            else return false;
+        }
+        /// <summary>
+        /// Tries to set a property name, will set if property is set to null.
+        /// </summary>
+        public bool TrySetPropName(string n)
+        {
+            if (this.PropName == null) { this.PropName = n; return true; }
+            else return false;
+        }
+
+        /// <summary>
+        /// Check is the variable has no set contents.
+        /// </summary>
+        public bool IsEmpty()
+        {
+            if ((this.Name == null) && (this.PropName == null)) return true;
+            else return false;
+        }
+    }
 }

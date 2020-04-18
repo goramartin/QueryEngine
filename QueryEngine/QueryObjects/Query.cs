@@ -50,9 +50,10 @@ namespace QueryEngine
             // Parse and create in order of the query words.
             Parser.ResetPosition();
             this.variableMap = new VariableMap();
-            this.select = new SelectObject(tokens, printer, formater, fileName);
-            
+
+            SelectNode selectNode = Parser.ParseSelectExpr(tokens);
             this.match = new MatchObject(tokens, variableMap, graph, ThreadCount, VerticesPerRound);
+            this.select = new SelectObject(graph, variableMap, selectNode, printer, formater, fileName);
 
             // Check correctness of select part
             select.CheckCorrectnessOfSelect(variableMap);

@@ -21,7 +21,7 @@ namespace QueryEngine
     /// <summary>
     /// Base class for every expression node.
     /// </summary>
-    abstract class ExpressionBaseNode
+    abstract class ExpressionBase
     {
         /// <summary>
         /// Evaluates expression.
@@ -29,8 +29,6 @@ namespace QueryEngine
         /// <param name="elements"> One result from a match query.</param>
         /// <returns> True if successfully evaluated or false.</returns>
         public abstract bool TryEvaluate(Element[] elements);
-        public abstract string GetValueAsString();
-
     }
 
     /// <summary>
@@ -38,7 +36,7 @@ namespace QueryEngine
     /// Each expression node will implement this interface.
     /// </summary>
     /// <typeparam name="T"> Type of return value.</typeparam>
-    abstract class ExpressionReturnValueNode<T> : ExpressionBaseNode
+    abstract class ExpressionReturnValue<T> : ExpressionBase
     {
         protected T Value;
 
@@ -46,13 +44,36 @@ namespace QueryEngine
         {
             return this.Value;
         }
-
-        public override string GetValueAsString()
-        {
-            return this.Value.ToString();
-        }
     }
 
+    /// <summary>
+    /// Class holds entire expression.
+    /// Optionally label representing entire expression.
+    /// </summary>
+    class ExpressionHolder
+    {
+        public string Label { get; private set; } 
+        public ExpressionBase Expr { get; private set; }
 
+        /// <summary>
+        /// Constructs expression holder.
+        /// </summary>
+        /// <param name="ex"> Expression base node. </param>
+        /// <param name="label"> Label of the expression. </param>
+        public ExpressionHolder(ExpressionBase ex, string label = null)
+        {
+            this.Expr = ex;
+            this.Label = label;
+        }
+
+        /// <summary>
+        /// Returns label representing entire expression or original expression as a string.
+        /// </summary>
+        public override string ToString()
+        {
+            return this.Label != null ? this.Label : this.Expr.ToString();
+        }
+
+    }
 
 }

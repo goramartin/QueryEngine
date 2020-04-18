@@ -28,22 +28,28 @@ namespace QueryEngine
         void Visit(EdgeNode node);
         void Visit(VariableNode node);
         void Visit(IdentifierNode node);
+        void Visit(ExpressionNode node);
+        void Visit(MatchVariableNode node);
     }
 
 
     /// <summary>
     /// Creates list of variable (Name.Prop) to be displayed in Select expr.
     /// </summary>
-    class SelectVisitor : IVisitor<List<SelectVariable>>
+    class SelectVisitor : IVisitor<List<ExpressionHolder>>
     {
-        List<SelectVariable> result;
+        List<ExpressionHolder> result;
+        Dictionary<string, Type> Labels;
+        VariableMap Map;
 
-        public SelectVisitor()
+        public SelectVisitor(Dictionary<string, Type> labels, VariableMap map)
         {
-            result = new List<SelectVariable>();
+            this.result = new List<ExpressionHolder>();
+            this.Labels = labels;
+            this.Map = map;
         }
 
-        public List<SelectVariable> GetResult()
+        public List<ExpressionHolder> GetResult()
         {
             if (this.result == null || this.result.Count == 0) 
                 throw new ArgumentException($"{this.GetType()} final result is empty or null");
@@ -66,6 +72,22 @@ namespace QueryEngine
 
 
         /// <summary>
+        /// Parses expression node. Expects variable.name as label
+        /// </summary>
+        /// <param name="node"></param>
+        public void Visit(ExpressionNode node )
+        {
+            // parse the variable 
+
+            // parse label and parse next 
+            
+            
+            if (node.next == null) return;
+            else node.next.Accept(this);
+
+        }
+
+        /// <summary>
         /// Create new variable and try parse its name and propname.
         /// Name shall never be null. Name is identifier node.
         /// Jump to next variable node.
@@ -84,13 +106,8 @@ namespace QueryEngine
                 if (node.propName != null)
                 {
                     node.propName.Accept(this);
-                    if (node.label != null) node.label.Accept(this);
                 }
             }
-
-            if (node.next == null) return;
-            else node.next.Accept(this);
-
         }
 
         /// <summary>
@@ -105,7 +122,8 @@ namespace QueryEngine
             else throw new ArgumentException($"{this.GetType()}, could not parse name.");
         }
 
-       
+
+
         /// <summary>
         /// Not implemented.
         /// </summary>
@@ -134,7 +152,18 @@ namespace QueryEngine
         {
             throw new NotImplementedException();
         }
+        /// <summary>
+        /// Not implemented.
+        /// </summary>
+        public void Visit(MatchVariableNode node)
+        {
+            throw new NotImplementedException();
+        }
+
+
     }
+
+
 
     /// <summary>
     /// Creates List of single pattern chains which will form the whole pattern later in MatchQueryObject.
@@ -195,7 +224,7 @@ namespace QueryEngine
             vm.isVertex = true;
             currentPattern.AddParsedPatternNode(vm);
 
-            if (node.variable != null) node.variable.Accept(this);
+            if (node.matchVariable != null) node.matchVariable.Accept(this);
             if (node.next != null) node.next.Accept(this);
         }
 
@@ -212,33 +241,33 @@ namespace QueryEngine
             em.isVertex = false;
             currentPattern.AddParsedPatternNode(em);
 
-            if (node.variable != null) node.variable.Accept(this);
+            if (node.matchVariable != null) node.matchVariable.Accept(this);
             if (node.next == null)
                 throw new ArgumentException($"{this.GetType()}, missing end vertex from edge.");
             else node.next.Accept(this);
 
         }
 
+
         /// <summary>
-        /// Processes variable node.
-        /// Always jumps to identifier node where Name and promerty name is processed.
+        /// Processes match variable node.
+        /// Always jumps to identifier node where Name and type is processed.
         /// </summary>
         /// <param name="node"> Variable node </param>
-        public void Visit(VariableNode node)
+        public void Visit(MatchVariableNode node)
         {
             readingName = true;
             //It is not anonnymous field.
-            if (node.name != null)
+            if (node.variableName != null)
             {
-                node.name.Accept(this);
+                node.variableName.Accept(this);
             }
             //It has set type.
-            if (node.propName != null)
+            if (node.variableType != null)
             {
                 readingName = false;
-                node.propName.Accept(this);
+                node.variableType.Accept(this);
             }
-
         }
 
         /// <summary>
@@ -296,5 +325,20 @@ namespace QueryEngine
         {
             throw new NotImplementedException();
         }
+        /// <summary>
+        /// Not implemented.
+        /// </summary>
+        public void Visit(ExpressionNode node )
+        {
+            throw new NotImplementedException();
+        }
+        /// <summary>
+        /// Not implemented.
+        /// </summary>
+        public void Visit(VariableNode node)
+        {
+            throw new NotImplementedException();
+        }
+        
     }
 }
