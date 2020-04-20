@@ -33,6 +33,7 @@ namespace QueryEngine
         ISingleThreadMatcher[] Matchers;
         Graph Graph;
         int DistributorVerticesPerRound;
+        IMatchResultStorage Results;
 
         /// <summary>
         /// Creates a parallel matchers.
@@ -52,6 +53,7 @@ namespace QueryEngine
             this.Graph = graph;
             this.Threads = new Thread[threadCount];
             this.Matchers = new ISingleThreadMatcher[threadCount];
+            this.Results = results;
 
             for (int i = 0; i < threadCount; i++)
             {
@@ -78,7 +80,7 @@ namespace QueryEngine
         {
             if (this.Threads.Length == 1)
             {
-                JobSingleThread tmpJob = new JobSingleThread(this.Matchers[0]);
+                JobSingleThreadSearch tmpJob = new JobSingleThreadSearch(this.Matchers[0]);
                 this.Threads[0].Start(tmpJob);
 
             }
@@ -89,7 +91,7 @@ namespace QueryEngine
                 //Create jobs and assign them to threads and run the thread.
                 for (int i = 0; i < this.Threads.Length; i++)
                 {
-                    JobMultiThread tmpJob = new JobMultiThread(distributor, this.Matchers[i]);
+                    JobMultiThreadSearch tmpJob = new JobMultiThreadSearch(distributor, this.Matchers[i]);
                     this.Threads[i].Start(tmpJob);
                 }
             }
@@ -98,9 +100,107 @@ namespace QueryEngine
             for (int i = 0; i < this.Threads.Length; i++)
             {
                 this.Threads[i].Join();
+                this.Matchers[i] = null;
+                this.Threads[i] = null;
+            }
+
+            // Merge Arrays with results
+            MergeThreadResults();
+
+        }
+
+
+        #region ParalelMerge
+
+        /// <summary>
+        /// Merges results from all threads into a one list.
+        /// Merging is done by merging entire one column, that is to say, all results from all threads 
+        /// in the column are merged into the first thread position in the column.
+        /// </summary>
+        private void MergeThreadResults()
+        {
+            if (this.Threads.Length == 1) return;
+            else
+            {
+                var columnDistributor = new ColumnDistributor(this.Results.ColumnCount);
+                int threadsToUse = (this.Threads.Length < this.Results.ColumnCount ? this.Threads.Length : this.Results.ColumnCount);
+                for (int i = 0; i < threadsToUse; i++)
+                {
+                    this.Threads[i] = new Thread(DFSParallelPatternMatcher.MergeWork);
+                    this.Threads[i].Start(new MergeJob(columnDistributor, this.Results));
+                }
+
+                for (int i = 0; i < threadsToUse; i++)
+                    this.Threads[i].Join();
+            }
+        }
+
+        /// <summary>
+        /// Argument to a thread.
+        /// Tries to get a free column index and on successful retrieval of the index.
+        /// The column is merged.
+        /// </summary>
+        /// <param name="o"> Merge Job.</param>
+        private static void MergeWork(object o)
+        {
+            MergeJob mergeJob = (MergeJob)o;
+
+            int columnIndex;
+            while (true)
+            {
+                columnIndex = mergeJob.ColumnDistributor.DistributeColumn();
+                if (columnIndex == -1) break;
+                else  mergeJob.Elements.MergeColumn(columnIndex);
+            }
+        }
+
+        /// <summary>
+        /// Passes as an argument to a paralel merge work.
+        /// </summary>
+        private class MergeJob
+        {
+            public IMatchResultStorage Elements;
+            public ColumnDistributor ColumnDistributor;
+            public MergeJob(ColumnDistributor columnDistributor, IMatchResultStorage elements)
+            {
+                this.Elements = elements;
+                this.ColumnDistributor = columnDistributor;
+            }
+        }
+
+        /// <summary>
+        /// Distributes columns to merge.
+        /// Each distribution encomapasses an index of a column.
+        /// The column in the given index will be merged.
+        /// </summary>
+        private class ColumnDistributor
+        {
+            int firstFreeColumn = 0;
+            int columnCount;
+
+            public ColumnDistributor(int columnCount)
+            {
+                this.columnCount = columnCount;
+            }
+
+            /// <summary>
+            /// Distributes a free column index to merge.
+            /// </summary>
+            /// <returns> Index of a column to merge or -1 on no more columns. </returns>
+            public int DistributeColumn()
+            {
+                int tmpNextFreeColumn = Interlocked.Add(ref this.firstFreeColumn, 1);
+                int tmpFirstFreeColumn = tmpNextFreeColumn - 1;
+
+                if (tmpFirstFreeColumn < columnCount) return tmpFirstFreeColumn;
+                else return -1;
             }
 
         }
+
+        #endregion ParalelMerge
+
+        #region ParalelSearch
 
         /// <summary>
         /// Method passed to a thread.
@@ -109,7 +209,7 @@ namespace QueryEngine
         /// <param name="o"> Class containing matcher. </param>
         private static void WorkSingleThread(object o)
         {
-            JobSingleThread job = (JobSingleThread)o;
+            JobSingleThreadSearch job = (JobSingleThreadSearch)o;
             job.Matcher.Search(); // Starting indeces implicitly set to entire graph.
         }
 
@@ -122,7 +222,7 @@ namespace QueryEngine
         /// <param name="o"> Class containing matcher and distributor. </param>
         private static void WorkMultiThread(object o)
         {
-            JobMultiThread job = (JobMultiThread)o;
+            JobMultiThreadSearch job = (JobMultiThreadSearch)o;
 
             while (true)
             {
@@ -149,12 +249,12 @@ namespace QueryEngine
         /// Contains vertex distributor and matcher.
         /// Used when multiple threads can be used to search graph.
         /// </summary>
-        private class JobMultiThread
+        private class JobMultiThreadSearch
         {
             public VertexDistributor Distributor;
             public ISingleThreadMatcher Matcher;
 
-            public JobMultiThread(VertexDistributor vD, ISingleThreadMatcher m)
+            public JobMultiThreadSearch(VertexDistributor vD, ISingleThreadMatcher m)
             {
                 this.Distributor = vD;
                 this.Matcher = m;
@@ -167,11 +267,11 @@ namespace QueryEngine
         /// Contains matcher.
         /// Used when a single thread is used to search graph.
         /// </summary>
-        private class JobSingleThread
+        private class JobSingleThreadSearch
         {
             public ISingleThreadMatcher Matcher;
 
-            public JobSingleThread(ISingleThreadMatcher m)
+            public JobSingleThreadSearch(ISingleThreadMatcher m)
             {
                 this.Matcher = m;
             }
@@ -235,7 +335,8 @@ namespace QueryEngine
                 Debug.WriteLine("Thread: " + Thread.CurrentThread.ManagedThreadId + " asked for vertices and gets start = " + start + " , end = " + end + ".");
             }
         }
-
+       
+        #endregion ParalelSearch
 
     }
 }

@@ -66,6 +66,7 @@
     <Compile Include="Expression\Expression.cs" />
     <Compile Include="Expression\VariableReference.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="QueryObjects\Match\MatchFactory.cs" />
     <Compile Include="QueryObjects\Results\MatchResults.cs" />
     <Compile Include="QueryParser\ParsedPattern.cs" />
     <Compile Include="QueryParser\Parser\ParseTreeNodes.cs" />

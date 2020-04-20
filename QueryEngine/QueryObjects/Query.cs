@@ -67,6 +67,8 @@ namespace QueryEngine
         public void ComputeQuery()
         {
             this.results = this.match.Search();
+            this.match = null;
+
             this.select.Print(this.results);
         }
     }

@@ -137,5 +137,26 @@ namespace QueryEngine
         {
             return this.GetEnumerator();
         }
+
+        public List<Element>[][] GetResults()
+        {
+            return this.results;
+        }
+
+
+        /// <summary>
+        /// Merges results of a one column into the first thread index.
+        /// And clears the rest.
+        /// </summary>
+        /// <param name="columnIndex"> Column index. </param>
+        public void MergeColumn(int columnIndex)
+        {
+            for (int i = 1; i < this.ThreadCount; i++)
+            {
+                this.results[columnIndex][0].AddRange(this.results[columnIndex][i]);
+                this.results[columnIndex][i].Clear();
+            }
+        }
     }
+
 }
