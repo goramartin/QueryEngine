@@ -110,15 +110,12 @@ namespace QueryEngine
             }
 
 
-
-
-
-
+            Parser.ResetPosition();
             var map = new VariableMap();
-            var select = new SelectObject(tokens, "console", "simple");
-            var match = new MatchObject(tokens, map, g, 2, 2);
-            select.CheckCorrectnessOfSelect(map);
 
+            SelectNode selectNode = Parser.ParseSelectExpr(tokens);
+            var match = new MatchObject(tokens, map, g, 2, 2);
+             var select = new SelectObject(g, map, selectNode, "console", "simple");
 
             var tmp = match.Search();
 

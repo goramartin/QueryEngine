@@ -85,18 +85,18 @@ namespace QueryEngine {
 
     class EdgeNode : CommomMatchNode
     {
-        public EdgeType type;
+        public EdgeType edgeType;
         public override void Accept<T>(IVisitor<T> visitor)
         {
             visitor.Visit(this);
         }
         public void SetEdgeType(EdgeType type)
         {
-            this.type = type;
+            this.edgeType = type;
         }
         public EdgeType GetEdgeType()
         {
-            return this.type;
+            return this.edgeType;
         }
 
     }
@@ -154,8 +154,8 @@ namespace QueryEngine {
     class ExpressionNode : QueryNodeChain
     {
 
-        public Node Exp;
-        public Node AsLabel;
+        public Node exp;
+        public Node asLabel;
 
         public override void Accept<T>(IVisitor<T> visitor)
         { 
@@ -164,12 +164,12 @@ namespace QueryEngine {
 
         public void AddLabel(Node label)
         {
-            this.AsLabel = label;
+            this.asLabel = label;
         }
 
         public void AddExpression(Node expr)
         {
-            this.Exp = expr;
+            this.exp = expr;
         }
 
     }

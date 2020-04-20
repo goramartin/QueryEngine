@@ -32,7 +32,6 @@ namespace QueryEngine
         void Visit(MatchVariableNode node);
     }
 
-
     /// <summary>
     /// Creates list of variable (Name.Prop) to be displayed in Select expr.
     /// </summary>
@@ -40,13 +39,13 @@ namespace QueryEngine
     {
         List<ExpressionHolder> result;
         Dictionary<string, Type> Labels;
-        VariableMap Map;
+        VariableMap variableMap;
 
         public SelectVisitor(Dictionary<string, Type> labels, VariableMap map)
         {
             this.result = new List<ExpressionHolder>();
             this.Labels = labels;
-            this.Map = map;
+            this.variableMap = map;
         }
 
         public List<ExpressionHolder> GetResult()
@@ -72,58 +71,60 @@ namespace QueryEngine
 
 
         /// <summary>
-        /// Parses expression node. Expects variable.name as label
+        /// Parses expression node. Expects "variable.name as label"
+        /// Parses expression nodes and tries to get a label for the expression.
+        /// At the end it creates a expression holder.
         /// </summary>
         /// <param name="node"></param>
         public void Visit(ExpressionNode node )
         {
-            // parse the variable 
+            string label = null;
+            ExpressionBase expr = null;
 
-            // parse label and parse next 
-            
-            
+            // Parse expression.
+            if (node.exp == null) 
+                throw new ArgumentException($"{this.GetType()}, Expected expression.");
+            else
+            {
+                var tmpVisitor = new ExpressionNodesVisitor(this.variableMap, this.Labels);
+                node.exp.Accept(tmpVisitor);
+                expr = tmpVisitor.GetResult();
+            }
+
+            // Try get a label for entire expression.
+            if (node.asLabel != null)
+                label = ((IdentifierNode)(node.asLabel)).value;
+
+            this.result.Add(new ExpressionHolder(expr, label));
+
             if (node.next == null) return;
             else node.next.Accept(this);
 
         }
 
         /// <summary>
-        /// Create new variable and try parse its name and propname.
-        /// Name shall never be null. Name is identifier node.
-        /// Jump to next variable node.
+        /// Parses asterix. That means that there are as many expressions as variables.
+        /// For each variable, expression that consists only of reference id will be created.
         /// </summary>
-        /// <param name="node"> Variable node </param>
         public void Visit(VariableNode node)
         {
-            result.Add(new SelectVariable());
-            if (node.name == null)
-                throw new ArgumentException($"{this.GetType()}, could not parse variable name.");
-            else
-            {
-                // Jump to identifier node with string value of name 
-                node.name.Accept(this);
-                // If the propname is set, jump to identifier node of property
-                if (node.propName != null)
-                {
-                    node.propName.Accept(this);
-                }
-            }
+            if (node.name == null || ((IdentifierNode)node.name).value != "*")
+                throw new ArgumentException($"{this.GetType()}, expected asterix.");
+
+            foreach (var item in variableMap)
+                this.result.Add( new ExpressionHolder(new VariableIDReference(new VariableReferenceNameHolder(item.Key), item.Value.Item1),null));
+
         }
+
+        #region NotImpl
 
         /// <summary>
-        /// Obtains string value of variable or property or label.
+        /// Not implemented.
         /// </summary>
-        /// <param name="node"> Identifier node </param>
         public void Visit(IdentifierNode node)
         {
-            if (result[result.Count - 1].TrySetName(node.value)) return;
-            else if (result[result.Count - 1].TrySetPropName(node.value)) return;
-            else if (result[result.Count - 1].TrySetLabel(node.value)) return;
-            else throw new ArgumentException($"{this.GetType()}, could not parse name.");
+            throw new NotImplementedException();
         }
-
-
-
         /// <summary>
         /// Not implemented.
         /// </summary>
@@ -160,6 +161,7 @@ namespace QueryEngine
             throw new NotImplementedException();
         }
 
+        #endregion NotImpl
 
     }
 
@@ -318,6 +320,8 @@ namespace QueryEngine
             node.next.Accept(this);
         }
 
+        #region NotImpl
+
         /// <summary>
         /// Not implemented.
         /// </summary>.
@@ -339,6 +343,132 @@ namespace QueryEngine
         {
             throw new NotImplementedException();
         }
-        
+        #endregion NotImpl
     }
+
+    /// <summary>
+    /// Visitor used to parse expressions.
+    /// So far there are implemented only variable references as a expression.
+    /// </summary>
+    class ExpressionNodesVisitor : IVisitor<ExpressionBase>
+    {
+        ExpressionBase Expr;
+        VariableReferenceNameHolder nameHolder;
+        VariableMap variableMap;
+        Dictionary<string, Type> Labels;
+
+        public ExpressionBase GetResult()
+        {
+            return this.Expr;
+        }
+
+        public ExpressionNodesVisitor(VariableMap map, Dictionary<string, Type> labels)
+        {
+            this.variableMap = map;
+            this.Labels = labels;
+        }
+
+        /// <summary>
+        /// Visits variable node. 
+        /// If it consists only of a name, variable id reference is created.
+        /// Otherwise propperty reference will be created.
+        /// </summary>
+        /// <param name="node"> Variable node.</param>
+        public void Visit(VariableNode node)
+        {
+            this.nameHolder = new VariableReferenceNameHolder();
+
+            if (node.name == null)
+                throw new ArgumentException($"{this.GetType()}, expected name of a variable.");
+            else
+            {
+                node.name.Accept(this);
+                if (node.propName != null)
+                    node.propName.Accept(this);
+            }
+
+            // Get the position of the variable in the result.
+            int varIndex = this.variableMap.GetVariablePosition(this.nameHolder.Name);
+            if (this.nameHolder.PropName == null)
+                this.Expr = new VariableIDReference(this.nameHolder, varIndex);
+            else
+            {
+                // Get type of accessed property.
+                if (!this.Labels.TryGetValue(this.nameHolder.PropName, out Type propType))
+                    throw new ArgumentException($"{this.GetType()}, property {this.nameHolder.PropName} does not exists in the graph.");
+                else
+                    this.Expr = VariableReferencePropertyFactory.Create(this.nameHolder, varIndex, propType);
+            }
+
+        }
+
+        /// <summary>
+        /// Visits identifier node.
+        /// Sets only name of variable and name of accessed property.
+        /// </summary>
+        /// <param name="node">Identifier node. </param>
+        public void Visit(IdentifierNode node)
+        {
+            if (node.value == null) throw new ArgumentNullException($"{this.GetType()}, identifier value is set to null.");
+            else if (this.nameHolder.TrySetName(node.value)) return;
+            else if (this.nameHolder.TrySetPropName(node.value)) return;
+            else throw new ArgumentException($"{this.GetType()}, expected new name holder.");
+        }
+
+        #region NotImpl
+
+        /// <summary>
+        /// Not implemented.
+        /// </summary>
+        public void Visit(SelectNode node)
+        {
+            throw new NotImplementedException();
+        }
+        /// <summary>
+        /// Not implemented.
+        /// </summary>
+        public void Visit(MatchNode node)
+        {
+            throw new NotImplementedException();
+        }
+        /// <summary>
+        /// Not implemented.
+        /// </summary>
+        public void Visit(MatchDivider node)
+        {
+            throw new NotImplementedException();
+        }
+        /// <summary>
+        /// Not implemented.
+        /// </summary>
+        public void Visit(VertexNode node)
+        {
+            throw new NotImplementedException();
+        }
+        /// <summary>
+        /// Not implemented.
+        /// </summary>
+        public void Visit(EdgeNode node)
+        {
+            throw new NotImplementedException();
+        }
+        /// <summary>
+        /// Not implemented.
+        /// </summary>
+        public void Visit(ExpressionNode node)
+        {
+            throw new NotImplementedException();
+        }
+        /// <summary>
+        /// Not implemented.
+        /// </summary>
+        public void Visit(MatchVariableNode node)
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion NotImpl
+    }
+
+
 }

@@ -24,11 +24,25 @@ namespace QueryEngine
     abstract class ExpressionBase
     {
         /// <summary>
+        /// Stores inforamtion whether the expression node was successfully evaluated.
+        /// If set to true, the get value method from expression return value must be set to a default value
+        /// of the templated type.
+        /// If set to true, the get value as string method should return "null".
+        /// </summary>
+        public bool IsNull {get; protected set;}
+
+        /// <summary>
         /// Evaluates expression.
         /// </summary>
         /// <param name="elements"> One result from a match query.</param>
         /// <returns> True if successfully evaluated or false.</returns>
         public abstract bool TryEvaluate(Element[] elements);
+
+        /// <summary>
+        /// Returns string value of the value. If the IsNull is set to true, it should return a "null".
+        /// </summary>
+        /// <returns> String representaition of the value. </returns>
+        public abstract string GetValueAsString();
     }
 
     /// <summary>
@@ -44,13 +58,22 @@ namespace QueryEngine
         {
             return this.Value;
         }
+
+        /// <summary>
+        /// Returns string value of the value. If the IsNull is set to true, it should return a "null".
+        /// </summary>
+        /// <returns> String representaition of the value. </returns>
+        public override string GetValueAsString()
+        {
+            return (!(this.IsNull) ? "Null" : this.Value.ToString());
+        }
     }
 
     /// <summary>
     /// Class holds entire expression.
     /// Optionally label representing entire expression.
     /// </summary>
-    class ExpressionHolder
+    sealed class ExpressionHolder
     {
         public string Label { get; private set; } 
         public ExpressionBase Expr { get; private set; }

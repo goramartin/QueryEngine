@@ -29,7 +29,7 @@ namespace QueryEngine
         /// <summary>
         /// Defines how each row will look like. Each variable is one column which is equivalent to one value in a row.
         /// </summary>
-        protected List<PrinterVariable> rowFormat;
+        protected List<ExpressionHolder> rowFormat;
         /// <summary>
         /// Defines what resulting table will look like.
         /// </summary>
@@ -56,7 +56,7 @@ namespace QueryEngine
             this.writer = null;
         }
 
-        protected Printer(List<PrinterVariable> rowFormat) : this()
+        protected Printer(List<ExpressionHolder> rowFormat) : this()
         {
             if (rowFormat.Count <= 0) 
                 throw new ArgumentException($"{this.GetType()}, was given empty header or row format.");
@@ -72,12 +72,10 @@ namespace QueryEngine
         public void PrintRow( Element[] elements)
         {
             for (int i = 0; i < this.rowFormat.Count; i++)
-            { 
-                var tmpElement = elements[this.rowFormat[i].VariableIndex];
+            {
+                this.rowFormat[i].Expr.TryEvaluate(elements);
                 
-                // Access correct element and get its string value.
-                var tmpStrProp = this.rowFormat[i].GetSelectVariableAsString(tmpElement);
-                this.formater.AddToFormat(tmpStrProp);
+                this.formater.AddToFormat(this.rowFormat[i].Expr.GetValueAsString());
             }
         }
 
@@ -98,7 +96,7 @@ namespace QueryEngine
         /// <param name="formater"> Formater type. </param>
         /// <param name="fileName"> File name if defined file printer. </param>
         /// <returns> Printer instance. </returns>
-        public static Printer PrinterFactory(string printerType, List<PrinterVariable> rowFormat, string formater, string fileName= null)
+        public static Printer PrinterFactory(string printerType, List<ExpressionHolder> rowFormat, string formater, string fileName= null)
         {
             if (printerType == "console")
                 return new ConsolePrinter(rowFormat, formater);
@@ -120,7 +118,7 @@ namespace QueryEngine
         /// </summary>
         /// <param name="rowFormat"> Format of a columns. </param>
         /// <param name="formater"> Type of formater. </param>
-        public ConsolePrinter( List<PrinterVariable> rowFormat, string formater) : base(rowFormat)
+        public ConsolePrinter( List<ExpressionHolder> rowFormat, string formater) : base(rowFormat)
         {
             try
             {
@@ -155,7 +153,7 @@ namespace QueryEngine
         /// <param name="rowFormat"> Format of a columns. </param>
         /// <param name="formater"> Type of formater. </param>
         /// <param name="fileName"> File to print into. </param>
-        public FilePrinter(List<PrinterVariable> rowFormat, string formater, string fileName) : base(rowFormat)
+        public FilePrinter(List<ExpressionHolder> rowFormat, string formater, string fileName) : base(rowFormat)
         {
             if (!Formater.fileEndings.TryGetValue(formater, out string ending)) 
                 throw new ArgumentException($"{this.GetType()}, file ending for given formater does not exist. Formater = {formater}");  

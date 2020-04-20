@@ -73,7 +73,6 @@
     <Compile Include="QueryParser\Parser\Visitors.cs" />
     <Compile Include="QueryObjects\Select\Printer\Formater.cs" />
     <Compile Include="QueryObjects\Select\Printer\Printer.cs" />
-    <Compile Include="QueryObjects\Select\Printer\PrintVariables.cs" />
     <Compile Include="QueryObjects\Results\QueryResults.cs" />
     <Compile Include="QueryObjects\Match\QueryMatch.cs" />
     <Compile Include="QueryParser\Parser\Parser.cs" />

@@ -21,6 +21,9 @@ namespace QueryEngine
     /// <typeparam name="T"> Type of return value. </typeparam>
     abstract class VariableReference<T> : ExpressionReturnValue<T>
     {
+        /// <summary>
+        /// Stores information about the name of the variable reference.
+        /// </summary>
         protected VariableReferenceNameHolder NameHolder { get; private set; }
 
         /// <summary>
@@ -33,7 +36,7 @@ namespace QueryEngine
         /// </summary>
         /// <param name="nHolder"> Holder of string representation of the name. </param>
         /// <param name="varIndex"> Index of an element in a result during evaluation.</param>
-        public VariableReference(VariableReferenceNameHolder nHolder, int varIndex) 
+        protected VariableReference(VariableReferenceNameHolder nHolder, int varIndex) 
         {
             this.NameHolder = nHolder;
             this.VariableIndex = varIndex;
@@ -50,24 +53,16 @@ namespace QueryEngine
     /// Property reference of an element.
     /// </summary>
     /// <typeparam name="T"> Type of property referenced. </typeparam>
-    abstract class VariablePropertyReference<T> : VariableReference<T>
+    sealed class VariablePropertyReference<T> : VariableReference<T>
     {
-        /// <summary>
-        /// Name of a property that will be accessed during evaluation of an element.
-        /// </summary>
-        protected string PropertyName { get; private set; }
-
         /// <summary>
         /// Creates a property reference based on index of an element from a result and an accessed
         /// property.
         /// </summary>
         /// <param name="nHolder"> Holder of string representation of the name. </param>
         /// <param name="varIndex"> Index in a result during evaluation. </param>
-        /// <param name="propName"> Name of an accessed property during evaluation. </param>
-        public VariablePropertyReference(VariableReferenceNameHolder nHolder, int varIndex, string propName) : base(nHolder, varIndex)
-        {
-            this.PropertyName = propName;
-        }
+        public VariablePropertyReference(VariableReferenceNameHolder nHolder, int varIndex) : base(nHolder, varIndex)
+        { }
 
         /// <summary>
         /// Accesses property of an element based on variable index.
@@ -77,16 +72,16 @@ namespace QueryEngine
         /// <returns> True on successful evaluation otherwise false. </returns>
         public override bool TryEvaluate(Element[] elements)
         {
-            bool success = elements[this.VariableIndex].TryGetPropertyValue(this.PropertyName, out T retValue);
+            this.IsNull = elements[this.VariableIndex].TryGetPropertyValue(this.NameHolder.PropName, out T retValue);
             this.Value = retValue;
-            return success;
+            return this.IsNull;
         }
     }
 
     /// <summary>
     /// Represents a reference to an element ID.
     /// </summary>
-    class VariableIDReference : VariableReference<int>
+    sealed class VariableIDReference : VariableReference<int>
     {
         /// <summary>
         /// Constructs id reference.
@@ -102,8 +97,9 @@ namespace QueryEngine
         /// <returns> True on successful evaluation otherwise false. </returns>
         public override bool TryEvaluate(Element[] elements)
         {
+            this.IsNull = true;
             this.Value = elements[this.VariableIndex].ID;
-            return true;
+            return this.IsNull;
         }
     }
 
@@ -113,16 +109,23 @@ namespace QueryEngine
     /// Class is used as a holder for printing directives.
     /// When select initialises printing the class will serve as a base information for printing headers.
     /// </summary>
-    class VariableReferenceNameHolder
+    sealed class VariableReferenceNameHolder
     {
         /// <summary>
         /// Name of variable.
         /// </summary>
-        public string Name { get; set; }
+        public string Name { get; private set; }
         /// <summary>
         /// Property access to a variable.
         /// </summary>
-        public string PropName { get; set; }
+        public string PropName { get; private set; }
+
+
+        public VariableReferenceNameHolder(string name = null, string propName = null)
+        {
+            this.Name = name;
+            this.PropName = propName;
+        }
 
         /// <summary>
         /// Tries to set a name, will set if name is set to null.
@@ -150,4 +153,29 @@ namespace QueryEngine
             else return false;
         }
     }
+
+    /// <summary>
+    /// Factory for templated property reference.
+    /// </summary>
+    static class VariableReferencePropertyFactory
+    {
+        /// <summary>
+        /// Creates a typed property reference.
+        /// </summary>
+        /// <param name="nameHolder"> Name of the variable refernece. </param>
+        /// <param name="varIndex"> Index of an accessed varible.</param>
+        /// <param name="type"> Type of accessed property. </param>
+        /// <returns> Property reference node. </returns>
+        public static ExpressionBase Create(VariableReferenceNameHolder nameHolder, int varIndex, Type type)
+        {
+             if (type == typeof(string))
+                return new VariablePropertyReference<string>(nameHolder, varIndex);
+            else if (type == typeof(int))
+                return new VariablePropertyReference<int>(nameHolder, varIndex);
+            else throw new ArgumentException($"VariableReferenceFactory, inputed wrong type of property.");
+        }
+    }
+
+
+
 }

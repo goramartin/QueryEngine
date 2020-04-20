@@ -55,9 +55,6 @@ namespace QueryEngine
             this.match = new MatchObject(tokens, variableMap, graph, ThreadCount, VerticesPerRound);
             this.select = new SelectObject(graph, variableMap, selectNode, printer, formater, fileName);
 
-            // Check correctness of select part
-            select.CheckCorrectnessOfSelect(variableMap);
-
             // Check if it successfully parsed every token.
             if (tokens.Count != Parser.GetPosition())
                 throw new ArgumentException("Failed to parse every token for Query.");

@@ -67,33 +67,6 @@ namespace QueryEngine
 
 
         /// <summary>
-        /// Checks correctness of given print expression.
-        /// There must be either * or variable references with their properties.
-        /// such as *, varName, varName.Property
-        /// If the variable has defined type, then user cannot access property that is not defined.
-        /// Otherwise can, but will print null.
-        /// </summary>
-        /// <param name="variableMap"> Map of variables. </param>
-        public void CheckCorrectnessOfSelect(VariableMap variableMap)
-        {
-            if (this.selectVariables[0].name == "*")
-            {
-                if (this.selectVariables.Count > 1)
-                    throw new ArgumentException($"{this.GetType()}, select expression cannot have another variable while habing *");
-            }
-            else
-            {
-                // For each select variable check if it is defined in the query and check if it has defined type
-                for (int i = 0; i < this.selectVariables.Count; i++) 
-                {
-                    if (!variableMap.TryGetValue(this.selectVariables[i].name, out Tuple<int, Table> tuple))
-                      throw new ArgumentException($"{this.GetType()}, select expression contains variable that is not defined");
-                }
-            }
-        }
-
-
-        /// <summary>
         /// Prints results in given format from concstructor init.
         /// Creates structure that printer uses.
         /// </summary>
@@ -101,9 +74,7 @@ namespace QueryEngine
         /// <param name="map"> Map of variable for creation of print variables. </param>
         public void Print(IResultStorage results, VariableMap map)
         {
-            var printVars = this.CreatePrintVariables(map) ;
-
-            var printer = Printer.PrinterFactory(this.PrinterType, printVars, this.FormaterType, this.FileName);
+            var printer = Printer.PrinterFactory(this.PrinterType, expressions, this.FormaterType, this.FileName);
 
             printer.PrintHeader();
             foreach (var item in results)
@@ -113,51 +84,6 @@ namespace QueryEngine
 
             printer.Dispose();
         }
-
-        /// <summary>
-        /// Creates list of structs that printer uses to print out headers and columns.
-        /// For every variable for printing that did not stated property, for each of its property
-        /// one struct will be created representing each property. The same for * but for every variable.
-        /// Otherwise only one printer variable is created.
-        /// </summary>
-        /// <param name="map"> Map of variables. </param>
-        /// <returns> List of print variables. </returns>
-        private List<PrinterVariable> CreatePrintVariables(VariableMap map)
-        {
-            List<PrinterVariable> printVars = null;
-            if (this.selectVariables[0].name == "*") return CreatePrintvariablesAsterix(map);
-
-            printVars = new List<PrinterVariable>();
-            for (int i = 0; i < this.selectVariables.Count; i++)
-            {
-                if (this.selectVariables[i].propName == "id") this.selectVariables[i].propName = null;
-                 
-                printVars.Add(PrinterVariable.PrinterVariableFactory(this.selectVariables[i],map));
-            }
-
-            return printVars;
-        }
-
-        /// <summary>
-        /// Creates printer variable for every variable defined in match query.
-        /// Select variables are also created with the names from variable map.
-        /// This leads to printing id and a type of the variable into one column.
-        /// </summary>
-        /// <param name="map"> Map of variables.</param>
-        /// <returns> List of print variables. </returns>
-        private List<PrinterVariable> CreatePrintvariablesAsterix(VariableMap map)
-        {
-            var printVars = new List<PrinterVariable>();
-            foreach (var item in map)
-            {
-                    var tmp = new SelectVariable();
-                    tmp.TrySetName(item.Key);
-                    printVars.Add(PrinterVariable.PrinterVariableFactory(tmp, map));
-            }
-            return printVars;
-        }        
-
-
     }
 
 }
