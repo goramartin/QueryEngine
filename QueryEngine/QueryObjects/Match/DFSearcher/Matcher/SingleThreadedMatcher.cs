@@ -53,7 +53,7 @@ namespace QueryEngine
         private int startVerticesEndIndex;
 
 
-        private IResultStorage queryResults;
+        private IMatchResultStorage queryResults;
 
         /// <summary>
         /// Starting vertices are implicitly set to entire graph.
@@ -62,7 +62,7 @@ namespace QueryEngine
         /// <param name="graph"> Graph to search. </param>
         /// <param name="results"> Object to store found results. </param>
         /// <param name="threadIndex"> Index to store results on. => 0 </param>
-        public DFSPatternMatcher(IDFSPattern pattern, Graph graph, IResultStorage results, int threadIndex)
+        public DFSPatternMatcher(IDFSPattern pattern, Graph graph, IMatchResultStorage results, int threadIndex)
         {
             if (pattern == null || graph == null || results == null)
                 throw new ArgumentException($"{this.GetType()}, passed null to a constructor.");

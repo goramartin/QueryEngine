@@ -66,6 +66,7 @@
     <Compile Include="Expression\Expression.cs" />
     <Compile Include="Expression\VariableReference.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="QueryObjects\Results\MatchResults.cs" />
     <Compile Include="QueryParser\ParsedPattern.cs" />
     <Compile Include="QueryParser\Parser\ParseTreeNodes.cs" />
     <Compile Include="QueryParser\Tokenizer\Token.cs" />
@@ -73,7 +74,7 @@
     <Compile Include="QueryParser\Parser\Visitors.cs" />
     <Compile Include="QueryObjects\Select\Printer\Formater.cs" />
     <Compile Include="QueryObjects\Select\Printer\Printer.cs" />
-    <Compile Include="QueryObjects\Results\QueryResults.cs" />
+    <Compile Include="QueryObjects\Results\Results.cs" />
     <Compile Include="QueryObjects\Match\QueryMatch.cs" />
     <Compile Include="QueryParser\Parser\Parser.cs" />
     <Compile Include="QueryObjects\Query.cs" />

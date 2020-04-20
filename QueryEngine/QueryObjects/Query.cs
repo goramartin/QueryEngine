@@ -28,7 +28,7 @@ namespace QueryEngine
         VariableMap variableMap;
         SelectObject select;
         MatchObject match;
-        IResultStorage results;
+        IResults results;
 
         /// <summary>
         /// Creates all neccessary object for query.
@@ -67,7 +67,7 @@ namespace QueryEngine
         public void ComputeQuery()
         {
             this.results = this.match.Search();
-            this.select.Print(this.results, this.variableMap);
+            this.select.Print(this.results);
         }
     }
 

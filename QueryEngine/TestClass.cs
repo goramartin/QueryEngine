@@ -127,7 +127,7 @@ namespace QueryEngine
                 Console.WriteLine(item.Print());
             }
 
-            select.Print(tmp, map);
+            select.Print(tmp);
 
 
 

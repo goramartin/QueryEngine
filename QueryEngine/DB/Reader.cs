@@ -173,7 +173,7 @@ namespace QueryEngine
             {
                this.fileReader = new StreamReader(fileName);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 throw;
             }

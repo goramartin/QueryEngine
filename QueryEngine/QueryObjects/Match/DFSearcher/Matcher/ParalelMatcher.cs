@@ -43,7 +43,7 @@ namespace QueryEngine
         /// <param name="results"> Where to store results. </param>
         /// <param name="threadCount"> Number of threads to search.</param>
         /// <param name="verticesPerThread"> If more than one thread is used to search this defines number of vertices that will be distributed to threads during matching.</param>
-        public DFSParallelPatternMatcher(IDFSPattern pattern, Graph graph, IResultStorage results, int threadCount, int verticesPerThread = 1)
+        public DFSParallelPatternMatcher(IDFSPattern pattern, Graph graph, IMatchResultStorage results, int threadCount, int verticesPerThread = 1)
         {
             if (threadCount <= 0 || verticesPerThread <= 0)
                 throw new ArgumentException($"{this.GetType()}, invalid number of threads or vertices per thread.");

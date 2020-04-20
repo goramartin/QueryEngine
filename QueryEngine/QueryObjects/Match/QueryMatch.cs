@@ -32,7 +32,7 @@ namespace QueryEngine
     {
         private  IPatternMatcher Matcher;
         private  IPattern Pattern;
-        private  IResultStorage queryResults;
+        private IMatchResultStorage queryResults;
 
         /// <summary>
         /// Creates Match expression
@@ -63,7 +63,7 @@ namespace QueryEngine
             
             // Now we have got enough information about results. 
             // After creating pattern the variable map is filled and we know extend of the results.
-            this.queryResults = new QueryResults(variableMap.GetCount(), ThreadCount);
+            this.queryResults = new MatchResults(variableMap.GetCount(), ThreadCount);
 
             this.Matcher = MatchFactory.CreateMatcher("DFSParallel", Pattern, graph, this.queryResults, ThreadCount, VerticesPerRound);
         }
@@ -106,7 +106,7 @@ namespace QueryEngine
         /// Starts searching of the graph.
         /// </summary>
         /// <returns> Results of search algorithm </returns>
-        public IResultStorage Search()
+        public IResults Search()
         {
             this.Matcher.Search();
             return this.queryResults;

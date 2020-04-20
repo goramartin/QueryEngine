@@ -71,8 +71,7 @@ namespace QueryEngine
         /// Creates structure that printer uses.
         /// </summary>
         /// <param name="results"> Results from query. </param>
-        /// <param name="map"> Map of variable for creation of print variables. </param>
-        public void Print(IResultStorage results, VariableMap map)
+        public void Print(IResults results)
         {
             var printer = Printer.PrinterFactory(this.PrinterType, expressions, this.FormaterType, this.FileName);
 
