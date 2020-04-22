@@ -73,7 +73,11 @@ namespace QueryEngine
         /// <param name="results"> Results from query. </param>
         public void Print(IResults results)
         {
-            var printer = Printer.PrinterFactory(this.PrinterType, expressions, this.FormaterType, this.FileName);
+            var rowValues = new List<PrintVariable>();
+            for (int i = 0; i < this.expressions.Count; i++)
+                rowValues.Add(PrintVariable.PrintVariableFactory(this.expressions[i], this.expressions[i].GetExpressionType()));
+
+            var printer = Printer.PrinterFactory(this.PrinterType, expressions, rowValues, this.FormaterType, this.FileName);
 
             printer.PrintHeader();
             foreach (var item in results)

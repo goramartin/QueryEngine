@@ -55,7 +55,6 @@ namespace QueryEngine
              return this.result; 
         }
 
-
         /// <summary>
         /// Starts parsing from select node, does nothing only jumps to next node.
         /// There must be at least one variable to be displyed.

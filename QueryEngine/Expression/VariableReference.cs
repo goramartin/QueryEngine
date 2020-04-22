@@ -65,16 +65,23 @@ namespace QueryEngine
         { }
 
         /// <summary>
+        /// Returns type of this expression node.
+        /// </summary>
+        public override Type GetExpressionType()
+        {
+            return typeof(T);
+        }
+
+        /// <summary>
         /// Accesses property of an element based on variable index.
         /// Always sets value, because we expect that the out value is set on default if failed to evaluate.
         /// </summary>
         /// <param name="elements"> Result from a match query. </param>
+        /// <param name="returnValue">Return value of this expression node. </param>
         /// <returns> True on successful evaluation otherwise false. </returns>
-        public override bool TryEvaluate(Element[] elements)
+        public override bool TryEvaluate(Element[] elements, out T returnValue)
         {
-            this.IsNull = elements[this.VariableIndex].TryGetPropertyValue(this.NameHolder.PropName, out T retValue);
-            this.Value = retValue;
-            return this.IsNull;
+             return elements[this.VariableIndex].TryGetPropertyValue(this.NameHolder.PropName, out returnValue);
         }
     }
 
@@ -91,15 +98,23 @@ namespace QueryEngine
         public VariableIDReference(VariableReferenceNameHolder nHolder, int varIndex) : base(nHolder, varIndex) { }
 
         /// <summary>
+        /// Returns type of this expression.
+        /// </summary>
+        public override Type GetExpressionType()
+        {
+            return typeof(int);
+        }
+
+        /// <summary>
         /// Accesses id of an element. This always succedes.
         /// </summary>
         /// <param name="elements"> Result from a match query. </param>
+        /// <param name="returnValue">Return value of this expression node. </param>
         /// <returns> True on successful evaluation otherwise false. </returns>
-        public override bool TryEvaluate(Element[] elements)
+        public override bool TryEvaluate(Element[] elements, out int returnValue)
         {
-            this.IsNull = true;
-            this.Value = elements[this.VariableIndex].ID;
-            return this.IsNull;
+            returnValue = elements[this.VariableIndex].ID;
+            return true;
         }
     }
 

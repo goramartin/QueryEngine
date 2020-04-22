@@ -137,15 +137,15 @@ namespace QueryEngine
         {
              try
              {
-               Run(args, Console.In);
-             }
-             catch (Exception e )
-             {
-                Console.WriteLine( e.Message);
-                Console.WriteLine("Press enter to close the application");
-                Console.ReadLine();
-             }
-             
+                     Run(args, Console.In);
+            }
+            catch (Exception e )
+            {
+               Console.WriteLine(e);
+               Console.WriteLine("Press enter to close the application");
+               Console.ReadLine();
+            }
+
            // TestClass.RunTest();
             
         }

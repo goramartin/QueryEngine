@@ -4,15 +4,12 @@
 
     Each node has evaluation method that tries to evalue the expression.
     If the evaluation fails (missing property value on element) it returns false.
-    If it returns true, the value can be returned by casting the node to appropriate return value node.
-
 */
-
-
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -20,29 +17,15 @@ namespace QueryEngine
 {
     /// <summary>
     /// Base class for every expression node.
+    /// Serves only as a holder.
     /// </summary>
     abstract class ExpressionBase
     {
         /// <summary>
-        /// Stores inforamtion whether the expression node was successfully evaluated.
-        /// If set to true, the get value method from expression return value must be set to a default value
-        /// of the templated type.
-        /// If set to true, the get value as string method should return "null".
+        /// Gets expression type.
         /// </summary>
-        public bool IsNull {get; protected set;}
-
-        /// <summary>
-        /// Evaluates expression.
-        /// </summary>
-        /// <param name="elements"> One result from a match query.</param>
-        /// <returns> True if successfully evaluated or false.</returns>
-        public abstract bool TryEvaluate(Element[] elements);
-
-        /// <summary>
-        /// Returns string value of the value. If the IsNull is set to true, it should return a "null".
-        /// </summary>
-        /// <returns> String representaition of the value. </returns>
-        public abstract string GetValueAsString();
+        /// <returns> Type of expression. </returns>
+        public abstract Type GetExpressionType();
     }
 
     /// <summary>
@@ -52,32 +35,26 @@ namespace QueryEngine
     /// <typeparam name="T"> Type of return value.</typeparam>
     abstract class ExpressionReturnValue<T> : ExpressionBase
     {
-        protected T Value;
-
-        public T GetValue()
-        {
-            return this.Value;
-        }
-
         /// <summary>
-        /// Returns string value of the value. If the IsNull is set to true, it should return a "null".
+        /// Evaluates expression node and returns value inside value parameter.
         /// </summary>
-        /// <returns> String representaition of the value. </returns>
-        public override string GetValueAsString()
-        {
-            return (!(this.IsNull) ? "Null" : this.Value.ToString());
-        }
+        /// <param name="elements"> One results of a search. </param>
+        /// <param name="value"> Value of the expression. </param>
+        /// <returns> Bool on successful evaluation otherwise fasel. On success, the value parameter
+        /// will contain value of the epression otherwise the value is undefined. </returns>
+        public abstract bool TryEvaluate(Element[] elements, out T value);    
     }
 
     /// <summary>
     /// Class holds entire expression.
     /// Optionally label representing entire expression.
     /// </summary>
-    sealed class ExpressionHolder
+    sealed class ExpressionHolder : ExpressionBase
     {
-        public string Label { get; private set; } 
-        public ExpressionBase Expr { get; private set; }
-
+        private string Label { get; set; } 
+        private ExpressionBase Expr { get;  set; }
+        public Type ExpressionType { get; private set; }
+        
         /// <summary>
         /// Constructs expression holder.
         /// </summary>
@@ -86,6 +63,7 @@ namespace QueryEngine
         public ExpressionHolder(ExpressionBase ex, string label = null)
         {
             this.Expr = ex;
+            this.ExpressionType = ex.GetExpressionType();
             this.Label = label;
         }
 
@@ -97,6 +75,26 @@ namespace QueryEngine
             return this.Label != null ? this.Label : this.Expr.ToString();
         }
 
+        /// <summary>
+        /// Tries evaluating expression with given element row.
+        /// </summary>
+        /// <typeparam name="T">Return value of the expression. </typeparam>
+        /// <param name="elements">One results of the search.</param>
+        /// <param name="returnValue"> Place to store return value of the expression. </param>
+        /// <returns>True of successful evaluation otherwise false.</returns>
+        public bool TryGetExpressionValue<T>(Element[] elements, out T returnValue)
+        {
+                if (((ExpressionReturnValue<T>)(this.Expr)).TryEvaluate(elements, out returnValue)) return true;
+                else return false;
+        }
+
+        /// <summary>
+        /// Returns type of containing expression.
+        /// </summary>
+        public override Type GetExpressionType()
+        {
+            return this.Expr.GetExpressionType();
+        }
     }
 
 }
