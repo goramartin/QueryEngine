@@ -24,12 +24,12 @@ namespace QueryEngine
         /// <summary>
         /// Stores information about the name of the variable reference.
         /// </summary>
-        protected VariableReferenceNameHolder NameHolder { get; private set; }
+        protected VariableReferenceNameHolder NameHolder { get; }
 
         /// <summary>
         /// Index of a variable to be evaluated from a given result.
         /// </summary>
-        protected int VariableIndex { get; private set; }
+        protected int VariableIndex { get; }
 
         /// <summary>
         /// Creates a variable reference.
@@ -79,7 +79,7 @@ namespace QueryEngine
         /// <param name="elements"> Result from a match query. </param>
         /// <param name="returnValue">Return value of this expression node. </param>
         /// <returns> True on successful evaluation otherwise false. </returns>
-        public override bool TryEvaluate(RowProxy elements, out T returnValue)
+        public override bool TryEvaluate(in RowProxy elements, out T returnValue)
         {
              return elements[this.VariableIndex].TryGetPropertyValue(this.NameHolder.PropName, out returnValue);
         }
@@ -111,7 +111,7 @@ namespace QueryEngine
         /// <param name="elements"> Result from a match query. </param>
         /// <param name="returnValue">Return value of this expression node. </param>
         /// <returns> True on successful evaluation otherwise false. </returns>
-        public override bool TryEvaluate(RowProxy elements, out int returnValue)
+        public override bool TryEvaluate(in RowProxy elements, out int returnValue)
         {
             returnValue = elements[this.VariableIndex].ID;
             return true;

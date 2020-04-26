@@ -42,7 +42,7 @@ namespace QueryEngine
         /// <param name="value"> Value of the expression. </param>
         /// <returns> Bool on successful evaluation otherwise fasel. On success, the value parameter
         /// will contain value of the epression otherwise the value is undefined. </returns>
-        public abstract bool TryEvaluate(RowProxy elements, out T value);    
+        public abstract bool TryEvaluate(in RowProxy elements, out T value);    
     }
 
     /// <summary>
@@ -51,9 +51,9 @@ namespace QueryEngine
     /// </summary>
     sealed class ExpressionHolder : ExpressionBase
     {
-        private string Label { get; set; } 
-        private ExpressionBase Expr { get;  set; }
-        public Type ExpressionType { get; private set; }
+        private string Label { get; }
+        private ExpressionBase Expr { get; }
+        public Type ExpressionType { get; }
         
         /// <summary>
         /// Constructs expression holder.
@@ -82,7 +82,7 @@ namespace QueryEngine
         /// <param name="elements">One results of the search.</param>
         /// <param name="returnValue"> Place to store return value of the expression. </param>
         /// <returns>True of successful evaluation otherwise false.</returns>
-        public bool TryGetExpressionValue<T>(RowProxy elements, out T returnValue)
+        public bool TryGetExpressionValue<T>(in RowProxy elements, out T returnValue)
         {
                 if (((ExpressionReturnValue<T>)(this.Expr)).TryEvaluate(elements, out returnValue)) return true;
                 else return false;
