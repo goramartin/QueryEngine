@@ -39,7 +39,7 @@ namespace QueryEngine
         /// </summary>
         /// <param name="elements"> One result of the search. </param>
         /// <returns></returns>
-        public abstract string GetValueAsString(Element[] elements);
+        public abstract string GetValueAsString(RowProxy elements);
 
         /// <summary>
         /// Print variable factory. Creates specialised print variable based on a given type.
@@ -75,7 +75,7 @@ namespace QueryEngine
         /// </summary>
         /// <param name="elements"> One result of a search. </param>
         /// <returns>Null on failed evaluation or string prepresentation of a evaluated expression.</returns>
-        public override string GetValueAsString(Element[] elements)
+        public override string GetValueAsString(RowProxy elements)
         {
             if (this.expressionHolder.TryGetExpressionValue(elements, out T returnValue)) 
                 return returnValue.ToString();

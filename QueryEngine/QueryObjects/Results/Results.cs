@@ -24,25 +24,12 @@ namespace QueryEngine
     /// <summary>
     /// Base interface for all result classes.
     /// </summary>
-    interface IResults : IEnumerable<Element[]>
+    interface IResults : IEnumerable<RowProxy>
     {
         int ColumnCount { get; }
         int Count { get; }
-        Element this[int row, int column] { get; }
-    }
+        RowProxy this[int row] { get; }
 
-
-    /// <summary>
-    /// Interface for class that stores results from a match expression.
-    /// </summary>
-    interface IMatchResultStorage : IResults
-    {
-        void AddElement(Element element, int columnIndex, int threadIndex);
-
-        List<Element>[][] GetResults();
-
-        void MergeColumn(int ColumnIndex);
-        int ThreadCount { get; }
     }
 
     /// <summary>
@@ -85,25 +72,14 @@ namespace QueryEngine
         /// Accesses table of results.
         /// </summary>
         /// <param name="row"> Row of a table. </param>
-        /// <param name="column"> Column of a table.</param>
         /// <returns> Element on a given position. </returns>
-        public Element this[int row, int column]
+        public RowProxy this[int row]
         {
             get
             {
                 if (row < 0 || row >= this.Count) 
                     throw new ArgumentOutOfRangeException($"{this.GetType()}, row is out of range.");
-                else if ( column < 0 || column >= ColumnCount)
-                    throw new ArgumentOutOfRangeException($"{this.GetType()}, column is out of range.");
-                else return results[column][row];
-            }
-            set
-            {
-                if (row < 0 || row >= this.Count)
-                    throw new ArgumentOutOfRangeException($"{this.GetType()}, row is out of range.");
-                else if (column < 0 || column >= ColumnCount)
-                    throw new ArgumentOutOfRangeException($"{this.GetType()}, column is out of range.");
-                else this.results[column][row] = value;
+                else return new RowProxy(this.results, row);
             }
         }
 
@@ -113,18 +89,10 @@ namespace QueryEngine
         /// Copies one row into internal array. That array is rewritten during next iteration.
         /// </summary>
         /// <returns> One row of a table. </returns>
-        public IEnumerator<Element[]> GetEnumerator()
+        public IEnumerator<RowProxy> GetEnumerator()
         {
-            Element[] tmpElements = new Element[this.ColumnCount];
-
             for (int i = 0; i < this.Count; i++)
-            {
-                for (int  j = 0;  j < this.ColumnCount;  j++)
-                {
-                    tmpElements[j] = this.results[j][i];
-                }
-                yield return tmpElements;
-            }
+                yield return new RowProxy(this.results, i);
         }
 
         IEnumerator IEnumerable.GetEnumerator()

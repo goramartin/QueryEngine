@@ -33,7 +33,7 @@ namespace QueryEngine
         ISingleThreadMatcher[] Matchers;
         Graph Graph;
         int DistributorVerticesPerRound;
-        IMatchResultStorage Results;
+        MatchResultsStorage Results;
 
         /// <summary>
         /// Creates a parallel matchers.
@@ -44,7 +44,7 @@ namespace QueryEngine
         /// <param name="results"> Where to store results. </param>
         /// <param name="threadCount"> Number of threads to search.</param>
         /// <param name="verticesPerThread"> If more than one thread is used to search this defines number of vertices that will be distributed to threads during matching.</param>
-        public DFSParallelPatternMatcher(IDFSPattern pattern, Graph graph, IMatchResultStorage results, int threadCount, int verticesPerThread = 1)
+        public DFSParallelPatternMatcher(IDFSPattern pattern, Graph graph, MatchResultsStorage results, int threadCount, int verticesPerThread = 1)
         {
             if (threadCount <= 0 || verticesPerThread <= 0)
                 throw new ArgumentException($"{this.GetType()}, invalid number of threads or vertices per thread.");
@@ -159,9 +159,9 @@ namespace QueryEngine
         /// </summary>
         private class MergeJob
         {
-            public IMatchResultStorage Elements;
+            public MatchResultsStorage Elements;
             public ColumnDistributor ColumnDistributor;
-            public MergeJob(ColumnDistributor columnDistributor, IMatchResultStorage elements)
+            public MergeJob(ColumnDistributor columnDistributor, MatchResultsStorage elements)
             {
                 this.Elements = elements;
                 this.ColumnDistributor = columnDistributor;

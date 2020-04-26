@@ -124,7 +124,7 @@ namespace QueryEngine
 
             foreach (var item in tmp)
             {
-                Console.WriteLine(item.Print());
+                Console.WriteLine(item.ToString());
             }
 
             select.Print(tmp);

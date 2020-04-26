@@ -68,6 +68,7 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="QueryObjects\Match\MatchFactory.cs" />
     <Compile Include="QueryObjects\Results\MatchResults.cs" />
+    <Compile Include="QueryObjects\Results\RowProxy.cs" />
     <Compile Include="QueryObjects\Select\Printer\PrintVariables.cs" />
     <Compile Include="QueryParser\ParsedPattern.cs" />
     <Compile Include="QueryParser\Parser\ParseTreeNodes.cs" />

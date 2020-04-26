@@ -74,7 +74,7 @@ namespace QueryEngine
         /// Prints row for one result.
         /// </summary>
         /// <param name="elements"> A one result from query search. </param>
-        public void PrintRow(Element[] elements)
+        public void PrintRow(RowProxy elements)
         {
             for (int i = 0; i < this.rowValues.Count; i++)
                 this.formater.AddToFormat(this.rowValues[i].GetValueAsString(elements));

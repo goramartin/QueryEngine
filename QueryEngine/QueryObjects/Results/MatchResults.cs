@@ -1,4 +1,14 @@
-﻿using System;
+﻿/*! \file 
+ 
+    This file contains definition of a result class that is used by a matcher to store its sub results of each
+    working thread.
+ 
+    Class behaves like a 2 dimensional array. Where first array contains columns, the second index contains 
+    list of all results of a specific thread. That is to say, each thread stores results into its specific index.
+*/ 
+
+
+using System;
 using System.Collections.Generic;
 using System.Collections;
 using System.Linq;
@@ -9,6 +19,8 @@ namespace QueryEngine
 
 {
     /// <summary>
+    /// This class is used only by a matcher during matching to store its semi results of the matching,
+    /// the class is then converted into a normal result structure with general interface.
     /// Class for storign matcher results.
     /// Contains 2-dimensional array. 
     /// [x][y] x = column, y = thread number.
@@ -21,7 +33,7 @@ namespace QueryEngine
     /// So copying of the contents of the array is recomended before next interation.
     /// Note this structure does not check validity of the stores.
     /// </summary>
-    class MatchResults : IMatchResultStorage
+    class MatchResultsStorage 
     {
 
         /// <summary>
@@ -42,16 +54,7 @@ namespace QueryEngine
         /// <summary>
         /// Number of results.
         /// </summary>
-        public int Count
-        {
-            get
-            {
-                int count = 0;
-                for (int i = 0; i < ThreadCount; i++)
-                    count += results[0][i].Count;
-                return count;
-            }
-        }
+        public int Count { get; private set; }
 
         public Element this[int row, int column] => throw new NotImplementedException();
 
@@ -62,7 +65,7 @@ namespace QueryEngine
         /// </summary>
         /// <param name="columnCount"> Number of variables in search query. </param>
         /// <param name="threadCount"> Number of threads that add results to this instance.</param>
-        public MatchResults(int columnCount, int threadCount)
+        public MatchResultsStorage(int columnCount, int threadCount)
         {
             if (columnCount <= 0 || threadCount <= 0)
                 throw new ArgumentException($"{this.GetType()}, trying to create results with invalid columnx or thread number.");
@@ -81,6 +84,10 @@ namespace QueryEngine
 
             this.ColumnCount = columnCount;
             this.ThreadCount = threadCount;
+
+            for (int i = 0; i < ThreadCount; i++)
+                this.Count += results[0][i].Count;
+
         }
 
         /// <summary>
@@ -99,50 +106,10 @@ namespace QueryEngine
             this.results[columnIndex][threadIndex].Add(element);
         }
 
-
-
-        /// <summary>
-        /// Enumeration over all the results.
-        /// We are returning reference to a internal array in order to avoid unneccessary creation
-        /// of a new arrays.
-        /// </summary>
-        /// <returns> Enumerator that returns an array that is held inside of the Enumerator. </returns>
-        public IEnumerator<Element[]> GetEnumerator()
-        {
-            var result = new Element[this.ColumnCount];
-
-            // For each thread
-            for (int threadIndex = 0; threadIndex < this.ThreadCount; threadIndex++)
-            {
-                // For each result of the thread.
-                // this.results[0][threadIndex].Count we take count on the first column, and we assume that the same count is
-                // each columns. 
-                for (int resultIndex = 0; resultIndex < this.results[0][threadIndex].Count; resultIndex++)
-                {
-                    // Collect elements from each column and put it inside array.
-                    for (int columnIndex = 0; columnIndex < this.ColumnCount; columnIndex++)
-                    {
-                        result[columnIndex] = results[columnIndex][threadIndex][resultIndex];
-                    }
-                    yield return result;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Calls generic methods.
-        /// </summary>
-        /// <returns> Generic Enumerator. </returns>
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return this.GetEnumerator();
-        }
-
         public List<Element>[][] GetResults()
         {
             return this.results;
         }
-
 
         /// <summary>
         /// Merges results of a one column into the first thread index.
