@@ -153,6 +153,10 @@ namespace QueryEngine
             RegisterToken("by", Token.TokenType.By);
             RegisterToken("ORDER", Token.TokenType.Order);
             RegisterToken("order", Token.TokenType.Order);
+            RegisterToken("asc", Token.TokenType.Asc);
+            RegisterToken("ASC", Token.TokenType.Asc);
+            RegisterToken("desc", Token.TokenType.Desc);
+            RegisterToken("DESC", Token.TokenType.Desc);
         }
 
     }

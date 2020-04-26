@@ -24,7 +24,7 @@ namespace QueryEngine {
     /// Certain nodes can form a chain. E.g variable node or vertex/edge node.
     /// Gives property next.
     /// </summary>
-    abstract class QueryNodeChain : Node
+    abstract class NodeChain : Node
     {
         public Node next;
         public void AddNext(Node next)
@@ -42,7 +42,7 @@ namespace QueryEngine {
     /// Match and Select Nodes are only roots of subtrees when parsing. From them the parsing
     /// of query word starts.
     /// </summary>
-    class MatchNode : QueryNodeChain
+    class MatchNode : NodeChain
     {
         public MatchNode() { }
 
@@ -51,7 +51,7 @@ namespace QueryEngine {
             visitor.Visit(this);
         }
     }
-    class SelectNode : QueryNodeChain
+    class SelectNode : NodeChain
     {
         public SelectNode() { }
 
@@ -60,16 +60,42 @@ namespace QueryEngine {
             visitor.Visit(this);
         }
     }
+    class OrderByNode : NodeChain
+    {
+        public OrderByNode() { }
+
+        public override void Accept<T>(IVisitor<T> visitor)
+        {
+            visitor.Visit(this);
+        }
+    }
 
 
+    #region SelectNodes
 
+    class SelectPrintTermNode : NodeChain
+    {
+        public Node exp;
 
-    #region MatchExpressionNodes
+        public override void Accept<T>(IVisitor<T> visitor)
+        {
+            visitor.Visit(this);
+        }
+
+        public void AddExpression(Node expr)
+        {
+            this.exp = expr;
+        }
+    }
+
+    #endregion SelectNodes
+
+    #region MatchNodes
     /// <summary>
     /// Only vertices and edges inherit from this class.
     /// Gives varible node property to the edges and vertices.
     /// </summary>
-    abstract class CommomMatchNode : QueryNodeChain
+    abstract class CommomMatchNode : NodeChain
     {
         public Node matchVariable;
 
@@ -111,7 +137,7 @@ namespace QueryEngine {
     /// <summary>
     /// Match divider serves as a separator of multiple patterns in query.
     /// </summary>
-    class MatchDivider : QueryNodeChain
+    class MatchDividerNode : NodeChain
     {
         public override void Accept<T>(IVisitor<T> visitor)
         {
@@ -147,11 +173,47 @@ namespace QueryEngine {
     }
 
 
-    #endregion MatchExpressionNodes
+    #endregion MatchNodes
+
+    #region OrderByNodes
+
+    /// <summary>
+    /// Node representing one ordering.
+    /// Contains information whether it is ascending order or descending and 
+    /// expression to evaluate against.
+    /// </summary>
+    class OrderTermNode : NodeChain
+    {
+        public bool isAscending;
+        public Node exp;
+        public OrderTermNode() { }
+
+        public override void Accept<T>(IVisitor<T> visitor)
+        {
+            visitor.Visit(this);
+        }
+
+        public void AddExpression(Node expr)
+        {
+            this.exp = expr;
+        }
+
+        public void SetIsAscending(bool isAscending)
+        {
+            this.isAscending = isAscending;
+        }
+    }
 
 
 
-    class ExpressionNode : QueryNodeChain
+
+    #endregion OrderByNodes
+
+
+
+    #region ExprNodes
+
+    class ExpressionNode : Node
     {
 
         public Node exp;
@@ -173,7 +235,6 @@ namespace QueryEngine {
         }
 
     }
-
 
     /// <summary>
     /// Varible node serves as a holder for Name of varibles and possibly selection of their properties.
@@ -208,9 +269,6 @@ namespace QueryEngine {
         }
     }
 
-
-
-
     /// <summary>
     /// Stores a indetifier as a string.
     /// </summary>
@@ -227,4 +285,5 @@ namespace QueryEngine {
             visitor.Visit(this);
         }
     }
+    #endregion ExprNodes
 }

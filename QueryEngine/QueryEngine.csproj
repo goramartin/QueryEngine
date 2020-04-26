@@ -67,6 +67,8 @@
     <Compile Include="Expression\VariableReference.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="QueryObjects\Match\MatchFactory.cs" />
+    <Compile Include="QueryObjects\OrderBy\Comparer\Comparer.cs" />
+    <Compile Include="QueryObjects\OrderBy\QueryOrderBy.cs" />
     <Compile Include="QueryObjects\Results\MatchResults.cs" />
     <Compile Include="QueryObjects\Results\RowProxy.cs" />
     <Compile Include="QueryObjects\Select\Printer\PrintVariables.cs" />
@@ -107,6 +109,8 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="QueryObjects\OrderBy\Sort\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

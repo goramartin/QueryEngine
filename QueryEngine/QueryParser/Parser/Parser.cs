@@ -76,7 +76,7 @@ namespace QueryEngine
             {
                 IncrementPosition();
                 Node node = ParseVarExprForSelectExpr(tokens);
-                if (node == null) throw new ArgumentException("Failed to parse Select Expresion.");
+                if (node == null) throw new ArgumentException("SelectParser, Failed to parse Select Expresion.");
                 selectNode.AddNext(node);
             }
 
@@ -105,11 +105,46 @@ namespace QueryEngine
             else
             {
                 // expression as label, ... 
-                return ParseExpressionNode(tokens);
+                return ParseSelectPrintTermExpression(tokens);
             }
         }
 
-        
+        /// <summary>
+        /// Parses select print term node.
+        /// Expecting: expression, expression
+        /// </summary>
+        /// <param name="tokens"> Tokens to parse. </param>
+        /// <returns> Chain of variable nodes. </returns>
+        static private Node ParseSelectPrintTermExpression(List<Token> tokens)
+        {
+            SelectPrintTermNode selectPrintTermNode = new SelectPrintTermNode();
+
+            var expression = ParseExpressionNode(tokens);
+            if (expression == null) throw new ArgumentNullException($"SelectParser, expected expression.");
+            else selectPrintTermNode.AddExpression(expression);
+
+            // Comma signals there is another expression node, next expression must follow.
+            if (CheckToken(position, Token.TokenType.Comma, tokens))
+            {
+                IncrementPosition();
+                selectPrintTermNode.AddNext(ParseNextSelectPrintNode(tokens));
+            }
+            return selectPrintTermNode;
+        }
+
+        /// <summary>
+        /// Parses next select print term node.
+        /// </summary>
+        /// <param name="tokens"> Tokens to parse. </param>
+        /// <returns> Chain of print term nodes. </returns>
+        static private Node ParseNextSelectPrintNode(List<Token> tokens)
+        {
+            Node nextSelectPrintTermNode = ParseSelectPrintTermExpression(tokens);
+            if (nextSelectPrintTermNode == null)
+                throw new ArgumentException("SelectParser, exprected Indentifier after comma.");
+            else return nextSelectPrintTermNode;
+        }
+
         #endregion SELECT
 
 
@@ -437,7 +472,7 @@ namespace QueryEngine
             if (!CheckToken(position, Token.TokenType.Comma, tokens)) return null;
             IncrementPosition();
 
-            MatchDivider matchDivider = new MatchDivider();
+            MatchDividerNode matchDivider = new MatchDividerNode();
 
 
             Node newPattern = ParseVertexExpr(tokens);
@@ -448,9 +483,6 @@ namespace QueryEngine
 
 
         #endregion MATCH
-
-
-
 
         #region Expression
 
@@ -474,26 +506,7 @@ namespace QueryEngine
                 IncrementPosition();
             }
 
-            // Comma signals there is another expression node, next expression must follow.
-            if (CheckToken(position, Token.TokenType.Comma, tokens))
-            {
-                IncrementPosition();
-                expressionNode.AddNext(ParseNextExpressionNode(tokens));
-            }
             return expressionNode;
-        }
-
-        /// <summary>
-        /// Parses next variable node.
-        /// </summary>
-        /// <param name="tokens"> Tokens to parse. </param>
-        /// <returns> Chain of variable nodes. </returns>
-        static private Node ParseNextExpressionNode(List<Token> tokens)
-        {
-            Node nextExpressionNode = ParseExpressionNode(tokens);
-            if (nextExpressionNode == null)
-                throw new ArgumentException("VariableParser, exprected Indentifier after comma.");
-            else return nextExpressionNode;
         }
 
 

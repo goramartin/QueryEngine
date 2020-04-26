@@ -45,7 +45,7 @@ namespace QueryEngine
         /// </summary>
         /// <param name="expressionHolder"> Expression. </param>
         /// <param name="typeofPrintVariable"> Type of print variable. (Same as the expression type). </param>
-        /// <returns></returns>
+        /// <returns> Specialised print variable. </returns>
         public static PrintVariable PrintVariableFactory(ExpressionHolder expressionHolder, Type typeofPrintVariable)
         {
             if (typeofPrintVariable == (typeof(int)))

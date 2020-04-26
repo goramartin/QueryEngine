@@ -5,6 +5,9 @@
     Select object is included inside Query class and prepresents printing of an input of a query.
     Select object remembers the columns the user wants to print and creates an appropriate printer and formater
     based on user needs.
+
+    Notice that during creation of the select expression it only stores the expression holders.
+    It is because printing needs both print variables and expression holders to specify headings. 
  */
 
 
