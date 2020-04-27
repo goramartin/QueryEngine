@@ -47,7 +47,7 @@ namespace QueryEngine
 
 
         /// <summary>
-        /// Creates Select expression
+        /// Creates Select object.
         /// Parsing is done beforehand because first we need to parse match expression for variable definitions.
         /// </summary>
         /// <param name="graph"> Property graph. </param>

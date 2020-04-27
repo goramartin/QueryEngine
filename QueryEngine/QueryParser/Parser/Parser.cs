@@ -8,7 +8,33 @@
   to the next token after the last token parsed by methods above.
   
   Visitors then create structures that are used to create query objects.
+
+  Grammar:
+  Query -> Select Match (OrderBy)? ;
   
+  Select -> SELECT (\*|(SelectPrintTerm (, SelectPrintTerm)*)
+  SelectPrintTerm -> Expression
+  
+  Match -> MATCH MatchTerm (, MatchTerm)*
+  MatchTerm -> Vertex (Edge Vertex)*
+  Vertex -> (MatchVariable)
+  Edge -> (EmptyAnyEdge|EmptyOutEdge|EmptyInEdge|AnyEdge|InEdge|OutEdge) 
+  EmptyAnyEdge -> -
+  EmptyOutEdge -> <-
+  EmptyInEdge -> ->
+  AnyEdge -> -[MatchVariable]-
+  InEdge -> <-[MatchVariable]-
+  OutEdge -> -[MatchVariable]->
+  MatchVariable -> (VariableNameReference)?(:TableType)?
+  TableType -> IDENTIFIER
+ 
+  OrderBy -> ORDER BY OrderTerm (, OrderTerm)*
+  OrderTerm -> Expression (ASC|DESC)?
+ 
+  Expression -> VariableNameReference(.VariablePropertyReference)? AS Label
+  Label -> IDENTIFIER
+  VariableNameReference -> IDENTIFIER
+  VariablePropertyReference -> IDENTIFIER
  */
 
 using System;
@@ -24,7 +50,8 @@ namespace QueryEngine
     /// Parsing should always start with parsing select and match
     /// since they are compulsory to use.
     /// Parsing Select always starts at position 0.
-    /// When finished parsing query word, the position is set on the next token.
+    /// When finished parsing query token, the position is set on the next token.
+    /// Query -> Select Match (OrderBy)? ;
     /// </summary>
     static class Parser
     {
@@ -61,22 +88,24 @@ namespace QueryEngine
 
         /// <summary>
         /// Parses select query part.
-        /// Select is only parsing variables, that is XXX.YYY inputs separated by comma.
+        /// Select is only parsing expressions separated by comma.
+        /// Select -> SELECT (*|(SelectPrintTerm (, SelectPrintTerm)*)
+        /// SelectPrintTerm -> Expression
         /// </summary>
         /// <param name="tokens"> Token list to parse </param>
         /// <returns> Tree representation of a SELECT query part. </returns>
-        static public SelectNode ParseSelectExpr(List<Token> tokens)
+        static public SelectNode ParseSelect(List<Token> tokens)
         {
             SelectNode selectNode = new SelectNode();
 
             // Parsing Select always starts at position 0.
             if (position > 0 || tokens[position].type != Token.TokenType.Select)
-                throw new ArgumentException("SelectParser, Could not find a Select token, or position is not set at 0.");
+                throw new ArgumentException("SelectParser, could not find a Select token, or position is not set at 0.");
             else
             {
                 IncrementPosition();
-                Node node = ParseVarExprForSelectExpr(tokens);
-                if (node == null) throw new ArgumentException("SelectParser, Failed to parse Select Expresion.");
+                Node node = ParseVarExprForSelect(tokens);
+                if (node == null) throw new NullReferenceException("SelectParser, cailed to parse Select Expresion.");
                 selectNode.AddNext(node);
             }
 
@@ -90,7 +119,7 @@ namespace QueryEngine
         /// </summary>
         /// <param name="tokens"> Tokens to parse </param>
         /// <returns> Chain of variable nodes </returns>
-        static private Node ParseVarExprForSelectExpr(List<Token> tokens)
+        static private Node ParseVarExprForSelect(List<Token> tokens)
         {
             VariableNode variableNode = null;
 
@@ -104,8 +133,8 @@ namespace QueryEngine
             }
             else
             {
-                // expression as label, ... 
-                return ParseSelectPrintTermExpression(tokens);
+                // SelectPrintTerm
+                return ParseSelectPrintTerm(tokens);
             }
         }
 
@@ -115,12 +144,12 @@ namespace QueryEngine
         /// </summary>
         /// <param name="tokens"> Tokens to parse. </param>
         /// <returns> Chain of variable nodes. </returns>
-        static private Node ParseSelectPrintTermExpression(List<Token> tokens)
+        static private Node ParseSelectPrintTerm(List<Token> tokens)
         {
             SelectPrintTermNode selectPrintTermNode = new SelectPrintTermNode();
 
             var expression = ParseExpressionNode(tokens);
-            if (expression == null) throw new ArgumentNullException($"SelectParser, expected expression.");
+            if (expression == null) throw new NullReferenceException($"SelectParser, expected expression.");
             else selectPrintTermNode.AddExpression(expression);
 
             // Comma signals there is another expression node, next expression must follow.
@@ -139,34 +168,46 @@ namespace QueryEngine
         /// <returns> Chain of print term nodes. </returns>
         static private Node ParseNextSelectPrintNode(List<Token> tokens)
         {
-            Node nextSelectPrintTermNode = ParseSelectPrintTermExpression(tokens);
+            Node nextSelectPrintTermNode = ParseSelectPrintTerm(tokens);
             if (nextSelectPrintTermNode == null)
-                throw new ArgumentException("SelectParser, exprected Indentifier after comma.");
+                throw new NullReferenceException("SelectParser, expected Indentifier after comma.");
             else return nextSelectPrintTermNode;
         }
 
         #endregion SELECT
 
-
         #region MATCH
 
         /// <summary>
         /// Parsing Match expression, chains of vertex -> edge -> vertex expressions.
+        /// Match -> MATCH MatchTerm (, MatchTerm)*
+        /// MatchTerm -> Vertex (Edge Vertex)*
+        /// Vertex -> (MatchVariable)
+        /// Edge -> (EmptyAnyEdge|EmptyOutEdge|EmptyInEdge|AnyEdge|InEdge|OutEdge) 
+        /// EmptyAnyEdge -> -
+        /// EmptyOutEdge -> <-
+        /// EmptyInEdge -> ->
+        /// AnyEdge -> -[MatchVariable]-
+        /// InEdge -> <-[MatchVariable]-
+        /// OutEdge -> -[MatchVariable]->
+        /// MatchVariable -> (VariableNameReference)?(:TableType)?
+        /// TableType -> IDENTIFIER
+        /// VariableNameReference -> IDENTIFIER
         /// </summary>
         /// <param name="tokens"> Token list to parse </param>
         /// <returns> Tree representation of Match expression </returns>
-        static public MatchNode ParseMatchExpr(List<Token> tokens)
+        static public MatchNode ParseMatch(List<Token> tokens)
         {
             MatchNode matchNode = new MatchNode();
 
             // We expect after reading Select expr that the position is set on the Match token.
             if (!CheckToken(position, Token.TokenType.Match, tokens))
-                throw new ArgumentException("SelectParser, position is not set at Match Token.");
+                throw new ArgumentException("MatchParser, position is not set at Match Token.");
             else
             {
                 IncrementPosition();
-                Node node = ParseVertexExpr(tokens);
-                if (node == null) throw new ArgumentException("Failed to parse Match Expresion.");
+                Node node = ParseVertex(tokens);
+                if (node == null) throw new NullReferenceException("MatchParser, Failed to parse Match Expresion.");
                 matchNode.AddNext(node);
             }
             return matchNode;
@@ -179,7 +220,7 @@ namespace QueryEngine
         /// </summary>
         /// <param name="tokens"> Tokens to parse </param>
         /// <returns> Variable node </returns>
-        static private Node ParseVarForMatchExpr(List<Token> tokens)
+        static private Node ParseMatchVariable(List<Token> tokens)
         {
             MatchVariableNode matchVariableNode = new MatchVariableNode();
 
@@ -193,7 +234,7 @@ namespace QueryEngine
             {
                 IncrementPosition();
                 Node identifierNode = ParseIdentifierExrp(tokens);
-                if (identifierNode == null) throw new ArgumentException("VariableForMatchParser, exprected Indentifier after double dot.");
+                if (identifierNode == null) throw new NullReferenceException("MatchParser, expected Indentifier after double dot.");
                 else matchVariableNode.AddVariableType(identifierNode);
                 IncrementPosition();
             }
@@ -207,19 +248,19 @@ namespace QueryEngine
         /// </summary>
         /// <param name="tokens"> Tokens to parse </param>
         /// <returns> Vertex node </returns>
-        static private Node ParseVertexExpr(List<Token> tokens)
+        static private Node ParseVertex(List<Token> tokens)
         {
             VertexNode vertexNode = new VertexNode();
 
             CheckLeftParen(tokens);
             //Parse Values of the variable.
-            Node variableNode = ParseVarForMatchExpr(tokens);
+            Node variableNode = ParseMatchVariable(tokens);
             vertexNode.AddMatchVariable(variableNode);
             CheckRightParen(tokens);
 
             //Position incremented from leaving function PsrseVariable.
             //Try parse an Edge.
-            Node edgeNode = ParseEdgeExpr(tokens);
+            Node edgeNode = ParseEdge(tokens);
             if (edgeNode != null)
             {
                 vertexNode.AddNext(edgeNode);
@@ -241,21 +282,21 @@ namespace QueryEngine
         /// </summary>
         /// <param name="tokens"> Tokens to parse. </param>
         /// <returns> Chain of vertex/edge nodes. </returns>
-        static private Node ParseEdgeExpr(List<Token> tokens)
+        static private Node ParseEdge(List<Token> tokens)
         {
             EdgeNode edgeNode = null;
 
-            edgeNode = (EdgeNode)TryParseAnonymousEdge(tokens);
+            edgeNode = (EdgeNode)TryParseEmptyEdge(tokens);
             if (edgeNode == null)
             {
-                edgeNode =(EdgeNode)ParseEdgeWithVar(tokens);
+                edgeNode =(EdgeNode)ParseEdgeWithMatchVariable(tokens);
                 if (edgeNode == null) return null;
                 // to do check end 
             }
 
-            Node vertexNode = ParseVertexExpr(tokens);
+            Node vertexNode = ParseVertex(tokens);
             if (vertexNode != null) edgeNode.AddNext(vertexNode);
-            else throw new ArgumentException("ParseEdge, expected vertex.");
+            else throw new NullReferenceException("MatchParser, expected vertex.");
 
             return edgeNode;
 
@@ -265,22 +306,22 @@ namespace QueryEngine
         /// </summary>
         /// <param name="tokens"> Tokens to parse. </param>
         /// <returns> Anonymous edge or null. </returns>
-        static private Node TryParseAnonymousEdge(List<Token> tokens)
+        static private Node TryParseEmptyEdge(List<Token> tokens)
         {
             EdgeNode edgeNode = new EdgeNode();
-            if (CheckAnonymousAnyEdge(tokens))
+            if (CheckEmptyAnyEdge(tokens))
             {
                 edgeNode.SetEdgeType(EdgeType.AnyEdge);
                 IncrementPosition();
                 return edgeNode;
             }
-            else if (CheckAnonymousOutEdge(tokens))
+            else if (CheckEmptyOutEdge(tokens))
             {
                 edgeNode.SetEdgeType(EdgeType.OutEdge);
                 IncrementPositionBy(2);
                 return edgeNode;
             }
-            else if (CheckAnonymousInEdge(tokens))
+            else if (CheckEmptyInEdge(tokens))
             {
                 edgeNode.SetEdgeType(EdgeType.InEdge);
                 IncrementPositionBy(2);
@@ -294,7 +335,7 @@ namespace QueryEngine
         /// </summary>
         /// <param name="tokens">Tokens to parse.</param>
         /// <returns> True on matched pattern.</returns>
-        private static bool CheckAnonymousAnyEdge(List<Token> tokens)
+        private static bool CheckEmptyAnyEdge(List<Token> tokens)
         {
             if (CheckToken(position, Token.TokenType.Dash, tokens) &&
                 CheckToken(position + 1, Token.TokenType.LeftParen, tokens)) return true;
@@ -306,7 +347,7 @@ namespace QueryEngine
         /// </summary>
         /// <param name="tokens">Tokens to parse.</param>
         /// <returns> True on matched pattern.</returns>
-        private static bool CheckAnonymousOutEdge(List<Token> tokens)
+        private static bool CheckEmptyOutEdge(List<Token> tokens)
         {
             if (CheckToken(position, Token.TokenType.Dash, tokens) &&
                 CheckToken(position + 1, Token.TokenType.Greater, tokens)  &&
@@ -319,7 +360,7 @@ namespace QueryEngine
         /// </summary>
         /// <param name="tokens">Tokens to parse.</param>
         /// <returns> True on matched pattern.</returns>
-        private static bool CheckAnonymousInEdge(List<Token> tokens)
+        private static bool CheckEmptyInEdge(List<Token> tokens)
         {
             if (CheckToken(position, Token.TokenType.Less, tokens) &&
                CheckToken(position + 1, Token.TokenType.Dash, tokens) &&
@@ -333,7 +374,7 @@ namespace QueryEngine
         /// </summary>
         /// <param name="tokens">Tokens to parse.</param>
         /// <returns> Null on fault match or edge node.</returns>
-        private static Node ParseEdgeWithVar(List<Token> tokens)
+        private static Node ParseEdgeWithMatchVariable(List<Token> tokens)
         {
             EdgeNode edgeNode = null;
 
@@ -364,7 +405,7 @@ namespace QueryEngine
             EdgeNode edgeNode = new EdgeNode();
 
             CheckLeftBrace(tokens);           
-            edgeNode.AddMatchVariable(ParseVarForMatchExpr(tokens));
+            edgeNode.AddMatchVariable(ParseMatchVariable(tokens));
             CheckRightBrace(tokens);
 
 
@@ -396,7 +437,7 @@ namespace QueryEngine
             else IncrementPosition();
 
             CheckLeftBrace(tokens);
-            edgeNode.AddMatchVariable(ParseVarForMatchExpr(tokens));
+            edgeNode.AddMatchVariable(ParseMatchVariable(tokens));
             CheckRightBrace(tokens);
 
             // -
@@ -405,7 +446,7 @@ namespace QueryEngine
                 IncrementPosition();
                 edgeNode.SetEdgeType(EdgeType.InEdge);
             }
-            else throw new ArgumentException($"EdgeParser, expected ending of edge.");
+            else throw new ArgumentException($"MatchParser, expected ending of edge.");
 
             return edgeNode;
         }
@@ -446,7 +487,7 @@ namespace QueryEngine
         {
             // (
             if (CheckToken(position, Token.TokenType.LeftParen, tokens)) IncrementPosition();
-            else throw new ArgumentException("MatchParser variable, expected left parent.");
+            else throw new ArgumentException("MatchParser, expected left parent.");
         }
         /// <summary>
         /// Check token for left parent.
@@ -458,7 +499,7 @@ namespace QueryEngine
         {
             // )
             if (CheckToken(position, Token.TokenType.RightParen, tokens)) IncrementPosition();
-            else throw new ArgumentException("MatchParser variable, expected right parent.");
+            else throw new ArgumentException("MatchParser, expected right parent.");
         }
     
         /// <summary>
@@ -475,8 +516,8 @@ namespace QueryEngine
             MatchDividerNode matchDivider = new MatchDividerNode();
 
 
-            Node newPattern = ParseVertexExpr(tokens);
-            if (newPattern == null) throw new ArgumentException("ParseNewPatern, expected new pattern.");
+            Node newPattern = ParseVertex(tokens);
+            if (newPattern == null) throw new NullReferenceException("MatchParser, expected Vertex after comma.");
             matchDivider.AddNext(newPattern);
             return matchDivider;
         }
@@ -484,10 +525,103 @@ namespace QueryEngine
 
         #endregion MATCH
 
+        #region ORDERBY
+
+
+        /// <summary>
+        /// Parses order by expression. 
+        /// Order by expression consists only of expression optionally followed by ASC or DESC token separated by comma.
+        /// OrderBy -> ORDER BY OrderTerm (, OrderTerm)*
+        /// OrderTerm -> Expression (ASC|DESC)?
+        /// </summary>
+        /// <param name="tokens"> Token list to parse </param>
+        /// <returns> Tree representation of a order by or null if the tokens are missing order token on its first position. </returns>
+        static public OrderByNode ParseOrderBy(List<Token> tokens)
+        {
+            OrderByNode orderByNode = new OrderByNode();
+
+            // We expect after reading Select expr that the position is set on the Order token.
+            // ORDER
+            if (!CheckToken(position, Token.TokenType.Order, tokens))
+                return null;
+            else
+            {
+
+                IncrementPosition();
+                // BY
+                if (!CheckToken(position, Token.TokenType.By, tokens))
+                    throw new ArgumentException("OrderByParser, failed to parse OrderBy Expresion. Missing BY token");
+                else IncrementPosition();
+                
+
+                Node node = ParseOrderTerm(tokens);
+                if (node == null) throw new NullReferenceException("OrderByParser, failed to parse order by Expresion. OrderByTerm node is null.");
+                orderByNode.AddNext(node);
+                return orderByNode;
+            }
+        }
+
+        /// <summary>
+        /// Parses order term. 
+        /// Expression (ASC|DESC)?, (Expression (ASC|DESC)?)*
+        /// </summary>
+        /// <param name="tokens"> Tokens to parse. </param>
+        /// <returns> Order term node. </returns>
+        private static Node ParseOrderTerm(List<Token> tokens)
+        {
+            OrderTermNode orderTermNode = new OrderTermNode();
+
+            // Expression
+            var expression = ParseExpressionNode(tokens);
+            if (expression == null) 
+                throw new NullReferenceException($"OrderByParser, expected expression.");
+            else orderTermNode.AddExpression(expression);
+
+            // ASC|DESC
+            orderTermNode.SetIsAscending(ParseAscDesc(tokens));
+
+            // Comma singnals another order term.
+            if (CheckToken(position, Token.TokenType.Comma, tokens))
+            {
+                IncrementPosition();
+                orderTermNode.AddNext(ParseOrderTerm(tokens));
+            }
+
+            return orderTermNode;
+        }
+
+        /// <summary>
+        /// Parses order of an order term.
+        /// (ASC|DESC)?
+        /// If missing, it is implicitly set to ascending order.
+        /// </summary>
+        /// <param name="tokens"> Tokens to parse. </param>
+        /// <returns> True for ascending otherwise false. </returns>
+        private static bool ParseAscDesc(List<Token> tokens)
+        {
+            if (CheckToken(position, Token.TokenType.Asc, tokens))
+            {
+                IncrementPosition();
+                return true;
+            }
+            else if (CheckToken(position, Token.TokenType.Desc, tokens))
+            {
+                IncrementPosition();
+                return false;
+            }
+            else return true;
+        }
+
+        #endregion ORDERBY
+
         #region Expression
 
         /// <summary>
         /// Parsing of reference variables in select expression: var.PropName AS Label
+        /// Expression -> VariableNameReference(.VariablePropertyReference)? AS Label
+        /// Label -> IDENTIFIER
+        /// VariableNameReference -> IDENTIFIER
+        /// VariablePropertyReference -> IDENTIFIER
         /// </summary>
         /// <param name="tokens"> Tokens to parse. </param>
         /// <returns> Chain of variable nodes. </returns>
@@ -498,10 +632,11 @@ namespace QueryEngine
             // Expecting successful parse otherwise it would throw inside.
             expressionNode.AddExpression(ParseExpression(tokens));
 
-            // Label for an expression 
+            // AS Label 
             if (CheckToken(position, Token.TokenType.AsLabel, tokens))
             {
                 IncrementPosition();
+                // Label
                 expressionNode.AddLabel(ParseReferenceName(tokens));
                 IncrementPosition();
             }
@@ -545,7 +680,7 @@ namespace QueryEngine
             // Expecting identifier.
             Node ident = ParseIdentifierExrp(tokens);
             if (ident == null)
-                throw new ArgumentNullException("VariableParser, failed to parse ident.");
+                throw new NullReferenceException("ExpressionParser, failed to parse identifier.");
             return ident;
         }
 
@@ -563,12 +698,6 @@ namespace QueryEngine
 
 
         #endregion Expression
-
-
-
-
-
-
     }
 
 }

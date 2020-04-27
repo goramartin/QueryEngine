@@ -154,7 +154,6 @@ namespace QueryEngine
                 this.stringBuilder.Append(tmp);
                 this.PadWithChar(Formater.BaseColumnLength - tmp.Length, ' ');
             }
-
            
             this.Flush();
 

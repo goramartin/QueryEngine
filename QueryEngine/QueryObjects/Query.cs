@@ -51,7 +51,7 @@ namespace QueryEngine
             Parser.ResetPosition();
             this.variableMap = new VariableMap();
 
-            SelectNode selectNode = Parser.ParseSelectExpr(tokens);
+            SelectNode selectNode = Parser.ParseSelect(tokens);
             this.match = new MatchObject(tokens, variableMap, graph, ThreadCount, VerticesPerRound);
             this.select = new SelectObject(graph, variableMap, selectNode, printer, formater, fileName);
 

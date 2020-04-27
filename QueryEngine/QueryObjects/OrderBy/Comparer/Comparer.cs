@@ -93,7 +93,7 @@ namespace QueryEngine
         /// <param name="expressionHolder"> Expression to be evaluated. </param>
         /// <param name="ascending"> Whether to use ascending order or descending. </param>
         /// <param name="typeOfExpression"> Type of comparer. </param>
-        /// <returns></returns>
+        /// <returns> Specialised comparer </returns>
         public static ExpressionComparer ExpressionCompaperFactory(ExpressionHolder expressionHolder, bool ascending, Type typeOfExpression)
         {
             if (typeOfExpression == typeof(int))

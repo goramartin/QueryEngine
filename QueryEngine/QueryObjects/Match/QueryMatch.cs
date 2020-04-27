@@ -1,7 +1,7 @@
 ﻿
 /*! \file
   
-  This file includes defintion of match object.
+  This file includes definition of match object.
   This class should contain information from the query match expression that is,
   pattern to search and algorithm to perform the search.
   Note that during this class creating happens also definitions 
@@ -33,10 +33,10 @@ namespace QueryEngine
         private MatchResultsStorage queryResults;
 
         /// <summary>
-        /// Creates Match expression
+        /// Creates Match object.
         /// </summary>
         /// <param name="tokens"> Tokens to be parsed. (Expecting first token to be a Match token.)</param>
-        /// <param name="graph"> Graph to be conduct a query on. </param>
+        /// <param name="graph"> Graph to conduct a query on. </param>
         /// <param name="variableMap"> Empty map of variables. </param>
         /// <param name="ThreadCount"> Number of threads used for matching.</param>
         /// <param name="VerticesPerRound"> Number of vertices one thread gets per round. Used only if more than one thread is used.</param>
@@ -47,7 +47,7 @@ namespace QueryEngine
 
             // Create parse tree of match part of query and
             // create a shallow pattern
-            MatchNode matchNode = Parser.ParseMatchExpr(tokens);
+            MatchNode matchNode = Parser.ParseMatch(tokens);
             MatchVisitor matchVisitor = new MatchVisitor(graph.NodeTables, graph.EdgeTables);
             matchNode.Accept(matchVisitor);
 

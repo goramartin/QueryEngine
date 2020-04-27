@@ -113,9 +113,16 @@ namespace QueryEngine
             Parser.ResetPosition();
             var map = new VariableMap();
 
-            SelectNode selectNode = Parser.ParseSelectExpr(tokens);
+            SelectNode selectNode = Parser.ParseSelect(tokens);
             var match = new MatchObject(tokens, map, g, 2, 2);
              var select = new SelectObject(g, map, selectNode, "console", "simple");
+
+
+            OrderByNode orderNode = Parser.ParseOrderBy(tokens);
+            var orderV = new OrderByVisitor(g.Labels, map);
+            orderV.Visit(orderNode);
+            var a = orderV.GetResult();
+
 
             var tmp = match.Search();
 
