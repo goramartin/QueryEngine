@@ -63,8 +63,8 @@ namespace QueryEngine
     /// Specialised print variable.
     /// Does explicit call to evaluate the containing expression.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    class PrintVariable<T> : PrintVariable
+    /// <typeparam name="T"> Type of value that will be computed and printed. </typeparam>
+    sealed class PrintVariable<T> : PrintVariable
     {
         /// <summary>
         /// Constructs specialised print variable.

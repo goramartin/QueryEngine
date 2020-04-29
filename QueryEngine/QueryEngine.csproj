@@ -68,22 +68,31 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="QueryObjects\Match\MatchFactory.cs" />
     <Compile Include="QueryObjects\OrderBy\Comparer\Comparer.cs" />
-    <Compile Include="QueryObjects\OrderBy\QueryOrderBy.cs" />
+    <Compile Include="QueryObjects\OrderBy\OrderByObject.cs" />
+    <Compile Include="QueryObjects\OrderBy\Sort\Sorter.cs" />
     <Compile Include="QueryObjects\Results\MatchResults.cs" />
     <Compile Include="QueryObjects\Results\RowProxy.cs" />
-    <Compile Include="QueryObjects\Select\Printer\PrintVariables.cs" />
+    <Compile Include="QueryObjects\Select\Formater\MarkdownFormater.cs" />
+    <Compile Include="QueryObjects\Select\Formater\SimpleFormater.cs" />
+    <Compile Include="QueryObjects\Select\Printer\ConsolePrinter.cs" />
+    <Compile Include="QueryObjects\Select\Printer\FilePrinter.cs" />
+    <Compile Include="QueryObjects\Select\PrintVariables\PrintVariable.cs" />
     <Compile Include="QueryParser\ParsedPattern.cs" />
     <Compile Include="QueryParser\Parser\ParseTreeNodes.cs" />
+    <Compile Include="QueryParser\Parser\Visitor\ExpressionVisitor.cs" />
+    <Compile Include="QueryParser\Parser\Visitor\MatchVisitor.cs" />
+    <Compile Include="QueryParser\Parser\Visitor\OrderByVisitor.cs" />
+    <Compile Include="QueryParser\Parser\Visitor\SelectVisitor.cs" />
     <Compile Include="QueryParser\Tokenizer\Token.cs" />
     <Compile Include="QueryParser\Tokenizer\Tokenizer.cs" />
-    <Compile Include="QueryParser\Parser\Visitors.cs" />
-    <Compile Include="QueryObjects\Select\Printer\Formater.cs" />
+    <Compile Include="QueryParser\Parser\Visitor\Visitor.cs" />
+    <Compile Include="QueryObjects\Select\Formater\Formater.cs" />
     <Compile Include="QueryObjects\Select\Printer\Printer.cs" />
     <Compile Include="QueryObjects\Results\Results.cs" />
-    <Compile Include="QueryObjects\Match\QueryMatch.cs" />
+    <Compile Include="QueryObjects\Match\MatchObject.cs" />
     <Compile Include="QueryParser\Parser\Parser.cs" />
     <Compile Include="QueryObjects\Query.cs" />
-    <Compile Include="QueryObjects\Select\QuerySelect.cs" />
+    <Compile Include="QueryObjects\Select\SelectObject.cs" />
     <Compile Include="DB\Table\Table.cs" />
     <Compile Include="DB\Graph.cs" />
     <Compile Include="QueryObjects\QueryVariableMap.cs" />
@@ -96,21 +105,19 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Edges.txt">
+    <Content Include="DataFiles\Edges.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="EdgeTypes.txt">
+    <Content Include="DataFiles\EdgeTypes.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Nodes.txt">
+    <Content Include="DataFiles\Nodes.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="NodeTypes.txt">
+    <Content Include="DataFiles\NodeTypes.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="QueryObjects\OrderBy\Sort\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

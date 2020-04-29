@@ -28,8 +28,8 @@ namespace QueryEngine
     {
         int ColumnCount { get; }
         int Count { get; }
-        RowProxy this[int row] { get; }
-
+        RowProxy this[int rowIndex] { get; }
+        void SwapRows(int firstRowIndex, int secondRowIndex);
     }
 
     /// <summary>
@@ -71,18 +71,17 @@ namespace QueryEngine
         /// <summary>
         /// Accesses table of results.
         /// </summary>
-        /// <param name="row"> Row of a table. </param>
+        /// <param name="rowIndex"> Row of a table. </param>
         /// <returns> Element on a given position. </returns>
-        public RowProxy this[int row]
+        public RowProxy this[int rowIndex]
         {
             get
             {
-                if (row < 0 || row >= this.Count) 
+                if (rowIndex < 0 || rowIndex >= this.Count) 
                     throw new ArgumentOutOfRangeException($"{this.GetType()}, row is out of range.");
-                else return new RowProxy(this.results, row);
+                else return new RowProxy(this.results, rowIndex);
             }
         }
-
 
         /// <summary>
         /// Lazy enum.
@@ -98,6 +97,30 @@ namespace QueryEngine
         IEnumerator IEnumerable.GetEnumerator()
         {
             return this.GetEnumerator();
+        }
+
+        /// <summary>
+        /// Swaps two rows in the table on given indeces.
+        /// </summary>
+        /// <param name="firstRowIndex"> First row index.</param>
+        /// <param name="secondRowIndex"> Second row index. </param>
+        public void SwapRows(int firstRowIndex, int secondRowIndex)
+        {
+            if (firstRowIndex < 0 || firstRowIndex >= this.Count)
+                throw new ArgumentOutOfRangeException($"{this.GetType()}, first row index is out of range.");
+            else if (secondRowIndex < 0 || secondRowIndex >= this.Count)
+                throw new ArgumentOutOfRangeException($"{this.GetType()}, second row index is out of range.");
+            else if (secondRowIndex == firstRowIndex) return;
+            else
+            {
+                Element tmpElement = null;
+                for (int i = 0; i < this.ColumnCount; i++)
+                {
+                    tmpElement = this.results[i][firstRowIndex];
+                    this.results[i][firstRowIndex] = this.results[i][secondRowIndex];
+                    this.results[i][secondRowIndex] = tmpElement;
+                }
+            }
         }
     }
 

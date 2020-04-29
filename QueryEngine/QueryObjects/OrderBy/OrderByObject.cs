@@ -1,4 +1,13 @@
-﻿using System;
+﻿/*! \file 
+ 
+    This file includes definition of a order by object.
+    His purpose is to contain information about sorting of results from a query.
+    It contains a list of comparers that will be used during sorting.
+    
+ */
+
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +19,7 @@ namespace QueryEngine
     /// Class represents order by part of a query.
     /// It sorts given results with defined comparers.
     /// </summary>
-    class QueryOrderBy
+    sealed class OrderByObject
     {
         private List<IRowProxyComparer> comparers;
 
@@ -18,7 +27,7 @@ namespace QueryEngine
         /// Creates Order by object. 
         /// </summary>
         /// <param name="comparers"> List of comparers that the results will be sorted with.</param>
-        private QueryOrderBy(List<IRowProxyComparer> comparers)
+        private OrderByObject(List<IRowProxyComparer> comparers)
         {
             this.comparers = comparers;
         }
@@ -30,7 +39,7 @@ namespace QueryEngine
         /// <param name="graph"> Graph the query is computed on. </param>
         /// <param name="variableMap"> Map of query variables. </param>
         /// <returns> Null if there is no order by token or QueryOrderBy object.</returns>
-        public static QueryOrderBy CreateOrderBy(List<Token> tokens, Graph graph, VariableMap variableMap)
+        public static OrderByObject CreateOrderBy(List<Token> tokens, Graph graph, VariableMap variableMap)
         {
             OrderByNode orderNode = Parser.ParseOrderBy(tokens);
             if (orderNode == null) return null;
@@ -39,8 +48,21 @@ namespace QueryEngine
                 var orderVisitor = new OrderByVisitor(graph.Labels, variableMap);
                 orderVisitor.Visit(orderNode);
                 var comparers = orderVisitor.GetResult();
-                return new QueryOrderBy(comparers);
+                return new OrderByObject(comparers);
             }
         }
+
+        /// <summary>
+        /// Sorts given data.
+        /// </summary>
+        /// <param name="sortData"> Query reults to be sorted. </param>
+        /// <returns> Sorted data. </returns>
+        public IResults Sort(IResults sortData)
+        {
+            ISorter sorter = new Sorter(sortData);
+            return sorter.Sort();
+        }
+
+
     }
 }

@@ -23,7 +23,7 @@ namespace QueryEngine
     /// Class takes reader and processor that proccesses words from reader.
     /// Main purpose is to have a general way to create classes from files.
     /// </summary>
-    class CreatorFromFile<T> : ICreator<T>
+    sealed class CreatorFromFile<T> : ICreator<T>
     {
         IReader reader;
         IProcessor<T> processor;

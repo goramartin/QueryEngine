@@ -23,11 +23,12 @@ namespace QueryEngine
     /// Query represents query information, carrying it in each of the query objects.
     /// It is a facade for the query.
     /// </summary>
-    class Query
+    sealed class Query
     {
         VariableMap variableMap;
         SelectObject select;
         MatchObject match;
+        //OrderByObject orderBy;
         IResults results;
 
         /// <summary>

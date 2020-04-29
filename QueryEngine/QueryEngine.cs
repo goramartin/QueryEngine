@@ -22,7 +22,7 @@ namespace QueryEngine
     /// Class represents main algorithm loop where user inputs queries and subsequently they are computed
     /// and printed.
     /// </summary>
-    class QueryEngine
+    sealed class QueryEngine
     {
 
         /// <summary>
@@ -135,18 +135,18 @@ namespace QueryEngine
 
         static void Main(string[] args)
         {
-             try
-             {
-                    Run(args, Console.In);
+            try
+            {
+                //Run(args, Console.In);
             }
             catch (Exception e )
             {
-               Console.WriteLine(e);
-               Console.WriteLine("Press enter to close the application");
-               Console.ReadLine();
+                Console.WriteLine(e);
+                Console.WriteLine("Press enter to close the application");
+                Console.ReadLine();
             }
 
-           // TestClass.RunTest();
+            TestClass.RunTest();
             
         }
 

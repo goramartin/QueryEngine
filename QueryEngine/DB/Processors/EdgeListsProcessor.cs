@@ -29,7 +29,7 @@ namespace QueryEngine
     /// We suppose edges in datafile are stored based on id of the from vertex in ascending order.
     /// That is to say, having three vertices with ids 1, 2, 3... first all edges are from vertex 1, then edges from vertex 2 etc. 
     /// </summary>
-    class EdgeListProcessor : IProcessor<EdgeListHolder>
+    sealed class EdgeListProcessor : IProcessor<EdgeListHolder>
     {
         IProcessorState<EdgeListHolder> processorState;
         EdgeListHolder holder = new EdgeListHolder();
@@ -96,7 +96,7 @@ namespace QueryEngine
         /// Processes id of an edge.
         /// Creates new outgoing edge. Next state is processing of a type.
         /// </summary>
-        class EdgeIDState : IProcessorState<EdgeListHolder>
+        sealed class EdgeIDState : IProcessorState<EdgeListHolder>
         {
             static EdgeIDState instance =
              new EdgeIDState();
@@ -130,7 +130,7 @@ namespace QueryEngine
         /// Finds table assiciated with the edge and inserts the edge inside.
         /// Also sets the table for the edge.
         /// </summary>
-        class EdgeTypeState : IProcessorState<EdgeListHolder>
+        sealed class EdgeTypeState : IProcessorState<EdgeListHolder>
         {
             static EdgeTypeState instance =
              new EdgeTypeState();
@@ -159,7 +159,7 @@ namespace QueryEngine
         /// Note the Count is pointing to the empty space where the processed edge will be added in FinishParams.
         /// Also sets values to the opposite edge.
         /// </summary>
-        class EdgeFromIDState : IProcessorState<EdgeListHolder>
+        sealed class EdgeFromIDState : IProcessorState<EdgeListHolder>
         {
             static EdgeFromIDState instance =
              new EdgeFromIDState();
@@ -212,7 +212,7 @@ namespace QueryEngine
         /// Finds end vertex of an edge and sets him to the end position of out edge.
         /// Finishes processing of in edge and adds it to the appropriate table of the vertex.
         /// </summary>
-        class EdgeToIDState: EdgeParamsEndState
+        sealed class EdgeToIDState: EdgeParamsEndState
         {
             static EdgeToIDState instance =
              new EdgeToIDState();
@@ -244,7 +244,7 @@ namespace QueryEngine
         ///Get the position of property where adding the parameter.
         ///Add the parameter there.
         /// </summary>
-        class EdgeParameterState : EdgeParamsEndState
+        sealed class EdgeParameterState : EdgeParamsEndState
         {
             static EdgeParameterState instance =
              new EdgeParameterState();

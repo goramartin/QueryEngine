@@ -20,7 +20,7 @@ namespace QueryEngine
     /// Defines vertex match node.
     /// Description is provided inside abstract parent.
     /// </summary>
-    class DFSVertexMatch : DFSBaseMatch
+    sealed class DFSVertexMatch : DFSBaseMatch
     {
         public DFSVertexMatch() : base()
         { }
@@ -59,7 +59,7 @@ namespace QueryEngine
     /// Defines vertex match node.
     /// Description is provided inside abstract parent.
     /// </summary>
-    class DFSInEdgeMatch : DFSEdgeMatch
+    sealed class DFSInEdgeMatch : DFSEdgeMatch
     {
         public DFSInEdgeMatch() : base()
         { }
@@ -81,7 +81,7 @@ namespace QueryEngine
     /// Defines vertex match node.
     /// Description is provided inside abstract parent.
     /// </summary>
-    class DFSOutEdgeMatch : DFSEdgeMatch
+    sealed class DFSOutEdgeMatch : DFSEdgeMatch
     {
         public DFSOutEdgeMatch() : base()
         { }
@@ -99,7 +99,7 @@ namespace QueryEngine
 
     }
 
-    class DFSAnyEdgeMatch : DFSEdgeMatch
+    sealed class DFSAnyEdgeMatch : DFSEdgeMatch
     {
         public DFSAnyEdgeMatch() : base()
         { }

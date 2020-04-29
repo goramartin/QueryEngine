@@ -24,7 +24,7 @@ namespace QueryEngine
     /// Can be splited by a certain parsed pattern node which contains given string variable
     /// Is used when creating specialised pattern, such as DFS.
     /// </summary>
-    class ParsedPattern
+    sealed class ParsedPattern
     {
         public List<ParsedPatternNode> Pattern;
         public string splitBy;
@@ -151,13 +151,12 @@ namespace QueryEngine
 
     }
 
-
     /// <summary>
     /// Represents single Node when parsing match expression.
     /// There is no need to create another type just for edge type as those will be created later.
     /// Caries information about match node. 
     /// </summary>
-    class ParsedPatternNode
+    sealed class ParsedPatternNode
     {
         public bool isAnonymous;
         public bool isVertex;
@@ -213,6 +212,11 @@ namespace QueryEngine
                 return true;
             }
             return false;
+        }
+
+        public override int GetHashCode()
+        {
+            throw new NotImplementedException();
         }
     }
 }

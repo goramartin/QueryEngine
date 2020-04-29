@@ -1,0 +1,6 @@
+﻿[
+{
+"Kind": "isFriend",
+"For": "integer"
+}
+]

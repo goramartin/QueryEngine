@@ -28,15 +28,10 @@ namespace QueryEngine
      /// List IDs consists of added nodes into the table. Values of the node we can find 
      /// on the same position in the properties.
      /// </summary>
-    class Table
+    sealed class Table
     {
         // Name of the table (type of node)
-        private string tableIri;
-        public string IRI 
-        {
-            get => this.tableIri; 
-            protected set => this.tableIri=value; 
-        }
+        public string IRI { get; private set; } 
 
         /// <summary>
         /// Properties pertaining to the table.

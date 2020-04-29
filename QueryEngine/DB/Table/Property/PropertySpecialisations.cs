@@ -69,7 +69,7 @@ namespace QueryEngine
     /// <summary>
     /// String property specialisation.
     /// </summary>
-    class StringProperty : Property<string>
+    sealed class StringProperty : Property<string>
     {
         public StringProperty(string propName) : base(propName) { }
 
@@ -88,7 +88,7 @@ namespace QueryEngine
     /// <summary>
     /// Integer specialisation of a column.
     /// </summary>
-    class IntProperty : Property<int>
+    sealed class IntProperty : Property<int>
     {
         public IntProperty(string propName) : base(propName) { }
 

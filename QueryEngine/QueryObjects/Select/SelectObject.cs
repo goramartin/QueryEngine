@@ -23,7 +23,7 @@ namespace QueryEngine
     /// Select represents list of variables to be printed.
     /// List of select variables contains names and proprty names to be printed from the result.
     /// </summary>
-    class SelectObject
+    sealed class SelectObject
     {
         /// <summary>
         /// List of arguments to print from a select expression.

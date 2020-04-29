@@ -32,7 +32,7 @@ namespace QueryEngine
     /// also it remembers the state of the matched variables and state
     /// which nodes and chains should be matched.
     /// </summary>
-    class DFSPattern : IDFSPattern
+    sealed class DFSPattern : IDFSPattern
     {
         private List<List<DFSBaseMatch>> Patterns;
         public int CurrentPatternIndex { get; private set; }
@@ -120,7 +120,7 @@ namespace QueryEngine
         /// </summary>
         /// <param name="parsedPatterns"> Pattern created by Match Visitor </param>
         /// <param name="variableMap"> Query map of variables (empty) </param>
-        protected void CreatePattern(List<ParsedPattern> parsedPatterns, VariableMap variableMap)
+        private void CreatePattern(List<ParsedPattern> parsedPatterns, VariableMap variableMap)
         {
             var orderedPatterns = OrderParsedPatterns(parsedPatterns);
 
@@ -158,7 +158,7 @@ namespace QueryEngine
         /// Their splitBy property remains set to Null.
         /// </summary>
         /// <param name="parsedPatterns"> Parser Pattern from MatchVisitor</param>
-        protected List<ParsedPattern> OrderParsedPatterns(List<ParsedPattern> parsedPatterns)
+        private List<ParsedPattern> OrderParsedPatterns(List<ParsedPattern> parsedPatterns)
         {
             List<ParsedPattern> result = new List<ParsedPattern>();
             bool[] usedPatterns = new bool[parsedPatterns.Count];
@@ -218,7 +218,7 @@ namespace QueryEngine
         /// <param name="patternNodes"> Parsed pattern </param>
         /// <param name="map"> Map to store info about veriables </param>
         /// <returns></returns>
-        protected List<DFSBaseMatch> CreateChain(List<ParsedPatternNode> patternNodes, VariableMap map)
+        private List<DFSBaseMatch> CreateChain(List<ParsedPatternNode> patternNodes, VariableMap map)
         {
             List<DFSBaseMatch> tmpChain = new List<DFSBaseMatch>();
 

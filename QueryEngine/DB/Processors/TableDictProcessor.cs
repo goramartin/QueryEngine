@@ -21,7 +21,7 @@ namespace QueryEngine
     /// <summary>
     /// Creates distionary/map from data scheme with specific nodes in the graph.
     /// </summary>
-    class TableDictProcessor : IProcessor<Dictionary<string, Table>>
+    sealed class TableDictProcessor : IProcessor<Dictionary<string, Table>>
     {
         IProcessorState<Dictionary<string, Table>> processorState;
         IProcessorState<Dictionary<string, Table>> lastProcessorState;
@@ -69,7 +69,7 @@ namespace QueryEngine
         }
 
 
-        class TableDictLeftSquareBraceState : IProcessorState<Dictionary<string, Table>>
+        sealed class TableDictLeftSquareBraceState : IProcessorState<Dictionary<string, Table>>
         {
             static TableDictLeftSquareBraceState instance =
              new TableDictLeftSquareBraceState();
@@ -90,7 +90,7 @@ namespace QueryEngine
             }
         }
 
-        class TableDictLeftBracketState : IProcessorState<Dictionary<string, Table>>
+        sealed class TableDictLeftBracketState : IProcessorState<Dictionary<string, Table>>
         {
             static TableDictLeftBracketState instance =
              new TableDictLeftBracketState();
@@ -112,7 +112,7 @@ namespace QueryEngine
             }
         }
 
-        class TableDictLeftMarkState : IProcessorState<Dictionary<string, Table>>
+        sealed class TableDictLeftMarkState : IProcessorState<Dictionary<string, Table>>
         {
             static TableDictLeftMarkState instance =
              new TableDictLeftMarkState();
@@ -138,7 +138,7 @@ namespace QueryEngine
             }
         }
 
-        class TableDictKindState : IProcessorState<Dictionary<string, Table>>
+        sealed class TableDictKindState : IProcessorState<Dictionary<string, Table>>
         {
             static TableDictKindState instance =
              new TableDictKindState();
@@ -161,7 +161,7 @@ namespace QueryEngine
             }
         }
 
-        class TableDictRightMarkState : IProcessorState<Dictionary<string, Table>>
+        sealed class TableDictRightMarkState : IProcessorState<Dictionary<string, Table>>
         {
             static TableDictRightMarkState instance =
              new TableDictRightMarkState();
@@ -186,7 +186,7 @@ namespace QueryEngine
             }
         }
 
-        class TableDictDoubleDotState : IProcessorState<Dictionary<string, Table>>
+        sealed class TableDictDoubleDotState : IProcessorState<Dictionary<string, Table>>
         {
             static TableDictDoubleDotState instance =
              new TableDictDoubleDotState();
@@ -210,7 +210,7 @@ namespace QueryEngine
         /// <summary>
         /// Processes name of the table. Call for creating of a table.
         /// </summary>
-        class TableDictNameState : IProcessorState<Dictionary<string, Table>>
+        sealed class TableDictNameState : IProcessorState<Dictionary<string, Table>>
         {
             static TableDictNameState instance =
              new TableDictNameState();
@@ -235,7 +235,7 @@ namespace QueryEngine
             }
         }
 
-        class TableDictCommaAfterPropState : IProcessorState<Dictionary<string, Table>>
+        sealed class TableDictCommaAfterPropState : IProcessorState<Dictionary<string, Table>>
         {
             static TableDictCommaAfterPropState instance =
              new TableDictCommaAfterPropState();
@@ -256,7 +256,7 @@ namespace QueryEngine
             }
         }
 
-        class TableDictCommaAfterBracketState : IProcessorState<Dictionary<string, Table>>
+        sealed class TableDictCommaAfterBracketState : IProcessorState<Dictionary<string, Table>>
         {
             static TableDictCommaAfterBracketState instance =
              new TableDictCommaAfterBracketState();
@@ -284,7 +284,7 @@ namespace QueryEngine
         /// <summary>
         /// Saves property name for a later usage.
         /// </summary>
-        class TableDictPropNameState : IProcessorState<Dictionary<string, Table>>
+        sealed class TableDictPropNameState : IProcessorState<Dictionary<string, Table>>
         {
             static TableDictPropNameState instance =
              new TableDictPropNameState();
@@ -310,7 +310,7 @@ namespace QueryEngine
         /// Processes property type.
         /// Creates new proprty based on type with a property name stored before.
         /// </summary>
-        class TableDictPropTypeState : IProcessorState<Dictionary<string, Table>>
+        sealed class TableDictPropTypeState : IProcessorState<Dictionary<string, Table>>
         {
             static TableDictPropTypeState instance =
              new TableDictPropTypeState();

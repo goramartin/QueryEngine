@@ -52,7 +52,7 @@ namespace QueryEngine
     /// <summary>
     /// In specialisation of an edge.
     /// </summary>
-    class InEdge : Edge
+    sealed class InEdge : Edge
     {
         public InEdge() : base()
         {
@@ -68,7 +68,7 @@ namespace QueryEngine
     /// <summary>
     /// Out specialisation of an edge.
     /// </summary>
-    class OutEdge : Edge
+    sealed class OutEdge : Edge
     {
         public OutEdge() : base()
         {

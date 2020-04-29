@@ -23,7 +23,7 @@ namespace QueryEngine
     /// <summary>
     /// Creates vertices list from a file.
     /// </summary>
-    class VerticesListProcessor : IProcessor<List<Vertex>>
+    sealed class VerticesListProcessor : IProcessor<List<Vertex>>
     {
         IProcessorState<List<Vertex>> processorState { get; set; }
         List<Vertex> vertices;
@@ -70,7 +70,7 @@ namespace QueryEngine
         /// First state of processor. Tries to parse ID of a node and inits a new vertex.
         /// After parsing ID, the type of node is a next state.
         /// </summary>
-        class NodeIDState : IProcessorState<List<Vertex>>
+        sealed class NodeIDState : IProcessorState<List<Vertex>>
         {
             static NodeIDState instance =
              new NodeIDState();
@@ -133,7 +133,7 @@ namespace QueryEngine
         /// Also inserts ID of the node into the table.
         /// Next state should parse data of the node.
         /// </summary>
-        class NodeTypeState : NodeParamsEndState
+        sealed class NodeTypeState : NodeParamsEndState
         {
             static NodeTypeState instance =
              new NodeTypeState();
@@ -162,7 +162,7 @@ namespace QueryEngine
         /// <summary>
         /// Gets position of accessed property and parses its value to its list.
         /// </summary>
-        class NodeParametersState : NodeParamsEndState
+        sealed class NodeParametersState : NodeParamsEndState
         {
             static NodeParametersState instance =
              new NodeParametersState();

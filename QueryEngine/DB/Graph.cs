@@ -58,15 +58,15 @@ namespace QueryEngine
             this.inEdges = null;
             this.EdgeTables = null;
 
-            this.LoadNodeTables("NodeTypes.txt");
-            this.LoadEdgeTables("EdgeTypes.txt");
+            this.LoadNodeTables("DataFiles\\NodeTypes.txt");
+            this.LoadEdgeTables("DataFiles\\EdgeTypes.txt");
 
             this.Labels = new Dictionary<string, Type>();
             this.AdjustLabels(this.EdgeTables);
             this.AdjustLabels(this.NodeTables);
 
-            this.LoadVertices("Nodes.txt");
-            this.LoadEdges("Edges.txt");
+            this.LoadVertices("DataFiles\\Nodes.txt");
+            this.LoadEdges("DataFiles\\Edges.txt");
         }
 
         /// <summary>

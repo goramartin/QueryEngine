@@ -42,7 +42,7 @@ namespace QueryEngine
     /// Bear in mind, that variables of each separate conjunction disregarding its connection to the others is 
     /// dependent on the matched variables from the other conjunctions.
     /// </summary>
-    class DFSPatternMatcher : ISingleThreadMatcher
+    sealed class DFSPatternMatcher : ISingleThreadMatcher
     {
         private Graph graph;
         private IDFSPattern pattern;

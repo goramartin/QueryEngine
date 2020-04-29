@@ -26,7 +26,7 @@ namespace QueryEngine
     /// When creating the variable map is filled when constructor of pattern is called and query results are appropriately created
     /// based on number of threads passed and columns which are stored in created pattern.
     /// </summary>
-    class MatchObject
+    sealed class MatchObject
     {
         private  IPatternMatcher Matcher;
         private  IPattern Pattern;

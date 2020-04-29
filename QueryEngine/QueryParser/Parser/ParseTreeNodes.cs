@@ -11,9 +11,10 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace QueryEngine { 
+   
     /// <summary>
-    ///Parent to every node.
-    ///Gives Visit method.
+    /// Parent to every parse tree node.
+    /// Gives Visit method.
     /// </summary>
     abstract class Node
     {
@@ -34,9 +35,7 @@ namespace QueryEngine {
     }
 
 
-
-
-
+    #region RootNodes
 
     /// <summary>
     /// Match and Select Nodes are only roots of subtrees when parsing. From them the parsing
@@ -70,6 +69,7 @@ namespace QueryEngine {
         }
     }
 
+    #endregion RootNodes
 
     #region SelectNodes
 
@@ -208,8 +208,6 @@ namespace QueryEngine {
 
 
     #endregion OrderByNodes
-
-
 
     #region ExprNodes
 

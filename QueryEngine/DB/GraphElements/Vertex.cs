@@ -22,7 +22,7 @@ namespace QueryEngine
     /// and the other one encompasses inwards edges.
     /// If the vertex does now have any edges (in or out) the positions are set to -1.
     /// </summary>
-    class Vertex : Element
+    sealed class Vertex : Element
     {
         public int OutEdgesStartPosition { get; internal set; }
         public int OutEdgesEndPosition { get; internal set; }
