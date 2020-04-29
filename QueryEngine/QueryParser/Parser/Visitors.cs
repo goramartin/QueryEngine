@@ -38,20 +38,20 @@ namespace QueryEngine
     /// <summary>
     /// Creates list of variable (Name.Prop) to be displayed in Select expr.
     /// </summary>
-    class SelectVisitor : IVisitor<List<ExpressionHolder>>
+    class SelectVisitor : IVisitor<List<PrintVariable>>
     {
-        List<ExpressionHolder> result;
+        List<PrintVariable> result;
         Dictionary<string, Type> Labels;
         VariableMap variableMap;
 
         public SelectVisitor(Dictionary<string, Type> labels, VariableMap map)
         {
-            this.result = new List<ExpressionHolder>();
+            this.result = new List<PrintVariable>();
             this.Labels = labels;
             this.variableMap = map;
         }
 
-        public List<ExpressionHolder> GetResult()
+        public List<PrintVariable> GetResult()
         {
             if (this.result == null || this.result.Count == 0) 
                 throw new ArgumentException($"{this.GetType()} final result is empty or null");
@@ -110,7 +110,8 @@ namespace QueryEngine
             if (node.asLabel != null)
                 label = ((IdentifierNode)(node.asLabel)).value;
 
-            this.result.Add(new ExpressionHolder(expr, label));
+            var tmpExprHolder = new ExpressionHolder(expr, label);
+            this.result.Add(PrintVariable.PrintVariableFactory(tmpExprHolder, tmpExprHolder.ExpressionType));
 
         }
 
@@ -124,7 +125,11 @@ namespace QueryEngine
                 throw new ArgumentException($"{this.GetType()}, expected asterix.");
 
             foreach (var item in variableMap)
-                this.result.Add( new ExpressionHolder(new VariableIDReference(new VariableReferenceNameHolder(item.Key), item.Value.Item1),null));
+            {
+                var tmpExprHolder = new ExpressionHolder(new VariableIDReference(new VariableReferenceNameHolder(item.Key), item.Value.Item1), null);
+                this.result.Add(PrintVariable.PrintVariableFactory(tmpExprHolder, tmpExprHolder.ExpressionType));
+
+            }
 
         }
 
@@ -404,7 +409,7 @@ namespace QueryEngine
 
             this.result.Add(ExpressionComparer.
                             ExpressionCompaperFactory(this.expressionHolder, node.isAscending,
-                                                      this.expressionHolder.GetExpressionType()));
+                                                      this.expressionHolder.ExpressionType));
 
             if (node.next != null) node.next.Accept(this);
         }

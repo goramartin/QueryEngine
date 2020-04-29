@@ -93,7 +93,7 @@ namespace QueryEngine
         /// </summary>
         public override Type GetExpressionType()
         {
-            return this.Expr.GetExpressionType();
+            return this.ExpressionType;
         }
     }
 

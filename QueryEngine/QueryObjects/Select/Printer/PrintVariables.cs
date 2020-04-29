@@ -54,6 +54,9 @@ namespace QueryEngine
                 return new PrintVariable<string>(expressionHolder);
             else throw new ArgumentException($"PrintVariable, unknown type passed to a print variable factory.");
         }
+
+
+
     }
 
     /// <summary>
@@ -80,6 +83,12 @@ namespace QueryEngine
                 return returnValue.ToString();
             else return "null";
         }
+
+        public override string ToString()
+        {
+            return this.expressionHolder.ToString();
+        }
+
     }
 
 }

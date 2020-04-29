@@ -82,7 +82,7 @@ namespace QueryEngine
         /// Formats header of a table.
         /// </summary>
         /// <param name="header">Header format. </param>
-        public abstract void FormatHeader(List<ExpressionHolder> header);
+        public abstract void FormatHeader(List<PrintVariable> header);
         
         /// <summary>
         /// Adds a word to a row and formats it.
@@ -146,7 +146,7 @@ namespace QueryEngine
         /// header and results.
         /// </summary>
         /// <param name="variables"> Header format. </param>
-        public override void FormatHeader(List<ExpressionHolder> variables)
+        public override void FormatHeader(List<PrintVariable> variables)
         {
             for (int i = 0; i < variables.Count; i++)
             {
@@ -223,7 +223,7 @@ namespace QueryEngine
         /// header and results. Columns are also | separated on sides.
         /// </summary>
         /// <param name="variables"> Header format. </param>
-        public override void FormatHeader(List<ExpressionHolder> variables)
+        public override void FormatHeader(List<PrintVariable> variables)
         {
             this.stringBuilder.Append('|');
             for (int i = 0; i < variables.Count; i++)

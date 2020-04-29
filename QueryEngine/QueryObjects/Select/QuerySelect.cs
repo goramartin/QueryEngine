@@ -28,7 +28,7 @@ namespace QueryEngine
         /// <summary>
         /// List of arguments to print from a select expression.
         /// </summary>
-        private List<ExpressionHolder> expressions;
+        private List<PrintVariable> rowFormat;
         
         /// <summary>
         /// Type of printing format.
@@ -65,22 +65,17 @@ namespace QueryEngine
             SelectVisitor visitor = new SelectVisitor(graph.Labels, map);
             selectNode.Accept(visitor);
 
-            this.expressions = visitor.GetResult();
+            this.rowFormat = visitor.GetResult();
         }
 
 
         /// <summary>
         /// Prints results in given format from concstructor init.
-        /// Creates structure that printer uses.
         /// </summary>
         /// <param name="results"> Results from query. </param>
         public void Print(IResults results)
         {
-            var rowValues = new List<PrintVariable>();
-            for (int i = 0; i < this.expressions.Count; i++)
-                rowValues.Add(PrintVariable.PrintVariableFactory(this.expressions[i], this.expressions[i].GetExpressionType()));
-
-            var printer = Printer.PrinterFactory(this.PrinterType, expressions, rowValues, this.FormaterType, this.FileName);
+            var printer = Printer.PrinterFactory(this.PrinterType, rowFormat, this.FormaterType, this.FileName);
 
             printer.PrintHeader();
             foreach (var item in results)
@@ -91,5 +86,7 @@ namespace QueryEngine
             printer.Dispose();
         }
     }
+
+
 
 }
