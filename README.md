@@ -70,11 +70,20 @@ Edges.txt
 
 ## Query
 
-Using PGQL syntax subset.
-So far only Match expression works.
+Using PGQL syntax subset. So far only select, match, order by work.
+General expressions used inside the query work only as variable references and property references.
+
+### Expressions
+
+Inside the inputed query, there can be used expressions that will be evaluated for each individual result.
+The expression consists so far only of variable reference or property reference. Expression can be followed by "AS Label" which
+defines name for the entire expression.
+
+>Example  Select consits of expressions. That is SELECT expression, expression ... So, given a query: select x, x.Age as Age match (x); it consits of two expressions x and x.Age which name is set to Age. The results will be printed into two columns where the displayed values in those columns are values computed of these two expressions. The header of the printed table is then the name of the entire expression.  
 
 ### Select syntax
-SELECT expression starts with SELECT word and expects variable names reffering to the variables in Match expression. If the variable in Match expression has defined type, you can access the properties of that type throught the variable.
+SELECT expression starts with SELECT word and expects expressions (consisting only of variable and property references).
+Each expression represents one column of the final printed table. Values in the columns are computed for each row of the result with the given expressions. The header of the final table is defined as the name of the expression.
 
 Types of referrences:
 
@@ -85,9 +94,14 @@ Types of referrences:
 |  x.Name  | Selects a specified property of a specified variable     |
 
 Inside select expression can be either * or variable referrences. If the * is chosen, then all variables
-from a match expression are selected. Selecting a variable with its name solely will cause the same effect as if a function id(x) was called, so the results is the unique id of an element. When selecting a property of a variable, if the variable has defined type and the accessed property does not exists it will throw an error, otherwise if it is unknown type, the accessing will generete null value.
+from a match expression are selected. Selecting a variable with its name solely will cause the same effect as if a function id(x) was called, so the results is the unique id of an element. When selecting a property of a variable, if the variable has defined type and the accessed property does not exist in the entire data scheme it will throw an error, otherwise if it is only missing in the variable table but exists in the graph, accessing the property will generete null value.
 
-Each referrence is comma separated.
+Each expression is comma separated.
+
+>Example: 
+    
+    SELECT x as xID, x.Age as xAge, y match (x)->(y);
+    SELECT * match (x) -[e]-> (y); <=> SELECT x, e, y match (x) -[e]-> (y);
 
 ### Match syntax
 Match expression starts with MATCH word and expects pattern to match. There can be more patterns separated by comma.
@@ -124,6 +138,21 @@ Every vertex is enveloped in () and every non-anonymous edge is enveloped in [].
 >Example: 
 
     SELECT x MATCH (x:Person)->(y)->(x:Person); (correct) SELECT x MATCH (x:Person)->(y)->(x); (incorrect)
+    SELECT x, y MATCH (x) -> (y), (y) -> (t:Person);
+
+### Order by 
+Order by part is optional. If it is ommited the final results are not sorted in any order. If we include this part, the final results will be sorted according to included expressions (their values are taken when sorting). Order by can contain multiple expressions which causes sorting by the the other expression when two elements are same for a sooner expression.
+
+| Syntax      | Description |
+| ----------- | ----------- |
+| expression ASC      | Sort according to the expression in ascending order      |
+| expression DESC | Sort according to the expression in descending order      |
+
+If ASC and DESC are ommited the ordering is implicitly set to ascending order.
+
+>Example:
+
+    SELECT x, x.Age, y match (x) -> (y) order by x.Age ASC, x, y DESC; 
 
 ### Inputing a query
 1. Query must consists of SELECT expression with at least one variable refference to a variable in Match expression. Or an *. Also, the query must consists of a MATCH expression with at least one match expression.
@@ -131,12 +160,14 @@ Every vertex is enveloped in () and every non-anonymous edge is enveloped in [].
 
      SELECT x MATCH (x)->(y); (correct), SELECT y MATCH (x)->(z); (incorrect),
      SELECT * MATCH (x); (correct)
+     SELECT * MACTH (); (incorrect) match expression must contain at least one defined variable
 
 2. Every query main word (SELECT, MATCH...) must be separated by space.
 
 >Example:
 
-     SELECTxMACTH(x)->(y); (incorrect)
+     SELECTxMATCH(x)->(y); (incorrect)
+     SELECT x MATCH (x)->(y);
 
 3. Every match chain must consists of either singular vertex or a pattern (vertex) (edge) (vertex).
 There can not be a pattern with edge that has no specified end.
@@ -149,10 +180,12 @@ There can not be a pattern with edge that has no specified end.
 
 5. The match expression must consist of at least one defined variable.
 
-6. Both SELECT and MATCH can not be empty or ommited.
-
+6. Both SELECT and MATCH can not be empty or ommited. Other parts, such as Order by, are optional. 
 
 ## Running the application
+
+Application is run with 5 arguments (noted below). The program has simple api. Upon start of the program a user is prompted to input query. After inputing the query, the user must press enter. Then the program evaluates the query and displays the results (file, console).
+After evaluation user will be prompted to press anter again. Then the user will be asked if he wants to input another query or close the application by inputing "y" to continue or "n" for closing the application.
 
 ### Commandline arguments
 
