@@ -128,7 +128,9 @@ namespace QueryEngine
                 Console.WriteLine(item.ToString());
             }
 
-            select.Print(tmp);
+            var tmp2 = order.Sort(tmp);
+
+            select.Print(tmp2);
 
 
 

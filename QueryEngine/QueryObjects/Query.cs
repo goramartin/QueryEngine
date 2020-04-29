@@ -28,7 +28,7 @@ namespace QueryEngine
         VariableMap variableMap;
         SelectObject select;
         MatchObject match;
-        //OrderByObject orderBy;
+        OrderByObject orderBy;
         IResults results;
 
         /// <summary>
@@ -48,13 +48,16 @@ namespace QueryEngine
             // Create tokens from console.
             List<Token> tokens = Tokenizer.Tokenize(reader);
 
-            // Parse and create in order of the query words.
+            // Parse and create main object in order of the query words.
             Parser.ResetPosition();
             this.variableMap = new VariableMap();
 
             SelectNode selectNode = Parser.ParseSelect(tokens);
             this.match = new MatchObject(tokens, variableMap, graph, ThreadCount, VerticesPerRound);
             this.select = new SelectObject(graph, variableMap, selectNode, printer, formater, fileName);
+
+            // Optional, if ommited it returns null. 
+            this.orderBy = OrderByObject.CreateOrderBy(tokens, graph, variableMap);
 
             // Check if it successfully parsed every token.
             if (tokens.Count != Parser.GetPosition())
@@ -69,6 +72,8 @@ namespace QueryEngine
         {
             this.results = this.match.Search();
             this.match = null;
+
+            if (this.orderBy != null) this.orderBy.Sort(this.results);
 
             this.select.Print(this.results);
         }

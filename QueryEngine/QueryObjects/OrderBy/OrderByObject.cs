@@ -59,10 +59,8 @@ namespace QueryEngine
         /// <returns> Sorted data. </returns>
         public IResults Sort(IResults sortData)
         {
-            ISorter sorter = new Sorter(sortData);
+            ISorter sorter = new Sorter(sortData, this.comparers);
             return sorter.Sort();
         }
-
-
     }
 }
