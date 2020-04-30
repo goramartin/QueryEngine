@@ -136,11 +136,6 @@ namespace QueryEngine
             var xSuccess = expressionHolder.TryGetExpressionValue(x, out T xValue);
             var ySuccess = expressionHolder.TryGetExpressionValue(y, out T yValue);
 
-            if (!xSuccess || !ySuccess)
-            {
-                Console.WriteLine();
-            }
-
             int retValue = 0;
             if (xSuccess && !ySuccess) retValue = -1;
             else if (!xSuccess && ySuccess) retValue = 1;
