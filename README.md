@@ -81,7 +81,7 @@ defines name for the entire expression.
 
 >Example:
 
-Select consits of expressions. That is SELECT expression, expression ... So, given a query: select x, x.Age as Age match (x); it consits of two expressions x and x.Age which name is set to Age. The results will be printed into two columns where the displayed values in those columns are values computed of these two expressions. The header of the printed table is then the name of the entire expression.  
+    Select consits of expressions. That is SELECT expression, expression ... So, given a query: select x, x.Age as Age match (x); it consits of two expressions x and x.Age which name is set to Age. The results will be printed into two columns where the displayed values in those columns are values computed of these two expressions. The header of the printed table is then the name of the entire expression.  
 
 ### Select syntax
 SELECT expression starts with SELECT word and expects expressions (consisting only of variable and property references).
