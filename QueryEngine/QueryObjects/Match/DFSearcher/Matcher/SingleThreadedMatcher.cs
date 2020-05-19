@@ -370,7 +370,7 @@ namespace QueryEngine
         private Edge FindAnyEdge(Vertex vertex, Edge lastUsedEdge)
         {
             Edge nextEdge = null;
-            if (lastUsedEdge == null || lastUsedEdge.EdgeType == EdgeType.InEdge)
+            if (lastUsedEdge == null || lastUsedEdge.GetEdgeType() == EdgeType.InEdge)
             {
                 nextEdge = FindInEdge(vertex, lastUsedEdge);
                 if (nextEdge == null) lastUsedEdge = null;

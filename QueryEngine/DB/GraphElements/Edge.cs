@@ -31,9 +31,8 @@ namespace QueryEngine
     /// Edge represents edge in a graph. The type of an edge is based on the list that contains the list.
     /// Each edge has an end vertex, that is which vertex the edge is leading to.
     /// </summary>
-    class Edge : Element
+    abstract class Edge : Element
     {
-        public EdgeType EdgeType { get; internal set; }
         public Vertex EndVertex { get; internal set; }
 
         public Edge()
@@ -42,6 +41,8 @@ namespace QueryEngine
             this.Table = null;
             this.EndVertex = null;
         }
+
+        public abstract EdgeType GetEdgeType();
 
         public override int GetHashCode()
         {
@@ -56,8 +57,13 @@ namespace QueryEngine
     {
         public InEdge() : base()
         {
-            this.EdgeType = EdgeType.InEdge;
         }
+
+        public override EdgeType GetEdgeType()
+        {
+            return EdgeType.InEdge;
+        }
+
         public override int GetHashCode()
         {
             return base.GetHashCode();
@@ -72,8 +78,13 @@ namespace QueryEngine
     {
         public OutEdge() : base()
         {
-            this.EdgeType = EdgeType.OutEdge;
         }
+
+        public override EdgeType GetEdgeType()
+        {
+            return EdgeType.OutEdge;
+        }
+
         public override int GetHashCode()
         {
             return base.GetHashCode();
