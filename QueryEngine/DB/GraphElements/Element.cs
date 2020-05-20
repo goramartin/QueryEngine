@@ -31,9 +31,6 @@ namespace QueryEngine
         /// </summary>
         public int PositionInList { get; internal set; }
 
-        public void AddID(int id) => this.ID = id;
-        public void AddTable(Table table) => this.Table = table;
-
         public override int GetHashCode()
         {
             return this.ID;

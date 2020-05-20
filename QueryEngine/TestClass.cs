@@ -149,7 +149,7 @@ namespace QueryEngine
             ///////////////////////////////////////
 
             TestClass.DumpGraph(g);
-            TestClass.Search(g);
+          //  TestClass.Search(g);
 
 
 

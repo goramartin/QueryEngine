@@ -98,7 +98,7 @@ namespace QueryEngine
 
                 proc.vertex = new Vertex();
                 proc.vertex.PositionInList = proc.vertices.Count;
-                proc.vertex.AddID(id);
+                proc.vertex.ID = id;
                 proc.SetNewState(NodeTypeState.Instance);
             }
         }
@@ -151,7 +151,7 @@ namespace QueryEngine
 
                 Table table;
                 proc.nodeTables.TryGetValue(param, out table);
-                proc.vertex.AddTable(table);
+                proc.vertex.Table = table;
                 proc.vertex.Table.AddID(proc.vertex.ID);
 
                 proc.paramsToReadLeft = proc.vertex.Table.GetPropertyCount();

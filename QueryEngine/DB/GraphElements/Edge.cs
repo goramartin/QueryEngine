@@ -43,7 +43,7 @@ namespace QueryEngine
         }
 
         public abstract EdgeType GetEdgeType();
-
+        
         public override int GetHashCode()
         {
             return base.GetHashCode();
