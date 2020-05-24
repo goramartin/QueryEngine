@@ -41,6 +41,11 @@ Stored data in files:
 
 Ids must be sorted in ascending order.
 Properties goes as there are in data scheme.
+IDs must start from 0 and there must be no missing number between the other IDs.
+
+>Example
+
+    Consider having 5 vertices, then the only valid IDs are 0 1 2 3 4.  
 
 #### For edges:
 
@@ -55,16 +60,16 @@ in entire graph.
 
 ```
 Nodes.txt
-1 Person Pavel Mikulas 21
-2 Person Patrik Peska 40
-3 Person Max Slev 20
+0 Person Pavel Mikulas 21
+1 Person Patrik Peska 40
+2 Person Max Slev 20
 ...
 
 Edges.txt
-4 BasicEdge 1 2
-5 BasicEdge 1 3
-6 BasicEdge 2 1
-7 BasicEdge 3 1
+4 BasicEdge 0 1
+5 BasicEdge 0 2
+6 BasicEdge 1 0
+7 BasicEdge 2 0
 ...
 ```
 
