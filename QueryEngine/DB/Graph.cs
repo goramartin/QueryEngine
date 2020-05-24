@@ -66,6 +66,10 @@ namespace QueryEngine
             this.AdjustLabels(this.NodeTables);
 
             this.LoadVertices("DataFiles\\Nodes.txt");
+            Console.WriteLine("Vertices done.");
+
+
+
             this.LoadEdges("DataFiles\\Edges.txt");
         }
 

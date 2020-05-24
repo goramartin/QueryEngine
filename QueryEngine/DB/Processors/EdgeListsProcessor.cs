@@ -13,8 +13,6 @@
   States are singletons and flyweight since they do not contain any additional variables.
  */
 
-
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,12 +30,20 @@ namespace QueryEngine
     sealed class EdgeListProcessor : IProcessor<EdgeListHolder>
     {
         IProcessorState<EdgeListHolder> processorState;
+        EdgeListHolder holder = new EdgeListHolder();
+
         List<Vertex> vertices;
         List<OutEdge> outEdges;
         List<InEdge> inEdges;
 
         Dictionary<string, Table> edgeTables;
+        /// <summary>
+        /// Each vertex has a set of inwards edges
+        /// </summary>
+        List<InEdge>[] incomingEdgesTable;
+
         bool finished;
+        InEdge incomingEdge;
         OutEdge outEdge;
         int paramsToReadLeft;
 
@@ -67,6 +73,7 @@ namespace QueryEngine
         {
             this.edgeTables = (Dictionary<string, Table>)prms[1];
             this.vertices = (List<Vertex>)prms[2];
+            InicialiseInEdgesTables();
         }
 
         /// <summary>
@@ -75,7 +82,7 @@ namespace QueryEngine
         /// <param name="param"> Parameter to process. </param>
         public void Process(string param)
         {
-           if (!finished) this.processorState.Process(this, param);
+            if (!finished) this.processorState.Process(this, param);
         }
 
         public void SetNewState(IProcessorState<EdgeListHolder> state)
@@ -104,13 +111,7 @@ namespace QueryEngine
                 var proc = (EdgeListProcessor)processor;
 
 
-                if (param == null) { 
-                    proc.FinalizeEdgesEndPositionInVertices(isOut: true);
-                    proc.CreateInEdges();
-                    proc.FinalizeEdgesEndPositionInVertices(isOut: false);
-                    proc.finished = true;
-                    return;
-                }
+                if (param == null) { proc.FinalizeInEdges(); proc.FinalizeVertices(); proc.finished = true; return; }
 
                 int id = 0;
                 if (!int.TryParse(param, out id))
@@ -142,7 +143,7 @@ namespace QueryEngine
             public void Process(IProcessor<EdgeListHolder> processor, string param)
             {
                 var proc = (EdgeListProcessor)processor;
-                 
+
                 Table table;
                 proc.edgeTables.TryGetValue(param, out table);
                 proc.outEdge.Table = table;
@@ -171,9 +172,11 @@ namespace QueryEngine
             public void Process(IProcessor<EdgeListHolder> processor, string param)
             {
                 var proc = (EdgeListProcessor)processor;
-               
+
                 Vertex fromVertex = proc.FindVertex(param);
                 if (!fromVertex.HasOutEdges()) fromVertex.OutEdgesStartPosition = proc.outEdges.Count;
+                proc.incomingEdge = new InEdge();
+                proc.incomingEdge.EndVertex = fromVertex;
                 proc.SetNewState(EdgeToIDState.Instance);
             }
         }
@@ -207,7 +210,7 @@ namespace QueryEngine
         /// Finds end vertex of an edge and sets him to the end position of out edge.
         /// Finishes processing of in edge and adds it to the appropriate table of the vertex.
         /// </summary>
-        sealed class EdgeToIDState: EdgeParamsEndState
+        sealed class EdgeToIDState : EdgeParamsEndState
         {
             static EdgeToIDState instance =
              new EdgeToIDState();
@@ -222,9 +225,14 @@ namespace QueryEngine
             public override void Process(IProcessor<EdgeListHolder> processor, string param)
             {
                 var proc = (EdgeListProcessor)processor;
-               
+
                 Vertex endVertex = proc.FindVertex(param);
                 proc.outEdge.EndVertex = endVertex;
+
+                proc.incomingEdge.Table = proc.outEdge.Table;
+                proc.incomingEdge.ID = proc.outEdge.ID;
+                proc.incomingEdgesTable[endVertex.PositionInList].Add(proc.incomingEdge);
+
                 proc.paramsToReadLeft = proc.outEdge.Table.GetPropertyCount();
                 FinishParams(proc);
             }
@@ -265,82 +273,84 @@ namespace QueryEngine
         private Vertex FindVertex(string param)
         {
             int id = 0;
-            if (!int.TryParse(param, out id))
+            if (!int.TryParse(param, out id) || id < 0 || id >= this.vertices.Count)
                 throw new ArgumentException($"{this.GetType()}, reading wrong node ID. ID is not a number. ID = {param}");
-            Vertex vertex = this.vertices.Find(x => x.ID == id);
-            if (vertex == null) throw new ArgumentException($"{this.GetType()}, ID is not found in vertices. ID = {id}");
-            return vertex;
+            return this.vertices[id];
         }
 
-        /// <summary>
-        /// Creates in edges.
-        /// For each vertex in the graph, find edges that points to that vertex,
-        /// and create an in edge for this vertex.
-        /// </summary>
-        private void CreateInEdges()
-        {
-            // For each vertex in the graph...
-            foreach (Vertex processedVertex in this.vertices)
-            {
-                // ... iterate over each vertex in the graph ...
-                for (int vertexIndex = 0; vertexIndex < this.vertices.Count; vertexIndex++)
-                {
-                    // ... if the vertex has out edges, iterate over its edges ... 
-                    if (this.vertices[vertexIndex].HasOutEdges())
-                    {
-                        for (int edgeIndex = this.vertices[vertexIndex].OutEdgesStartPosition;
-                             edgeIndex < this.vertices[vertexIndex].OutEdgesEndPosition; edgeIndex++)
-                        {
-                            // ... if the edge points to the processed vertex, 
-                            // then create new InEdge for the processed vertex.
-                            if (this.outEdges[edgeIndex].EndVertex.ID == processedVertex.ID)
-                            {
-                                var tmpInEdge = new InEdge();
-                                tmpInEdge.ID = this.outEdges[edgeIndex].ID;
-                                tmpInEdge.Table =this.outEdges[edgeIndex].Table;
-                                tmpInEdge.PositionInList = this.inEdges.Count; 
-                                tmpInEdge.EndVertex = this.vertices[vertexIndex];
 
-                                if (!processedVertex.HasInEdges()) 
-                                    processedVertex.InEdgesStartPosition = tmpInEdge.PositionInList;
-                                this.inEdges.Add(tmpInEdge);
-                            }
-                        }
-                    }
-                    else continue;
-                }
+        /// <summary>
+        ///Merge results from inedges tables into one. -> Creates inEdges list.
+        ///Set positions for inEdges field in vertices.
+        ///Set positions for inEdges in their own list.
+        /// </summary>
+        private void FinalizeInEdges()
+        {
+            int count = 0;
+
+            for (int i = 0; i < incomingEdgesTable.Length; i++)
+            {
+                int c = incomingEdgesTable[i].Count;
+                if (c == 0) continue;
+                vertices[i].InEdgesStartPosition = count;
+                for (int k = 0; k < c; k++)
+                    inEdges.Add(incomingEdgesTable[i][k]);
+                count += c;
+            }
+
+            SetPositionsInListforInEdges();
+        }
+
+
+
+        /// <summary>
+        /// For each edge from in edges, set its position in a list.
+        /// </summary>
+        private void SetPositionsInListforInEdges()
+        {
+            for (int i = 0; i < inEdges.Count; i++)
+            {
+                inEdges[i].PositionInList = i;
+            }
+        }
+
+
+        /// <summary>
+        /// Creates list for each vertex. Each table will include incoming edges.
+        /// </summary>
+        private void InicialiseInEdgesTables()
+        {
+            this.incomingEdgesTable = new List<InEdge>[vertices.Count];
+            for (int i = 0; i < incomingEdgesTable.Length; i++)
+            {
+                incomingEdgesTable[i] = new List<InEdge>();
             }
         }
 
         /// <summary>
-        /// Set end positions for edges of a vertex.
+        /// Set count on in/out edges.
         /// </summary>
-        /// <param name="isOut"> A parameter whether to finilaze position of in edges or out edges. </param>
-        private void FinalizeEdgesEndPositionInVertices(bool isOut)
+        private void FinalizeVertices()
         {
             for (int i = 0; i < vertices.Count; i++)
             {
-                if (isOut) vertices[i].OutEdgesEndPosition = FindEndPositionOfEdges(isOut: true, i);
-                else vertices[i].InEdgesEndPosition = FindEndPositionOfEdges(isOut: false, i);
+                vertices[i].OutEdgesEndPosition = FindEndPositionOfEdges(isOut: true, i);
+                vertices[i].InEdgesEndPosition = FindEndPositionOfEdges(isOut: false, i);
             }
         }
+
 
         /// <summary>
         /// Based on a given vertex we set ending positions of in/out edges in their lists.
         /// </summary>
         /// <param name="isOut"> Wheter we are setting in or out edges.</param>
         /// <param name="p"> Position of a processed vertex.</param>
-        /// <returns> End position of edges of a vertex on a given position.
-        /// -1 if the vertex does not have a edges. Otherwise returns 
-        ///  index of the first edge that does not belong to the given vertex.
-        ///  </returns>
+        /// <returns></returns>
         private int FindEndPositionOfEdges(bool isOut, int p)
         {
-            // if the vertex had no edges of the given type
             if ((isOut) && (!vertices[p].HasOutEdges())) return -1;
             else if ((!isOut) && (!vertices[p].HasInEdges())) return -1;
 
-            // From the given position of a vertex, iterate over subsequent vertices and search for start of their edges
             for (int k = p + 1; k < vertices.Count; k++)
             {
                 Vertex v = vertices[k];
@@ -348,7 +358,6 @@ namespace QueryEngine
                 if (t != -1) return t;
             }
 
-            // if it reaches end of the vertices list, that means the ending of edges is at the end of the edge list
             if (isOut) return outEdges.Count;
             else return inEdges.Count;
         }
