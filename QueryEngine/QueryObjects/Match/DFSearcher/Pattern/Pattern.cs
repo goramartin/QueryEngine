@@ -13,9 +13,6 @@
  
  */
 
-
-
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -251,6 +248,8 @@ namespace QueryEngine
 
         #endregion PatternCreation
 
+        #region INTERFACE
+
         /// <summary>
         /// Calls apply on match object, based on the current object we choose which dict will be passed into the apply method.
         /// We know that the sequence is vertex - edge - vertex, that is to say, vertex positions is divisible by 2.
@@ -382,6 +381,8 @@ namespace QueryEngine
         {
             return this.Scope;
         }
+
+        #endregion INTERFACE
     }
 
 

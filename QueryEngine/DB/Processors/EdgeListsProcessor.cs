@@ -99,6 +99,7 @@ namespace QueryEngine
             static EdgeIDState instance =
              new EdgeIDState();
 
+            int count;
             private EdgeIDState() { }
 
             public static EdgeIDState Instance
@@ -110,8 +111,18 @@ namespace QueryEngine
             {
                 var proc = (EdgeListProcessor)processor;
 
-
-                if (param == null) { proc.FinalizeInEdges(); proc.FinalizeVertices(); proc.finished = true; return; }
+                count++;
+                if (count % 20000 == 0) Console.WriteLine(count);
+                if (param == null) 
+                {
+                    Console.WriteLine("finished loading edges, now empty buckets into an list");
+                    proc.FinalizeInEdges();
+                    Console.WriteLine("finihed emptying buckets of in edges");
+                    proc.FinalizeVertices();
+                    Console.WriteLine("finished loading completely");
+                    proc.finished = true;
+                    return; 
+                }
 
                 int id = 0;
                 if (!int.TryParse(param, out id))

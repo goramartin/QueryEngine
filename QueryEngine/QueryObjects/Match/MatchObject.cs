@@ -34,6 +34,9 @@ namespace QueryEngine
 
         /// <summary>
         /// Creates Match object.
+        /// Creation is done in a few steps.
+        /// Firstly the match expression is parsed and traversed with visitors. Visitor returns parsed pattern nodes.
+        /// The parsed pattern nodes are used to create a pattern and the created pattern is passed to a matcher constructor.
         /// </summary>
         /// <param name="tokens"> Tokens to be parsed. (Expecting first token to be a Match token.)</param>
         /// <param name="graph"> Graph to conduct a query on. </param>
@@ -56,7 +59,7 @@ namespace QueryEngine
             this.CheckParsedPatternCorrectness(result);
 
             // Create  matcher and pattern based on the name of matcher and pattern
-            // Change if necessary just for testing 
+            // Change if necessary //just for testing 
             this.Pattern = MatchFactory.CreatePattern("DFSParallel", "SIMPLE", variableMap, result);
             
             // Now we have got enough information about results. 
@@ -68,9 +71,11 @@ namespace QueryEngine
 
         /// <summary>
         /// Throws error when the given pattern is fault.
-        /// Fault pattern contains one of: No variables, Discrepant variable definitions
-        /// discrepant type definitions
-        /// Correctness is checked only against the first appearance of the variable.
+        /// Fault pattern contains one of: No variables, 
+        /// discrepant variable definitions, 
+        /// variable used for vertex and edge at the same time,
+        /// discrepant type definitions,
+        /// repetition of edge variable. 
         /// </summary>
         /// <param name="parsedPatterns"> Patterns to check. </param>
         private void CheckParsedPatternCorrectness(List<ParsedPattern> parsedPatterns)
@@ -88,8 +93,11 @@ namespace QueryEngine
                     if (!tmpDict.TryGetValue(name, out ParsedPatternNode node)) tmpDict.Add(name, tmpPattern[j]);
                     else
                     {   // Compare the two variables with the same name.
-                        if (!node.Equals(tmpPattern[j])) 
-                            throw new ArgumentException($"{this.GetType()}, variables from Match expr are not matching.");
+                        if (!node.Equals(tmpPattern[j]))
+                            throw new ArgumentException($"{this.GetType()}, variables from Match expr are not matching."); 
+                        // Check if the same variables are edges.
+                        else if (!node.isVertex && !tmpPattern[j].isVertex)
+                            throw new ArgumentException($"{this.GetType()}, you cannot repeat edge variables in match expression.");
                         else continue;
                     }
                 }
