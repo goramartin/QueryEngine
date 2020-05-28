@@ -21,29 +21,37 @@ namespace QueryEngine
 
             foreach (var item in g.NodeTables)
             {
-                Console.WriteLine("Key:" + item.Key);
-                Console.WriteLine("TableIri:" + item.Value.IRI);
+                Console.WriteLine(
+                    " Key:" + item.Key + 
+                    " TableIri:" + item.Value.IRI
+                    );
                 foreach (var ite in item.Value.Properties)
                 {
-                    Console.WriteLine("PropertyIRI:" + ite.IRI);
-                    Console.WriteLine("PropertyType:" + ite.GetType());
+                    Console.Write(
+                        " PropertyIRI:" + ite.IRI +
+                        " PropertyType:" + ite.GetType() + " / "
+                        );
                 }
-
                 Console.WriteLine();
             }
+            Console.WriteLine();
 
             /////////////
-            Console.WriteLine();
             //Display whats inside dictionary of edges
 
             foreach (var item in g.EdgeTables)
             {
-                Console.WriteLine("Key:" + item.Key);
-                Console.WriteLine("TableIri:" + item.Value.IRI);
+                Console.WriteLine(
+                    " Key:" + item.Key + 
+                    " TableIri:" + item.Value.IRI
+                    );
+                
                 foreach (var ite in item.Value.Properties)
                 {
-                    Console.WriteLine("PropertyIRI:" + ite.IRI);
-                    Console.WriteLine("PropertyType:" + ite.GetType());
+                    Console.Write(
+                        " PropertyIRI:" + ite.IRI + 
+                        " PropertyType:" + ite.GetType() + " / "
+                        );
                 }
 
                 Console.WriteLine();
@@ -57,44 +65,44 @@ namespace QueryEngine
 
             foreach (var item in g.vertices)
             {
-                Console.WriteLine("ID:" + item.ID);
-                Console.WriteLine("TableIRI:" + item.Table.IRI);
-                Console.WriteLine("OutSP:" + item.OutEdgesStartPosition);
-                Console.WriteLine("OutEP:" + item.OutEdgesEndPosition);
-
-                Console.WriteLine("InSP:" + item.InEdgesStartPosition);
-                Console.WriteLine("INEP:" + item.InEdgesEndPosition);
-                Console.WriteLine("P:" + item.PositionInList);
+                Console.WriteLine(
+                    " ID:" + item.ID + 
+                    " TableIRI:" + item.Table.IRI +
+                    " OutSP:" + item.OutEdgesStartPosition +
+                    " OutEP:" + item.OutEdgesEndPosition + 
+                    " InSP:" + item.InEdgesStartPosition +
+                    " INEP:" + item.InEdgesEndPosition +
+                    " P:" + item.PositionInList
+                    );
                 Console.WriteLine();
             }
-
-
-
+            Console.WriteLine();
 
             //////////////
-            Console.WriteLine();
             Console.WriteLine("OutEdges");
             //displey whats inside edges
 
-
             foreach (var item in g.outEdges)
             {
-                Console.WriteLine("ID:" + item.ID);
-                Console.WriteLine("TableIRI:" + item.Table.IRI);
-                Console.WriteLine("EndVertexID:" + item.EndVertex.ID);
+                Console.WriteLine(
+                " ID:" + item.ID +
+                " TableIRI:" + item.Table.IRI +
+                " EndVertexID:" + item.EndVertex.ID
+                );
                 Console.WriteLine();
             }
             Console.WriteLine();
+
             Console.WriteLine("InEdges");
             foreach (var item in g.inEdges)
             {
-                Console.WriteLine("ID:" + item.ID);
-                Console.WriteLine("TableIRI:" + item.Table.IRI);
-                Console.WriteLine("EndVertexID:" + item.EndVertex.ID);
+                Console.WriteLine(
+                " ID:" + item.ID +
+                " TableIRI:" + item.Table.IRI +
+                " EndVertexID:" + item.EndVertex.ID
+                );
                 Console.WriteLine();
             }
-
-
         }
 
         public static void Search(Graph g)
@@ -103,12 +111,14 @@ namespace QueryEngine
 
             List<Token> tokens = Tokenizer.Tokenize(Console.In);
 
+            // Print parsed tokens
             foreach (var item in tokens)
             {
                 Console.WriteLine(item.type);
                 if (item.type == Token.TokenType.Identifier) Console.WriteLine(item.strValue);
             }
 
+            Console.WriteLine();
 
             Parser.ResetPosition();
             var map = new VariableMap();
@@ -140,9 +150,6 @@ namespace QueryEngine
 
         public static void RunTest()
         {
-
-
- 
            Graph g = new Graph();
 
             //just for testing
@@ -150,13 +157,6 @@ namespace QueryEngine
 
             TestClass.DumpGraph(g);
           //  TestClass.Search(g);
-
-
-
-
-
         }
-
-
     }
 }

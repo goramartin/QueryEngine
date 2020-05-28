@@ -39,7 +39,7 @@ namespace QueryEngine
 
         int AllNodeCount { get; }
 
-        Dictionary<int, Element> GetMatchedVariables();
+        Element[] GetMatchedVariables();
     }
 
     /// <summary>

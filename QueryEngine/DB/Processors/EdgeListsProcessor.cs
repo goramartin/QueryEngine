@@ -30,13 +30,17 @@ namespace QueryEngine
     sealed class EdgeListProcessor : IProcessor<EdgeListHolder>
     {
         IProcessorState<EdgeListHolder> processorState;
-        EdgeListHolder holder = new EdgeListHolder();
+        Dictionary<string, Table> edgeTables;
 
         List<Vertex> vertices;
         List<OutEdge> outEdges;
         List<InEdge> inEdges;
 
-        Dictionary<string, Table> edgeTables;
+        /// <summary>
+        /// Index of vertices IDs to a position in their list. To speed up loading of edges.
+        /// (vertex ID, position)
+        /// </summary>
+        Dictionary<int, int> verticesIndex;
         /// <summary>
         /// Each vertex has a set of inwards edges
         /// </summary>
@@ -74,6 +78,14 @@ namespace QueryEngine
             this.edgeTables = (Dictionary<string, Table>)prms[1];
             this.vertices = (List<Vertex>)prms[2];
             InicialiseInEdgesTables();
+            CreateVerticesIndex();
+        }
+
+        private void CreateVerticesIndex()
+        {
+            this.verticesIndex = new Dictionary<int, int>();
+            for (int i = 0; i < this.vertices.Count; i++)
+                this.verticesIndex.Add(this.vertices[i].ID, this.vertices[i].PositionInList);
         }
 
         /// <summary>
@@ -284,9 +296,11 @@ namespace QueryEngine
         private Vertex FindVertex(string param)
         {
             int id = 0;
-            if (!int.TryParse(param, out id) || id < 0 || id >= this.vertices.Count)
+            if (!int.TryParse(param, out id))
                 throw new ArgumentException($"{this.GetType()}, reading wrong node ID. ID is not a number. ID = {param}");
-            return this.vertices[id];
+            else if (!this.verticesIndex.TryGetValue(id, out int value))
+                throw new ArgumentException($"{this.GetType()}, could not find corresponding ID to a vertex. ID = {id}");
+            else return this.vertices[value];
         }
 
 
@@ -312,17 +326,13 @@ namespace QueryEngine
             SetPositionsInListforInEdges();
         }
 
-
-
         /// <summary>
         /// For each edge from in edges, set its position in a list.
         /// </summary>
         private void SetPositionsInListforInEdges()
         {
             for (int i = 0; i < inEdges.Count; i++)
-            {
                 inEdges[i].PositionInList = i;
-            }
         }
 
 
@@ -333,9 +343,7 @@ namespace QueryEngine
         {
             this.incomingEdgesTable = new List<InEdge>[vertices.Count];
             for (int i = 0; i < incomingEdgesTable.Length; i++)
-            {
                 incomingEdgesTable[i] = new List<InEdge>();
-            }
         }
 
         /// <summary>

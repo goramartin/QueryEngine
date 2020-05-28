@@ -136,7 +136,7 @@ namespace QueryEngine
         {
             try
             {
-                Run(args, Console.In);
+               Run(args, Console.In);
             }
             catch (Exception e )
             {
@@ -145,7 +145,7 @@ namespace QueryEngine
                 Console.ReadLine();
             }
 
-          //  TestClass.RunTest();
+            // TestClass.RunTest();
         }
     }
 }

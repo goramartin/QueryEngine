@@ -9,7 +9,6 @@
   This class is directly connected to the dfs pattern class.
  */
 
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -64,9 +63,8 @@ namespace QueryEngine
         /// </summary>
         /// <param name="element"> Element to be tested. </param>
         /// <param name="map"> Scope of variables in search context. </param>
-        /// <param name="used"> A scope containing elements from map but in reversed dictionary. </param>
         /// <returns> True if element can be aplicable or false on refusal. </returns>
-        public abstract bool Apply(Element element, Dictionary<int, Element> map, Dictionary<Element, bool> used);
+        public abstract bool Apply(Element element, Element[] map);
 
 
         /// <summary>
@@ -76,9 +74,8 @@ namespace QueryEngine
         /// </summary>
         /// <param name="element"> Elemented to be tested. </param>
         /// <param name="map"> Scope of variables in search context.</param>
-        /// <param name="used"> Variables used in the search (dep. on if the match object is Edge or Vertex). </param>
         /// <returns>True if element can be aplicable or false on refusal.</returns>
-        protected bool CheckCommonConditions(Element element, Dictionary<int, Element> map, Dictionary<Element, bool> used)
+        protected bool CheckCommonConditions(Element element, Element[] map)
         {
             // Check type, comparing references to tables.
             if ((this.Table != null) && (this.Table != element.Table)) return false;
@@ -88,62 +85,43 @@ namespace QueryEngine
             else  // it is a variable 
             {
                 // Check if any element occupies variable rep. by this match object.
-                if (map.TryGetValue(this.PositionOfRepeatedField, out Element tmpEl))
+                if (map[this.PositionOfRepeatedField] != null)
                 {
                     // It contains el. 
-                    // Check if the elemets are same.
-                    if (tmpEl.ID != element.ID) return false;
-                    else { /* Empty else -> returns true at the end */ }
+                    // Check if the two elements are same.
+                    if (map[this.PositionOfRepeatedField].ID != element.ID) return false;
+                    else { /* Empty else -> it returns true at the end */ }
 
-                }
-                else // The dict does not contain the element.
-                {
-                    // Check if the element is used for another variable.
-                    if (used.ContainsKey(element)) return false;
-                    // Add it to the map and to the used elements.
-                    else
-                    {
-                        map.Add(this.PositionOfRepeatedField, element);
-                        used.Add(element, true);
-                    }
-                }
+                } // The variable is not occupied by the element -> add the element
+                else map[this.PositionOfRepeatedField] = element;
             }
 
             return true;
         }
 
         /// <summary>
-        /// Unsets variable from scope and used elements.
+        /// Unsets variable from scope.
+        /// It checks for anonoymous to avoid uneccessary dict access,
+        /// and it checks for first appearance to avoid unseting variable while it is still used.
         /// </summary>
         /// <param name="map"> Scope of the search algorithm. </param>
-        /// <param name="used"> Used elements (edges/vertices. </param>
-        public void UnsetVariable(Dictionary<int, Element> map, Dictionary<Element, bool> used)
+        public void UnsetVariable(Element[] map)
         {
-            if (this.IsFirstAppereance && !this.IsAnonnymous)
-            {
-                if (map.TryGetValue(this.PositionOfRepeatedField, out Element tmpElement))
-                {
-                    map.Remove(this.PositionOfRepeatedField);
-                    used.Remove(tmpElement);
-                }
-            }
+            if (!this.IsAnonnymous && this.IsFirstAppereance)
+                map[this.PositionOfRepeatedField] = null;
         }
 
         /// <summary>
         /// Gets element corresponding to this match object.
+        /// If the match node is anonymous, it cannot access any variable.
+        /// This 
         /// </summary>
         /// <param name="map"> Scope of the search algorithm. </param>
         /// <returns> Null if no element is used, else element of this match object. </returns>
-        public Element GetVariable(Dictionary<int, Element> map)
+        public Element GetVariable(Element[] map)
         {
             if (this.IsAnonnymous) return null;
-            else
-            {
-                if (this.IsFirstAppereance) return null;
-                else if (map.ContainsKey(this.PositionOfRepeatedField))
-                    return map[this.PositionOfRepeatedField];
-                else throw new ArgumentException($"{ this.GetType()} Map does not contain desired variable.");
-            }
+            else return map[this.PositionOfRepeatedField];
         }
 
 
@@ -171,8 +149,5 @@ namespace QueryEngine
                     throw new ArgumentException($"Trying to create DFS Match type that does not exit.");
             }
         }
-
-
-
     }
 }

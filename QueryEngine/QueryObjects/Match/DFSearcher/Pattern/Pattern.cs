@@ -50,34 +50,25 @@ namespace QueryEngine
             }
         }
 
-
         /// <summary>
-        /// Map of variables that maps strings (names of variables) is map for the whole query.
+        /// Map of variables that maps strings (names of variables) in map for the whole query.
         /// We need to ensure that the indexes when retrieved are the same. 
         /// Integer here is the positionOfRepeated variable (index in Map of variables.)
         /// </summary>
-        private Dictionary<int, Element> Scope;
-
-        /// <summary>
-        /// We need two dictionaries to check if elements rep. other variables.
-        /// Problem is that id of a vertex and id of a edge can be the same -> that why to dicts.
-        /// </summary>
-        private Dictionary<Element, bool> MatchedVarsVertices;
-        private Dictionary<Element, bool> MatchedVarsEdges;
+        private Element[] Scope;
 
         /// <summary>
         /// Creates a pattern from a given matches. Used only inside clone method.
         /// </summary>
         /// <param name="dFSBaseMatches"> Pattern to match during search. </param>
-        private DFSPattern(List<List<DFSBaseMatch>> dFSBaseMatches)
+        /// <param name="variableCount"> Number of variables for the scope. </param>
+        private DFSPattern(List<List<DFSBaseMatch>> dFSBaseMatches, int variableCount)
         {
             if (dFSBaseMatches == null || dFSBaseMatches.Count == 0) 
                 throw new ArgumentException($"{this.GetType()} passed null or empty matches.");
 
             this.Patterns = dFSBaseMatches;
-            this.Scope = new Dictionary<int, Element>();
-            this.MatchedVarsEdges = new Dictionary<Element, bool>();
-            this.MatchedVarsVertices = new Dictionary<Element, bool>();
+            this.Scope = new Element[variableCount];
             this.CurrentMatchNodeIndex = 0;
             this.CurrentPatternIndex = 0;
             this.OverAllIndex = 0;
@@ -99,15 +90,15 @@ namespace QueryEngine
             this.Patterns = new List<List<DFSBaseMatch>>();
             this.CreatePattern(parsedPatterns, map);
 
-            this.Scope = new Dictionary<int, Element>();
-            this.MatchedVarsEdges = new Dictionary<Element, bool>();
-            this.MatchedVarsVertices = new Dictionary<Element, bool>();
+            this.Scope = new Element[map.GetCount()];
+            this.Scope.Populate(null);
+
             this.CurrentMatchNodeIndex = 0;
             this.CurrentPatternIndex = 0;
             this.OverAllIndex = 0;
         }
 
- #region PatternCreation
+        #region PatternCreation
         /// <summary>
         /// Creates pattern from Parsed Pattern made by match visitor, also creates a map for variables
         /// during pattern matching.
@@ -248,7 +239,7 @@ namespace QueryEngine
 
         #endregion PatternCreation
 
-        #region INTERFACE
+        #region PatternInterface
 
         /// <summary>
         /// Calls apply on match object, based on the current object we choose which dict will be passed into the apply method.
@@ -258,10 +249,7 @@ namespace QueryEngine
         /// <returns> True if the element can be applied, false if it cannot be applied. </returns>
         public bool Apply(Element element)
         {
-            if ((this.CurrentMatchNodeIndex % 2) == 0)
-                return this.Patterns[this.CurrentPatternIndex][this.CurrentMatchNodeIndex].Apply(element, this.Scope, this.MatchedVarsVertices);
-            else
-                return this.Patterns[this.CurrentPatternIndex][this.CurrentMatchNodeIndex].Apply(element, this.Scope, this.MatchedVarsEdges);
+            return this.Patterns[this.CurrentPatternIndex][this.CurrentMatchNodeIndex].Apply(element, this.Scope);
         }
 
         /// <summary>
@@ -318,13 +306,8 @@ namespace QueryEngine
         /// </summary>
         public void UnsetCurrentVariable()
         {
-            var tmpNode = this.Patterns[this.CurrentPatternIndex][this.CurrentMatchNodeIndex];
-            if ((this.CurrentMatchNodeIndex % 2) == 1)
-                tmpNode.UnsetVariable(this.Scope, this.MatchedVarsEdges);
-            else tmpNode.UnsetVariable(this.Scope, this.MatchedVarsVertices);
+            this.Patterns[this.CurrentPatternIndex][this.CurrentMatchNodeIndex].UnsetVariable(this.Scope);
         }
-
-
 
         /// <summary>
         ///  Gets starting element of the current chain.
@@ -338,6 +321,7 @@ namespace QueryEngine
         /// <summary>
         /// Gets starting element of the next chain.
         /// This method is called only when there is another pattern.
+        /// If the next chain contains a variable that was already used it returns it from the scope.
         /// </summary>
         /// <returns>Null if anonymous/first appearance else element from scope. </returns>
         public Element GetNextChainConnection()
@@ -369,20 +353,19 @@ namespace QueryEngine
         /// </summary>
         public IDFSPattern Clone()
         {
-            var tmpPattern = new DFSPattern(this.Patterns);
+            var tmpPattern = new DFSPattern(this.Patterns, this.Scope.Length);
             return tmpPattern;
         }
 
         /// <summary>
         /// Returns variables that have been matches so far.
         /// </summary>
-        /// <returns></returns>
-        public Dictionary<int, Element> GetMatchedVariables()
+        public Element[] GetMatchedVariables()
         {
             return this.Scope;
         }
 
-        #endregion INTERFACE
+        #endregion PatternInterface
     }
 
 

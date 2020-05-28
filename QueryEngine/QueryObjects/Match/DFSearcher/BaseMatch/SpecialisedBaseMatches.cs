@@ -28,11 +28,11 @@ namespace QueryEngine
         public DFSVertexMatch(ParsedPatternNode node, int indexInMap, bool isFirst) : base(node, indexInMap, isFirst)
         { }
 
-        public override bool Apply(Element element, Dictionary<int, Element> map, Dictionary<Element, bool> used)
+        public override bool Apply(Element element, Element[] map)
         {
             if (element == null) return false;
             else if (!(element is Vertex)) return false;
-            else return CheckCommonConditions(element, map, used);
+            else return CheckCommonConditions(element, map);
         }
 
     }
@@ -68,11 +68,11 @@ namespace QueryEngine
 
         public override EdgeType GetEdgeType() => EdgeType.InEdge;
 
-        public override bool Apply(Element element, Dictionary<int, Element> map, Dictionary<Element, bool> used)
+        public override bool Apply(Element element, Element[] map)
         {
             if (element == null) return false;
             else if (!(element is InEdge)) return false;
-            else return CheckCommonConditions(element, map, used);
+            else return CheckCommonConditions(element, map);
         }
 
     }
@@ -90,13 +90,12 @@ namespace QueryEngine
 
         public override EdgeType GetEdgeType() => EdgeType.OutEdge;
 
-        public override bool Apply(Element element, Dictionary<int, Element> map, Dictionary<Element, bool> used)
+        public override bool Apply(Element element, Element[] map)
         {
             if (element == null) return false;
             else if (!(element is OutEdge)) return false;
-            else return CheckCommonConditions(element, map, used);
+            else return CheckCommonConditions(element, map);
         }
-
     }
 
     sealed class DFSAnyEdgeMatch : DFSEdgeMatch
@@ -108,11 +107,11 @@ namespace QueryEngine
 
         public override EdgeType GetEdgeType() => EdgeType.AnyEdge;
 
-        public override bool Apply(Element element, Dictionary<int, Element> map, Dictionary<Element, bool> used)
+        public override bool Apply(Element element, Element[] map)
         {
             if (element == null) return false;
             else if (!(element is Edge)) return false;
-            else return CheckCommonConditions(element, map, used);
+            else return CheckCommonConditions(element, map);
         }
     }
 }

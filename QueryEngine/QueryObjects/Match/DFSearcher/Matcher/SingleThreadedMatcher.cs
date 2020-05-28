@@ -81,9 +81,9 @@ namespace QueryEngine
 
         /// <summary>
         /// Method initiates search from every conjunction.
-        /// Once one conjunction is finished filling its chains, it returns  an index of last used vertex.
-        /// That index is then stored and once we jump to another junctions and return back later on, we use this index
-        /// to continue in the previous conjunction.
+        /// Once one conjunction is finished filling its chains, it returns an index of last used vertex.
+        /// That index is then stored and once we jump to subsequent conjunction and return back to the same conjunction later on,
+        /// we use this stored index to continue with the vertex on that index in the search.
         /// </summary>
         public void Search()
         {
@@ -116,14 +116,14 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Initiates iteration over one connected pattern.
+        /// Initiates iteration over one connected pattern (patterns that share a variable).
         /// We try to start search from each vertex in the graph.
-        /// Algorithm is divided into filling up chains.
+        /// Algorithm is divided into filling up chains (patterns).
         /// Once one chain is filled/depleted we return from main search loop.
-        /// Filled: We check whether next pattern in part of the conjuntion or there is another conjunction.
-        /// If there is another conjunction we return the index of the last used vertex that will be later used to init this conjunction search.
+        /// Filled: We check whether next pattern is part of the conjuntion (shared variable is on its start) or there is another conjunction.
+        /// If there is another conjunction we return the index of the last used vertex that will be later used to init currently running conjunction search.
         /// Otherwise we prepare next sub pattern chain and pick an element that connects that pattern, it will be immediately matched.
-        /// Depleted: It is check if current pattern chain is starting point of a conjunction, if it is we either pick next vertex from the graph
+        /// Depleted: It is checked if current pattern chain is a starting point of a conjunction, if it is, we either pick next vertex from the graph
         /// or we just return -1, that is we finished searching this conjunction.
         /// If it is not the starting point, we simply prepare previous sub pattern and set next element to null,
         /// which will lead to dfs backwards once the main loop is started.
@@ -148,9 +148,12 @@ namespace QueryEngine
                 // Iteration over the connected chains.
                 while (true)
                 {
+                    // Note: 
+                    // true is only when current pattern is filled and there are more patterns
+                    // false is only when current pattern is emptied and need to return to a previous pattern or take another starting vertex
                     var canContinue = DFSMainLoop(nextElement);
 
-                    // If there is more chains
+                    // If there are more chains
                     if (canContinue)
                     {
                         // If the new chain is not connected, that means there is another conjunction.
@@ -164,12 +167,11 @@ namespace QueryEngine
                     }
                     else
                     {
-                        // If there are no more chains or we are simply returning
-                        // If we are at the starting chain of conjunction we let main for loop pick next starting vertex.
+                        // If we are at the starting chain of a conjunction we let main for loop pick next starting vertex.
                         if ((pattern.GetCurrentChainConnection()) == null) break;
+                        // If we are connected to the before pattern through a variable, we will initiate returning.
                         else
                         {
-                            // If we are connected to the before pattern, we will initiate returning.
                             pattern.PreparePreviousSubPattern();
                             nextElement = null;
                         }
@@ -180,8 +182,11 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Main loop of the dfs, always consumes one sub pattern from pattern.
+        /// Main loop of the dfs, always consumes one sub pattern from patterns.
         /// When it returns we expect the sub pattern to be empty of full.
+        /// 
+        /// The pattern is full only when there are more patterns to search.
+        /// Otherwise it is empty.
         /// </summary>
         /// <param name="nextElement"> Element to start on. </param>
         /// <returns> True if there is another pattern (Filled), False if it is returning.(Empty) </returns>
@@ -218,7 +223,7 @@ namespace QueryEngine
                     // Check if we came back from top, meaning we finished all possible matches in this chain.
                     if (pattern.CurrentMatchNodeIndex <= 0)
                     {
-                        // The 0th variable must be unset here, because we cant anticipate if we failed on 0th match or somewhere else.
+                        // The 0th variable must be unset here, because we cant anticipate if we failed on 0th match.
                         this.ClearCurrentFromResult();
                         pattern.PreparePreviousNode();
                         break;
@@ -232,10 +237,16 @@ namespace QueryEngine
 
 
         /// <summary>
-        /// Method seaches for the next element to match.
+        /// Method searches for the next element to match.
+        /// 
+        /// Processing Vertex:
         /// If the last matched element is vertex we look for an edge.
-        /// If the last matched element is edge we just take the end vertex.
-        /// Last used edge is filled only when calling from dfs back.
+        /// 
+        /// Processing Edge:
+        /// If the last matched element is edge we just take the end vertex of the edge.
+        /// 
+        /// Notes:
+        /// Last used edge is not null only when calling from dfs back method.
         /// In this case we do not add anything to the result.
         /// </summary>
         /// <param name="lastUsedElement"> Last matched Element. </param>
@@ -264,16 +275,17 @@ namespace QueryEngine
         /// We are returning from the dfs.
         /// When processing the vertex, we failed to add the vertex to the pattern, 
         /// that means we need to go down in the pattern and also remove the edge we came from to the vertex. 
-        /// In order to do so, we will return null, next loop in algorithm fails on adding edge, so the edge gets removed.
+        /// In order to do so, we will return null, next loop in algorithm behaves as if it fails on adding an edge,
+        /// so the edge gets removed.
         /// 
         /// Processing Edge:
-        /// When processing edge, we get the last used edge from the result and remove it from result.
+        /// When processing edge, we get the last used edge from the result and remove it from result array.
         /// (Note there can be no edge, eg: we failed to add one at all.)
         /// We take the edge (null or normal edge) and try to do dfs from the vertex the edge started from 
         /// If it returns a new edge we can continue trying to apply the edge on the same index in pattern.
         /// If it is null we need to remove also the vertex because there are no more available edges from this vertex.
-        /// In order to do that we go down in pattern and return null, so the algorithm fail 
-        /// on adding vertex so it jumps here again and so on.
+        /// In order to do that we go down in pattern that is done via returning null, so the algorithm behaves as if it failed 
+        /// on adding a vertex. (Note that after fail, it jumps here again and so on.)
         /// </summary>
         /// <param name="lastElement"> Last element we failed on. Used only if it was an edge. </param>
         /// <returns>  Element to continue in the search. </returns>
@@ -288,10 +300,10 @@ namespace QueryEngine
             }
             else
             {
-                // Take the edge on the current position. (Edge that was matched before, can be null if no edge was there.)
+                // Take the edge on the current position in result array. (Edge that was matched before, can be null if no edge was there.)
                 Element lastUsedEdgeInResult = (Edge)result[pattern.OverAllIndex];
 
-                // lastElement is null only when we are returning from the removed vertex, we take the last used edge in the result.
+                // lastElement is null only when we are returning from the removed vertex -> we take the last used edge in the result.
                 // Else we always use the newest edge we failed on. 
                 if (lastElement == null) lastElement = lastUsedEdgeInResult;
 
@@ -361,7 +373,7 @@ namespace QueryEngine
 
         /// <summary>
         /// Returns a next edge to be processed of the given vertex.
-        /// Fixed errors when returning to from another pattern which caused using different edge types and infinite loop.
+        /// Fixed errors when returning from future pattern which caused using different edge types and infinite loop.
         /// Notice that this method is called only when matching type Any of the edge.
         /// </summary>
         /// <param name="vertex"> Edges of the vertex will be searched for next possible. </param>
@@ -370,12 +382,15 @@ namespace QueryEngine
         private Edge FindAnyEdge(Vertex vertex, Edge lastUsedEdge)
         {
             Edge nextEdge = null;
+
+            // If no edge has been used -> pick in edge /or/ it hasnt finished iteration over in edges 
             if (lastUsedEdge == null || lastUsedEdge.GetEdgeType() == EdgeType.InEdge)
             {
                 nextEdge = FindInEdge(vertex, lastUsedEdge);
                 if (nextEdge == null) lastUsedEdge = null;
                 else return nextEdge;
             }
+            // if all in edges were used -> pick out edges
             nextEdge = FindOutEdge(vertex, lastUsedEdge);
             return nextEdge;
         }
@@ -454,9 +469,7 @@ namespace QueryEngine
             var scope = this.pattern.GetMatchedVariables();
 
             for (int i = 0; i < this.queryResults.ColumnCount; i++)
-            {
                 this.queryResults.AddElement(scope[i], i, this.threadIndex);
-            }
         }
 
         /// <summary>
