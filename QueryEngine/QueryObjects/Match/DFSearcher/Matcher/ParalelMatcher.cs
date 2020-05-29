@@ -78,6 +78,9 @@ namespace QueryEngine
         /// </summary>
         public void Search()
         {
+            QueryEngine.stopwatch.Start();
+
+
             if (this.Threads.Length == 1)
             {
                 JobSingleThreadSearch tmpJob = new JobSingleThreadSearch(this.Matchers[0]);
@@ -100,9 +103,21 @@ namespace QueryEngine
             for (int i = 0; i < this.Threads.Length; i++)
             {
                 this.Threads[i].Join();
+                QueryEngine.countXX += ((DFSPatternMatcher)this.Matchers[i]).count;
                 this.Matchers[i] = null;
                 this.Threads[i] = null;
             }
+
+            Console.WriteLine(QueryEngine.countXX);
+
+            TimeSpan ts = QueryEngine.stopwatch.Elapsed;
+
+            string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
+            ts.Hours, ts.Minutes, ts.Seconds,
+            ts.Milliseconds / 10);
+
+            Console.WriteLine("RunTime " + elapsedTime);
+
 
             // Merge Arrays with results
             MergeThreadResults();

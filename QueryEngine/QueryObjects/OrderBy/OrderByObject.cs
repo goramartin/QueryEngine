@@ -59,8 +59,18 @@ namespace QueryEngine
         /// <returns> Sorted data. </returns>
         public IResults Sort(IResults sortData)
         {
+            Console.WriteLine("sort start");
+
             ISorter sorter = new Sorter(sortData, this.comparers);
-            return sorter.Sort();
+            var tmp=  sorter.Sort();
+            TimeSpan ts = QueryEngine.stopwatch.Elapsed;
+
+            string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
+            ts.Hours, ts.Minutes, ts.Seconds,
+            ts.Milliseconds / 10);
+
+            Console.WriteLine("RunTime " + elapsedTime);
+            return tmp;
         }
     }
 }

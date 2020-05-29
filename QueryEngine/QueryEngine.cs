@@ -12,10 +12,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using System.Diagnostics;
 
 
 namespace QueryEngine
 {
+    
+
     /// <summary>
     /// Entry point of a program.
     /// Class represents main algorithm loop where user inputs queries and subsequently they are computed
@@ -23,6 +26,8 @@ namespace QueryEngine
     /// </summary>
     sealed class QueryEngine
     {
+        public static ulong countXX = 0;
+        public static Stopwatch stopwatch = new Stopwatch();
 
         /// <summary>
         /// Parses argument that expects to be a thread count.
@@ -121,6 +126,17 @@ namespace QueryEngine
                                         ,Printer,Formater, FileName);
                 Console.WriteLine();
                 query.ComputeQuery();
+
+                stopwatch.Stop();
+                TimeSpan ts = QueryEngine.stopwatch.Elapsed;
+
+                string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
+                ts.Hours, ts.Minutes, ts.Seconds,
+                ts.Milliseconds / 10);
+
+                Console.WriteLine("RunTime " + elapsedTime);
+
+
                 Console.WriteLine("Finished computing. Pres enter to continue...");
                 Console.ReadLine();
                 Console.WriteLine();

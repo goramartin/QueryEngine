@@ -64,7 +64,7 @@ namespace QueryEngine
                 low = partitionRanges.Pop();
 
                 // If the range is smaller than the thresh hold use insert sort otherwise quicksort.
-                if ((high - low + 1) < 20) InsertSort(low, high);
+                if ((high - low + 1) < 10000) InsertSort(low, high);
                 else
                 {
                     // Set pivot of this range to the correct position.

@@ -51,10 +51,9 @@ namespace QueryEngine
         private int threadIndex; // Based on thread, implicitly 0
         private int startVerticesIndex;
         private int startVerticesEndIndex;
-
-
         private MatchResultsStorage queryResults;
 
+        public ulong count = 0;
         /// <summary>
         /// Starting vertices are implicitly set to entire graph.
         /// </summary>
@@ -467,9 +466,10 @@ namespace QueryEngine
         private void StoreResult()
         {
             var scope = this.pattern.GetMatchedVariables();
+            this.count++;
 
             for (int i = 0; i < this.queryResults.ColumnCount; i++)
-                this.queryResults.AddElement(scope[i], i, this.threadIndex);
+                    this.queryResults.AddElement(scope[i], i, this.threadIndex);
         }
 
         /// <summary>
@@ -487,8 +487,5 @@ namespace QueryEngine
                 this.startVerticesEndIndex = end;
             }
         }
-
-
-
     }
 }
