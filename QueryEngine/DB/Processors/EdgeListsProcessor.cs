@@ -124,7 +124,7 @@ namespace QueryEngine
                 var proc = (EdgeListProcessor)processor;
 
                 count++;
-                if (count % 20000 == 0) Console.WriteLine(count);
+                if (count % 200000 == 0) Console.WriteLine(count);
                 if (param == null) 
                 {
                     Console.WriteLine("finished loading edges, now empty buckets into an list");

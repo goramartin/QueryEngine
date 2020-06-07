@@ -1,4 +1,4 @@
-﻿1 Person Pavel Jezek 35
+1 Person Pavel Jezek 35
 2 Person Lubomir Bulej 39
 3 Person Jarek Kaufman 21
 4 Person Pavel Mikulas 22

@@ -1,4 +1,4 @@
-﻿8 isFriend 1 2 11
+8 isFriend 1 2 11
 9 isFriend 1 4 22
 10 isFriend 1 5 3
 11 isFriend 2 3 2

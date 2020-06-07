@@ -124,6 +124,22 @@ namespace QueryEngine
                 this.results[columnIndex][i].Clear();
             }
         }
+
+        /// <summary>
+        /// Merges two thread rows on given indeces
+        /// </summary>
+        /// <param name="first"> Row to merge into.</param>
+        /// <param name="second"> Data are copied to the first row.</param>
+        public void MergeRows(int first, int second)
+        {
+            Console.WriteLine("Merging " + first + " " + second);
+
+            for (int i = 0; i < this.ColumnCount; i++)
+            {
+                this.results[i][first].AddRange(this.results[i][second]);
+                this.results[i][second].Clear();
+            }
+        }
     }
 
 }

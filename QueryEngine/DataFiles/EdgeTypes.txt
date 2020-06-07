@@ -3,4 +3,4 @@
 "Kind": "isFriend",
 "For": "integer"
 }
-]﻿
+]
