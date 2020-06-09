@@ -65,7 +65,7 @@ namespace QueryEngine
                     // Found matching variable
                     if (this.Pattern[k].Equals(other.Pattern[l]))
                     {
-                        name = this.Pattern[k].name;
+                        name = this.Pattern[k].Name;
                         return true;
                     }
                 }
@@ -110,7 +110,7 @@ namespace QueryEngine
                 var tmp = this.Pattern[j];
                 this.Pattern.RemoveAt(j);
 
-                if (tmp.isVertex) this.Pattern.Add(tmp);
+                if (tmp.IsVertex) this.Pattern.Add(tmp);
                 else this.Pattern.Add(tmp.CloneReverse());
             }
             return null;
@@ -144,7 +144,7 @@ namespace QueryEngine
             //Find index of splitVariable
             for (int i = 0; i < this.GetCount(); i++)
             {
-                if (this.splitBy == this.Pattern[i].name) return i;
+                if (this.splitBy == this.Pattern[i].Name) return i;
             }
             return -1;
         }
@@ -158,25 +158,19 @@ namespace QueryEngine
     /// </summary>
     sealed class ParsedPatternNode
     {
-        public bool isAnonymous;
-        public bool isVertex;
-        public Table table;
-        public EdgeType edgeType;
-        public string name;
+        public bool IsAnonymous { get; set; }
+        public bool IsVertex { get; set; }
+        public Table Table { get; set; }
+        public EdgeType edgeType { get; set; }
+        public string Name { get; set; }
 
         public ParsedPatternNode()
         {
-            this.table = null;
-            this.name = null;
-            this.isVertex = true;
-            this.isAnonymous = true;
+            this.Table = null;
+            this.Name = null;
+            this.IsVertex = true;
+            this.IsAnonymous = true;
         }
-
-        public bool IsAnonymous() => this.isAnonymous;
-        public bool IsVertex() => this.isVertex;
-        public Table GetTable() => this.table;
-        public EdgeType GetEdgeType() => this.edgeType;
-        public string GetName() => this.name;
 
         /// <summary>
         /// Creates copy of instance, reverses edges.
@@ -186,10 +180,10 @@ namespace QueryEngine
         {
             var clone = new ParsedPatternNode();
 
-            clone.isVertex = this.isVertex;
-            clone.name = this.name;
-            clone.table = this.table;
-            clone.isAnonymous = this.isAnonymous;
+            clone.IsVertex = this.IsVertex;
+            clone.Name = this.Name;
+            clone.Table = this.Table;
+            clone.IsAnonymous = this.IsAnonymous;
 
             if (this.edgeType == EdgeType.InEdge) clone.edgeType = EdgeType.OutEdge;
             else if (this.edgeType == EdgeType.OutEdge) clone.edgeType = EdgeType.InEdge;
@@ -202,12 +196,12 @@ namespace QueryEngine
             if (obj is ParsedPatternNode)
             {
                 var o = obj as ParsedPatternNode;
-                if (this.isAnonymous && o.isAnonymous) return false;
+                if (this.IsAnonymous && o.IsAnonymous) return false;
 
-                if (this.name != o.name) return false;
-                else if (this.isVertex != o.isVertex) return false;
+                if (this.Name != o.Name) return false;
+                else if (this.IsVertex != o.IsVertex) return false;
                 //referrence to the same object is valid here
-                else if (this.table != o.table) return false;
+                else if (this.Table != o.Table) return false;
                 else if (this.edgeType != o.edgeType) return false;
                 return true;
             }

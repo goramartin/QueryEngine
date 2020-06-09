@@ -71,7 +71,7 @@ namespace QueryEngine
             this.readingVertex = true;
 
             ParsedPatternNode vm = new ParsedPatternNode();
-            vm.isVertex = true;
+            vm.IsVertex = true;
             currentPattern.AddParsedPatternNode(vm);
 
             if (node.matchVariable != null) node.matchVariable.Accept(this);
@@ -88,7 +88,7 @@ namespace QueryEngine
 
             ParsedPatternNode em = new ParsedPatternNode();
             em.edgeType = node.GetEdgeType();
-            em.isVertex = false;
+            em.IsVertex = false;
             currentPattern.AddParsedPatternNode(em);
 
             if (node.matchVariable != null) node.matchVariable.Accept(this);
@@ -131,8 +131,8 @@ namespace QueryEngine
 
             if (readingName)
             {
-                n.isAnonymous = false;
-                n.name = node.value;
+                n.IsAnonymous = false;
+                n.Name = node.value;
             }
             else
             {
@@ -152,7 +152,7 @@ namespace QueryEngine
             //Try find the table of the variable, it has to be always valid table name.
             if (!d.TryGetValue(node.value, out Table table))
                 throw new ArgumentException($"{this.GetType()}, could not parse Table name.");
-            else n.table = table;
+            else n.Table = table;
         }
 
 

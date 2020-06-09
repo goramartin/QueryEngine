@@ -86,7 +86,7 @@ namespace QueryEngine
                 var tmpPattern = parsedPatterns[i].Pattern;
                 for (int j = 0; j < tmpPattern.Count; j++)
                 {
-                    string name = tmpPattern[j].GetName();
+                    string name = tmpPattern[j].Name;
                     // Anonymous variables are skipped.
                     if (name == null) continue;
                     // Try to obtain variable with the same name, if it is missing insert it to dictionary.
@@ -96,7 +96,7 @@ namespace QueryEngine
                         if (!node.Equals(tmpPattern[j]))
                             throw new ArgumentException($"{this.GetType()}, variables from Match expr are not matching."); 
                         // Check if the same variables are edges.
-                        else if (!node.isVertex && !tmpPattern[j].isVertex)
+                        else if (!node.IsVertex && !tmpPattern[j].IsVertex)
                             throw new ArgumentException($"{this.GetType()}, you cannot repeat edge variables in match expression.");
                         else continue;
                     }
@@ -114,7 +114,8 @@ namespace QueryEngine
         public IResults Search()
         {
             this.Matcher.Search();
-            return new Results(this.queryResults.GetResults());
+            var tmp = new Results(this.queryResults.GetResults());
+            return tmp;
         }
     }
 }

@@ -218,15 +218,15 @@ namespace QueryEngine
                 bool isFirst = true;
 
                 // If it has not got a name, do not add it to map.
-                if (tmpNode.name != null)
+                if (tmpNode.Name != null)
                 {
                     // Try if the variable is inside a dictionary
-                    if ((index = map.GetVariablePosition(tmpNode.name)) == -1)
+                    if ((index = map.GetVariablePosition(tmpNode.Name)) == -1)
                     {
                         // If it is not, Add it there with the proper type and index.
                         // Note: Table can be null
                         index = map.GetCount();
-                        map.AddVariable(tmpNode.name, index, tmpNode.table);
+                        map.AddVariable(tmpNode.Name, index, tmpNode.Table);
                     }
                     else isFirst = false;
                 }

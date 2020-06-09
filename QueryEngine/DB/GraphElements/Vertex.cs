@@ -80,11 +80,5 @@ namespace QueryEngine
             end = this.InEdgesEndPosition;
         }
 
-
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
     }
 }

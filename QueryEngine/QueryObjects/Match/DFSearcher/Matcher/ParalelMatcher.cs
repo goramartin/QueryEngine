@@ -85,16 +85,17 @@ namespace QueryEngine
             else
             {
                 this.ParallelSearch();
+
+                TimeSpan tss = QueryEngine.stopwatch.Elapsed;
+                string eelapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", tss.Hours, tss.Minutes, tss.Seconds, tss.Milliseconds / 10);
+                Console.WriteLine("Query time " + eelapsedTime);
+
                 this.ParallelMergeThreadResults();
             }
 
-            for (int i = 0; i < this.Matchers.Length; i++)
-                QueryEngine.countXX += ((DFSPatternMatcher)this.Matchers[i]).count;
-
-            Console.WriteLine(QueryEngine.countXX);
             TimeSpan ts = QueryEngine.stopwatch.Elapsed;
             string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-            Console.WriteLine("RunTime " + elapsedTime);
+            Console.WriteLine("Merge time " + elapsedTime);
         }
 
         /// <summary>
@@ -286,6 +287,10 @@ namespace QueryEngine
                     start = tmpStartOfRound;
                     end = tmpEndOfRound;
                 }
+                Console.WriteLine(Thread.CurrentThread.ManagedThreadId + " returning " + start + " " + end);
+
+
+
             }
         }
        
@@ -594,6 +599,7 @@ namespace QueryEngine
                             if (!IsInNextRound || this.workThreads == 0) return false;
                             else return true;
                         }
+
                     }
             }
 

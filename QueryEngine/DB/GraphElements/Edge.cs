@@ -44,10 +44,6 @@ namespace QueryEngine
 
         public abstract EdgeType GetEdgeType();
         
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
     }
 
     /// <summary>
@@ -62,11 +58,6 @@ namespace QueryEngine
         public override EdgeType GetEdgeType()
         {
             return EdgeType.InEdge;
-        }
-
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
         }
 
     }
@@ -85,9 +76,5 @@ namespace QueryEngine
             return EdgeType.OutEdge;
         }
 
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
     }
 }

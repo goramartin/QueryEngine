@@ -58,19 +58,25 @@ namespace QueryEngine
             this.inEdges = null;
             this.EdgeTables = null;
 
+
+            Console.WriteLine("Loading tables...");
             this.LoadNodeTables("DataFiles\\NodeTypes.txt");
             this.LoadEdgeTables("DataFiles\\EdgeTypes.txt");
+            Console.WriteLine("Loading tables finished.");
+
 
             this.Labels = new Dictionary<string, Type>();
             this.AdjustLabels(this.EdgeTables);
             this.AdjustLabels(this.NodeTables);
 
+            Console.WriteLine("Loading nodes...");
             this.LoadVertices("DataFiles\\Nodes.txt");
-            Console.WriteLine("Vertices done.");
+            Console.WriteLine("Loading nodes finished.");
 
 
-
+            Console.WriteLine("Loading edges...");
             this.LoadEdges("DataFiles\\Edges.txt");
+            Console.WriteLine("Loading edges finished.");
         }
 
         /// <summary>

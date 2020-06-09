@@ -26,7 +26,6 @@ namespace QueryEngine
     /// </summary>
     sealed class QueryEngine
     {
-        public static ulong countXX = 0;
         public static Stopwatch stopwatch = new Stopwatch();
 
         /// <summary>
@@ -129,13 +128,9 @@ namespace QueryEngine
 
                 stopwatch.Stop();
                 TimeSpan ts = QueryEngine.stopwatch.Elapsed;
-
-                string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
-                ts.Hours, ts.Minutes, ts.Seconds,
-                ts.Milliseconds / 10);
-
-                Console.WriteLine("RunTime " + elapsedTime);
-
+                string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
+                Console.WriteLine("Query time " + elapsedTime);
+                stopwatch.Reset();
 
                 Console.WriteLine("Finished computing. Pres enter to continue...");
                 Console.ReadLine();
@@ -157,7 +152,7 @@ namespace QueryEngine
             catch (Exception e )
             {
                 Console.WriteLine(e);
-                Console.WriteLine("Press enter to close the application");
+                Console.WriteLine("Press enter to close the application.");
                 Console.ReadLine();
             }
 

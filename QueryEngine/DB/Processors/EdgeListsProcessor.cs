@@ -123,15 +123,14 @@ namespace QueryEngine
             {
                 var proc = (EdgeListProcessor)processor;
 
+                // Just a test print
                 count++;
                 if (count % 200000 == 0) Console.WriteLine(count);
+
                 if (param == null) 
                 {
-                    Console.WriteLine("finished loading edges, now empty buckets into an list");
                     proc.FinalizeInEdges();
-                    Console.WriteLine("finihed emptying buckets of in edges");
                     proc.FinalizeVertices();
-                    Console.WriteLine("finished loading completely");
                     proc.finished = true;
                     return; 
                 }

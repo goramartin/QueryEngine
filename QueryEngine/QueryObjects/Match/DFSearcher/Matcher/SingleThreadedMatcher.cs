@@ -136,6 +136,9 @@ namespace QueryEngine
             //for (int i = lastIndex; i < vertices.Count; i++)
             for (int i = this.PickConjunctionStartIndex(lastIndex, cameFromUp); i < this.PickConjunctionEndIndex(); i++)
             {
+                Console.WriteLine(Thread.CurrentThread.ManagedThreadId + "picked" + i);
+
+
                 processingVertex = true;
                 Element nextElement = vertices[i];
                 if (cameFromUp)

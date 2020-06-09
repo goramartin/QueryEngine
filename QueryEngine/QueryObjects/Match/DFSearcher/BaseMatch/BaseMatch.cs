@@ -54,7 +54,7 @@ namespace QueryEngine
 
             this.IsFirstAppereance = isFirst;
             this.PositionOfRepeatedField = indexInMap;
-            this.Table = node.table;
+            this.Table = node.Table;
         }
 
 
