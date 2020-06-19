@@ -98,11 +98,6 @@ namespace QueryEngine
         /// <param name="threadIndex"> Index of a thread. </param>
         public void AddElement(Element element, int columnIndex, int threadIndex)
         {
-            if (columnIndex < 0 || columnIndex >= this.ColumnCount)
-                throw new ArgumentException($"{this.GetType()}, Cannot add into column = {columnIndex}.");
-            if (threadIndex < 0 || threadIndex >= this.ThreadCount)
-                throw new ArgumentException($"{this.GetType()}, Cannot add into thread index = {threadIndex}.");
-
             this.results[columnIndex][threadIndex].Add(element);
         }
 
@@ -132,8 +127,6 @@ namespace QueryEngine
         /// <param name="second"> Data are copied to the first row.</param>
         public void MergeRows(int first, int second)
         {
-            Console.WriteLine("Merging " + first + " " + second);
-
             for (int i = 0; i < this.ColumnCount; i++)
             {
                 this.results[i][first].AddRange(this.results[i][second]);

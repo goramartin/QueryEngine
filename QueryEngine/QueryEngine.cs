@@ -10,7 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using System.IO;
 using System.Diagnostics;
 
@@ -43,20 +43,6 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Parses argument that expects to be a vertices per round.
-        /// </summary>
-        /// <param name="param"> Application argument. </param>
-        /// <returns> Vertices per round.</returns>
-        private static int GetVerticesPerhread(string param)
-        {
-            if (!Int32.TryParse(param, out int verticesPerThread))
-                throw new ArgumentException("Failed to parse vertices per thread.");
-            else if (verticesPerThread <= 0)
-                throw new ArgumentException("Vertices per thread cannot be negative.");
-            else return verticesPerThread;
-        }
-
-        /// <summary>
         /// Parses argument that expects to be a printer type.
         /// </summary>
         /// <param name="param"> Application argument.</param>
@@ -82,19 +68,41 @@ namespace QueryEngine
         }
 
         /// <summary>
+        /// Parses argument that expects to be a vertices per round.
+        /// </summary>
+        /// <param name="param"> Application argument. </param>
+        /// <returns> Vertices per round.</returns>
+        private static int GetVerticesPerhread(int threadCount, string[] args)
+        {
+            if (threadCount == 1) return 1;
+            else if (args.Length < 4)
+                throw new ArgumentException("Missing number of vertices per thread in the argument list.");
+            else if (!Int32.TryParse(args[3], out int verticesPerThread))
+                throw new ArgumentException("Failed to parse vertices per thread.");
+            else if (verticesPerThread <= 0)
+                throw new ArgumentException("Vertices per thread cannot be negative.");
+            else return verticesPerThread;
+        }
+
+        /// <summary>
         /// Parses argument that expects to be a file name.
         /// </summary>
-        /// <param name="pars"> Application arguments.</param>
+        /// <param name="threadCount"> Number of threads fro the app.</param>
+        /// <param name="printer"> The destination of printer. </param>
+        /// <param name="args">Application arguments.</param>
         /// <returns> File name. </returns>
-        private static string GetFileName(string[] pars)
+        private static string GetFileName(int threadCount, string printer, string[] args)
         {
-            if (pars[2] == "file")
+            // If it runs in parallel, the number of vertices precedes the file name
+            if (printer == "file")
             {
-                if (pars.Length < 5) throw new ArgumentException("Missing file name.");
-                else return pars[4];
+                if (threadCount == 1 && args.Length == 4) return args[3];
+                else if (args.Length == 5) return args[4];
+                else throw new ArgumentException("Missing file name.");
             }
             else return null; 
         }
+
 
     /// <summary>
     /// Main algorith.
@@ -104,25 +112,29 @@ namespace QueryEngine
     /// <param name="reader"> Reader from which to read input. </param>
     private static void Run(string[] args, TextReader reader)
         {
-            if (args.Length < 4) throw new ArgumentException("Wrong number of program parameters.");
+            if (args.Length < 3) throw new ArgumentException("Wrong number of program parameters.");
 
             // Parse program arguments
             int ThreadCount = GetThreadCount(args[0]);
-            int VerticesPerThread = GetVerticesPerhread(args[1]);
-            string Printer = GetPrinter(args[2]);
-            string Formater = GetFormater(args[3]);
-            string FileName = GetFileName(args);
-            
+            string Printer = GetPrinter(args[1]);
+            string Formater = GetFormater(args[2]);
+            int VerticesPerThread = GetVerticesPerhread(ThreadCount, args);
+            string FileName = GetFileName( ThreadCount, Printer, args);
+
+            using (Process p = Process.GetCurrentProcess())
+            p.PriorityClass = ProcessPriorityClass.RealTime; ///High;
+            Thread.CurrentThread.Priority = ThreadPriority.Highest;
+
             // Load graph.
             Graph graph = new Graph();
-            
+
             //Every query needs valid SELECT and MATCH expr.
             //Every query must end with semicolon ';'.
             while (true)
             {
                 Console.WriteLine("Enter Query:");
-                Query query = new Query(reader, graph, ThreadCount,VerticesPerThread
-                                        ,Printer,Formater, FileName);
+                Query query = new Query(reader, graph, ThreadCount, VerticesPerThread
+                                        , Printer, Formater, FileName);
                 Console.WriteLine();
                 query.ComputeQuery();
 
@@ -137,7 +149,7 @@ namespace QueryEngine
                 Console.WriteLine();
                 Console.WriteLine("Continue with another query? y/n (single character answer):");
                 string c;
-                c= (Console.ReadLine());
+                c = (Console.ReadLine());
                 if (c[0] != 'y') break;
                 Console.Clear();
             }

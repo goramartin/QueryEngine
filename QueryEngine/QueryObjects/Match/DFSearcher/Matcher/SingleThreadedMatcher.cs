@@ -53,7 +53,7 @@ namespace QueryEngine
         private int startVerticesEndIndex;
         private MatchResultsStorage queryResults;
 
-        public ulong count = 0;
+        public int Count = 0;
         /// <summary>
         /// Starting vertices are implicitly set to entire graph.
         /// </summary>
@@ -93,7 +93,7 @@ namespace QueryEngine
 
             while (true)
             {
-                // -1 meaning that next conjunction search will start from the beginning of vertix list. 
+                // -1 meaning that next conjunction search will start from the beginning of vertex list. 
                 if (lastUsedIndex == -1) lastUsedIndex = DFSStartOfCunjunction(0, false);
                 // Else it uses last used index in that conjunction.
                 else lastUsedIndex = DFSStartOfCunjunction(lastUsedIndex, true);
@@ -136,9 +136,6 @@ namespace QueryEngine
             //for (int i = lastIndex; i < vertices.Count; i++)
             for (int i = this.PickConjunctionStartIndex(lastIndex, cameFromUp); i < this.PickConjunctionEndIndex(); i++)
             {
-                Console.WriteLine(Thread.CurrentThread.ManagedThreadId + "picked" + i);
-
-
                 processingVertex = true;
                 Element nextElement = vertices[i];
                 if (cameFromUp)
@@ -468,7 +465,7 @@ namespace QueryEngine
         private void StoreResult()
         {
             var scope = this.pattern.GetMatchedVariables();
-            this.count++;
+            this.Count++;
 
             for (int i = 0; i < this.queryResults.ColumnCount; i++)
                     this.queryResults.AddElement(scope[i], i, this.threadIndex);

@@ -198,13 +198,13 @@ After evaluation user will be prompted to press anter again. Then the user will 
 
 The application expects 5 arguments in a given order.
 
-| Argument      | Description |
+| Argument      | Description | 
 | ----------- | ----------- |
 | Thread number      | A number of threads for computation of queries.       |
-|  Vertices per Thread  | Defines the number of vertices that will be distributed to each thread. (Only if more than one thread is specified)        |
 |  Printer   | Type of a printer.       |
 |  Formater  | Formating of a printing table.       |
-| File name | A name of a file if printer is defined as a file printer |
+|  Vertices per Thread  | Defines the number of vertices that will be distributed to each thread. Only if more than one thread is specified        |
+| File name | A name of a file only if printer is defined as a "file" printer |
 
 #### Printer 
 

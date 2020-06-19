@@ -95,7 +95,7 @@ namespace QueryEngine
 
             TimeSpan ts = QueryEngine.stopwatch.Elapsed;
             string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-            Console.WriteLine("Merge time " + elapsedTime);
+            Console.WriteLine("Query + merge time " + elapsedTime);
         }
 
         /// <summary>
@@ -159,6 +159,7 @@ namespace QueryEngine
                 for (int i = 0; i < this.Threads.Length; i++)
                 {
                     this.Threads[i] = new Thread(DFSParallelPatternMatcher.WorkMultiThreadSearch);
+                    this.Threads[i].Priority = ThreadPriority.Highest;
                     this.Threads[i].Start(new JobMultiThreadSearch(thisSynchronizer, distributor, this.Matchers[i]));
                 }
 
@@ -287,15 +288,14 @@ namespace QueryEngine
                     start = tmpStartOfRound;
                     end = tmpEndOfRound;
                 }
-                Console.WriteLine(Thread.CurrentThread.ManagedThreadId + " returning " + start + " " + end);
-
-
-
             }
         }
        
         #endregion ParalelSearch
 
+ 
+        
+        
         // This section contains structures for parallel merging of results.
         #region ParalelMerge
 
@@ -313,13 +313,12 @@ namespace QueryEngine
         /// </summary>
         private void ParallelMergeThreadResults()
         {
-            if (this.Threads.Length / 2 > this.Results.ColumnCount)
+             if (this.Threads.Length / 2 > this.Results.ColumnCount)
                 MergeRow();
-            else
+             else
                 MergeColumn();
 
         }
-
 
         #region MergeColumn
 
@@ -340,6 +339,7 @@ namespace QueryEngine
                 for (int i = 0; i < threadsToUse; i++)
                 {
                     this.Threads[i] = new Thread(DFSParallelPatternMatcher.ParallelMergeColumnWork);
+                    this.Threads[i].Priority = ThreadPriority.Highest;
                     this.Threads[i].Start(new ParallelMergeColumnJob(thisSynchronizer, columnDistributor, this.Results));
                 }
                 Monitor.Wait(thisSynchronizer.lockingObject);
@@ -429,211 +429,56 @@ namespace QueryEngine
 
         #region MergeRow
 
+
         /// <summary>
-        /// Initiates a parallel merging of results by rows.
-        /// The number of threads used during matching define the number of rows to merge.
-        /// The half of threads used for searching is taken and each thread merges two rows in the result table.
-        /// After they merge the rows, only half of threads from the first merging continues to the second round.
-        /// Where they merge the rows merged from before. Each round the number of rows is reducced by half.
-        /// When the number of rows to merge reaches 1 the algirthm finishes.
-        /// Threads exluded from merging finished at the time when round ends.
-        /// The threads are given jobs that contain index that decides whether the thread will continue into the next round.
-        /// For example:
-        /// The number of threads for search is 10, then the number of rows to merge is 10 and threads to use for merging the first 
-        /// round is 5. With indeces of jobs ordered 1 2 3 4 5. They are given the row numbers to merge and they start merging.
-        /// The rows are taken as first and the last, the second and the last-1 ... here are touples (0,9) (1,8) (2,7)...
-        /// If the number of rows is odd, the thread that gets touple (0, last) also merges (0,last-1) and the other touples are shifted by 
-        /// 2 instead of 1.
-        /// When one thread finishes it checks whether it is the last thread working and its index if it continues to the next round.
-        /// If the thread is last, it redistributes rows to a waiting threads via their jobs. Then they continue mergin while 
-        /// threads with indeces higher then 5/2=2 are discarded. If it is not the last one working it either stops working or it waits
-        /// for a pulse from the last wokring thread.
-        /// Note that the thread with index 1 always is the last one alive when everything is merged.
+        /// Merges results from parallel search.
         /// </summary>
         private void MergeRow()
         {
-            var thisSynchronizer = new Synchronizer(this.Threads.Length / 2);
-            var rowDistributor = new RowDistributor(this.Threads.Length / 2, this.Threads.Length);
-
-            lock (thisSynchronizer.lockingObject)
-            {
-                for (int i = 0; i < this.Threads.Length / 2; i++)
-                {
-                    this.Threads[i] = new Thread(DFSParallelPatternMatcher.ParallelMergeRowWork);
-                    var tmp = new ParallelMergeRowJob(i+1, thisSynchronizer, rowDistributor, this.Results);
-                    rowDistributor.AddJob(tmp);
-
-                    // Distribute verices 
-                    tmp.FirstRow = i;
-                    if (i != 0 && this.Threads.Length % 2 == 1)
-                        tmp.SecondRow = this.Threads.Length - i - 2;
-                    else tmp.SecondRow = this.Threads.Length - i - 1;
-
-                    this.Threads[i].Start(tmp);
-                }
-                Monitor.Wait(thisSynchronizer.lockingObject);
-            }
-            Console.WriteLine("finished");
+            Thread thread = new Thread(() => DFSParallelPatternMatcher.ParallelMergeRowWork(this.Results, 0, this.Threads.Length));
+            thread.Priority = ThreadPriority.Highest;
+            thread.Start();
+            thread.Join();
         }
 
         /// <summary>
-        /// A work passes to a thread.
-        /// It merges rows from a job, then it signals that it finished.
+        /// Each call the method receives a range to merge. If the range is smaller or equal three, it merges the results into the
+        /// row on position at value of first. If the range is larger it can be split into another thread to work by calculating middle position.
+        /// If the middle is on an odd number, the middle is moved one position back. What that means is that if we want to split range of 10,
+        /// middle is 5, and ranges 0 5, 5 10 are worked on separately, it would continue into 0 2, 2 5, 5 7, 7 9 merges. Which ommits one possible merge, which 
+        /// results in merging two times 3 rows.
+        /// Each merge is stored to the position at the value of first.
         /// </summary>
-        /// <param name="o"></param>
-        private static void ParallelMergeRowWork(object o)
+        /// <param name="results"> Result table to merge.</param>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        private static void ParallelMergeRowWork(MatchResultsStorage results, int start, int end)
         {
-            ParallelMergeRowJob job = (ParallelMergeRowJob)o;
-
-            bool canContinue = true;
-            while (true)
+            // do work parallel
+            if (end - start > 3)
             {
-                if (canContinue)
-                {
-                    job.Elements.MergeRows(job.FirstRow, job.SecondRow);
-                    // Case of odd number of rows and (0, last) tuple.       
-                    if (job.FirstRow == 0 && (job.SecondRow % 2 == 0)) 
-                           job.Elements.MergeRows(job.FirstRow, job.SecondRow - 1);
-                }
-                else
-                {
-                    Console.WriteLine("Finished with job = " + job.ThreadIndex);
-                    job.MainThreadSynchronizer.SignalFinish();
-                    break;
-                }
+                // compute middle of the range
+                int middle = ((end - start) / 2) + start;
+                if (middle % 2 == 1) middle--;
 
-                canContinue = job.RowDistributor.DistributeRows(job);
+                Thread thread = new Thread(() => DFSParallelPatternMatcher.ParallelMergeRowWork(results, middle, end));
+                thread.Priority = ThreadPriority.Highest;
+                thread.Start();
+
+                DFSParallelPatternMatcher.ParallelMergeRowWork(results, start, middle);
+                
+                // Wait for other thread to finish and start merging its results with yours.
+                thread.Join();
+                results.MergeRows(start, middle);
+            } else
+            { // merge rows
+                for (int i = start + 1; i < end; i++)
+                    results.MergeRows(start, i);
             }
         }
-
-        /// <summary>
-        /// Class serves as a job argument to a thread work.
-        /// </summary>
-        class ParallelMergeRowJob
-        {
-            /// <summary>
-            /// Synchronizer to the main thread.
-            /// </summary>
-            public Synchronizer MainThreadSynchronizer;
-            public RowDistributor RowDistributor;
-            public MatchResultsStorage Elements;
-            /// <summary>
-            /// Index that describes the order of the merge work and who continues to the next round.
-            /// </summary>
-            public int ThreadIndex; 
-            public int FirstRow;
-            public int SecondRow;
-
-            public ParallelMergeRowJob( int threadIndex, Synchronizer synchronizer, RowDistributor columnDistributor, MatchResultsStorage elements)
-            {
-                this.ThreadIndex = threadIndex;
-                this.MainThreadSynchronizer = synchronizer;
-                this.Elements = elements;
-                this.RowDistributor = columnDistributor;
-            }
-        }
-
-        /// <summary>
-        /// A class serves as a row dsitributor.
-        /// When a thread finished merging its column, it calls method for more work.
-        /// </summary>
-        class RowDistributor
-        {
-            object lockingObject = new object();
-            int finishedThreads;
-            /// <summary>
-            /// Threads to be used in a round.
-            /// </summary>
-            int workThreads;
-            /// <summary>
-            /// Rows to merge.
-            /// </summary>
-            int rowCount;
-            /// <summary>
-            /// Reference to the jobs of threads.
-            /// </summary>
-            List<ParallelMergeRowJob> threadJobs = new List<ParallelMergeRowJob>();
-
-            public RowDistributor(int workThreads, int rowCount)
-            {
-                this.rowCount = rowCount;
-                this.workThreads = workThreads;
-                this.finishedThreads = 0;
-            }
-
-            public void AddJob(ParallelMergeRowJob job)
-            {
-                this.threadJobs.Add(job);
-            }
-
-            /// <summary>
-            /// A method that thread that merges row calls when it finishes the mergins.
-            /// </summary>
-            /// <param name="threadJob"> A job of a thread that call this method.</param>
-            /// <returns> If the thread can continue to the next round.</returns>
-            public bool DistributeRows(ParallelMergeRowJob threadJob)
-            {
-                    lock (this.lockingObject)
-                    {
-                        this.finishedThreads++;
-                        bool IsInNextRound = ((this.workThreads / 2) < threadJob.ThreadIndex ? false : true);
-                        
-                        // Am I the last working thread?
-                        if (this.finishedThreads != this.workThreads)
-                        {   // No.
-                            // Will I work in the next round?
-                                  // No, then end completely.
-                            if (!IsInNextRound) return false;
-                            else  // Yes, wait for the last thread to finish.
-                            {
-                                Monitor.Wait(this.lockingObject);
-                                return true;
-                                // it assumed after they are woken up, the appropriate jobs were assigned.
-                            }
-                        } else
-                        {   // Yes, I am last.
-                            PrepareNextRound();
-                            // Wake up all waiting threads.
-                            Monitor.PulseAll(this.lockingObject);
-
-                            if (!IsInNextRound || this.workThreads == 0) return false;
-                            else return true;
-                        }
-
-                    }
-            }
-
-            /// <summary>
-            /// Prepares for the next round.
-            /// Number of threads is reduced by two and the row count is reduced by two as well.
-            /// </summary>
-            private void PrepareNextRound()
-            {
-                this.workThreads /= 2;
-                this.finishedThreads = 0;
-                this.rowCount /= 2;
-
-                // Assign work to all threads that continue to the next round.
-                for (int i = 0; i < this.workThreads; i++)
-                {
-                    this.threadJobs[i].FirstRow = i;
-
-                    // if the number of row count is odd, the thread that receives touple (0, last) also merges (0, last-1)
-                    // Other threads then receive values shifted by two instead of 1.
-                    if ( i != 0 && this.rowCount % 2 == 1)
-                         this.threadJobs[i].SecondRow = this.rowCount - i - 2;
-                     else this.threadJobs[i].SecondRow = this.rowCount - i - 1;
-                }
-            }
-        }
-
-
 
         #endregion MergeRow
 
         #endregion ParalelMerge
-
-
-
     }
 }
