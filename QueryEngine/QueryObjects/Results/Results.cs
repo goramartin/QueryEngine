@@ -24,11 +24,11 @@ namespace QueryEngine
     /// <summary>
     /// Base interface for all result classes.
     /// </summary>
-    interface IResults : IEnumerable<RowProxy>
+    interface IResults : IEnumerable<Results.RowProxy>
     {
         int ColumnCount { get; }
         int Count { get; }
-        RowProxy this[int rowIndex] { get; }
+        Results.RowProxy this[int rowIndex] { get; }
         void SwapRows(int firstRowIndex, int secondRowIndex);
     }
 
@@ -40,7 +40,7 @@ namespace QueryEngine
     /// in the given order.
     /// Note that we store by columns, that is to say, returning one row must be done through proxy class.
     /// </summary>
-    class Results : IResults
+    partial class Results : IResults
     {
         private List<Element>[] results;
 
@@ -79,7 +79,7 @@ namespace QueryEngine
             {
                 if (rowIndex < 0 || rowIndex >= this.Count) 
                     throw new ArgumentOutOfRangeException($"{this.GetType()}, row is out of range.");
-                else return new RowProxy(this.results, rowIndex);
+                else return new Results.RowProxy(this.results, rowIndex);
             }
         }
 
@@ -88,10 +88,10 @@ namespace QueryEngine
         /// Copies one row into internal array. That array is rewritten during next iteration.
         /// </summary>
         /// <returns> One row of a table. </returns>
-        public IEnumerator<RowProxy> GetEnumerator()
+        public IEnumerator<Results.RowProxy> GetEnumerator()
         {
             for (int i = 0; i < this.Count; i++)
-                yield return new RowProxy(this.results, i);
+                yield return new Results.RowProxy(this.results, i);
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -106,20 +106,12 @@ namespace QueryEngine
         /// <param name="secondRowIndex"> Second row index. </param>
         public void SwapRows(int firstRowIndex, int secondRowIndex)
         {
-            if (firstRowIndex < 0 || firstRowIndex >= this.Count)
-                throw new ArgumentOutOfRangeException($"{this.GetType()}, first row index is out of range.");
-            else if (secondRowIndex < 0 || secondRowIndex >= this.Count)
-                throw new ArgumentOutOfRangeException($"{this.GetType()}, second row index is out of range.");
-            else if (secondRowIndex == firstRowIndex) return;
-            else
+            Element tmpElement = null;
+            for (int i = 0; i < this.ColumnCount; i++)
             {
-                Element tmpElement = null;
-                for (int i = 0; i < this.ColumnCount; i++)
-                {
-                    tmpElement = this.results[i][firstRowIndex];
-                    this.results[i][firstRowIndex] = this.results[i][secondRowIndex];
-                    this.results[i][secondRowIndex] = tmpElement;
-                }
+                tmpElement = this.results[i][firstRowIndex];
+                this.results[i][firstRowIndex] = this.results[i][secondRowIndex];
+                this.results[i][secondRowIndex] = tmpElement;
             }
         }
     }

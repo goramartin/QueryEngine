@@ -30,7 +30,7 @@ namespace QueryEngine
     /// </summary>
     interface IRowProxyComparer
     {
-        int Compare(in RowProxy x, in RowProxy y);
+        int Compare(in Results.RowProxy x, in Results.RowProxy y);
     }
 
     /// <summary>
@@ -59,7 +59,7 @@ namespace QueryEngine
         /// <returns> Less than zero x precedes y in the sort order.
         /// Zero x occurs in the same position as y in the sort order.
         /// Greater than zero x follows y in the sort order.</returns>
-        public int Compare(in RowProxy x, in RowProxy y)
+        public int Compare(in Results.RowProxy x, in Results.RowProxy y)
         {
             int result = 0;
             for (int i = 0; i < this.comparers.Count; i++)
@@ -93,7 +93,7 @@ namespace QueryEngine
             this.Ascending = ascending;
         }
 
-        public abstract int Compare(in RowProxy x, in RowProxy y);
+        public abstract int Compare(in Results.RowProxy x, in Results.RowProxy y);
 
         /// <summary>
         /// Expression comparer facotry.
@@ -131,7 +131,7 @@ namespace QueryEngine
         /// <returns> Less than zero x precedes y in the sort order.
         /// Zero x occurs in the same position as y in the sort order.
         /// Greater than zero x follows y in the sort order.</returns>
-        public override int Compare(in RowProxy x, in RowProxy y)
+        public override int Compare(in Results.RowProxy x, in Results.RowProxy y)
         {
             var xSuccess = expressionHolder.TryGetExpressionValue(x, out T xValue);
             var ySuccess = expressionHolder.TryGetExpressionValue(y, out T yValue);
