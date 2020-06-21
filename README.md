@@ -224,7 +224,7 @@ The user enters specified character from a displayed table.
 
 ## Example queries for test graph.
 
-![](images/testgraph.png)
+![](images/graph.png)
 
 SELECT x MATCH (x);
 
