@@ -18,7 +18,7 @@ namespace QueryEngine
     /// <summary>
     /// Abstract class for printing results.
     /// </summary>
-    abstract class Printer : IDisposable
+    internal abstract class Printer : IDisposable
     {
         /// <summary>
         /// Contains valid printers.

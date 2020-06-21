@@ -17,7 +17,7 @@ namespace QueryEngine
     /// <summary>
     /// Printer which prints results into a console.
     /// </summary>
-    sealed class ConsolePrinter : Printer
+    internal sealed class ConsolePrinter : Printer
     {
         /// <summary>
         /// Creates a console printer.

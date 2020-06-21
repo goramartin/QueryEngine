@@ -19,7 +19,7 @@ namespace QueryEngine
     /// Base class for every expression node.
     /// Serves only as a holder.
     /// </summary>
-    abstract class ExpressionBase
+    internal abstract class ExpressionBase
     {
         /// <summary>
         /// Gets expression type.
@@ -33,7 +33,7 @@ namespace QueryEngine
     /// Each expression node will implement this interface.
     /// </summary>
     /// <typeparam name="T"> Type of return value.</typeparam>
-    abstract class ExpressionReturnValue<T> : ExpressionBase
+    internal abstract class ExpressionReturnValue<T> : ExpressionBase
     {
         /// <summary>
         /// Evaluates expression node and returns value inside value parameter.
@@ -49,7 +49,7 @@ namespace QueryEngine
     /// Class holds entire expression.
     /// Optionally label representing entire expression.
     /// </summary>
-    sealed class ExpressionHolder : ExpressionBase
+    internal sealed class ExpressionHolder : ExpressionBase
     {
         private string Label { get; }
         private ExpressionBase Expr { get; }

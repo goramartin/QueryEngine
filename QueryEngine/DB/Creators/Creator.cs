@@ -22,7 +22,7 @@ namespace QueryEngine
     /// Creator interface. Each creator object will create an object specified in a template.
     /// </summary>
     /// <typeparam name="T"> Value to be created. </typeparam>
-    interface ICreator<T>
+    internal interface ICreator<T>
     {
         T Create();
     }

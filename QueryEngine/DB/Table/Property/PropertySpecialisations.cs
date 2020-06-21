@@ -25,7 +25,7 @@ namespace QueryEngine
     /// We create specialisations based on the type of T.
     /// Its functions are not visible from a table.
     /// </summary>
-    abstract class Property<T> : Property
+    internal abstract class Property<T> : Property
     {
         public List<T> propHolder;
 
@@ -69,7 +69,7 @@ namespace QueryEngine
     /// <summary>
     /// String property specialisation.
     /// </summary>
-    sealed class StringProperty : Property<string>
+    internal sealed class StringProperty : Property<string>
     {
         public StringProperty(string propName) : base(propName) { }
 
@@ -88,7 +88,7 @@ namespace QueryEngine
     /// <summary>
     /// Integer specialisation of a column.
     /// </summary>
-    sealed class IntProperty : Property<int>
+    internal sealed class IntProperty : Property<int>
     {
         public IntProperty(string propName) : base(propName) { }
 

@@ -20,7 +20,7 @@ namespace QueryEngine
     /// Class includes register of all the Matchers and their coresponding patterns.
     ///  Enables to create instance of a Matcher/Pattern based on a string token.
     /// </summary>
-    static class MatchFactory
+    internal static class MatchFactory
     {
         /// <summary>
         /// Register of valid matchers.

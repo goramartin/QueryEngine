@@ -16,7 +16,7 @@ namespace QueryEngine
     /// <summary>
     /// Creates a list or comparers that will be used during ordering of match results.
     /// </summary>
-    sealed class OrderByVisitor : IVisitor<List<IRowProxyComparer>>
+    internal sealed class OrderByVisitor : IVisitor<List<IRowProxyComparer>>
     {
         List<IRowProxyComparer> result;
         Dictionary<string, Type> Labels;
@@ -98,7 +98,17 @@ namespace QueryEngine
             throw new NotImplementedException();
         }
 
-        public void Visit(EdgeNode node)
+        public void Visit(InEdgeNode node)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Visit(OutEdgeNode node)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Visit(AnyEdgeNode node)
         {
             throw new NotImplementedException();
         }

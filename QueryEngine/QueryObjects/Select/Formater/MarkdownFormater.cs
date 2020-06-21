@@ -17,7 +17,7 @@ namespace QueryEngine
     /// <summary>
     /// Format is printed as a markdown table.
     /// </summary>
-    sealed class MarkDownFormater : Formater
+    internal sealed class MarkDownFormater : Formater
     {
         public MarkDownFormater(int columnCount, TextWriter writer) : base(columnCount, writer) { }
 

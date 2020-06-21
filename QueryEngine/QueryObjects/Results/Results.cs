@@ -24,7 +24,7 @@ namespace QueryEngine
     /// <summary>
     /// Base interface for all result classes.
     /// </summary>
-    interface IResults : IEnumerable<Results.RowProxy>
+    internal interface IResults : IEnumerable<Results.RowProxy>
     {
         int ColumnCount { get; }
         int Count { get; }
@@ -40,7 +40,7 @@ namespace QueryEngine
     /// in the given order.
     /// Note that we store by columns, that is to say, returning one row must be done through proxy class.
     /// </summary>
-    partial class Results : IResults
+    internal partial class Results : IResults
     {
         private List<Element>[] results;
 

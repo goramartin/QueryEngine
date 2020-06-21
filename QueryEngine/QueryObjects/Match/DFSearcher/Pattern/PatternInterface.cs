@@ -16,7 +16,7 @@ namespace QueryEngine
     /// <summary>
     /// Basic interface for each pattern.
     /// </summary>
-    interface IPattern
+    internal interface IPattern
     {
         bool Apply(Element element);
 
@@ -45,11 +45,11 @@ namespace QueryEngine
     /// <summary>
     /// Interface neccessary for each DFS pattern.
     /// </summary>
-    interface IDFSPattern : IPattern
+    internal interface IDFSPattern : IPattern
     {
         Element GetCurrentChainConnection();
         Element GetNextChainConnection();
-        EdgeType GetEdgeType();
+        Edge.EdgeType GetEdgeType();
         void UnsetCurrentVariable();
         IDFSPattern Clone();
     }

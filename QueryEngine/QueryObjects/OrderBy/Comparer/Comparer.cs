@@ -28,7 +28,7 @@ namespace QueryEngine
     /// <summary>
     /// Interface for comparing rows of a result table.
     /// </summary>
-    interface IRowProxyComparer
+    internal interface IRowProxyComparer
     {
         int Compare(in Results.RowProxy x, in Results.RowProxy y);
     }
@@ -37,7 +37,7 @@ namespace QueryEngine
     /// Compares two rows.
     /// Contains list of all expression to compared with the rows.
     /// </summary>
-    class RowComparer : IRowProxyComparer
+    internal class RowComparer : IRowProxyComparer
     {
         private List<IRowProxyComparer> comparers { get; }
 
@@ -77,7 +77,7 @@ namespace QueryEngine
     /// Each class contains an expression that will be evaluated with given rows.
     /// Then the values are compared with templated compare method.
     /// </summary>
-    abstract class ExpressionComparer : IRowProxyComparer
+    internal abstract class ExpressionComparer : IRowProxyComparer
     {
         protected ExpressionHolder expressionHolder { get; }
         protected bool Ascending { get; }
@@ -117,7 +117,7 @@ namespace QueryEngine
     /// Base class for specialised comparers.
     /// </summary>
     /// <typeparam name="T"> Type of expression return value that will be evaluated. </typeparam>
-    abstract class ExpressionComparer<T> : ExpressionComparer
+    internal abstract class ExpressionComparer<T> : ExpressionComparer
     {
         protected ExpressionComparer(ExpressionHolder expressionHolder, bool ascending) : base(expressionHolder, ascending)
         { }
@@ -163,7 +163,7 @@ namespace QueryEngine
         protected abstract int CompareValues(T x, T y);
     }
 
-    class ExpressionIntegerCompaper : ExpressionComparer<int>
+    internal class ExpressionIntegerCompaper : ExpressionComparer<int>
     {
 
         public ExpressionIntegerCompaper(ExpressionHolder expressionHolder, bool ascending) : base(expressionHolder, ascending)
@@ -175,7 +175,7 @@ namespace QueryEngine
         }
     }
 
-    class ExpressionStringCompaper : ExpressionComparer<string>
+    internal class ExpressionStringCompaper : ExpressionComparer<string>
     {
         public ExpressionStringCompaper(ExpressionHolder expressionHolder, bool ascending = true) : base(expressionHolder, ascending) 
         { }

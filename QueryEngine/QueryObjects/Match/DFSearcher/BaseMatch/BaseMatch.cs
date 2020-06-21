@@ -23,7 +23,7 @@ namespace QueryEngine
     /// Method apply returns true if the element can be added to final result.
     /// Descendants share certain conditions when applying such as Type, Variable name, Edge type...
     /// </summary>
-    abstract class DFSBaseMatch
+    internal abstract class DFSBaseMatch
     {
         // The match is anonymous if it does not represent any variable.
         readonly bool IsAnonnymous;
@@ -124,30 +124,21 @@ namespace QueryEngine
             else return map[this.PositionOfRepeatedField];
         }
 
-
         /// <summary>
         /// Factory for base matches
         /// </summary>
-        /// <param name="edgeType"> Type of edge node</param>
         /// <param name="node"> Prototype of the node </param>
         /// <param name="indexInMap"> Index of its variable in scope </param>
         /// <param name="isFirst"> If the match node represents variable that appears for the first time.</param>
         /// <returns> Base match node. </returns>
-        public static DFSBaseMatch DFSBaseMatchFactory(EdgeType edgeType, ParsedPatternNode node, int indexInMap, bool isFirst)
+        public static DFSBaseMatch DFSBaseMatchFactory(ParsedPatternNode node, int indexInMap, bool isFirst)
         {
-            switch (edgeType)
-            {
-                case EdgeType.NotEdge:
-                    return new DFSVertexMatch(node, indexInMap, isFirst);
-                case EdgeType.InEdge:
-                    return new DFSInEdgeMatch(node, indexInMap, isFirst);
-                case EdgeType.OutEdge:
-                    return new DFSOutEdgeMatch(node, indexInMap, isFirst);
-                case EdgeType.AnyEdge:
-                    return new DFSAnyEdgeMatch(node, indexInMap, isFirst);
-                default:
-                    throw new ArgumentException($"Trying to create DFS Match type that does not exit.");
-            }
+            Type nodeType = node.GetType();
+            if (nodeType == typeof(VertexParsedPatternNode)) return new DFSVertexMatch(node, indexInMap, isFirst);
+            if (nodeType == typeof(InEdgeParsedPatternNode)) return new DFSInEdgeMatch(node, indexInMap, isFirst);
+            if (nodeType == typeof(OutEdgeParsedPatternNode)) return new DFSOutEdgeMatch(node, indexInMap, isFirst);
+            if (nodeType == typeof(AnyEdgeParsedPatternNode)) return new DFSAnyEdgeMatch(node, indexInMap, isFirst);
+            else throw new ArgumentException($"Trying to create DFS Match type that does not exit.");
         }
     }
 }

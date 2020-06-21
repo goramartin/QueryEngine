@@ -19,14 +19,14 @@ namespace QueryEngine
      /// <summary>
     /// Interface for reading text files.
     /// </summary>
-    interface IReader: IDisposable
+    internal interface IReader: IDisposable
     {
         string Read();
     }
     /// <summary>
     /// Interface to reader entire words from a stream.
     /// </summary>
-    interface IWordReader :IReader
+    internal interface IWordReader :IReader
     {
         string GetWord();
     } 
@@ -39,7 +39,7 @@ namespace QueryEngine
     /// Reader is used to read data files with edges and vertices.
     /// It needs to read words from a stream but must ommit certain special characters.
     /// </summary>
-    class WordReader : IWordReader
+    internal class WordReader : IWordReader
     {
         StringBuilder wordBuilder;
         StreamReader fileReader;
@@ -142,7 +142,7 @@ namespace QueryEngine
     /// This reader is used for reading a file with definition of tables in JSON format.
     /// Reader stripes words or a special characters from a file
     /// </summary>
-    class TableFileReader : IReader
+    internal class TableFileReader : IReader
     {
 
         /// <summary>

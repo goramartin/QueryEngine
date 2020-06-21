@@ -17,7 +17,7 @@ namespace QueryEngine
     /// Visitor used to parse expressions.
     /// So far there are implemented only variable references as a expression.
     /// </summary>
-    sealed class ExpressionVisitor : IVisitor<ExpressionBase>
+    internal sealed class ExpressionVisitor : IVisitor<ExpressionBase>
     {
         ExpressionBase Expr;
         VariableReferenceNameHolder nameHolder;
@@ -84,66 +84,50 @@ namespace QueryEngine
 
         #region NotImpl
 
-        /// <summary>
-        /// Not implemented.
-        /// </summary>
         public void Visit(SelectNode node)
         {
             throw new NotImplementedException();
         }
-        /// <summary>
-        /// Not implemented.
-        /// </summary>
         public void Visit(MatchNode node)
         {
             throw new NotImplementedException();
         }
-        /// <summary>
-        /// Not implemented.
-        /// </summary>
         public void Visit(MatchDividerNode node)
         {
             throw new NotImplementedException();
         }
-        /// <summary>
-        /// Not implemented.
-        /// </summary>
         public void Visit(VertexNode node)
         {
             throw new NotImplementedException();
         }
-        /// <summary>
-        /// Not implemented.
-        /// </summary>
-        public void Visit(EdgeNode node)
+        public void Visit(InEdgeNode node)
         {
             throw new NotImplementedException();
         }
-        /// <summary>
-        /// Not implemented.
-        /// </summary>
+        public void Visit(OutEdgeNode node)
+        {
+            throw new NotImplementedException();
+        }
+        public void Visit(AnyEdgeNode node)
+        {
+            throw new NotImplementedException();
+        }
         public void Visit(ExpressionNode node)
         {
             throw new NotImplementedException();
         }
-        /// <summary>
-        /// Not implemented.
-        /// </summary>
         public void Visit(MatchVariableNode node)
         {
             throw new NotImplementedException();
         }
-
         public void Visit(OrderByNode node)
         {
             throw new NotImplementedException();
         }
-
         public void Visit(OrderTermNode node)
         {
             throw new NotImplementedException();
         }
-
         public void Visit(SelectPrintTermNode node)
         {
             throw new NotImplementedException();

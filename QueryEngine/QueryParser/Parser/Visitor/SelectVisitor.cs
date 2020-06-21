@@ -17,7 +17,7 @@ namespace QueryEngine
     /// <summary>
     /// Creates list of variable (Name.Prop) to be displayed in Select expr.
     /// </summary>
-    sealed class SelectVisitor : IVisitor<List<PrintVariable>>
+    internal sealed class SelectVisitor : IVisitor<List<PrintVariable>>
     {
         List<PrintVariable> result;
         Dictionary<string, Type> Labels;
@@ -118,42 +118,42 @@ namespace QueryEngine
         {
             throw new NotImplementedException();
         }
-
         public void Visit(MatchDividerNode node)
         {
             throw new NotImplementedException();
         }
-
         public void Visit(MatchNode node)
         {
             throw new NotImplementedException();
         }
-
         public void Visit(VertexNode node)
         {
             throw new NotImplementedException();
         }
-
-        public void Visit(EdgeNode node)
+        public void Visit(InEdgeNode node)
         {
             throw new NotImplementedException();
         }
-
+        public void Visit(AnyEdgeNode node)
+        {
+            throw new NotImplementedException();
+        }
+        public void Visit(OutEdgeNode node)
+        {
+            throw new NotImplementedException();
+        }
         public void Visit(MatchVariableNode node)
         {
             throw new NotImplementedException();
         }
-
         public void Visit(OrderByNode node)
         {
             throw new NotImplementedException();
         }
-
         public void Visit(OrderTermNode node)
         {
             throw new NotImplementedException();
         }
-
 
 
         #endregion NotImpl

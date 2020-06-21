@@ -16,7 +16,7 @@ namespace QueryEngine
     /// <summary>
     /// Base interface for all matchers.
     /// </summary>
-    interface IPatternMatcher
+    internal interface IPatternMatcher
     {
         void Search();
     }
@@ -25,12 +25,12 @@ namespace QueryEngine
     /// Single threaded matcher is used by a parallel matcher.
     /// Represents one thread with a matcher.
     /// </summary>
-    interface ISingleThreadMatcher : IPatternMatcher
+    internal interface ISingleThreadMatcher : IPatternMatcher
     {
         void SetStartingVerticesIndeces(int start, int end);
     }
 
-    interface IParallelMatcher : IPatternMatcher
+    internal interface IParallelMatcher : IPatternMatcher
     {
     }
 }

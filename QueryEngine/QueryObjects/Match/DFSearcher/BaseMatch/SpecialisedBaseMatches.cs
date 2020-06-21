@@ -20,7 +20,7 @@ namespace QueryEngine
     /// Defines vertex match node.
     /// Description is provided inside abstract parent.
     /// </summary>
-    sealed class DFSVertexMatch : DFSBaseMatch
+    internal sealed class DFSVertexMatch : DFSBaseMatch
     {
         public DFSVertexMatch() : base()
         { }
@@ -41,7 +41,7 @@ namespace QueryEngine
     /// Defines vertex match node.
     /// Description is provided inside abstract parent.
     /// </summary>
-    abstract class DFSEdgeMatch : DFSBaseMatch
+    internal abstract class DFSEdgeMatch : DFSBaseMatch
     {
         public DFSEdgeMatch() : base()
         { }
@@ -49,7 +49,7 @@ namespace QueryEngine
         public DFSEdgeMatch(ParsedPatternNode node, int indexInMap, bool isFirst) : base(node, indexInMap, isFirst)
         { }
 
-        public abstract EdgeType GetEdgeType();
+        public abstract Edge.EdgeType GetEdgeType();
 
 
 
@@ -59,14 +59,14 @@ namespace QueryEngine
     /// Defines vertex match node.
     /// Description is provided inside abstract parent.
     /// </summary>
-    sealed class DFSInEdgeMatch : DFSEdgeMatch
+    internal sealed class DFSInEdgeMatch : DFSEdgeMatch
     {
         public DFSInEdgeMatch() : base()
         { }
         public DFSInEdgeMatch(ParsedPatternNode node, int indexInMap, bool isFirst) : base(node, indexInMap, isFirst)
         { }
 
-        public override EdgeType GetEdgeType() => EdgeType.InEdge;
+        public override Edge.EdgeType GetEdgeType() => Edge.EdgeType.InEdge;
 
         public override bool Apply(Element element, Element[] map)
         {
@@ -81,14 +81,14 @@ namespace QueryEngine
     /// Defines vertex match node.
     /// Description is provided inside abstract parent.
     /// </summary>
-    sealed class DFSOutEdgeMatch : DFSEdgeMatch
+    internal sealed class DFSOutEdgeMatch : DFSEdgeMatch
     {
         public DFSOutEdgeMatch() : base()
         { }
         public DFSOutEdgeMatch(ParsedPatternNode node, int indexInMap, bool isFirst) : base(node, indexInMap, isFirst)
         { }
 
-        public override EdgeType GetEdgeType() => EdgeType.OutEdge;
+        public override Edge.EdgeType GetEdgeType() => Edge.EdgeType.OutEdge;
 
         public override bool Apply(Element element, Element[] map)
         {
@@ -98,14 +98,14 @@ namespace QueryEngine
         }
     }
 
-    sealed class DFSAnyEdgeMatch : DFSEdgeMatch
+    internal sealed class DFSAnyEdgeMatch : DFSEdgeMatch
     {
         public DFSAnyEdgeMatch() : base()
         { }
         public DFSAnyEdgeMatch(ParsedPatternNode node, int indexInMap, bool isFirst) : base(node, indexInMap, isFirst)
         { }
 
-        public override EdgeType GetEdgeType() => EdgeType.AnyEdge;
+        public override Edge.EdgeType GetEdgeType() => Edge.EdgeType.AnyEdge;
 
         public override bool Apply(Element element, Element[] map)
         {

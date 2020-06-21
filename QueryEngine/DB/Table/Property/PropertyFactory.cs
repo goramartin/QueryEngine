@@ -18,7 +18,7 @@ namespace QueryEngine
     /// Class includes register of all the property types.
     /// Enables to create instance of a property based on a string token.
     /// </summary>
-    static class PropertyFactory
+    internal static class PropertyFactory
     {
         /// <summary>
         /// Register with valid value types.

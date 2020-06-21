@@ -21,7 +21,7 @@ namespace QueryEngine
     /// <summary>
     /// Creates distionary/map from data scheme with specific nodes in the graph.
     /// </summary>
-    sealed class TableDictProcessor : IProcessor<Dictionary<string, Table>>
+    internal sealed class TableDictProcessor : IProcessor<Dictionary<string, Table>>
     {
         IProcessorState<Dictionary<string, Table>> processorState;
         IProcessorState<Dictionary<string, Table>> lastProcessorState;

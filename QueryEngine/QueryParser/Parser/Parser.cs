@@ -53,7 +53,7 @@ namespace QueryEngine
     /// When finished parsing query token, the position is set on the next token.
     /// Query -> Select Match (OrderBy)? ;
     /// </summary>
-    static class Parser
+    internal static class Parser
     {
         // Position in token list.
         static private int position;
@@ -289,9 +289,8 @@ namespace QueryEngine
             edgeNode = (EdgeNode)TryParseEmptyEdge(tokens);
             if (edgeNode == null)
             {
-                edgeNode =(EdgeNode)ParseEdgeWithMatchVariable(tokens);
+                edgeNode = (EdgeNode)ParseEdgeWithMatchVariable(tokens);
                 if (edgeNode == null) return null;
-                // to do check end 
             }
 
             Node vertexNode = ParseVertex(tokens);
@@ -308,22 +307,22 @@ namespace QueryEngine
         /// <returns> Anonymous edge or null. </returns>
         static private Node TryParseEmptyEdge(List<Token> tokens)
         {
-            EdgeNode edgeNode = new EdgeNode();
+            EdgeNode edgeNode;
             if (CheckEmptyAnyEdge(tokens))
             {
-                edgeNode.SetEdgeType(EdgeType.AnyEdge);
+                edgeNode = new AnyEdgeNode();
                 IncrementPosition();
                 return edgeNode;
             }
             else if (CheckEmptyOutEdge(tokens))
             {
-                edgeNode.SetEdgeType(EdgeType.OutEdge);
+                edgeNode = new OutEdgeNode();
                 IncrementPositionBy(2);
                 return edgeNode;
             }
             else if (CheckEmptyInEdge(tokens))
             {
-                edgeNode.SetEdgeType(EdgeType.InEdge);
+                edgeNode = new InEdgeNode();
                 IncrementPositionBy(2);
                 return edgeNode;
             }
@@ -402,23 +401,25 @@ namespace QueryEngine
         /// <returns> Edge node.</returns>
         private static Node ParseOutAnyEdge(List<Token> tokens)
         {
-            EdgeNode edgeNode = new EdgeNode();
+            EdgeNode edgeNode;
+            MatchVariableNode matchVariableNode;
 
             CheckLeftBrace(tokens);           
-            edgeNode.AddMatchVariable(ParseMatchVariable(tokens));
+            matchVariableNode = (MatchVariableNode)(ParseMatchVariable(tokens));
             CheckRightBrace(tokens);
 
 
             // -> || -
             if (CheckToken(position, Token.TokenType.Dash, tokens)){
                 IncrementPosition();
-                edgeNode.SetEdgeType(EdgeType.AnyEdge);
+                edgeNode = new AnyEdgeNode();
                 if (CheckToken(position, Token.TokenType.Greater, tokens)){
                     IncrementPosition();
-                    edgeNode.SetEdgeType(EdgeType.OutEdge);
+                    edgeNode = new OutEdgeNode();
                 }
             } else throw new ArgumentException($"EdgeParser, expected ending of edge.");
 
+            edgeNode.AddMatchVariable(matchVariableNode);
             return edgeNode;
         }
         /// <summary>
@@ -429,25 +430,27 @@ namespace QueryEngine
         /// <returns> Edge node.</returns>
         private static Node ParseInEdge(List<Token> tokens)
         {
-            EdgeNode edgeNode = new EdgeNode();
-            
+            EdgeNode edgeNode;
+            MatchVariableNode matchVariableNode;
+
             // -
             if (!CheckToken(position, Token.TokenType.Dash, tokens)) 
                 throw new ArgumentException($"EdgeParser, expected beginning of edge.");
             else IncrementPosition();
 
             CheckLeftBrace(tokens);
-            edgeNode.AddMatchVariable(ParseMatchVariable(tokens));
+            matchVariableNode = (MatchVariableNode)(ParseMatchVariable(tokens));
             CheckRightBrace(tokens);
 
             // -
             if (CheckToken(position, Token.TokenType.Dash, tokens))
             {
                 IncrementPosition();
-                edgeNode.SetEdgeType(EdgeType.InEdge);
+                edgeNode = new InEdgeNode();
             }
             else throw new ArgumentException($"MatchParser, expected ending of edge.");
 
+            edgeNode.AddMatchVariable(matchVariableNode);
             return edgeNode;
         }
 

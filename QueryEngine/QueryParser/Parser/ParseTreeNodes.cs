@@ -16,7 +16,7 @@ namespace QueryEngine {
     /// Parent to every parse tree node.
     /// Gives Visit method.
     /// </summary>
-    abstract class Node
+    internal abstract class Node
     {
         public abstract void Accept<T>(IVisitor<T> visitor);
     }
@@ -25,7 +25,7 @@ namespace QueryEngine {
     /// Certain nodes can form a chain. E.g variable node or vertex/edge node.
     /// Gives property next.
     /// </summary>
-    abstract class NodeChain : Node
+    internal abstract class NodeChain : Node
     {
         public Node next;
         public void AddNext(Node next)
@@ -41,7 +41,7 @@ namespace QueryEngine {
     /// Match and Select Nodes are only roots of subtrees when parsing. From them the parsing
     /// of query word starts.
     /// </summary>
-    class MatchNode : NodeChain
+    internal class MatchNode : NodeChain
     {
         public MatchNode() { }
 
@@ -50,7 +50,7 @@ namespace QueryEngine {
             visitor.Visit(this);
         }
     }
-    class SelectNode : NodeChain
+    internal class SelectNode : NodeChain
     {
         public SelectNode() { }
 
@@ -59,7 +59,7 @@ namespace QueryEngine {
             visitor.Visit(this);
         }
     }
-    class OrderByNode : NodeChain
+    internal class OrderByNode : NodeChain
     {
         public OrderByNode() { }
 
@@ -73,7 +73,7 @@ namespace QueryEngine {
 
     #region SelectNodes
 
-    class SelectPrintTermNode : NodeChain
+    internal class SelectPrintTermNode : NodeChain
     {
         public Node exp;
 
@@ -95,7 +95,7 @@ namespace QueryEngine {
     /// Only vertices and edges inherit from this class.
     /// Gives varible node property to the edges and vertices.
     /// </summary>
-    abstract class CommomMatchNode : NodeChain
+    internal abstract class CommomMatchNode : NodeChain
     {
         public Node matchVariable;
 
@@ -104,29 +104,39 @@ namespace QueryEngine {
             this.matchVariable = v;
         }
     }
+
+    internal abstract class EdgeNode : CommomMatchNode { }
+
     /// <summary>
     /// Edge node and Vertex node represents vertex and edge in the parsing tree. 
     /// They hold next property that leads to a next vertex/edge or match divider.
     /// </summary>
 
-    class EdgeNode : CommomMatchNode
+    internal class InEdgeNode : EdgeNode
     {
-        public EdgeType edgeType;
         public override void Accept<T>(IVisitor<T> visitor)
         {
             visitor.Visit(this);
         }
-        public void SetEdgeType(EdgeType type)
-        {
-            this.edgeType = type;
-        }
-        public EdgeType GetEdgeType()
-        {
-            return this.edgeType;
-        }
-
     }
-    class VertexNode : CommomMatchNode
+
+    internal class OutEdgeNode : EdgeNode
+    {
+        public override void Accept<T>(IVisitor<T> visitor)
+        {
+            visitor.Visit(this);
+        }
+    }
+
+    internal class AnyEdgeNode : EdgeNode
+    {
+        public override void Accept<T>(IVisitor<T> visitor)
+        {
+            visitor.Visit(this);
+        }
+    }
+
+    internal class VertexNode : CommomMatchNode
     {
         public override void Accept<T>(IVisitor<T> visitor)
         {
@@ -137,7 +147,7 @@ namespace QueryEngine {
     /// <summary>
     /// Match divider serves as a separator of multiple patterns in query.
     /// </summary>
-    class MatchDividerNode : NodeChain
+    internal class MatchDividerNode : NodeChain
     {
         public override void Accept<T>(IVisitor<T> visitor)
         {
@@ -145,7 +155,7 @@ namespace QueryEngine {
         }
     }
 
-    class MatchVariableNode : Node
+    internal class MatchVariableNode : Node
     {
         public Node variableName;
         public Node variableType;
@@ -182,7 +192,7 @@ namespace QueryEngine {
     /// Contains information whether it is ascending order or descending and 
     /// expression to evaluate against.
     /// </summary>
-    class OrderTermNode : NodeChain
+   internal class OrderTermNode : NodeChain
     {
         public bool isAscending;
         public Node exp;
@@ -211,7 +221,7 @@ namespace QueryEngine {
 
     #region ExprNodes
 
-    class ExpressionNode : Node
+    internal class ExpressionNode : Node
     {
 
         public Node exp;
@@ -238,7 +248,7 @@ namespace QueryEngine {
     /// Varible node serves as a holder for Name of varibles and possibly selection of their properties.
     /// Identifier node hold the real value of variable.
     /// </summary>
-    class VariableNode : Node
+    internal class VariableNode : Node
     {
         public Node name;
         public Node propName;
@@ -270,7 +280,7 @@ namespace QueryEngine {
     /// <summary>
     /// Stores a indetifier as a string.
     /// </summary>
-    class IdentifierNode : Node
+    internal class IdentifierNode : Node
     {
         public string value { get; private set; }
 

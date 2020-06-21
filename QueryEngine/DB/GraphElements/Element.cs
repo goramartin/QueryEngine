@@ -21,7 +21,7 @@ namespace QueryEngine
     /// Position is location inside a vertex list or node list.
     /// NOTICE id of can be same for vertex and edge.
     /// </summary>
-    abstract class Element
+    internal abstract class Element
     {
         public int ID { get; internal set; }
         public Table Table { get; internal set; }

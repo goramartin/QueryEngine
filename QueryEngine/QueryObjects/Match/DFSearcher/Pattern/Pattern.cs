@@ -9,7 +9,6 @@
   particular pattern without repeating any unneccessary iterations. Also if the same variable occurs,
   the chain might be split into two chains  (a) - (b) - (c) where the repeating variable is b
   New chains will be (b) - (a), (b) - (c). This helps search algorithm connect chains together.
-  Creation of the pattern is described in constructor.
  
  */
 
@@ -25,11 +24,12 @@ namespace QueryEngine
     /// <summary>
     /// Class that implements basic DFS pattern.
     /// Creates it self from parsed pattern.
-    /// Pattern is represented by the lists of matching nodes,
-    /// also it remembers the state of the matched variables and state
+    /// Pattern is represented by the lists of matching nodes.
+    /// Also it remembers the state of the matched variables and state
     /// which nodes and chains should be matched.
+    /// The matched variables are stored in the scope.
     /// </summary>
-    sealed class DFSPattern : IDFSPattern
+    internal sealed class DFSPattern : IDFSPattern
     {
         private List<List<DFSBaseMatch>> Patterns;
         public int CurrentPatternIndex { get; private set; }
@@ -116,8 +116,8 @@ namespace QueryEngine
             // For every Parsed Pattern
             for (int i = 0; i < parsedPatterns.Count; i++)
             {
-                // Try to split it.
-                var firstPart = orderedPatterns[i].SplitParsedPattern();
+                // Try to split pattern into two parts. Only the first part is return and the second one is stored at the parsedPatterns[i]
+                var firstPart = orderedPatterns[i].TrySplitParsedPattern();
 
                 // If the parsed pattern was splited
                 // Add both parts into the real Pattern
@@ -125,6 +125,7 @@ namespace QueryEngine
                 {
                     this.Patterns.Add(CreateChain(firstPart.Pattern, variableMap));
                 }
+                // Always add the second part even if the has not been splitted.
                 this.Patterns.Add(CreateChain(orderedPatterns[i].Pattern, variableMap));
             }
 
@@ -138,14 +139,17 @@ namespace QueryEngine
 
         /// <summary>
         /// Orders patterns so that each consecutive pattern can be connected with patterns before.
-        /// Map used patterns in array of bools. If we found two patterns that have got same variable
-        /// Check for if one of the pattern is used, if first is used and second not, we add second to results and mark split by firsts var.
-        /// If first is not used and second is, we add first to result and mark its splitby by second variable.
-        /// If both are used we skip them, if non of them are used we add both and set split by policy to the second pattern.
-        /// Usused patterns, those that couldnt be connected to any other pattern are added at the end.
-        /// Their splitBy property remains set to Null.
+        /// Map used patterns in an array of bools (true meaning that the pattern has been ordered). If we found two patterns that have the same variable,
+        /// then check if one of these patterns was ordered and do following:
+        /// 1, If the first was ordered and the second did not, then, we add the second to ordered sequence, mark that
+        ///    it was ordered and set its split variable to the common variable.
+        /// 2, If the first was not ordered and the second was ordered, we add the first to results and set its split variable to the common variable.
+        /// 3, If both were ordered we skip them, if non of them are used we add both and set split variable to the second pattern.
+        /// Usused patterns, those that couldnt be connected to any other pattern, are added at the end. 
+        /// Their splitBy property remains set to Null, the same counts.
         /// </summary>
-        /// <param name="parsedPatterns"> Parser Pattern from MatchVisitor</param>
+        /// <param name="parsedPatterns"> Parser Pattern from MatchVisitor </param>
+        /// <returns> Ordered parsed patterns. </returns>
         private List<ParsedPattern> OrderParsedPatterns(List<ParsedPattern> parsedPatterns)
         {
             List<ParsedPattern> result = new List<ParsedPattern>();
@@ -162,23 +166,27 @@ namespace QueryEngine
                     var otherParsedPattern = parsedPatterns[j];
                     if (currentParsedPattern.TryFindEqualVariable(otherParsedPattern, out string varName))
                     {
+                        // Both patterns are ordered -> add both of them to results.
                         if (!usedPatterns[i] && !usedPatterns[j])
                         {
                             usedPatterns[i] = true; usedPatterns[j] = true;
                             result.Add(parsedPatterns[i]); result.Add(parsedPatterns[j]);
                             parsedPatterns[j].splitBy = varName;
                         }
+                        // The first one is ordered and the second one is not -> add second one to the results.
                         else if (usedPatterns[i] && !usedPatterns[j])
                         {
                             usedPatterns[j] = true;
                             result.Add(parsedPatterns[j]);
                             parsedPatterns[j].splitBy = varName;
                         }
+                        // Both were ordered. 
                         else if (usedPatterns[i] && usedPatterns[j])
                         {
-                            // Special case, Added two unconnected nodes which the first one is later connected by later one
+                            // Special case, Added two unconnected nodes but the first one is later connected by later one
                             if (parsedPatterns[i].splitBy == null) parsedPatterns[i].splitBy = varName;
-                        }
+                        } 
+                        // The first one is not ordered and the second one is -> add the first one to the results.
                         else if (!usedPatterns[i] && usedPatterns[j])
                         {
                             usedPatterns[i] = true;
@@ -189,7 +197,7 @@ namespace QueryEngine
                 }
             }
 
-            // Add rest of unconnected patterns 
+            // Add rest of unconnected patterns to results.
             for (int i = 0; i < usedPatterns.Length; i++)
             {
                 if (usedPatterns[i] == false) result.Add(parsedPatterns[i]);
@@ -198,14 +206,13 @@ namespace QueryEngine
             return result;
         }
 
-
         /// <summary>
-        /// Creates pattern chain used in searcher.
-        /// Also sets map for query.
+        /// Creates pattern chain used in a matcher.
+        /// 
         /// </summary>
         /// <param name="patternNodes"> Parsed pattern </param>
         /// <param name="map"> Map to store info about veriables </param>
-        /// <returns></returns>
+        /// <returns> Chain of base matched for search algorithm. </returns>
         private List<DFSBaseMatch> CreateChain(List<ParsedPatternNode> patternNodes, VariableMap map)
         {
             List<DFSBaseMatch> tmpChain = new List<DFSBaseMatch>();
@@ -217,7 +224,7 @@ namespace QueryEngine
                 int index = -1;
                 bool isFirst = true;
 
-                // If it has not got a name, do not add it to map.
+                // If it has not got a name, do not add it to the variable map.
                 if (tmpNode.Name != null)
                 {
                     // Try if the variable is inside a dictionary
@@ -232,7 +239,7 @@ namespace QueryEngine
                 }
 
                 // Create match node and add it to the chain.
-                tmpChain.Add(DFSBaseMatch.DFSBaseMatchFactory(tmpNode.edgeType, patternNodes[i], index, isFirst));
+                tmpChain.Add(DFSBaseMatch.DFSBaseMatchFactory(tmpNode, index, isFirst));
             }
             return tmpChain;
         }
@@ -242,8 +249,7 @@ namespace QueryEngine
         #region PatternInterface
 
         /// <summary>
-        /// Calls apply on match object, based on the current object we choose which dict will be passed into the apply method.
-        /// We know that the sequence is vertex - edge - vertex, that is to say, vertex positions is divisible by 2.
+        /// Calls apply on match object.
         /// </summary>
         /// <param name="element"> Element to be tested. </param>
         /// <returns> True if the element can be applied, false if it cannot be applied. </returns>
@@ -253,8 +259,8 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Algorithm should ensure that the method is not called after last pattern.
         /// Prepares subsequent pattern. That is, increment pattern index and set current node index to 0;
+        /// Algorithm must ensure that the method is not called after last pattern.
         /// </summary>
         public void PrepareNextSubPattern()
         {
@@ -342,8 +348,7 @@ namespace QueryEngine
        /// <summary>
        /// Returns edge type of a current match node.
        /// </summary>
-       /// <returns></returns>
-        public EdgeType GetEdgeType()
+        public Edge.EdgeType GetEdgeType()
         {
             return ((DFSEdgeMatch)(this.Patterns[this.CurrentPatternIndex][this.CurrentMatchNodeIndex])).GetEdgeType();
         }
@@ -358,7 +363,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Returns variables that have been matches so far.
+        /// Returns variables that have been matched so far.
         /// </summary>
         public Element[] GetMatchedVariables()
         {

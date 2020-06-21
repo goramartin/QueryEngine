@@ -20,7 +20,7 @@ namespace QueryEngine
     /// <summary>
     /// Class defining how resulting table when printing results will look like.
     /// </summary>
-    abstract class Formater
+    internal abstract class Formater
     {
         /// <summary>
         /// Endings of files based on format. 

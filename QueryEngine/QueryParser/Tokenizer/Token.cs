@@ -17,7 +17,7 @@ namespace QueryEngine
     /// <summary>
     /// Represents single token when parsing. Token type is a type of the token.
     /// </summary>
-    struct Token
+    internal struct Token
     {
         public enum TokenType
         {

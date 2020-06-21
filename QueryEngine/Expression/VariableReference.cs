@@ -19,7 +19,7 @@ namespace QueryEngine
     /// Base class for variable reference.
     /// </summary>
     /// <typeparam name="T"> Type of return value. </typeparam>
-    abstract class VariableReference<T> : ExpressionReturnValue<T>
+    internal abstract class VariableReference<T> : ExpressionReturnValue<T>
     {
         /// <summary>
         /// Stores information about the name of the variable reference.
@@ -53,7 +53,7 @@ namespace QueryEngine
     /// Property reference of an element.
     /// </summary>
     /// <typeparam name="T"> Type of property referenced. </typeparam>
-    sealed class VariablePropertyReference<T> : VariableReference<T>
+    internal sealed class VariablePropertyReference<T> : VariableReference<T>
     {
         /// <summary>
         /// Creates a property reference based on index of an element from a result and an accessed
@@ -88,7 +88,7 @@ namespace QueryEngine
     /// <summary>
     /// Represents a reference to an element ID.
     /// </summary>
-    sealed class VariableIDReference : VariableReference<int>
+    internal sealed class VariableIDReference : VariableReference<int>
     {
         /// <summary>
         /// Constructs id reference.
@@ -124,7 +124,7 @@ namespace QueryEngine
     /// Class is used as a holder for printing directives.
     /// When select initialises printing the class will serve as a base information for printing headers.
     /// </summary>
-    sealed class VariableReferenceNameHolder
+    internal sealed class VariableReferenceNameHolder
     {
         /// <summary>
         /// Name of variable.
@@ -172,7 +172,7 @@ namespace QueryEngine
     /// <summary>
     /// Factory for templated property reference.
     /// </summary>
-    static class VariableReferencePropertyFactory
+    internal static class VariableReferencePropertyFactory
     {
         /// <summary>
         /// Creates a typed property reference.

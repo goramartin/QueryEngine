@@ -70,7 +70,8 @@ namespace QueryEngine
         /// <summary>
         /// Parses argument that expects to be a vertices per round.
         /// </summary>
-        /// <param name="param"> Application argument. </param>
+        /// <param name="threadCount"> Number of threads to use for the app. </param>
+        /// <param name="args"> Application argument. </param>
         /// <returns> Vertices per round.</returns>
         private static int GetVerticesPerhread(int threadCount, string[] args)
         {
@@ -122,7 +123,7 @@ namespace QueryEngine
             string FileName = GetFileName( ThreadCount, Printer, args);
 
             using (Process p = Process.GetCurrentProcess())
-            p.PriorityClass = ProcessPriorityClass.RealTime; ///High;
+            p.PriorityClass = ProcessPriorityClass.RealTime; //High;
             Thread.CurrentThread.Priority = ThreadPriority.Highest;
 
             // Load graph.

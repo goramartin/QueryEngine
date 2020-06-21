@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 namespace QueryEngine
 {
 
-    partial class Results
+    internal partial class Results
     {
         /// <summary>
         /// Represents one row of a result table.

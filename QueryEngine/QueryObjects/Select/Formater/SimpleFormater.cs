@@ -22,7 +22,7 @@ namespace QueryEngine
     /// Simple formater prints output with normalised length of a one column in a row.
     /// No table and separators are only spaces.
     /// </summary>
-    sealed class SimpleFormater : Formater
+    internal sealed class SimpleFormater : Formater
     {
         public SimpleFormater(int columnCount, TextWriter writer) : base(columnCount, writer) { }
 

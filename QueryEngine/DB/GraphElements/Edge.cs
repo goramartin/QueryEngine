@@ -20,19 +20,19 @@ using System.Threading.Tasks;
 
 namespace QueryEngine
 {
-    /*! \enum EdgeType
-	
-	Represents all possible types of edge in a graph.
-        Not an edge is a value that is used to create match object with before they are assigned a proper edge type.
-    */
-    enum EdgeType { NotEdge, InEdge, OutEdge, AnyEdge };
 
     /// <summary>
     /// Edge represents edge in a graph. The type of an edge is based on the list that contains the list.
     /// Each edge has an end vertex, that is which vertex the edge is leading to.
     /// </summary>
-    abstract class Edge : Element
+    internal abstract class Edge : Element
     {
+        /*! \enum EdgeType
+	
+	    Represents all possible types of edge in a graph.
+            Not an edge is a value that is used to create match object with before they are assigned a proper edge type.
+        */
+        public enum EdgeType { NotEdge, InEdge, OutEdge, AnyEdge };
         public Vertex EndVertex { get; internal set; }
 
         public Edge()
@@ -42,20 +42,20 @@ namespace QueryEngine
             this.EndVertex = null;
         }
 
-        public abstract EdgeType GetEdgeType();
+        public abstract Edge.EdgeType GetEdgeType();
         
     }
 
     /// <summary>
     /// In specialisation of an edge.
     /// </summary>
-    sealed class InEdge : Edge
+    internal sealed class InEdge : Edge
     {
         public InEdge() : base()
         {
         }
 
-        public override EdgeType GetEdgeType()
+        public override Edge.EdgeType GetEdgeType()
         {
             return EdgeType.InEdge;
         }
@@ -65,13 +65,13 @@ namespace QueryEngine
     /// <summary>
     /// Out specialisation of an edge.
     /// </summary>
-    sealed class OutEdge : Edge
+    internal sealed class OutEdge : Edge
     {
         public OutEdge() : base()
         {
         }
 
-        public override EdgeType GetEdgeType()
+        public override Edge.EdgeType GetEdgeType()
         {
             return EdgeType.OutEdge;
         }

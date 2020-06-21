@@ -22,7 +22,7 @@ namespace QueryEngine
     /// <summary>
     /// Printer which prints results into a file.
     /// </summary>
-    sealed class FilePrinter : Printer
+    internal sealed class FilePrinter : Printer
     {
         /// <summary>
         /// Creates a file printer.

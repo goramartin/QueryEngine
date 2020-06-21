@@ -28,7 +28,7 @@ namespace QueryEngine
     /// Class contains definitions of jobs for threads and vertex distributor.
     /// If only one thread is used for matching the single thread variant is used otherwise the multithread variant is used.
     /// </summary>
-    sealed class DFSParallelPatternMatcher : IParallelMatcher
+    internal sealed class DFSParallelPatternMatcher : IParallelMatcher
     {
         Thread[] Threads;
         ISingleThreadMatcher[] Matchers;

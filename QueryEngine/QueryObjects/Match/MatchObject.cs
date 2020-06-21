@@ -26,7 +26,7 @@ namespace QueryEngine
     /// When creating the variable map is filled when constructor of pattern is called and query results are appropriately created
     /// based on number of threads passed and columns which are stored in created pattern.
     /// </summary>
-    sealed class MatchObject
+    internal sealed class MatchObject
     {
         private  IPatternMatcher Matcher;
         private  IPattern Pattern;
@@ -95,8 +95,8 @@ namespace QueryEngine
                     {   // Compare the two variables with the same name.
                         if (!node.Equals(tmpPattern[j]))
                             throw new ArgumentException($"{this.GetType()}, variables from Match expr are not matching."); 
-                        // Check if the same variables are edges.
-                        else if (!node.IsVertex && !tmpPattern[j].IsVertex)
+                        // Check if the same variables are edges -> edges cannot be repeated.
+                        else if ((node is EdgeParsedPatternNode) && (tmpPattern[j] is EdgeParsedPatternNode))
                             throw new ArgumentException($"{this.GetType()}, you cannot repeat edge variables in match expression.");
                         else continue;
                     }

@@ -24,7 +24,7 @@ namespace QueryEngine
     /// State of processor.
     /// Each processor has its own specialised states.
     /// </summary>
-    interface IProcessorState<T>
+    internal interface IProcessorState<T>
     {
         void Process(IProcessor<T> processor, string param);
     }
@@ -32,7 +32,7 @@ namespace QueryEngine
     /// Interface for state oriented processing of a file.
     /// </summary>
     /// <typeparam name="T"> Value to be created. </typeparam>
-    interface IProcessor<T>
+    internal interface IProcessor<T>
     {
         void SetNewState(IProcessorState<T> state);
         bool Finished();

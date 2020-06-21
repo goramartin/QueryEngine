@@ -19,7 +19,7 @@ namespace QueryEngine
     /// Class represents order by part of a query.
     /// It sorts given results with defined comparers.
     /// </summary>
-    sealed class OrderByObject
+    internal sealed class OrderByObject
     {
         private List<IRowProxyComparer> comparers;
 

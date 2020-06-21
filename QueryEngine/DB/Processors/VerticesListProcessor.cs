@@ -23,7 +23,7 @@ namespace QueryEngine
     /// <summary>
     /// Creates vertices list from a file.
     /// </summary>
-    sealed class VerticesListProcessor : IProcessor<List<Vertex>>
+    internal sealed class VerticesListProcessor : IProcessor<List<Vertex>>
     {
         IProcessorState<List<Vertex>> processorState { get; set; }
         List<Vertex> vertices;

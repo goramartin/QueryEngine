@@ -18,7 +18,7 @@ namespace QueryEngine
     /// <summary>
     /// Creates List of single pattern chains which will form the whole pattern later in MatchQueryObject.
     /// </summary>
-    sealed class MatchVisitor : IVisitor<List<ParsedPattern>>
+    internal sealed class MatchVisitor : IVisitor<List<ParsedPattern>>
     {
         List<ParsedPattern> result;
         ParsedPattern currentPattern;
@@ -70,8 +70,7 @@ namespace QueryEngine
         {
             this.readingVertex = true;
 
-            ParsedPatternNode vm = new ParsedPatternNode();
-            vm.IsVertex = true;
+            ParsedPatternNode vm = new VertexParsedPatternNode();
             currentPattern.AddParsedPatternNode(vm);
 
             if (node.matchVariable != null) node.matchVariable.Accept(this);
@@ -82,13 +81,28 @@ namespace QueryEngine
         /// Processes Edge node, tries to jump to variable node inside edge or to the next vertex.
         /// </summary>
         /// <param name="node"> Edge node </param>
-        public void Visit(EdgeNode node)
+        public void Visit(InEdgeNode node)
         {
             this.readingVertex = false;
 
-            ParsedPatternNode em = new ParsedPatternNode();
-            em.edgeType = node.GetEdgeType();
-            em.IsVertex = false;
+            ParsedPatternNode em = new InEdgeParsedPatternNode();
+            currentPattern.AddParsedPatternNode(em);
+
+            if (node.matchVariable != null) node.matchVariable.Accept(this);
+            if (node.next == null)
+                throw new ArgumentException($"{this.GetType()}, missing end vertex from edge.");
+            else node.next.Accept(this);
+        }
+
+        /// <summary>
+        /// Processes Edge node, tries to jump to variable node inside edge or to the next vertex.
+        /// </summary>
+        /// <param name="node"> Edge node </param>
+        public void Visit(OutEdgeNode node)
+        {
+            this.readingVertex = false;
+
+            ParsedPatternNode em = new OutEdgeParsedPatternNode();
             currentPattern.AddParsedPatternNode(em);
 
             if (node.matchVariable != null) node.matchVariable.Accept(this);
@@ -98,7 +112,23 @@ namespace QueryEngine
 
         }
 
+        /// <summary>
+        /// Processes Edge node, tries to jump to variable node inside edge or to the next vertex.
+        /// </summary>
+        /// <param name="node"> Edge node </param>
+        public void Visit(AnyEdgeNode node)
+        {
+            this.readingVertex = false;
 
+            ParsedPatternNode em = new AnyEdgeParsedPatternNode();
+            currentPattern.AddParsedPatternNode(em);
+
+            if (node.matchVariable != null) node.matchVariable.Accept(this);
+            if (node.next == null)
+                throw new ArgumentException($"{this.GetType()}, missing end vertex from edge.");
+            else node.next.Accept(this);
+        }
+        
         /// <summary>
         /// Processes match variable node.
         /// Always jumps to identifier node where Name and type is processed.

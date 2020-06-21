@@ -33,7 +33,7 @@ namespace QueryEngine
     /// So copying of the contents of the array is recomended before next interation.
     /// Note this structure does not check validity of the stores.
     /// </summary>
-    sealed class MatchResultsStorage 
+    internal sealed class MatchResultsStorage 
     {
 
         /// <summary>

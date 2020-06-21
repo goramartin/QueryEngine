@@ -27,7 +27,7 @@ namespace QueryEngine
     /// We suppose edges in datafile are stored based on id of the from vertex in ascending order.
     /// That is to say, having three vertices with ids 1, 2, 3... first all edges are from vertex 1, then edges from vertex 2 etc. 
     /// </summary>
-    sealed class EdgeListProcessor : IProcessor<EdgeListHolder>
+    internal sealed class EdgeListProcessor : IProcessor<EdgeListHolder>
     {
         IProcessorState<EdgeListHolder> processorState;
         Dictionary<string, Table> edgeTables;

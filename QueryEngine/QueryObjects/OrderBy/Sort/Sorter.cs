@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 namespace QueryEngine
 {
 
-    interface ISorter
+    internal interface ISorter
     {
         IResults Sort();
     }
@@ -25,7 +25,7 @@ namespace QueryEngine
     /// Sorts rows of the given data table using given comparers.
     /// Sort is done via iterative quick sort with insertsort for certain threshold.
     /// </summary>
-    class Sorter : ISorter
+    internal class Sorter : ISorter
     {
         private IResults dataTable;
         private IRowProxyComparer rowComparer; 

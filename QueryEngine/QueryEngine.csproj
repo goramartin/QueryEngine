@@ -77,7 +77,8 @@
     <Compile Include="QueryObjects\Select\Printer\ConsolePrinter.cs" />
     <Compile Include="QueryObjects\Select\Printer\FilePrinter.cs" />
     <Compile Include="QueryObjects\Select\PrintVariables\PrintVariable.cs" />
-    <Compile Include="QueryParser\ParsedPattern.cs" />
+    <Compile Include="QueryParser\ParsedPattern\ParsedPattern.cs" />
+    <Compile Include="QueryParser\ParsedPattern\ParsedPatternNodes.cs" />
     <Compile Include="QueryParser\Parser\ParseTreeNodes.cs" />
     <Compile Include="QueryParser\Parser\Visitor\ExpressionVisitor.cs" />
     <Compile Include="QueryParser\Parser\Visitor\MatchVisitor.cs" />

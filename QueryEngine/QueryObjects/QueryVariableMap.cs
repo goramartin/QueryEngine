@@ -24,7 +24,7 @@ namespace QueryEngine
     /// Each variable is inserted only once despite possible multiple occurences of the same variable.
     /// The main purpose of the variableMap is to obtain Elements that is the repetition does not change the desired value.
     /// </summary>
-    class VariableMap : IEnumerable<KeyValuePair<string, Tuple<int, Table>>>
+    internal class VariableMap : IEnumerable<KeyValuePair<string, Tuple<int, Table>>>
     {
      
         /// <summary>

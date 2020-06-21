@@ -42,7 +42,7 @@ namespace QueryEngine
     /// Bear in mind, that variables of each separate conjunction disregarding its connection to the others is 
     /// dependent on the matched variables from the other conjunctions.
     /// </summary>
-    sealed class DFSPatternMatcher : ISingleThreadMatcher
+    internal sealed class DFSPatternMatcher : ISingleThreadMatcher
     {
         private Graph graph;
         private IDFSPattern pattern;
@@ -254,7 +254,7 @@ namespace QueryEngine
         {
             if (processingVertex)
             {
-                EdgeType edgeType = pattern.GetEdgeType();
+                Edge.EdgeType edgeType = pattern.GetEdgeType();
                 Edge nextEdge = FindNextEdge(edgeType, (Vertex)lastUsedElement, lastUsedEdge);
 
                 processingVertex = false;
@@ -337,10 +337,10 @@ namespace QueryEngine
         /// <param name="lastUsedVertex"> Vertex that the edge is coming from. </param>
         /// <param name="lastUsedEdge"> Possibly, last used edge of the vertex. </param>
         /// <returns> Next edge. </returns>
-        private Edge FindNextEdge(EdgeType edgeType, Vertex lastUsedVertex, Edge lastUsedEdge)
+        private Edge FindNextEdge(Edge.EdgeType edgeType, Vertex lastUsedVertex, Edge lastUsedEdge)
         {
-            if (edgeType == EdgeType.InEdge) return FindInEdge(lastUsedVertex, lastUsedEdge);
-            else if (edgeType == EdgeType.OutEdge) return FindOutEdge(lastUsedVertex, lastUsedEdge);
+            if (edgeType == Edge.EdgeType.InEdge) return FindInEdge(lastUsedVertex, lastUsedEdge);
+            else if (edgeType == Edge.EdgeType.OutEdge) return FindOutEdge(lastUsedVertex, lastUsedEdge);
             else return FindAnyEdge(lastUsedVertex, lastUsedEdge);
         }
 
@@ -382,7 +382,7 @@ namespace QueryEngine
             Edge nextEdge = null;
 
             // If no edge has been used -> pick in edge /or/ it hasnt finished iteration over in edges 
-            if (lastUsedEdge == null || lastUsedEdge.GetEdgeType() == EdgeType.InEdge)
+            if (lastUsedEdge == null || lastUsedEdge.GetEdgeType() == Edge.EdgeType.InEdge)
             {
                 nextEdge = FindInEdge(vertex, lastUsedEdge);
                 if (nextEdge == null) lastUsedEdge = null;

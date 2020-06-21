@@ -18,14 +18,19 @@ namespace QueryEngine
     /// Parse tree is processed via visitors
     /// </summary>
     /// <typeparam name="T"> Object built after parsing </typeparam>
-    interface IVisitor<T>
+    internal interface IVisitor<T>
     {
         T GetResult();
         void Visit(SelectNode node);
         void Visit(MatchNode node);
         void Visit(MatchDividerNode node);
         void Visit(VertexNode node);
-        void Visit(EdgeNode node);
+
+        void Visit(InEdgeNode node);
+        void Visit(OutEdgeNode node);
+        void Visit(AnyEdgeNode node);
+
+
         void Visit(VariableNode node);
         void Visit(IdentifierNode node);
         void Visit(ExpressionNode node);

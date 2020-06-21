@@ -23,7 +23,7 @@ namespace QueryEngine
     /// <summary>
     /// Class takes console input and creates tokens based on their string representation.
     /// </summary>
-    static class Tokenizer
+    internal static class Tokenizer
     {
         // Dict of possible tokens.
         static Dictionary<string, Token.TokenType> tokenTypes;

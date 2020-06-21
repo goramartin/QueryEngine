@@ -18,7 +18,7 @@ namespace QueryEngine
     /// Class serves as a medium for evaluating expressions and obtaining string representation of the computed value.
     /// From this class inherits generic class which does explicit call to a generic method for evaluation of the expression.
     /// </summary>
-    abstract class PrintVariable
+    internal abstract class PrintVariable
     {
         /// <summary>
         /// Expression to be evaluated.
@@ -64,7 +64,7 @@ namespace QueryEngine
     /// Does explicit call to evaluate the containing expression.
     /// </summary>
     /// <typeparam name="T"> Type of value that will be computed and printed. </typeparam>
-    sealed class PrintVariable<T> : PrintVariable
+    internal sealed class PrintVariable<T> : PrintVariable
     {
         /// <summary>
         /// Constructs specialised print variable.
