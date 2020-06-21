@@ -435,10 +435,7 @@ namespace QueryEngine
         /// </summary>
         private void MergeRow()
         {
-            Thread thread = new Thread(() => DFSParallelPatternMatcher.ParallelMergeRowWork(this.Results, 0, this.Threads.Length));
-            thread.Priority = ThreadPriority.Highest;
-            thread.Start();
-            thread.Join();
+           DFSParallelPatternMatcher.ParallelMergeRowWork(this.Results, 0, this.Threads.Length);
         }
 
         /// <summary>
