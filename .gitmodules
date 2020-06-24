@@ -1,0 +1,3 @@
+[submodule "HPCsharp"]
+	path = HPCsharp
+	url = git@github.com:goramartin/HPCsharp.git
