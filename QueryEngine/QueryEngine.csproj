@@ -119,6 +119,11 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\HPCsharp\HPCsharp\HPCsharp.csproj">
+      <Project>{64ccedb0-2c62-4683-9d57-ffa0b2217277}</Project>
+      <Name>HPCsharp</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

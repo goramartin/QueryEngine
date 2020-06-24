@@ -122,15 +122,21 @@ namespace QueryEngine
             int VerticesPerThread = GetVerticesPerhread(ThreadCount, args);
             string FileName = GetFileName( ThreadCount, Printer, args);
 
+
+
             using (Process p = Process.GetCurrentProcess())
             p.PriorityClass = ProcessPriorityClass.RealTime; //High;
-            Thread.CurrentThread.Priority = ThreadPriority.Highest;
+
+            if (ThreadCount != 1)
+                ThreadPool.SetMinThreads(ThreadCount, 0);
 
             // Load graph.
             Graph graph = new Graph();
+            Console.Clear();
 
-            //Every query needs valid SELECT and MATCH expr.
-            //Every query must end with semicolon ';'.
+            // Main loop of a program.
+            // Program awaits users input query and computes it.
+            // After computation, the user is promted to choose whether he wants to compute another query or close the app.
             while (true)
             {
                 Console.WriteLine("Enter Query:");

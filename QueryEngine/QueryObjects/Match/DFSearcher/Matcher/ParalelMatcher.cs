@@ -30,11 +30,11 @@ namespace QueryEngine
     /// </summary>
     internal sealed class DFSParallelPatternMatcher : IParallelMatcher
     {
-        Thread[] Threads;
         ISingleThreadMatcher[] Matchers;
         Graph Graph;
         int DistributorVerticesPerRound;
         MatchResultsStorage Results;
+        int ThreadCount;
 
         /// <summary>
         /// Creates a parallel matchers.
@@ -52,7 +52,7 @@ namespace QueryEngine
 
             this.DistributorVerticesPerRound = verticesPerThread;
             this.Graph = graph;
-            this.Threads = new Thread[threadCount];
+            this.ThreadCount = threadCount;
             this.Matchers = new ISingleThreadMatcher[threadCount];
             this.Results = results;
 
@@ -81,7 +81,7 @@ namespace QueryEngine
         {
             QueryEngine.stopwatch.Start();
 
-            if (this.Threads.Length == 1) this.Matchers[0].Search();
+            if (this.ThreadCount == 1) this.Matchers[0].Search();
             else
             {
                 this.ParallelSearch();
@@ -98,45 +98,7 @@ namespace QueryEngine
             Console.WriteLine("Query + merge time " + elapsedTime);
         }
 
-        /// <summary>
-        /// Class serves as a signal to the main thread that all its spawned threads has finished it is work.
-        /// </summary>
-        private class Synchronizer
-        {
-            public readonly object lockingObject = new object();
-            int workThreads;
-            int finishedThreads;
-
-
-            /// <summary>
-            /// Creates synchronizer with number of threads to wait for.
-            /// </summary>
-            /// <param name="workThreads"> Number of threads to wait for. </param>
-            public Synchronizer(int workThreads)
-            {
-                this.workThreads = workThreads;
-                this.finishedThreads = 0;
-            }
-
-            /// <summary>
-            /// Signals that the calling thread finished its work.
-            /// If it is the last thread, it signals the main app thread that it can continue.
-            /// </summary>
-            public void SignalFinish()
-            {
-                var tmpFinished = Interlocked.Increment(ref this.finishedThreads);
-                if (tmpFinished == this.workThreads)
-                {
-                    lock (lockingObject)
-                    {
-                       Monitor.Pulse(lockingObject);
-                    }
-                }
-            } 
-        }
-
-
-
+       
         // This section contains structures and algorithm for handling parallel matching.
         #region ParalelSearch
 
@@ -149,23 +111,21 @@ namespace QueryEngine
         /// </summary>
         private void ParallelSearch()
         {
-            var thisSynchronizer = new Synchronizer(this.Threads.Length);
             var distributor = new VertexDistributor(this.Graph.GetAllVertices(), this.DistributorVerticesPerRound);
-
-            // We are locking before starting the thread to avoid misshappen if all threads finished before
-            // the main thread reached the Wait method.
-            lock (thisSynchronizer.lockingObject)
+            
+            // -1 because the last index is ment for the main app thread.
+            Task[] tasks = new Task[this.ThreadCount -1];
+            // Create task for each matcher except the last mather and enqueue them into thread pool.
+            for (int i = 0; i < tasks.Length; i++)
             {
-                for (int i = 0; i < this.Threads.Length; i++)
-                {
-                    this.Threads[i] = new Thread(DFSParallelPatternMatcher.WorkMultiThreadSearch);
-                    this.Threads[i].Priority = ThreadPriority.Highest;
-                    this.Threads[i].Start(new JobMultiThreadSearch(thisSynchronizer, distributor, this.Matchers[i]));
-                }
-
-                // Wait for all working threads to finish.
-                Monitor.Wait(thisSynchronizer.lockingObject);
+                var tmp = new JobMultiThreadSearch(distributor, this.Matchers[i]);
+                tasks[i] = Task.Factory.StartNew(() => DFSParallelPatternMatcher.WorkMultiThreadSearch(tmp));
             }
+
+            // The last matcher is used by the main app thread.
+            DFSParallelPatternMatcher.WorkMultiThreadSearch(new JobMultiThreadSearch(distributor, this.Matchers[this.ThreadCount - 1]));
+            
+            Task.WaitAll(tasks);
         }
 
         /// <summary>
@@ -186,11 +146,7 @@ namespace QueryEngine
                 job.Distributor.DistributeVertices(ref start, ref end);
 
                 // No more vertices. The thread can end.
-                if (start == -1 || end == -1)
-                {
-                    job.MainThreadSynchronizer.SignalFinish();
-                    break;
-                }
+                if (start == -1 || end == -1) break;
                 else
                 {
                     // Set the range of vertices to the matcher and start searching the graph.
@@ -209,11 +165,9 @@ namespace QueryEngine
         {
             public VertexDistributor Distributor;
             public ISingleThreadMatcher Matcher;
-            public Synchronizer MainThreadSynchronizer;
 
-            public JobMultiThreadSearch(Synchronizer synchronizer, VertexDistributor vertexDistributor, ISingleThreadMatcher matcher)
+            public JobMultiThreadSearch(VertexDistributor vertexDistributor, ISingleThreadMatcher matcher)
             {
-                this.MainThreadSynchronizer = synchronizer;
                 this.Distributor = vertexDistributor;
                 this.Matcher = matcher;
             }
@@ -301,20 +255,18 @@ namespace QueryEngine
 
         /// <summary>
         /// Merges results from all threads into one list. Note that the number of rows to merge is the same number
-        /// as the number of threads.
-        /// Merging can be done in two ways. If the half of available threads is larger than the number of columns.
-        /// The first method is used.
-        /// The half of the threads is assigned rows to merge. They merge it in parallel and then they wait for them to finish.
-        /// When they finish, the number rows to be merged is now twice smaller. The last running thread redistributes the newly
-        /// merged rows to the half of threads used for the first merging. The rest of threads finish. The same repeats until no more
-        /// rows can be merged.
-        /// The second method does parallel column mergins, instead of mergin columns, it assignes columns to threads that merge the entire
+        /// as the number of threads (so one row represents one thread from search algorithm).
+        /// Merging can be done in two ways. If the half of available threads is larger than the number of columns the merge rows method
+        /// is used because the number of threads for merging columns would be smaller.
+        /// The first method: MergeRows, merges rows in parallel, it recursively splits range of rows into two parts while the first range
+        /// is being merged with the one thread while the other range is being merged with a second thread.
+        /// The second method: MergeColumn does parallel column merging, instead of merging of rows, it assignes columns to threads that merge the entire
         /// columns into one column.
         /// </summary>
         private void ParallelMergeThreadResults()
         {
-             if (this.Threads.Length / 2 > this.Results.ColumnCount)
-                MergeRow();
+             if (this.ThreadCount / 2 > this.Results.ColumnCount)
+                MergeRows();
              else
                 MergeColumn();
 
@@ -330,20 +282,18 @@ namespace QueryEngine
         private void MergeColumn()
         {
             var columnDistributor = new ColumnDistributor(this.Results.ColumnCount);
-            int threadsToUse = (this.Threads.Length < this.Results.ColumnCount ?
-                                this.Threads.Length : this.Results.ColumnCount);
-            var thisSynchronizer = new Synchronizer(threadsToUse);
+            var mergeColumnJob = new ParallelMergeColumnJob(columnDistributor, this.Results);
 
-            lock (thisSynchronizer.lockingObject)
-            {
-                for (int i = 0; i < threadsToUse; i++)
-                {
-                    this.Threads[i] = new Thread(DFSParallelPatternMatcher.ParallelMergeColumnWork);
-                    this.Threads[i].Priority = ThreadPriority.Highest;
-                    this.Threads[i].Start(new ParallelMergeColumnJob(thisSynchronizer, columnDistributor, this.Results));
-                }
-                Monitor.Wait(thisSynchronizer.lockingObject);
-            }
+            int threadsToUse = (this.ThreadCount < this.Results.ColumnCount ?
+                                this.ThreadCount : this.Results.ColumnCount);
+            
+            // -1 because the main app thread will work as well.
+            Task[] tasks = new Task[threadsToUse - 1];
+            for (int i = 0; i < tasks.Length; i++)
+                tasks[i] = Task.Factory.StartNew(() => DFSParallelPatternMatcher.ParallelMergeColumnWork(mergeColumnJob));
+
+            DFSParallelPatternMatcher.ParallelMergeColumnWork(mergeColumnJob);
+            Task.WaitAll(tasks);
         }
         
         /// <summary>
@@ -361,11 +311,8 @@ namespace QueryEngine
             {
                 // Ask for a column to distribute.
                 columnIndex = job.ColumnDistributor.DistributeColumn();
-                if (columnIndex == -1)
-                {   // No more columns -> the thread can end.
-                    job.MainThreadSynchronizer.SignalFinish();
-                    break;
-                }
+                
+                if (columnIndex == -1) break;
                 else job.Elements.MergeColumn(columnIndex);
             }
         }
@@ -375,12 +322,10 @@ namespace QueryEngine
         /// </summary>
         private class ParallelMergeColumnJob
         {
-            public Synchronizer MainThreadSynchronizer;
             public MatchResultsStorage Elements;
             public ColumnDistributor ColumnDistributor;
-            public ParallelMergeColumnJob(Synchronizer synchronizer, ColumnDistributor columnDistributor, MatchResultsStorage elements)
+            public ParallelMergeColumnJob(ColumnDistributor columnDistributor, MatchResultsStorage elements)
             {
-                this.MainThreadSynchronizer = synchronizer;
                 this.Elements = elements;
                 this.ColumnDistributor = columnDistributor;
             }
@@ -427,15 +372,15 @@ namespace QueryEngine
 
         #endregion MergeColumn
 
-        #region MergeRow
+        #region MergeRows
 
 
         /// <summary>
         /// Merges results from parallel search.
         /// </summary>
-        private void MergeRow()
+        private void MergeRows()
         {
-           DFSParallelPatternMatcher.ParallelMergeRowWork(this.Results, 0, this.Threads.Length);
+           DFSParallelPatternMatcher.ParallelMergeRowWork(this.Results, 0, this.ThreadCount);
         }
 
         /// <summary>
@@ -447,8 +392,8 @@ namespace QueryEngine
         /// Each merge is stored to the position at the value of first.
         /// </summary>
         /// <param name="results"> Result table to merge.</param>
-        /// <param name="start"></param>
-        /// <param name="end"></param>
+        /// <param name="start"> Starting index of the range of rows to merge. </param>
+        /// <param name="end"> End index of the range of rows to merge. </param>
         private static void ParallelMergeRowWork(MatchResultsStorage results, int start, int end)
         {
             // do work parallel
@@ -458,14 +403,11 @@ namespace QueryEngine
                 int middle = ((end - start) / 2) + start;
                 if (middle % 2 == 1) middle--;
 
-                Thread thread = new Thread(() => DFSParallelPatternMatcher.ParallelMergeRowWork(results, middle, end));
-                thread.Priority = ThreadPriority.Highest;
-                thread.Start();
-
+                Task task = Task.Factory.StartNew(() => DFSParallelPatternMatcher.ParallelMergeRowWork(results, middle, end));
                 DFSParallelPatternMatcher.ParallelMergeRowWork(results, start, middle);
                 
-                // Wait for other thread to finish and start merging its results with yours.
-                thread.Join();
+                // Wait for other task to finish and start merging its results with yours.
+                task.Wait();
                 results.MergeRows(start, middle);
             } else
             { // merge rows

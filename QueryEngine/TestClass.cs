@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
 namespace QueryEngine
 {
     /// <summary>
@@ -14,7 +15,6 @@ namespace QueryEngine
     {
         public static void DumpGraph(Graph g)
         {
-
             /////////////
             Console.WriteLine();
             //Display whats inside dictionary of nodes 
