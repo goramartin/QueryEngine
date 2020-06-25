@@ -348,9 +348,9 @@ namespace QueryEngine
        /// <summary>
        /// Returns edge type of a current match node.
        /// </summary>
-        public Edge.EdgeType GetEdgeType()
+        public Type GetMatchType()
         {
-            return ((DFSEdgeMatch)(this.Patterns[this.CurrentPatternIndex][this.CurrentMatchNodeIndex])).GetEdgeType();
+            return (this.Patterns[this.CurrentPatternIndex][this.CurrentMatchNodeIndex]).GetMatchType();
         }
 
         /// <summary>

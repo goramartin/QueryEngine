@@ -47,5 +47,8 @@ namespace QueryEngine
         {
             return this.Table.TryGetPropertyValue(this.ID, propName,out value);
         }
+
+        public abstract Type GetElementType();
+
     }
 }

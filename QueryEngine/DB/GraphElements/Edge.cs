@@ -27,12 +27,6 @@ namespace QueryEngine
     /// </summary>
     internal abstract class Edge : Element
     {
-        /*! \enum EdgeType
-	
-	    Represents all possible types of edge in a graph.
-            Not an edge is a value that is used to create match object with before they are assigned a proper edge type.
-        */
-        public enum EdgeType { NotEdge, InEdge, OutEdge, AnyEdge };
         public Vertex EndVertex { get; internal set; }
 
         public Edge()
@@ -41,9 +35,6 @@ namespace QueryEngine
             this.Table = null;
             this.EndVertex = null;
         }
-
-        public abstract Edge.EdgeType GetEdgeType();
-        
     }
 
     /// <summary>
@@ -55,9 +46,9 @@ namespace QueryEngine
         {
         }
 
-        public override Edge.EdgeType GetEdgeType()
+        public override Type GetElementType()
         {
-            return EdgeType.InEdge;
+            return typeof(InEdge);
         }
 
     }
@@ -67,14 +58,11 @@ namespace QueryEngine
     /// </summary>
     internal sealed class OutEdge : Edge
     {
-        public OutEdge() : base()
-        {
-        }
+        public OutEdge() : base() { }
 
-        public override Edge.EdgeType GetEdgeType()
+        public override Type GetElementType()
         {
-            return EdgeType.OutEdge;
+            return typeof(OutEdge);
         }
-
     }
 }

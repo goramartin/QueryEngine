@@ -80,5 +80,9 @@ namespace QueryEngine
             end = this.InEdgesEndPosition;
         }
 
+        public override Type GetElementType()
+        {
+            return typeof(Vertex);
+        }
     }
 }

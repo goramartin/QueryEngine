@@ -1,12 +1,9 @@
 ﻿/*! \file
  
     This file include definitions of a specialised matches used to form a dfs pattern.
-    There is a vertex and edge match class. The edge class further creates a children classes
-    based on the edge orientation.
+    There are a vertex and edges match classes. 
  
  */
-
-
 
 using System;
 using System.Collections.Generic;
@@ -16,102 +13,43 @@ using System.Threading.Tasks;
 
 namespace QueryEngine
 {
-    /// <summary>
-    /// Defines vertex match node.
-    /// Description is provided inside abstract parent.
-    /// </summary>
+    
     internal sealed class DFSVertexMatch : DFSBaseMatch
     {
         public DFSVertexMatch() : base()
         { }
 
-        public DFSVertexMatch(ParsedPatternNode node, int indexInMap, bool isFirst) : base(node, indexInMap, isFirst)
+        public DFSVertexMatch(ParsedPatternNode node, int indexInMap, bool isFirst) : base(node, indexInMap, isFirst, typeof(Vertex))
         { }
-
-        public override bool Apply(Element element, Element[] map)
-        {
-            if (element == null) return false;
-            else if (!(element is Vertex)) return false;
-            else return CheckCommonConditions(element, map);
-        }
 
     }
 
-    /// <summary>
-    /// Defines vertex match node.
-    /// Description is provided inside abstract parent.
-    /// </summary>
-    internal abstract class DFSEdgeMatch : DFSBaseMatch
-    {
-        public DFSEdgeMatch() : base()
-        { }
-
-        public DFSEdgeMatch(ParsedPatternNode node, int indexInMap, bool isFirst) : base(node, indexInMap, isFirst)
-        { }
-
-        public abstract Edge.EdgeType GetEdgeType();
-
-
-
-    }
-
-    /// <summary>
-    /// Defines vertex match node.
-    /// Description is provided inside abstract parent.
-    /// </summary>
-    internal sealed class DFSInEdgeMatch : DFSEdgeMatch
+   
+    internal sealed class DFSInEdgeMatch : DFSBaseMatch
     {
         public DFSInEdgeMatch() : base()
         { }
-        public DFSInEdgeMatch(ParsedPatternNode node, int indexInMap, bool isFirst) : base(node, indexInMap, isFirst)
+        public DFSInEdgeMatch(ParsedPatternNode node, int indexInMap, bool isFirst) : base(node, indexInMap, isFirst, typeof(InEdge))
         { }
-
-        public override Edge.EdgeType GetEdgeType() => Edge.EdgeType.InEdge;
-
-        public override bool Apply(Element element, Element[] map)
-        {
-            if (element == null) return false;
-            else if (!(element is InEdge)) return false;
-            else return CheckCommonConditions(element, map);
-        }
 
     }
 
-    /// <summary>
-    /// Defines vertex match node.
-    /// Description is provided inside abstract parent.
-    /// </summary>
-    internal sealed class DFSOutEdgeMatch : DFSEdgeMatch
+   
+    internal sealed class DFSOutEdgeMatch : DFSBaseMatch
     {
         public DFSOutEdgeMatch() : base()
         { }
-        public DFSOutEdgeMatch(ParsedPatternNode node, int indexInMap, bool isFirst) : base(node, indexInMap, isFirst)
+        public DFSOutEdgeMatch(ParsedPatternNode node, int indexInMap, bool isFirst) : base(node, indexInMap, isFirst, typeof(OutEdge))
         { }
 
-        public override Edge.EdgeType GetEdgeType() => Edge.EdgeType.OutEdge;
-
-        public override bool Apply(Element element, Element[] map)
-        {
-            if (element == null) return false;
-            else if (!(element is OutEdge)) return false;
-            else return CheckCommonConditions(element, map);
-        }
     }
 
-    internal sealed class DFSAnyEdgeMatch : DFSEdgeMatch
+    internal sealed class DFSAnyEdgeMatch : DFSBaseMatch
     {
         public DFSAnyEdgeMatch() : base()
         { }
-        public DFSAnyEdgeMatch(ParsedPatternNode node, int indexInMap, bool isFirst) : base(node, indexInMap, isFirst)
+        public DFSAnyEdgeMatch(ParsedPatternNode node, int indexInMap, bool isFirst) : base(node, indexInMap, isFirst, typeof(Edge))
         { }
 
-        public override Edge.EdgeType GetEdgeType() => Edge.EdgeType.AnyEdge;
-
-        public override bool Apply(Element element, Element[] map)
-        {
-            if (element == null) return false;
-            else if (!(element is Edge)) return false;
-            else return CheckCommonConditions(element, map);
-        }
     }
 }

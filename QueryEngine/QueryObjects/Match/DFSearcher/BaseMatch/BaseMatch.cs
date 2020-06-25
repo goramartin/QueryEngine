@@ -25,13 +25,27 @@ namespace QueryEngine
     /// </summary>
     internal abstract class DFSBaseMatch
     {
-        // The match is anonymous if it does not represent any variable.
+        /// <summary>
+        /// The match is anonymous if it does not represent any variable.
+        /// </summary>
         readonly bool IsAnonnymous;
-        // Is true if the match object represents a variable that has it is first appereance.
+        /// <summary>
+        /// Is true if the match object represents a variable that has it is first appereance. 
+        /// </summary>
         readonly bool IsFirstAppereance;
-        // Represents index in scope if it is not anonymous.
+        /// <summary>
+        /// Represents index in scope if it is not anonymous. 
+        /// </summary>
         readonly int PositionOfRepeatedField;
+        /// <summary>
+        /// Type of a table of the element being matched.
+        /// </summary>
         readonly Table Table;
+        /// <summary>
+        /// Type of graph element to be matched. Its faster to store the information directly then call virtual methods.
+        /// The pattern is never really long, so the memory overhead is negligible.
+        /// </summary>
+        readonly Type MatchingType;
 
         public DFSBaseMatch()
         {
@@ -47,8 +61,9 @@ namespace QueryEngine
         /// <param name="node"> Node containing data of the match object. </param>
         /// <param name="indexInMap"> Index in the map of variables. (-1 if the the variable is anonymous.) </param>
         /// <param name="isFirst"> Indicates whether its first appearance of the variable. </param>
-        protected DFSBaseMatch(ParsedPatternNode node, int indexInMap, bool isFirst)
+        protected DFSBaseMatch(ParsedPatternNode node, int indexInMap, bool isFirst, Type matchingType)
         {
+            this.MatchingType = matchingType;
             if (indexInMap != -1) this.IsAnonnymous = false;
             else this.IsAnonnymous = true;
 
@@ -57,25 +72,17 @@ namespace QueryEngine
             this.Table = node.Table;
         }
 
-
         /// <summary>
         /// Gets an element that will be tested if it can be added to the result.
-        /// </summary>
-        /// <param name="element"> Element to be tested. </param>
-        /// <param name="map"> Scope of variables in search context. </param>
-        /// <returns> True if element can be aplicable or false on refusal. </returns>
-        public abstract bool Apply(Element element, Element[] map);
-
-
-        /// <summary>
-        /// Called by descendants. Checks conditions that are indifferent to the descendant type.
-        /// Checks correctes of type of the aplied elements. 
-        /// Also directs seting of map and used elements.
+        /// Checks correctes of type, if stated, of the aplied elements. 
+        /// When this match object represents variable, it checks whether the element is the same if the variable is taken
+        /// or just sets the element to be the variable.
+        /// Note: The element is never null and always the correct type. => must be ensured by matcher.
         /// </summary>
         /// <param name="element"> Elemented to be tested. </param>
         /// <param name="map"> Scope of variables in search context.</param>
         /// <returns>True if element can be aplicable or false on refusal.</returns>
-        protected bool CheckCommonConditions(Element element, Element[] map)
+        public bool Apply(Element element, Element[] map)
         {
             // Check type, comparing references to tables.
             if ((this.Table != null) && (this.Table != element.Table)) return false;
@@ -123,6 +130,18 @@ namespace QueryEngine
             if (this.IsAnonnymous) return null;
             else return map[this.PositionOfRepeatedField];
         }
+
+        /// <summary>
+        /// Returns type of graph element to be matched.
+        /// This is faster then calling virtual methods and the memory overhead is small because the instances of types
+        /// are created when starting the application.
+        /// </summary>
+        /// <returns> Type of graph element to be matched. </returns>
+        public Type GetMatchType()
+        {
+            return this.MatchingType;
+        }
+
 
         /// <summary>
         /// Factory for base matches

@@ -27,6 +27,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Threading;
+using System.CodeDom;
 
 namespace QueryEngine
 {
@@ -72,7 +73,7 @@ namespace QueryEngine
             this.queryResults = results;
             this.threadIndex = threadIndex;
 
-            //implicit
+            // Implicit range of vertices to iterate over.
             this.startVerticesIndex = 0;
             this.startVerticesEndIndex = graph.vertices.Count;
 
@@ -194,7 +195,7 @@ namespace QueryEngine
             while (true)
             {
                 // Try to apply the new element to the pattern.
-                bool success = pattern.Apply(nextElement);
+                bool success =  (nextElement != null) ? pattern.Apply(nextElement) : false;
                 if (success)
                 {
                     // If it is the last node in the pattern, we check if it is the last pattern.
@@ -254,9 +255,7 @@ namespace QueryEngine
         {
             if (processingVertex)
             {
-                Edge.EdgeType edgeType = pattern.GetEdgeType();
-                Edge nextEdge = FindNextEdge(edgeType, (Vertex)lastUsedElement, lastUsedEdge);
-
+                Edge nextEdge = FindNextEdge(pattern.GetMatchType(), (Vertex)lastUsedElement, lastUsedEdge);
                 processingVertex = false;
                 return nextEdge;
             }
@@ -337,11 +336,12 @@ namespace QueryEngine
         /// <param name="lastUsedVertex"> Vertex that the edge is coming from. </param>
         /// <param name="lastUsedEdge"> Possibly, last used edge of the vertex. </param>
         /// <returns> Next edge. </returns>
-        private Edge FindNextEdge(Edge.EdgeType edgeType, Vertex lastUsedVertex, Edge lastUsedEdge)
+        private Edge FindNextEdge(Type edgeType, Vertex lastUsedVertex, Edge lastUsedEdge)
         {
-            if (edgeType == Edge.EdgeType.InEdge) return FindInEdge(lastUsedVertex, lastUsedEdge);
-            else if (edgeType == Edge.EdgeType.OutEdge) return FindOutEdge(lastUsedVertex, lastUsedEdge);
-            else return FindAnyEdge(lastUsedVertex, lastUsedEdge);
+            if (edgeType == typeof(InEdge)) return FindInEdge(lastUsedVertex, lastUsedEdge);
+            else if (edgeType == typeof(OutEdge)) return FindOutEdge(lastUsedVertex, lastUsedEdge);
+            else if (edgeType == typeof(Edge)) return FindAnyEdge(lastUsedVertex, lastUsedEdge);
+            else throw new ArgumentException($"{this.GetType()}, matcher got invalid type of edge. Type = {edgeType}.");
         }
 
 
@@ -382,7 +382,7 @@ namespace QueryEngine
             Edge nextEdge = null;
 
             // If no edge has been used -> pick in edge /or/ it hasnt finished iteration over in edges 
-            if (lastUsedEdge == null || lastUsedEdge.GetEdgeType() == Edge.EdgeType.InEdge)
+            if (lastUsedEdge == null || lastUsedEdge.GetElementType() == typeof(InEdge))
             {
                 nextEdge = FindInEdge(vertex, lastUsedEdge);
                 if (nextEdge == null) lastUsedEdge = null;
@@ -432,7 +432,6 @@ namespace QueryEngine
         }
 
 
-
         /// <summary>
         /// Based on which conjunction we are filling we set set its starting vertices.
         /// If it is the first conjunction in the pattern we iterate over vertices received from vertex distributor.
@@ -467,8 +466,8 @@ namespace QueryEngine
             var scope = this.pattern.GetMatchedVariables();
             this.Count++;
 
-            for (int i = 0; i < this.queryResults.ColumnCount; i++)
-                    this.queryResults.AddElement(scope[i], i, this.threadIndex);
+            //for (int i = 0; i < this.queryResults.ColumnCount; i++)
+            //        this.queryResults.AddElement(scope[i], i, this.threadIndex);
         }
 
         /// <summary>

@@ -49,7 +49,7 @@ namespace QueryEngine
     {
         Element GetCurrentChainConnection();
         Element GetNextChainConnection();
-        Edge.EdgeType GetEdgeType();
+        Type GetMatchType();
         void UnsetCurrentVariable();
         IDFSPattern Clone();
     }
