@@ -56,8 +56,6 @@ namespace QueryEngine
         /// </summary>
         public int Count { get; private set; }
 
-        public Element this[int row, int column] => throw new NotImplementedException();
-
         /// <summary>
         /// Creates storage based on thread count and column count.
         /// Column count represents number of variables of a search query and

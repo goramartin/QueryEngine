@@ -46,7 +46,7 @@ namespace QueryEngine
     internal sealed class DFSPatternMatcher : ISingleThreadMatcher
     {
         private Graph graph;
-        private IDFSPattern pattern;
+        private DFSPattern pattern;
         private Element[] result;
         private bool processingVertex;
         private int threadIndex; // Based on thread, implicitly 0
@@ -69,7 +69,7 @@ namespace QueryEngine
 
             this.graph = graph;
             this.result = new Element[pattern.AllNodeCount];
-            this.pattern = pattern;
+            this.pattern = (DFSPattern)pattern;
             this.queryResults = results;
             this.threadIndex = threadIndex;
 
