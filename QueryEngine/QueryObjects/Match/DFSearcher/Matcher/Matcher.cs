@@ -30,7 +30,5 @@ namespace QueryEngine
         void SetStartingVerticesIndeces(int start, int end);
     }
 
-    internal interface IParallelMatcher : IPatternMatcher
-    {
-    }
+  
 }

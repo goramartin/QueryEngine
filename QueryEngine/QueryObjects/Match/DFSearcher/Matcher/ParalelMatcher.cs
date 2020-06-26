@@ -28,9 +28,9 @@ namespace QueryEngine
     /// Class contains definitions of jobs for threads and vertex distributor.
     /// If only one thread is used for matching the single thread variant is used otherwise the multithread variant is used.
     /// </summary>
-    internal sealed class DFSParallelPatternMatcher : IParallelMatcher
+    internal sealed class DFSParallelPatternMatcher : IPatternMatcher
     {
-        DFSPatternMatcher[] Matchers;
+        ISingleThreadMatcher[] Matchers;
         Graph Graph;
         int DistributorVerticesPerRound;
         MatchResultsStorage Results;
@@ -53,12 +53,12 @@ namespace QueryEngine
             this.DistributorVerticesPerRound = verticesPerThread;
             this.Graph = graph;
             this.ThreadCount = threadCount;
-            this.Matchers = new DFSPatternMatcher[threadCount];
+            this.Matchers = new ISingleThreadMatcher[threadCount];
             this.Results = results;
 
             for (int i = 0; i < threadCount; i++)
             {
-                this.Matchers[i] = (DFSPatternMatcher)MatchFactory
+                this.Matchers[i] = (ISingleThreadMatcher)MatchFactory
                                    .CreateMatcher("DFSSingleThread",                  // Type of Matcher 
                                                   i == 0 ? pattern : pattern.Clone(), // Cloning of pattern (one was already created)
                                                   graph,
@@ -164,9 +164,9 @@ namespace QueryEngine
         private class JobMultiThreadSearch
         {
             public VertexDistributor Distributor;
-            public DFSPatternMatcher Matcher;
+            public ISingleThreadMatcher Matcher;
 
-            public JobMultiThreadSearch(VertexDistributor vertexDistributor, DFSPatternMatcher matcher)
+            public JobMultiThreadSearch(VertexDistributor vertexDistributor, ISingleThreadMatcher matcher)
             {
                 this.Distributor = vertexDistributor;
                 this.Matcher = matcher;
