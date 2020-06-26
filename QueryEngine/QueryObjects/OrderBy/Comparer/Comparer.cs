@@ -160,7 +160,7 @@ namespace QueryEngine
         /// <returns> Less than zero x precedes y in the sort order.
         /// Zero x occurs in the same position as y in the sort order.
         /// Greater than zero x follows y in the sort order.</returns>
-        protected abstract int CompareValues(T x, T y);
+        protected abstract int CompareValues(T x, T y)
     }
 
     internal class ExpressionIntegerCompaper : ExpressionComparer<int>

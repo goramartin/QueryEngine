@@ -43,6 +43,7 @@ namespace QueryEngine
     internal partial class Results : IResults
     {
         private List<Element>[] results;
+        private int[] order;
 
         /// <summary>
         /// Number of columns.
@@ -61,6 +62,7 @@ namespace QueryEngine
         /// <param name="elements"> Matcher results. </param>
         public  Results(List<Element>[][] elements)
         {
+            this.order = null;
             this.results = new List<Element>[elements.Length];
             for (int i = 0; i < elements.Length; i++)
             {
@@ -79,7 +81,8 @@ namespace QueryEngine
             {
                 if (rowIndex < 0 || rowIndex >= this.Count) 
                     throw new ArgumentOutOfRangeException($"{this.GetType()}, row is out of range.");
-                else return new Results.RowProxy(this.results, rowIndex);
+                else if (order == null) return new Results.RowProxy(this, rowIndex);
+                else return new Results.RowProxy(this, order[rowIndex]);
             }
         }
 
@@ -91,7 +94,7 @@ namespace QueryEngine
         public IEnumerator<Results.RowProxy> GetEnumerator()
         {
             for (int i = 0; i < this.Count; i++)
-                yield return new Results.RowProxy(this.results, i);
+                yield return new Results.RowProxy(this, i);
         }
 
         IEnumerator IEnumerable.GetEnumerator()

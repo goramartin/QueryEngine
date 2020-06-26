@@ -25,18 +25,18 @@ namespace QueryEngine
         /// </summary>
         public readonly struct RowProxy
         {
-            private readonly List<Element>[] elements;
-            private readonly int index; 
+            private readonly Results resTable;
+            private readonly int index;
 
             /// <summary>
             /// Constructs proxy row.
             /// </summary>
-            /// <param name="elements"> Data of the result table. </param>
+            /// <param name="results"> Result table. </param>
             /// <param name="index"> Index of a row in the given result table.</param>
-            public RowProxy(List<Element>[] elements, int index)
+            public RowProxy(Results results, int index)
             {
-                this.elements = elements;
                 this.index = index;
+                this.resTable = results;
             }
 
             /// <summary>
@@ -48,8 +48,13 @@ namespace QueryEngine
             {
                 get
                 {
-                    return elements[column][this.index];
+                    return resTable.results[column][this.index];
                 }
+            }
+
+            public int GetColumnCount()
+            {
+                return this.resTable.results.Length;
             }
 
             /// <summary>
@@ -58,8 +63,8 @@ namespace QueryEngine
             public override string ToString()
             {
                 string tmpString =  "Row: " + this.index + " result: ";
-                for (int i = 0; i < this.elements.Length; i++)
-                    tmpString += " " + this[i].ID.ToString();
+                for (int i = 0; i < this.resTable.results.Length; i++)
+                    tmpString += " " + this[i].ID.ToString();  
             
                 return tmpString;
             }
