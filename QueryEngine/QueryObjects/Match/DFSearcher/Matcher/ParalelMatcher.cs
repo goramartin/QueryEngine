@@ -30,7 +30,7 @@ namespace QueryEngine
     /// </summary>
     internal sealed class DFSParallelPatternMatcher : IParallelMatcher
     {
-        ISingleThreadMatcher[] Matchers;
+        DFSPatternMatcher[] Matchers;
         Graph Graph;
         int DistributorVerticesPerRound;
         MatchResultsStorage Results;
@@ -53,12 +53,12 @@ namespace QueryEngine
             this.DistributorVerticesPerRound = verticesPerThread;
             this.Graph = graph;
             this.ThreadCount = threadCount;
-            this.Matchers = new ISingleThreadMatcher[threadCount];
+            this.Matchers = new DFSPatternMatcher[threadCount];
             this.Results = results;
 
             for (int i = 0; i < threadCount; i++)
             {
-                this.Matchers[i] = (ISingleThreadMatcher)MatchFactory
+                this.Matchers[i] = (DFSPatternMatcher)MatchFactory
                                    .CreateMatcher("DFSSingleThread",                  // Type of Matcher 
                                                   i == 0 ? pattern : pattern.Clone(), // Cloning of pattern (one was already created)
                                                   graph,
@@ -164,9 +164,9 @@ namespace QueryEngine
         private class JobMultiThreadSearch
         {
             public VertexDistributor Distributor;
-            public ISingleThreadMatcher Matcher;
+            public DFSPatternMatcher Matcher;
 
-            public JobMultiThreadSearch(VertexDistributor vertexDistributor, ISingleThreadMatcher matcher)
+            public JobMultiThreadSearch(VertexDistributor vertexDistributor, DFSPatternMatcher matcher)
             {
                 this.Distributor = vertexDistributor;
                 this.Matcher = matcher;
