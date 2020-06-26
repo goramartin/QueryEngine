@@ -20,7 +20,6 @@ using System.Threading.Tasks;
 
 namespace QueryEngine
 {
-
     /// <summary>
     /// Class that implements basic DFS pattern.
     /// Creates it self from parsed pattern.

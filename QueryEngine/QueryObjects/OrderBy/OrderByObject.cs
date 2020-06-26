@@ -59,9 +59,7 @@ namespace QueryEngine
         /// <returns> Sorted data. </returns>
         public IResults Sort(IResults sortData)
         {
-
-
-            ISorter sorter = new Sorter(sortData, this.comparers);
+           // Sorter sorter = new Sorter(sortData, this.comparers);
             var tmp=  sorter.Sort();
 
             TimeSpan ts = QueryEngine.stopwatch.Elapsed;

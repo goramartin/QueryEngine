@@ -67,7 +67,7 @@
     <Compile Include="Expression\VariableReference.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="QueryObjects\Match\MatchFactory.cs" />
-    <Compile Include="QueryObjects\OrderBy\Comparer\Comparer.cs" />
+    <Compile Include="QueryObjects\OrderBy\Comparer\RowProxyComparer.cs" />
     <Compile Include="QueryObjects\OrderBy\OrderByObject.cs" />
     <Compile Include="QueryObjects\OrderBy\Sort\Sorter.cs" />
     <Compile Include="QueryObjects\Results\MatchResults.cs" />

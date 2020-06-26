@@ -30,6 +30,8 @@ namespace QueryEngine
         int Count { get; }
         Results.RowProxy this[int rowIndex] { get; }
         void SwapRows(int firstRowIndex, int secondRowIndex);
+        void AddOrder(int[] order);
+        List<Element> GetResultColumn(int columnIndex);
     }
 
     /// <summary>
@@ -116,6 +118,16 @@ namespace QueryEngine
                 this.results[i][firstRowIndex] = this.results[i][secondRowIndex];
                 this.results[i][secondRowIndex] = tmpElement;
             }
+        }
+
+        public void AddOrder(int[] order)
+        {
+            this.order = order;
+        }
+
+        public List<Element> GetResultColumn(int columnIndex)
+        {
+            return this.results[columnIndex];
         }
     }
 

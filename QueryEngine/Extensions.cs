@@ -26,6 +26,15 @@ namespace QueryEngine
                 arr[i] = value;
             }
         }
+
+        public static void AscPopulate(this int[] arr, int value)
+        {
+            for (int i = value; i < arr.Length; i++)
+            {
+                arr[i] = value;
+            }
+        }
+
     }
 
 }
