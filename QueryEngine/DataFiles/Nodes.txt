@@ -1,7 +1,0 @@
-1 Person Pavel Jezek 35
-2 Person Lubomir Bulej 39
-3 Person Jarek Kaufman 21
-4 Person Pavel Mikulas 22
-5 Person Jiri Klepl 22
-6 Person Radek Ostruszka 25
-7 Person Ivana Kaufmanova 35
