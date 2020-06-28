@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="DB\Creators\Creator.cs" />
     <Compile Include="DB\Creators\CreatorFromFile.cs" />
+    <Compile Include="DB\Graph.cs" />
     <Compile Include="DB\GraphElements\Edge.cs" />
     <Compile Include="DB\GraphElements\Element.cs" />
     <Compile Include="DB\GraphElements\Vertex.cs" />
@@ -53,57 +54,67 @@
     <Compile Include="DB\Processors\Processor.cs" />
     <Compile Include="DB\Processors\TableDictProcessor.cs" />
     <Compile Include="DB\Processors\VerticesListProcessor.cs" />
+    <Compile Include="DB\Reader.cs" />
     <Compile Include="DB\Table\Property\Property.cs" />
     <Compile Include="DB\Table\Property\PropertyFactory.cs" />
     <Compile Include="DB\Table\Property\PropertySpecialisations.cs" />
-    <Compile Include="QueryObjects\Match\DFSearcher\BaseMatch\BaseMatch.cs" />
-    <Compile Include="QueryObjects\Match\DFSearcher\BaseMatch\SpecialisedBaseMatches.cs" />
-    <Compile Include="QueryObjects\Match\DFSearcher\Matcher\Matcher.cs" />
-    <Compile Include="QueryObjects\Match\DFSearcher\Matcher\ParalelMatcher.cs" />
-    <Compile Include="QueryObjects\Match\DFSearcher\Matcher\SingleThreadedMatcher.cs" />
-    <Compile Include="QueryObjects\Match\DFSearcher\Pattern\Pattern.cs" />
-    <Compile Include="QueryObjects\Match\DFSearcher\Pattern\PatternInterface.cs" />
+    <Compile Include="DB\Table\Table.cs" />
     <Compile Include="Expression\Expression.cs" />
     <Compile Include="Expression\VariableReference.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="QueryEngine.cs" />
+    <Compile Include="QueryObjects\Match\DFSearcher\BaseMatch\BaseMatch.cs" />
+    <Compile Include="QueryObjects\Match\DFSearcher\BaseMatch\BaseMatchesSpecialised.cs" />
+    <Compile Include="QueryObjects\Match\DFSearcher\Matcher\Matcher.cs" />
+    <Compile Include="QueryObjects\Match\DFSearcher\Matcher\ParallelMatcher.cs" />
+    <Compile Include="QueryObjects\Match\DFSearcher\Matcher\SingleThreadedMatcher.cs" />
+    <Compile Include="QueryObjects\Match\DFSearcher\Pattern\Pattern.cs" />
+    <Compile Include="QueryObjects\Match\DFSearcher\Pattern\PatternInterface.cs" />
     <Compile Include="QueryObjects\Match\MatchFactory.cs" />
-    <Compile Include="QueryObjects\OrderBy\Comparer\RowProxyComparer.cs" />
+    <Compile Include="QueryObjects\Match\MatchObject.cs" />
+    <Compile Include="QueryObjects\OrderBy\Comparer\RowProxyComparer\RowProxyComparer.cs" />
+    <Compile Include="QueryObjects\OrderBy\Comparer\RowProxyComparer\Wrappers\ElementToRowProxyComparer.cs" />
+    <Compile Include="QueryObjects\OrderBy\Comparer\RowProxyComparer\Wrappers\IndexToRowProxyComparer.cs" />
     <Compile Include="QueryObjects\OrderBy\OrderByObject.cs" />
-    <Compile Include="QueryObjects\OrderBy\Sort\Sorter.cs" />
+    <Compile Include="QueryObjects\OrderBy\Sorter\SimpleSorter\MultiColumnSimpleSorter.cs" />
+    <Compile Include="QueryObjects\OrderBy\Sorter\SimpleSorter\SimpleSorter.cs" />
+    <Compile Include="QueryObjects\OrderBy\Sorter\SimpleSorter\SingleColumnSimpleSorter.cs" />
+    <Compile Include="QueryObjects\OrderBy\Sorter\Sorter.cs" />
+    <Compile Include="QueryObjects\Query.cs" />
+    <Compile Include="QueryObjects\QueryVariableMap.cs" />
     <Compile Include="QueryObjects\Results\MatchResults.cs" />
+    <Compile Include="QueryObjects\Results\Results.cs" />
     <Compile Include="QueryObjects\Results\RowProxy.cs" />
+    <Compile Include="QueryObjects\Select\Formater\Formater.cs" />
     <Compile Include="QueryObjects\Select\Formater\MarkdownFormater.cs" />
     <Compile Include="QueryObjects\Select\Formater\SimpleFormater.cs" />
     <Compile Include="QueryObjects\Select\Printer\ConsolePrinter.cs" />
     <Compile Include="QueryObjects\Select\Printer\FilePrinter.cs" />
+    <Compile Include="QueryObjects\Select\Printer\Printer.cs" />
     <Compile Include="QueryObjects\Select\PrintVariables\PrintVariable.cs" />
+    <Compile Include="QueryObjects\Select\SelectObject.cs" />
     <Compile Include="QueryParser\ParsedPattern\ParsedPattern.cs" />
     <Compile Include="QueryParser\ParsedPattern\ParsedPatternNodes.cs" />
+    <Compile Include="QueryParser\Parser\Parser.cs" />
     <Compile Include="QueryParser\Parser\ParseTreeNodes.cs" />
     <Compile Include="QueryParser\Parser\Visitor\ExpressionVisitor.cs" />
     <Compile Include="QueryParser\Parser\Visitor\MatchVisitor.cs" />
     <Compile Include="QueryParser\Parser\Visitor\OrderByVisitor.cs" />
     <Compile Include="QueryParser\Parser\Visitor\SelectVisitor.cs" />
+    <Compile Include="QueryParser\Parser\Visitor\Visitor.cs" />
     <Compile Include="QueryParser\Tokenizer\Token.cs" />
     <Compile Include="QueryParser\Tokenizer\Tokenizer.cs" />
-    <Compile Include="QueryParser\Parser\Visitor\Visitor.cs" />
-    <Compile Include="QueryObjects\Select\Formater\Formater.cs" />
-    <Compile Include="QueryObjects\Select\Printer\Printer.cs" />
-    <Compile Include="QueryObjects\Results\Results.cs" />
-    <Compile Include="QueryObjects\Match\MatchObject.cs" />
-    <Compile Include="QueryParser\Parser\Parser.cs" />
-    <Compile Include="QueryObjects\Query.cs" />
-    <Compile Include="QueryObjects\Select\SelectObject.cs" />
-    <Compile Include="DB\Table\Table.cs" />
-    <Compile Include="DB\Graph.cs" />
-    <Compile Include="QueryObjects\QueryVariableMap.cs" />
-    <Compile Include="DB\Reader.cs" />
-    <Compile Include="QueryEngine.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestClass.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\HPCsharp\HPCsharp\HPCsharp.csproj">
+      <Project>{64ccedb0-2c62-4683-9d57-ffa0b2217277}</Project>
+      <Name>HPCsharp</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="DataFiles\Edges.txt">
@@ -119,11 +130,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\HPCsharp\HPCsharp\HPCsharp.csproj">
-      <Project>{64ccedb0-2c62-4683-9d57-ffa0b2217277}</Project>
-      <Name>HPCsharp</Name>
-    </ProjectReference>
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

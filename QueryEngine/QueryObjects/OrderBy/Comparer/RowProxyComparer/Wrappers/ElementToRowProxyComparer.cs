@@ -20,7 +20,7 @@ namespace QueryEngine
 
             public int Compare(Element x, Element y)
             {
-                return rowComparer.Compare(results[x], results[y]);
+            return 1;//rowComparer.Compare(results[x], results[y]);
             }
         
     }
