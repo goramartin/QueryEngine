@@ -28,24 +28,24 @@ namespace QueryEngine
     /// <summary>
     /// Interface for comparing rows of a result table.
     /// </summary>
-    internal interface IRowProxyComparer
+    internal abstract class ResultRowComparer
     {
-        int Compare(in Results.RowProxy x, in Results.RowProxy y);
+        public abstract int Compare(in Results.RowProxy x, in Results.RowProxy y);
     }
 
     /// <summary>
     /// Compares two rows.
     /// Contains list of all expression to compared with the rows.
     /// </summary>
-    internal class RowComparer : IRowProxyComparer
+    internal class RowComparer : ResultRowComparer
     {
-        private List<IRowProxyComparer> comparers { get; }
+        private List<ResultRowComparer> comparers { get; }
 
         /// <summary>
         /// Creates a row comparer.
         /// </summary>
         /// <param name="rowProxyComparers"> Expected a list of expression comparers.</param>
-        public RowComparer(List<IRowProxyComparer> rowProxyComparers)
+        public RowComparer(List<ResultRowComparer> rowProxyComparers)
         {
             this.comparers = rowProxyComparers;
         }
@@ -59,7 +59,7 @@ namespace QueryEngine
         /// <returns> Less than zero x precedes y in the sort order.
         /// Zero x occurs in the same position as y in the sort order.
         /// Greater than zero x follows y in the sort order.</returns>
-        public int Compare(in Results.RowProxy x, in Results.RowProxy y)
+        public override int Compare(in Results.RowProxy x, in Results.RowProxy y)
         {
             int result = 0;
             for (int i = 0; i < this.comparers.Count; i++)
@@ -77,7 +77,7 @@ namespace QueryEngine
     /// Each class contains an expression that will be evaluated with given rows.
     /// Then the values are compared with templated compare method.
     /// </summary>
-    internal abstract class ExpressionComparer : IRowProxyComparer
+    internal abstract class ExpressionComparer : ResultRowComparer
     {
         protected ExpressionHolder expressionHolder { get; }
         protected bool Ascending { get; }
@@ -92,8 +92,6 @@ namespace QueryEngine
             this.expressionHolder = expressionHolder;
             this.Ascending = ascending;
         }
-
-        public abstract int Compare(in Results.RowProxy x, in Results.RowProxy y);
 
         /// <summary>
         /// Expression comparer facotry.
@@ -163,7 +161,7 @@ namespace QueryEngine
         protected abstract int CompareValues(T x, T y);
     }
 
-    internal class ExpressionIntegerCompaper : ExpressionComparer<int>
+    internal sealed class ExpressionIntegerCompaper : ExpressionComparer<int>
     {
 
         public ExpressionIntegerCompaper(ExpressionHolder expressionHolder, bool ascending) : base(expressionHolder, ascending)
@@ -175,7 +173,7 @@ namespace QueryEngine
         }
     }
 
-    internal class ExpressionStringCompaper : ExpressionComparer<string>
+    internal sealed class ExpressionStringCompaper : ExpressionComparer<string>
     {
         public ExpressionStringCompaper(ExpressionHolder expressionHolder, bool ascending = true) : base(expressionHolder, ascending) 
         { }

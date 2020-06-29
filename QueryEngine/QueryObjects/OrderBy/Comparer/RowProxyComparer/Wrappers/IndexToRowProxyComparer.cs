@@ -8,10 +8,10 @@ namespace QueryEngine
 {
     internal sealed class IndexToRowProxyComparer : IComparer<int>
     {
-        IRowProxyComparer rowComparer;
+        ResultRowComparer rowComparer;
         IResults results;
 
-        public IndexToRowProxyComparer(IRowProxyComparer rowComparer, IResults results)
+        public IndexToRowProxyComparer(ResultRowComparer rowComparer, IResults results)
         {
             this.rowComparer = rowComparer;
             this.results = results;
@@ -20,7 +20,7 @@ namespace QueryEngine
 
         public int Compare(int x, int y)
         {
-            return rowComparer.Compare(results[x], results[y]);  
+            return this.rowComparer.Compare(this.results[x], this.results[y]);  
         }
     }
 }

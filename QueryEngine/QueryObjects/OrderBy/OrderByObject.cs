@@ -21,13 +21,13 @@ namespace QueryEngine
     /// </summary>
     internal sealed class OrderByObject
     {
-        private List<IRowProxyComparer> comparers;
+        private List<ResultRowComparer> comparers;
 
         /// <summary>
         /// Creates Order by object. 
         /// </summary>
         /// <param name="comparers"> List of comparers that the results will be sorted with.</param>
-        private OrderByObject(List<IRowProxyComparer> comparers)
+        private OrderByObject(List<ResultRowComparer> comparers)
         {
             this.comparers = comparers;
         }
@@ -56,18 +56,19 @@ namespace QueryEngine
         /// Sorts given data.
         /// </summary>
         /// <param name="sortData"> Query reults to be sorted. </param>
+        /// <param name="inParallel"> A flag whether to order results in parallel. </param>
         /// <returns> Sorted data. </returns>
-        public IResults Sort(IResults sortData)
+        public IResults Sort(IResults sortData, bool inParallel)
         {
-           // Sorter sorter = new Sorter(sortData, this.comparers);
-          //  var tmp=  sorter.Sort();
+             Sorter sorter = new MultiColumnSorter(sortData, this.comparers, inParallel);
+             var sortedResults =  sorter.Sort();
 
             TimeSpan ts = QueryEngine.stopwatch.Elapsed;
             string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
             Console.WriteLine("Sort time " + elapsedTime);
             
             
-            return null;
+            return sortedResults;
         }
     }
 }

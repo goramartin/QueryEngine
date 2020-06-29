@@ -11,7 +11,7 @@ namespace QueryEngine
     /// Simple test class for dumping and facading query requests.
     /// Not ment as a unit test class.
     /// </summary>
-    class TestClass
+    class DumpGraphClass
     {
         public static void DumpGraph(Graph g)
         {
@@ -105,6 +105,8 @@ namespace QueryEngine
             }
         }
 
+        
+        /*
         public static void Search(Graph g)
         {
 
@@ -138,25 +140,22 @@ namespace QueryEngine
                 Console.WriteLine(item.ToString());
             }
 
-            var tmp2 = order.Sort(tmp);
+            //var tmp2 = order.Sort(tmp);
 
-            select.Print(tmp2);
-
-
+            //select.Print(tmp2);
 
             Console.ReadLine();
 
         }
-
-        public static void RunTest()
+        */
+        public static void Dump()
         {
            Graph g = new Graph();
 
             //just for testing
             ///////////////////////////////////////
 
-            TestClass.DumpGraph(g);
-          //  TestClass.Search(g);
+            DumpGraphClass.DumpGraph(g);
         }
     }
 }

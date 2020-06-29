@@ -73,12 +73,10 @@
     <Compile Include="QueryObjects\Match\MatchFactory.cs" />
     <Compile Include="QueryObjects\Match\MatchObject.cs" />
     <Compile Include="QueryObjects\OrderBy\Comparer\RowProxyComparer\RowProxyComparer.cs" />
-    <Compile Include="QueryObjects\OrderBy\Comparer\RowProxyComparer\Wrappers\ElementToRowProxyComparer.cs" />
     <Compile Include="QueryObjects\OrderBy\Comparer\RowProxyComparer\Wrappers\IndexToRowProxyComparer.cs" />
     <Compile Include="QueryObjects\OrderBy\OrderByObject.cs" />
     <Compile Include="QueryObjects\OrderBy\Sorter\SimpleSorter\MultiColumnSimpleSorter.cs" />
     <Compile Include="QueryObjects\OrderBy\Sorter\SimpleSorter\SimpleSorter.cs" />
-    <Compile Include="QueryObjects\OrderBy\Sorter\SimpleSorter\SingleColumnSimpleSorter.cs" />
     <Compile Include="QueryObjects\OrderBy\Sorter\Sorter.cs" />
     <Compile Include="QueryObjects\Query.cs" />
     <Compile Include="QueryObjects\QueryVariableMap.cs" />

@@ -28,15 +28,14 @@ namespace QueryEngine
 
         /// <summary>
         /// Constructs multi column sorter.
+        /// It comprises of  row comparers wrapped inside an integer comparer.
         /// </summary>
         /// <param name="sortData"> Result table to sort. </param>
         /// <param name="rowComparers"> Comparers for comparing rows in the table. </param>
         /// <param name="inParallel"> Flag is the table should be sorted in parallel. </param>
-        public MultiColumnSorter(IResults sortData, List<IRowProxyComparer> rowComparers, bool inParallel) : base(sortData, rowComparers, inParallel)
+        public MultiColumnSorter(IResults sortData, List<ResultRowComparer> rowComparers, bool inParallel) : base(sortData, rowComparers, inParallel)
         {
-
-            // to do create wrapper comparer
-
+            this.indexComparer = new IndexToRowProxyComparer(new RowComparer(rowComparers), sortData);
         }
 
         /// <summary>

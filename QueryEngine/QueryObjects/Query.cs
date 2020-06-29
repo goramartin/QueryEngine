@@ -30,20 +30,22 @@ namespace QueryEngine
         MatchObject match;
         OrderByObject orderBy;
         IResults results;
+        int threadCount;
 
         /// <summary>
         /// Creates all neccessary object for query.
         /// </summary>
         /// <param name="reader"> Input of query. </param>
         /// <param name="graph"> Graph to be conduct a query on. </param>
-        /// <param name="ThreadCount"> Number of threads used for matching.</param>
-        /// <param name="VerticesPerRound"> Number of vertices one thread gets per round. Used only if more than one thread is used.</param>
+        /// <param name="threadCount"> Number of threads used for matching.</param>
+        /// <param name="verticesPerRound"> Number of vertices one thread gets per round. Used only if more than one thread is used.</param>
         /// <param name="printer"> Printer type to print results.</param>
         /// <param name="formater"> Formater to format the printing of results. </param>
         /// <param name="fileName"> File name where to print results. </param>
-        public Query(TextReader reader, Graph graph, int ThreadCount, int VerticesPerRound, string printer, string formater, string fileName = null)
+        public Query(TextReader reader, Graph graph, int threadCount, int verticesPerRound, string printer, string formater, string fileName = null)
         {
             if (reader == null || graph == null) throw new ArgumentException($"{this.GetType()} Passed null as a reader or graph.");
+            this.threadCount = threadCount;
 
             // Create tokens from console.
             List<Token> tokens = Tokenizer.Tokenize(reader);
@@ -53,7 +55,7 @@ namespace QueryEngine
             this.variableMap = new VariableMap();
 
             SelectNode selectNode = Parser.ParseSelect(tokens);
-            this.match = new MatchObject(tokens, variableMap, graph, ThreadCount, VerticesPerRound);
+            this.match = new MatchObject(tokens, variableMap, graph, threadCount, verticesPerRound);
             this.select = new SelectObject(graph, variableMap, selectNode, printer, formater, fileName);
 
             // Optional, if ommited it returns null. 
@@ -73,7 +75,7 @@ namespace QueryEngine
             this.results = this.match.Search();
             this.match = null;
 
-            if (this.orderBy != null) this.orderBy.Sort(this.results);
+            if (this.orderBy != null) this.orderBy.Sort(this.results, (this.threadCount == 1 ? false : true));
 
             this.select.Print(this.results);
         }

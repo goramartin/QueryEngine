@@ -16,21 +16,21 @@ namespace QueryEngine
     /// <summary>
     /// Creates a list or comparers that will be used during ordering of match results.
     /// </summary>
-    internal sealed class OrderByVisitor : IVisitor<List<IRowProxyComparer>>
+    internal sealed class OrderByVisitor : IVisitor<List<ResultRowComparer>>
     {
-        List<IRowProxyComparer> result;
+        List<ResultRowComparer> result;
         Dictionary<string, Type> Labels;
         VariableMap variableMap;
         ExpressionHolder expressionHolder;
 
         public OrderByVisitor(Dictionary<string, Type> labels, VariableMap map)
         {
-            this.result = new List<IRowProxyComparer>();
+            this.result = new List<ResultRowComparer>();
             this.Labels = labels;
             this.variableMap = map;
         }
 
-        public List<IRowProxyComparer> GetResult()
+        public List<ResultRowComparer> GetResult()
         {
             if (this.result == null || this.result.Count == 0)
                 throw new ArgumentException($"{this.GetType()} final result is empty or null");
