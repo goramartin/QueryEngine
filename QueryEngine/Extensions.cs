@@ -31,7 +31,7 @@ namespace QueryEngine
         {
             for (int i = value; i < arr.Length; i++)
             {
-                arr[i] = value;
+                arr[i] = i;
             }
         }
 

@@ -17,7 +17,6 @@ namespace QueryEngine
             this.results = results;
         }
 
-
         public int Compare(int x, int y)
         {
             return this.rowComparer.Compare(this.results[x], this.results[y]);  

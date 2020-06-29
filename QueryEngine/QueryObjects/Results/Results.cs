@@ -96,7 +96,10 @@ namespace QueryEngine
         public IEnumerator<Results.RowProxy> GetEnumerator()
         {
             for (int i = 0; i < this.Count; i++)
-                yield return new Results.RowProxy(this, i);
+            {
+                if (this.order == null) yield return new Results.RowProxy(this, i);
+                else yield return new Results.RowProxy(this, order[i]);
+            }
         }
 
         IEnumerator IEnumerable.GetEnumerator()
