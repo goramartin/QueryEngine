@@ -38,14 +38,14 @@ namespace QueryEngine
         /// <param name="tokens"> Tokens to parse.</param>
         /// <param name="graph"> Graph the query is computed on. </param>
         /// <param name="variableMap"> Map of query variables. </param>
-        /// <param name="qEHelper"> Query execution helper. </param>
+        /// <param name="executionHelper"> Orderby execution helper. </param>
         /// <returns> Null if there is no order by token or QueryOrderBy object.</returns>
-        public static OrderByObject CreateOrderBy(List<Token> tokens, Graph graph, VariableMap variableMap, QueryExecutionHelper qEHelper)
+        public static OrderByObject CreateOrderBy(List<Token> tokens, Graph graph, VariableMap variableMap, OrderByExecutionHelper executionHelper)
         {
             OrderByNode orderNode = Parser.ParseOrderBy(tokens);
             if (orderNode == null)
             {
-                qEHelper.IsSetOrderBy = false;
+                executionHelper.IsSetOrderBy = false;
                 return null;
             }
             else
@@ -54,7 +54,7 @@ namespace QueryEngine
                 orderVisitor.Visit(orderNode);
                 var comparers = orderVisitor.GetResult();
 
-                qEHelper.IsSetOrderBy = true;
+                executionHelper.IsSetOrderBy = true;
                 return new OrderByObject(comparers);
             }
         }

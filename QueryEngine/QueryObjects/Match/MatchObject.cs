@@ -41,8 +41,8 @@ namespace QueryEngine
         /// <param name="tokens"> Tokens to be parsed. (Expecting first token to be a Match token.)</param>
         /// <param name="graph"> Graph to conduct a query on. </param>
         /// <param name="variableMap"> Empty map of variables. </param>
-        /// <param name="executionHelper"> Query execution helper. </param>
-        public MatchObject(List<Token> tokens, VariableMap variableMap, Graph graph, QueryExecutionHelper executionHelper)
+        /// <param name="executionHelper"> Match execution helper. </param>
+        public MatchObject(List<Token> tokens, VariableMap variableMap, Graph graph, MatchExecutionHelper executionHelper)
         {
             if (tokens == null || variableMap == null || graph == null)
                 throw new ArgumentNullException($"{this.GetType()}, passing null arguments to the constructor.");

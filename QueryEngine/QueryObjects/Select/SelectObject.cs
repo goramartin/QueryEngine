@@ -37,8 +37,8 @@ namespace QueryEngine
         /// <param name="graph"> Property graph. </param>
         /// <param name="map"> Variable map. </param>
         /// <param name="selectNode"> Parsed tokens from input query. </param>
-        /// <param name="executionHelper"> Query execution helper. </param>
-        public SelectObject(Graph graph, VariableMap map, SelectNode selectNode, QueryExecutionHelper executionHelper)
+        /// <param name="executionHelper"> Select execution helper. </param>
+        public SelectObject(Graph graph, VariableMap map, SelectNode selectNode, SelectExecutionHelper executionHelper)
         {
             if (executionHelper.Printer == null || executionHelper.Formater == null) throw new ArgumentNullException($"{this.GetType()}, got printer or formater as null.");
            
