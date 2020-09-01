@@ -79,7 +79,7 @@ namespace QueryEngine
         /// <param name="elements"> Result from a match query. </param>
         /// <param name="returnValue">Return value of this expression node. </param>
         /// <returns> True on successful evaluation otherwise false. </returns>
-        public override bool TryEvaluate(in Results.RowProxy elements, out T returnValue)
+        public override bool TryEvaluate(in TableResults.RowProxy elements, out T returnValue)
         {
              return elements[this.VariableIndex].TryGetPropertyValue(this.NameHolder.PropName, out returnValue);
         }
@@ -111,7 +111,7 @@ namespace QueryEngine
         /// <param name="elements"> Result from a match query. </param>
         /// <param name="returnValue">Return value of this expression node. </param>
         /// <returns> True on successful evaluation otherwise false. </returns>
-        public override bool TryEvaluate(in Results.RowProxy elements, out int returnValue)
+        public override bool TryEvaluate(in TableResults.RowProxy elements, out int returnValue)
         {
             returnValue = elements[this.VariableIndex].ID;
             return true;

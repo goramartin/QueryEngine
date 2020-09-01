@@ -55,7 +55,7 @@ namespace QueryEngine
         /// </summary>
         /// <param name="results"> Results from query. </param>
         /// <param name="executionHelper"> Select execution helper. </param>
-        public void Print(IResults results, SelectExecutionHelper executionHelper)
+        public void Print(ITableResults results, SelectExecutionHelper executionHelper)
         {
             var printer = Printer.PrinterFactory(executionHelper.Printer, rowFormat, executionHelper.Formater, executionHelper.FileName);
 

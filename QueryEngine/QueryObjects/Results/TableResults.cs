@@ -24,11 +24,11 @@ namespace QueryEngine
     /// <summary>
     /// Base interface for all result classes.
     /// </summary>
-    internal interface IResults : IEnumerable<Results.RowProxy>
+    internal interface ITableResults : IEnumerable<TableResults.RowProxy>
     {
         int ColumnCount { get; }
         int Count { get; }
-        Results.RowProxy this[int rowIndex] { get; }
+        TableResults.RowProxy this[int rowIndex] { get; }
         void SwapRows(int firstRowIndex, int secondRowIndex);
         void AddOrder(int[] order);
         List<Element> GetResultColumn(int columnIndex);
@@ -42,7 +42,7 @@ namespace QueryEngine
     /// in the given order.
     /// Note that we store by columns, that is to say, returning one row must be done through proxy class.
     /// </summary>
-    internal partial class Results : IResults
+    internal partial class TableResults : ITableResults
     {
         private List<Element>[] results;
         private int[] order;
@@ -62,7 +62,7 @@ namespace QueryEngine
         /// It expects that the results will be merged in the first thread index.
         /// </summary>
         /// <param name="elements"> Matcher results. </param>
-        public  Results(List<Element>[][] elements)
+        public  TableResults(List<Element>[][] elements)
         {
             this.order = null;
             this.results = new List<Element>[elements.Length];
@@ -83,8 +83,8 @@ namespace QueryEngine
             {
                 if (rowIndex < 0 || rowIndex >= this.Count) 
                     throw new ArgumentOutOfRangeException($"{this.GetType()}, row is out of range.");
-                else if (order == null) return new Results.RowProxy(this, rowIndex);
-                else return new Results.RowProxy(this, order[rowIndex]);
+                else if (order == null) return new TableResults.RowProxy(this, rowIndex);
+                else return new TableResults.RowProxy(this, order[rowIndex]);
             }
         }
 
@@ -93,12 +93,12 @@ namespace QueryEngine
         /// Copies one row into internal array. That array is rewritten during next iteration.
         /// </summary>
         /// <returns> One row of a table. </returns>
-        public IEnumerator<Results.RowProxy> GetEnumerator()
+        public IEnumerator<TableResults.RowProxy> GetEnumerator()
         {
             for (int i = 0; i < this.Count; i++)
             {
-                if (this.order == null) yield return new Results.RowProxy(this, i);
-                else yield return new Results.RowProxy(this, order[i]);
+                if (this.order == null) yield return new TableResults.RowProxy(this, i);
+                else yield return new TableResults.RowProxy(this, order[i]);
             }
         }
 

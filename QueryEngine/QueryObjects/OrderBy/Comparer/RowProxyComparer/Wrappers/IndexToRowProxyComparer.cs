@@ -9,9 +9,9 @@ namespace QueryEngine
     internal sealed class IndexToRowProxyComparer : IComparer<int>
     {
         ResultRowComparer rowComparer;
-        IResults results;
+        ITableResults results;
 
-        public IndexToRowProxyComparer(ResultRowComparer rowComparer, IResults results)
+        public IndexToRowProxyComparer(ResultRowComparer rowComparer, ITableResults results)
         {
             this.rowComparer = rowComparer;
             this.results = results;

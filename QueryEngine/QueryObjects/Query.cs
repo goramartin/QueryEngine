@@ -29,7 +29,7 @@ namespace QueryEngine
         SelectObject select;
         MatchObject match;
         OrderByObject orderBy;
-        IResults results;
+        ITableResults results;
         QueryExecutionHelper qEhelper;
 
         /// <summary>

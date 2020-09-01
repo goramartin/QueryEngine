@@ -42,7 +42,7 @@ namespace QueryEngine
         /// <param name="value"> Value of the expression. </param>
         /// <returns> Bool on successful evaluation otherwise fasel. On success, the value parameter
         /// will contain value of the epression otherwise the value is undefined. </returns>
-        public abstract bool TryEvaluate(in Results.RowProxy elements, out T value);    
+        public abstract bool TryEvaluate(in TableResults.RowProxy elements, out T value);    
     }
 
     /// <summary>
@@ -82,7 +82,7 @@ namespace QueryEngine
         /// <param name="elements">One results of the search.</param>
         /// <param name="returnValue"> Place to store return value of the expression. </param>
         /// <returns>True of successful evaluation otherwise false.</returns>
-        public bool TryGetExpressionValue<T>(in Results.RowProxy elements, out T returnValue)
+        public bool TryGetExpressionValue<T>(in TableResults.RowProxy elements, out T returnValue)
         {
                 if (((ExpressionReturnValue<T>)(this.Expr)).TryEvaluate(elements, out returnValue)) return true;
                 else return false;

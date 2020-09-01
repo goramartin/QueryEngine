@@ -111,10 +111,10 @@ namespace QueryEngine
         /// </summary>
         /// <param name="executionHelper"> Match execution helper. </param>
         /// <returns> Results of search algorithm </returns>
-        public IResults Search(MatchExecutionHelper executionHelper)
+        public ITableResults Search(MatchExecutionHelper executionHelper)
         {
             this.Matcher.Search();
-            var tmp = new Results(this.queryResults.GetResults());
+            var tmp = new TableResults(this.queryResults.GetResults());
             return tmp;
         }
     }

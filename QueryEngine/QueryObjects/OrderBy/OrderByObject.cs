@@ -65,7 +65,7 @@ namespace QueryEngine
         /// <param name="sortData"> Query reults to be sorted. </param>
         /// <param name="executionHelper"> Order by execution helper. </param>
         /// <returns> Sorted data. </returns>
-        public IResults Sort(IResults sortData, OrderByExecutionHelper executionHelper)
+        public ITableResults Sort(ITableResults sortData, OrderByExecutionHelper executionHelper)
         {
              Sorter sorter = new MultiColumnSorter(sortData, this.comparers, executionHelper.IsParallel());
              var sortedResults =  sorter.Sort();

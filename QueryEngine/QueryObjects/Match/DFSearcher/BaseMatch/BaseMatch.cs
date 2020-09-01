@@ -61,6 +61,7 @@ namespace QueryEngine
         /// <param name="node"> Node containing data of the match object. </param>
         /// <param name="indexInMap"> Index in the map of variables. (-1 if the the variable is anonymous.) </param>
         /// <param name="isFirst"> Indicates whether its first appearance of the variable. </param>
+        /// <param name="matchingType"> Type of matching graph element. </param>
         protected DFSBaseMatch(ParsedPatternNode node, int indexInMap, bool isFirst, Type matchingType)
         {
             this.MatchingType = matchingType;

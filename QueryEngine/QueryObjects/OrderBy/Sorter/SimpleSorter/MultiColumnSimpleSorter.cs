@@ -33,7 +33,7 @@ namespace QueryEngine
         /// <param name="sortData"> Result table to sort. </param>
         /// <param name="rowComparers"> Comparers for comparing rows in the table. </param>
         /// <param name="inParallel"> Flag is the table should be sorted in parallel. </param>
-        public MultiColumnSorter(IResults sortData, List<ResultRowComparer> rowComparers, bool inParallel) : base(sortData, rowComparers, inParallel)
+        public MultiColumnSorter(ITableResults sortData, List<ResultRowComparer> rowComparers, bool inParallel) : base(sortData, rowComparers, inParallel)
         {
             this.indexComparer = new IndexToRowProxyComparer(new RowComparer(rowComparers), sortData);
         }
@@ -45,7 +45,7 @@ namespace QueryEngine
         /// swap long rows in the result table.
         /// </summary>
         /// <returns> Sorted result table. </returns>
-        public override IResults Sort()
+        public override ITableResults Sort()
         {
             int[] order = new int[this.dataTable.Count];
             order.AscPopulate(0);

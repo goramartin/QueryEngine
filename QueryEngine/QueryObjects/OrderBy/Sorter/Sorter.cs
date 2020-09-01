@@ -8,6 +8,6 @@ namespace QueryEngine
 {
     internal abstract class Sorter
     {
-        public abstract IResults Sort();
+        public abstract ITableResults Sort();
     }
 }

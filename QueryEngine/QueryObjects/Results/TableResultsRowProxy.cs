@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 namespace QueryEngine
 {
 
-    internal partial class Results
+    internal partial class TableResults
     {
         /// <summary>
         /// Represents one row of a result table.
@@ -25,7 +25,7 @@ namespace QueryEngine
         /// </summary>
         public readonly struct RowProxy
         {
-            private readonly Results resTable;
+            private readonly TableResults resTable;
             private readonly int index;
 
             /// <summary>
@@ -33,7 +33,7 @@ namespace QueryEngine
             /// </summary>
             /// <param name="results"> Result table. </param>
             /// <param name="index"> Index of a row in the given result table.</param>
-            public RowProxy(Results results, int index)
+            public RowProxy(TableResults results, int index)
             {
                 this.index = index;
                 this.resTable = results;

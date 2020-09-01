@@ -82,8 +82,9 @@
     <Compile Include="QueryObjects\QueryExecutionHelper.cs" />
     <Compile Include="QueryObjects\QueryVariableMap.cs" />
     <Compile Include="QueryObjects\Results\MatchResults.cs" />
-    <Compile Include="QueryObjects\Results\Results.cs" />
-    <Compile Include="QueryObjects\Results\RowProxy.cs" />
+    <Compile Include="QueryObjects\Results\MultiTableResults.cs" />
+    <Compile Include="QueryObjects\Results\TableResults.cs" />
+    <Compile Include="QueryObjects\Results\TableResultsRowProxy.cs" />
     <Compile Include="QueryObjects\Select\Formater\Formater.cs" />
     <Compile Include="QueryObjects\Select\Formater\MarkdownFormater.cs" />
     <Compile Include="QueryObjects\Select\Formater\SimpleFormater.cs" />

@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 namespace QueryEngine
 {
  
-    interface BaseExecutionHelper
+    internal interface BaseExecutionHelper
     {
         /// <summary>
         /// Defines whether optional clause order by was defined in the user input query.
@@ -34,7 +34,7 @@ namespace QueryEngine
 
     }
 
-    interface MatchExecutionHelper : BaseExecutionHelper
+    internal interface MatchExecutionHelper : BaseExecutionHelper
     {
         /// <summary>
         /// If more than one thread is used to search,
@@ -51,7 +51,7 @@ namespace QueryEngine
 
     }
 
-    interface SelectExecutionHelper : BaseExecutionHelper
+    internal interface SelectExecutionHelper : BaseExecutionHelper
     {
         /// <summary>
         /// Type of printer for printing results.
@@ -71,7 +71,7 @@ namespace QueryEngine
 
     }
 
-    interface OrderByExecutionHelper : BaseExecutionHelper
+    internal interface OrderByExecutionHelper : BaseExecutionHelper
     {
     }
 

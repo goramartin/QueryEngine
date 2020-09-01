@@ -57,6 +57,11 @@ namespace QueryEngine
         public int Count { get; private set; }
 
         /// <summary>
+        /// Defines whether the results have been merged into one row.
+        /// Applies only if there are more threads used for matching.
+        /// </summary>
+        public bool Merged { get; set; } = false;
+        /// <summary>
         /// Creates storage based on thread count and column count.
         /// Column count represents number of variables of a search query and
         /// thread count defines how many threads add results to this instance. 
