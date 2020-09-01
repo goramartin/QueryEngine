@@ -18,7 +18,7 @@ using System.IO;
 
 
 namespace QueryEngine
-{ 
+{
     /// <summary>
     /// Query represents query information, carrying it in each of the query objects.
     /// It is a facade for the query.
@@ -30,22 +30,18 @@ namespace QueryEngine
         MatchObject match;
         OrderByObject orderBy;
         IResults results;
-        int threadCount;
+        QueryExecutionHelper qEhelper;
 
         /// <summary>
         /// Creates all neccessary object for query.
         /// </summary>
         /// <param name="reader"> Input of query. </param>
         /// <param name="graph"> Graph to be conduct a query on. </param>
-        /// <param name="threadCount"> Number of threads used for matching.</param>
-        /// <param name="verticesPerRound"> Number of vertices one thread gets per round. Used only if more than one thread is used.</param>
-        /// <param name="printer"> Printer type to print results.</param>
-        /// <param name="formater"> Formater to format the printing of results. </param>
-        /// <param name="fileName"> File name where to print results. </param>
-        public Query(TextReader reader, Graph graph, int threadCount, int verticesPerRound, string printer, string formater, string fileName = null)
+        /// <param name="executionHelper"> Helper for query execution. Basically, parsed arguments from user. </param>
+        public Query(TextReader reader, Graph graph, QueryExecutionHelper executionHelper)
         {
             if (reader == null || graph == null) throw new ArgumentException($"{this.GetType()} Passed null as a reader or graph.");
-            this.threadCount = threadCount;
+            this.qEhelper = executionHelper;
 
             // Create tokens from console.
             List<Token> tokens = Tokenizer.Tokenize(reader);
@@ -55,11 +51,12 @@ namespace QueryEngine
             this.variableMap = new VariableMap();
 
             SelectNode selectNode = Parser.ParseSelect(tokens);
-            this.match = new MatchObject(tokens, variableMap, graph, threadCount, verticesPerRound);
-            this.select = new SelectObject(graph, variableMap, selectNode, printer, formater, fileName);
+            this.match = new MatchObject(tokens, variableMap, graph, this.qEhelper);
+            this.select = new SelectObject(graph, variableMap, selectNode, this.qEhelper) ;
 
             // Optional, if ommited it returns null. 
-            this.orderBy = OrderByObject.CreateOrderBy(tokens, graph, variableMap);
+            this.orderBy = OrderByObject.CreateOrderBy(tokens, graph, variableMap, this.qEhelper);
+
 
             // Check if it successfully parsed every token.
             if (tokens.Count != Parser.GetPosition())
@@ -72,12 +69,12 @@ namespace QueryEngine
         /// </summary>
         public void ComputeQuery()
         {
-            this.results = this.match.Search();
+            this.results = this.match.Search(this.qEhelper);
             this.match = null;
 
-            if (this.orderBy != null) this.orderBy.Sort(this.results, (this.threadCount == 1 ? false : true));
+            if (this.qEhelper.IsSetOrderBy) this.orderBy.Sort(this.results, this.qEhelper);
 
-            this.select.Print(this.results);
+            this.select.Print(this.results, this.qEhelper);
         }
     }
 

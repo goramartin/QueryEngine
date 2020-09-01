@@ -29,22 +29,6 @@ namespace QueryEngine
         /// List of arguments to print from a select expression.
         /// </summary>
         private List<PrintVariable> rowFormat;
-        
-        /// <summary>
-        /// Type of printing format.
-        /// Used inside print method for factory method of formater.
-        /// </summary>
-        string FormaterType { get; }
-        /// <summary>
-        /// Type of printer for printing results.
-        ///  Used inside print method for factory method of printer.
-        /// </summary>
-        string PrinterType { get; }
-        /// <summary>
-        /// File name where to print results.
-        /// </summary>
-        string FileName { get; }
-
 
         /// <summary>
         /// Creates Select object.
@@ -53,14 +37,11 @@ namespace QueryEngine
         /// <param name="graph"> Property graph. </param>
         /// <param name="map"> Variable map. </param>
         /// <param name="selectNode"> Parsed tokens from input query. </param>
-        /// <param name="printer"> Type of printer. </param>
-        /// <param name="formater"> Type of formater. </param>
-        /// <param name="fileName"> File name where to print results if chosen file printer. </param>
-        public SelectObject(Graph graph, VariableMap map, SelectNode selectNode, string printer, string formater, string fileName = null)
+        /// <param name="executionHelper"> Query execution helper. </param>
+        public SelectObject(Graph graph, VariableMap map, SelectNode selectNode, QueryExecutionHelper executionHelper)
         {
-            if (printer == null || formater == null) throw new ArgumentNullException($"{this.GetType()}, got printer or formater as null.");
-            else { this.FormaterType = formater; this.FileName = fileName; this.PrinterType = printer; }
-
+            if (executionHelper.Printer == null || executionHelper.Formater == null) throw new ArgumentNullException($"{this.GetType()}, got printer or formater as null.");
+           
             // Process parse tree and create list of variables to be printed
             SelectVisitor visitor = new SelectVisitor(graph.Labels, map);
             selectNode.Accept(visitor);
@@ -73,9 +54,10 @@ namespace QueryEngine
         /// Prints results in given format from concstructor init.
         /// </summary>
         /// <param name="results"> Results from query. </param>
-        public void Print(IResults results)
+        /// <param name="executionHelper"> Select execution helper. </param>
+        public void Print(IResults results, SelectExecutionHelper executionHelper)
         {
-            var printer = Printer.PrinterFactory(this.PrinterType, rowFormat, this.FormaterType, this.FileName);
+            var printer = Printer.PrinterFactory(executionHelper.Printer, rowFormat, executionHelper.Formater, executionHelper.FileName);
 
             printer.PrintHeader();
             foreach (var item in results)

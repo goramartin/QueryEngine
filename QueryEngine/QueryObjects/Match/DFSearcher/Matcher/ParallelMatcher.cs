@@ -1,6 +1,6 @@
 ﻿/*! \file
   
-  This class includes definitions of dfs search paralel algorithm used to find pattern defined in query match expression.
+  This class includes definitions of dfs search parallel algorithm used to find pattern defined in query match expression.
   
   This paralel version only uses single threaded version of the dfs search algorithm.
   The one single threaded should not be used alone because it was made to be used by the parallel.
@@ -35,6 +35,7 @@ namespace QueryEngine
         int DistributorVerticesPerRound;
         MatchResultsStorage Results;
         int ThreadCount;
+        bool IsMergeNeeded;
 
         /// <summary>
         /// Creates a parallel matchers.
@@ -43,20 +44,20 @@ namespace QueryEngine
         /// <param name="pattern"> Pattern to match. </param>
         /// <param name="graph"> Graph to search on.</param>
         /// <param name="results"> Where to store results. </param>
-        /// <param name="threadCount"> Number of threads to search.</param>
-        /// <param name="verticesPerThread"> If more than one thread is used to search this defines number of vertices that will be distributed to threads during matching.</param>
-        public DFSParallelPatternMatcher(IDFSPattern pattern, Graph graph, MatchResultsStorage results, int threadCount, int verticesPerThread = 1)
+        /// <param name="executionHelper"> Query execution helper. </param>
+        public DFSParallelPatternMatcher(IDFSPattern pattern, Graph graph, MatchResultsStorage results, QueryExecutionHelper executionHelper)
         {
-            if (threadCount <= 0 || verticesPerThread <= 0)
+            if (executionHelper.ThreadCount <= 0 || executionHelper.VerticesPerThread <= 0)
                 throw new ArgumentException($"{this.GetType()}, invalid number of threads or vertices per thread.");
 
-            this.DistributorVerticesPerRound = verticesPerThread;
+            this.DistributorVerticesPerRound = executionHelper.VerticesPerThread;
+            this.ThreadCount = executionHelper.ThreadCount;
+            this.IsMergeNeeded = executionHelper.IsMergeNeeded();
+            this.Matchers = new ISingleThreadMatcher[executionHelper.ThreadCount];
             this.Graph = graph;
-            this.ThreadCount = threadCount;
-            this.Matchers = new ISingleThreadMatcher[threadCount];
             this.Results = results;
 
-            for (int i = 0; i < threadCount; i++)
+            for (int i = 0; i < executionHelper.ThreadCount; i++)
             {
                 this.Matchers[i] = (ISingleThreadMatcher)MatchFactory
                                    .CreateMatcher("DFSSingleThread",                  // Type of Matcher 
@@ -90,9 +91,13 @@ namespace QueryEngine
                 string eelapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", tss.Hours, tss.Minutes, tss.Seconds, tss.Milliseconds / 10);
                 Console.WriteLine("Query time " + eelapsedTime);
 
-                this.ParallelMergeThreadResults();
-            }
 
+                //if (this.IsMergeNeeded)
+        //        {
+                    this.ParallelMergeThreadResults();
+       //            
+        //        }
+            }
             TimeSpan ts = QueryEngine.stopwatch.Elapsed;
             string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
             Console.WriteLine("Query + merge time " + elapsedTime);
@@ -416,8 +421,11 @@ namespace QueryEngine
             }
         }
 
+
         #endregion MergeRow
 
         #endregion ParalelMerge
+   
+
     }
 }

@@ -79,6 +79,7 @@
     <Compile Include="QueryObjects\OrderBy\Sorter\SimpleSorter\SimpleSorter.cs" />
     <Compile Include="QueryObjects\OrderBy\Sorter\Sorter.cs" />
     <Compile Include="QueryObjects\Query.cs" />
+    <Compile Include="QueryObjects\QueryExecutionHelper.cs" />
     <Compile Include="QueryObjects\QueryVariableMap.cs" />
     <Compile Include="QueryObjects\Results\MatchResults.cs" />
     <Compile Include="QueryObjects\Results\Results.cs" />
@@ -102,7 +103,7 @@
     <Compile Include="QueryParser\Parser\Visitor\Visitor.cs" />
     <Compile Include="QueryParser\Tokenizer\Token.cs" />
     <Compile Include="QueryParser\Tokenizer\Tokenizer.cs" />
-    <Compile Include="TestClass.cs" />
+    <Compile Include="DumpGraph.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

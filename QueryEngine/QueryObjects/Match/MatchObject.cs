@@ -41,9 +41,8 @@ namespace QueryEngine
         /// <param name="tokens"> Tokens to be parsed. (Expecting first token to be a Match token.)</param>
         /// <param name="graph"> Graph to conduct a query on. </param>
         /// <param name="variableMap"> Empty map of variables. </param>
-        /// <param name="ThreadCount"> Number of threads used for matching.</param>
-        /// <param name="VerticesPerRound"> Number of vertices one thread gets per round. Used only if more than one thread is used.</param>
-        public MatchObject(List<Token> tokens, VariableMap variableMap, Graph graph, int ThreadCount, int VerticesPerRound = 1 )
+        /// <param name="executionHelper"> Query execution helper. </param>
+        public MatchObject(List<Token> tokens, VariableMap variableMap, Graph graph, QueryExecutionHelper executionHelper)
         {
             if (tokens == null || variableMap == null || graph == null)
                 throw new ArgumentNullException($"{this.GetType()}, passing null arguments to the constructor.");
@@ -64,9 +63,9 @@ namespace QueryEngine
             
             // Now we have got enough information about results. 
             // After creating pattern the variable map is filled and we know extend of the results.
-            this.queryResults = new MatchResultsStorage(variableMap.GetCount(), ThreadCount);
+            this.queryResults = new MatchResultsStorage(variableMap.GetCount(), executionHelper.ThreadCount);
 
-            this.Matcher = MatchFactory.CreateMatcher("DFSParallel", Pattern, graph, this.queryResults, ThreadCount, VerticesPerRound);
+            this.Matcher = MatchFactory.CreateMatcher("DFSParallel", Pattern, graph, this.queryResults, executionHelper);
         }
 
         /// <summary>
@@ -110,8 +109,9 @@ namespace QueryEngine
         /// <summary>
         /// Starts searching of the graph.
         /// </summary>
+        /// <param name="executionHelper"> Match execution helper. </param>
         /// <returns> Results of search algorithm </returns>
-        public IResults Search()
+        public IResults Search(MatchExecutionHelper executionHelper)
         {
             this.Matcher.Search();
             var tmp = new Results(this.queryResults.GetResults());

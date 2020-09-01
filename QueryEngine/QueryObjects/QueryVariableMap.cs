@@ -2,6 +2,7 @@
  
  This file contains definition of variable map.
  Variable map stores information about variables defined in match expression.
+
  */
 
 

@@ -38,16 +38,23 @@ namespace QueryEngine
         /// <param name="tokens"> Tokens to parse.</param>
         /// <param name="graph"> Graph the query is computed on. </param>
         /// <param name="variableMap"> Map of query variables. </param>
+        /// <param name="qEHelper"> Query execution helper. </param>
         /// <returns> Null if there is no order by token or QueryOrderBy object.</returns>
-        public static OrderByObject CreateOrderBy(List<Token> tokens, Graph graph, VariableMap variableMap)
+        public static OrderByObject CreateOrderBy(List<Token> tokens, Graph graph, VariableMap variableMap, QueryExecutionHelper qEHelper)
         {
             OrderByNode orderNode = Parser.ParseOrderBy(tokens);
-            if (orderNode == null) return null;
+            if (orderNode == null)
+            {
+                qEHelper.IsSetOrderBy = false;
+                return null;
+            }
             else
             {
                 var orderVisitor = new OrderByVisitor(graph.Labels, variableMap);
                 orderVisitor.Visit(orderNode);
                 var comparers = orderVisitor.GetResult();
+
+                qEHelper.IsSetOrderBy = true;
                 return new OrderByObject(comparers);
             }
         }
@@ -56,11 +63,11 @@ namespace QueryEngine
         /// Sorts given data.
         /// </summary>
         /// <param name="sortData"> Query reults to be sorted. </param>
-        /// <param name="inParallel"> A flag whether to order results in parallel. </param>
+        /// <param name="executionHelper"> Order by execution helper. </param>
         /// <returns> Sorted data. </returns>
-        public IResults Sort(IResults sortData, bool inParallel)
+        public IResults Sort(IResults sortData, OrderByExecutionHelper executionHelper)
         {
-             Sorter sorter = new MultiColumnSorter(sortData, this.comparers, inParallel);
+             Sorter sorter = new MultiColumnSorter(sortData, this.comparers, executionHelper.IsParallel());
              var sortedResults =  sorter.Sort();
 
             TimeSpan ts = QueryEngine.stopwatch.Elapsed;

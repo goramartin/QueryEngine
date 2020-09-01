@@ -30,5 +30,4 @@ namespace QueryEngine
         void SetStartingVerticesIndeces(int start, int end);
     }
 
-  
 }

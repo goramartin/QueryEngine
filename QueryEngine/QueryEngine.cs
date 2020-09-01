@@ -116,19 +116,20 @@ namespace QueryEngine
             if (args.Length < 3) throw new ArgumentException("Wrong number of program parameters.");
 
             // Parse program arguments
-            int ThreadCount = GetThreadCount(args[0]);
-            string Printer = GetPrinter(args[1]);
-            string Formater = GetFormater(args[2]);
-            int VerticesPerThread = GetVerticesPerhread(ThreadCount, args);
-            string FileName = GetFileName( ThreadCount, Printer, args);
+            QueryExecutionHelper qEHelper = new QueryExecutionHelper();
+            qEHelper.ThreadCount = GetThreadCount(args[0]);
+            qEHelper.Printer = GetPrinter(args[1]);
+            qEHelper.Formater = GetFormater(args[2]);
+            qEHelper.VerticesPerThread = GetVerticesPerhread(qEHelper.ThreadCount, args);
+            qEHelper.FileName = GetFileName(qEHelper.ThreadCount, qEHelper.Printer, args);
 
 
 
             using (Process p = Process.GetCurrentProcess())
             p.PriorityClass = ProcessPriorityClass.RealTime; //High;
 
-            if (ThreadCount != 1)
-                ThreadPool.SetMinThreads(ThreadCount, 0);
+            if (qEHelper.ThreadCount != 1)
+                ThreadPool.SetMinThreads(qEHelper.ThreadCount, 0);
 
             // Load graph.
             Graph graph = new Graph();
@@ -140,16 +141,20 @@ namespace QueryEngine
             while (true)
             {
                 Console.WriteLine("Enter Query:");
-                Query query = new Query(reader, graph, ThreadCount, VerticesPerThread
-                                        , Printer, Formater, FileName);
+                Query query = new Query(reader, graph, qEHelper);
+
                 Console.WriteLine();
                 query.ComputeQuery();
+
+
 
                 stopwatch.Stop();
                 TimeSpan ts = QueryEngine.stopwatch.Elapsed;
                 string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
                 Console.WriteLine("Query time " + elapsedTime);
                 stopwatch.Reset();
+
+
 
                 Console.WriteLine("Finished computing. Pres enter to continue...");
                 Console.ReadLine();
