@@ -147,14 +147,13 @@ namespace QueryEngine
         /// <param name="table"> Table to take properties from. </param>
         private void AddTableLabels(Table table)
         {
-            for (int i = 0; i < table.Properties.Count; i++)
+            foreach (var property in table.Properties)
             {
-                if (this.Labels.TryGetValue(table.Properties[i].IRI, out Type type))
+                if (this.Labels.TryGetValue(property.Key, out Type type))
                 {
-                    if (type != table.Properties[i].GetPropertyType())
+                    if (type != property.Value.GetPropertyType())
                         throw new ArgumentException($"{this.GetType()}, found two properties with the same name but discrepant types. Adjust input scheme.");
-                }
-                else this.Labels.Add(table.Properties[i].IRI, table.Properties[i].GetPropertyType());
+                } else this.Labels.Add(property.Key, property.Value.GetPropertyType());
             }
         }
 

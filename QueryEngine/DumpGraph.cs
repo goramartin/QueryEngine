@@ -28,8 +28,8 @@ namespace QueryEngine
                 foreach (var ite in item.Value.Properties)
                 {
                     Console.Write(
-                        " PropertyIRI:" + ite.IRI +
-                        " PropertyType:" + ite.GetType() + " / "
+                        " PropertyIRI:" + ite.Value.IRI +
+                        " PropertyType:" + ite.Value.GetType() + " / "
                         );
                 }
                 Console.WriteLine();
@@ -49,8 +49,8 @@ namespace QueryEngine
                 foreach (var ite in item.Value.Properties)
                 {
                     Console.Write(
-                        " PropertyIRI:" + ite.IRI + 
-                        " PropertyType:" + ite.GetType() + " / "
+                        " PropertyIRI:" + ite.Value.IRI + 
+                        " PropertyType:" + ite.Value.GetType() + " / "
                         );
                 }
 

@@ -186,12 +186,13 @@ namespace QueryEngine
             public override void Process(IProcessor<List<Vertex>> processor, string param)
             {
                 var proc = (VerticesListProcessor)processor;
+                var tmpTable = proc.vertex.Table;
 
                 // Get the position of a property inside the table of the out edge. 
-                int accessedPropertyPosition = proc.vertex.Table.GetPropertyCount() - proc.paramsToReadLeft;
+                int accessedPropertyPosition = tmpTable.GetPropertyCount() - proc.paramsToReadLeft;
 
                 // Parse the value from parameter.
-                proc.vertex.Table.Properties[accessedPropertyPosition].ParsePropFromStringToList(param);
+                tmpTable.Properties[tmpTable.PropertyLabels[accessedPropertyPosition]].ParsePropFromStringToList(param);
 
                 // Try to read another property.
                 proc.paramsToReadLeft--;

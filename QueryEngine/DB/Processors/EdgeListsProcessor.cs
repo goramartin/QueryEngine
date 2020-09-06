@@ -308,12 +308,13 @@ namespace QueryEngine
             public override void Process(IProcessor<EdgeListHolder> processor, string param)
             {
                 var proc = (EdgeListProcessor)processor;
+                var tmpTable = proc.outEdge.Table;
 
                 // Get the position of a property inside the table of the out edge. 
-                int accessedPropertyPosition = proc.outEdge.Table.GetPropertyCount() - proc.paramsToReadLeft;
+                int accessedPropertyPosition = tmpTable.GetPropertyCount() - proc.paramsToReadLeft;
 
                 // Parse the value from parameter.
-                proc.outEdge.Table.Properties[accessedPropertyPosition].ParsePropFromStringToList(param);
+                tmpTable.Properties[tmpTable.PropertyLabels[accessedPropertyPosition]].ParsePropFromStringToList(param);
                 
                 // Try to read another property.
                 proc.paramsToReadLeft--;

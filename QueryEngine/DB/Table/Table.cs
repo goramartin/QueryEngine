@@ -3,11 +3,11 @@
 File includes definition of tables.
 Each graph element has a pointer to a type, that is to say, a table.
 Each table holds all the nodes of the same type.
-Table has got a list, a dictionary and a hash table. 
-The list for properties = named lists with values of a single type.
+Table has got a list and two dictionaries.
+The list for property names = property names in the same order they were added.
 The dictionary of IDs, each entry is a representation of a graph element (element ID), on that entry lies the position of the element in table.
 On the same position we will find values of properties of the element in the property lists.
-The hash set is used for fast access to property labels.
+The dictionary of properties is used for fast access to property via string.
   
 Properties are formed from an abstract type Property that is visible from within a table.
 Generic properties extend Property, and specialisations are created separately. 
@@ -39,13 +39,12 @@ namespace QueryEngine
         /// <summary>
         /// Properties pertaining to the table.
         /// </summary>
-        public List<Property> Properties { get; private set; }
-
+        public Dictionary<string, Property> Properties { get; private set; }
+       
         /// <summary>
-        /// Contains labels of properties for faster search and access.
-        /// string for a name of a property and stored integer represents index in a list properties.
+        /// List of all property names in the table.
         /// </summary>
-        private Dictionary<string, int> PropertyLabels {  get; set; }
+        public List<String> PropertyLabels {  get; private set; }
 
         /// <summary>
         /// Represents nodes inside a table. An index represents also an index inside the property lists.
@@ -60,8 +59,8 @@ namespace QueryEngine
             else
             { 
                 this.IRI = tableName;
-                this.Properties = new List<Property>();
-                this.PropertyLabels = new Dictionary<string, int>();
+                this.Properties = new Dictionary<string, Property>();
+                this.PropertyLabels = new List<string>();
                 this.IDs = new Dictionary<int, int>();
             }
         }
@@ -99,7 +98,7 @@ namespace QueryEngine
         /// <returns> True if found. </returns>
         public bool ContainsProperty(string iri)
         {
-            return this.PropertyLabels.ContainsKey(iri);
+            return this.PropertyLabels.Contains(iri); 
         }
 
 
@@ -116,8 +115,8 @@ namespace QueryEngine
                 throw new ArgumentException($"{this.GetType()}, adding property that already exists. Prop name = {newProp.IRI}");
             else
             {
-                this.PropertyLabels.Add(newProp.IRI, this.Properties.Count);
-                this.Properties.Add(newProp);
+                this.PropertyLabels.Add(newProp.IRI);
+                this.Properties.Add(newProp.IRI, newProp);
             }
         }
 
@@ -131,11 +130,11 @@ namespace QueryEngine
         /// <returns> String value of value stored inside a property or null if property does not exists.</returns>
         public string TryGetElementValueAsString(int elementId, string propertyName)
         {
-            if (!this.IDs.TryGetValue(elementId, out int value))
+            if (!this.IDs.TryGetValue(elementId, out int elementPosition))
                 throw new ArgumentException($"{this.GetType()}, element id = {elementId} not found in table.");
 
-            if (this.PropertyLabels.TryGetValue(propertyName, out int propIndex)) 
-                return this.Properties[propIndex].GetValueAsString(value);
+            if (this.Properties.TryGetValue(propertyName, out Property property)) 
+                return property.GetValueAsString(elementPosition);
             else return "null";
         }
 
@@ -146,18 +145,19 @@ namespace QueryEngine
         /// <param name="id"> Id of an element in the table. </param>
         /// <param name="propName"> Property name. </param>
         /// <param name="value"> Where to store the value of the property. </param>
-        /// <returns>True of successful access otherwise false. </returns>
+        /// <returns>True if successful access, otherwise false. </returns>
         public bool TryGetPropertyValue<T>(int id, string propName, out T value)
         {
             if (!this.IDs.TryGetValue(id, out int elementPosition)) 
                 throw new ArgumentException($"{this.GetType()}, accessing element that is missing in the table. Element ID = {id}.");
-            else if (!this.PropertyLabels.TryGetValue(propName, out int propertyPosition))
+            else if (!this.Properties.TryGetValue(propName, out Property property))
             {
                 value = default(T);
                 return false;
-            } else
+            }
+            else
             {
-                value = ((Property<T>)(this.Properties[propertyPosition])).propHolder[elementPosition];
+                value = ((Property<T>)property).propHolder[elementPosition];
                 return true;
             }
         }
