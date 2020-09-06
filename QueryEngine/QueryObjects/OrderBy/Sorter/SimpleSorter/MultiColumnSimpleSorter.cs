@@ -2,7 +2,7 @@
  
     This file includes definition of a multi column version of a simple sorter.
     Multi column sorter sorts table of results when multiple columns occur in the result table.
-    The sort is done via allocating array of indeces (0 -- result count). The array is sorted
+    The sort is done via allocating array of indeces (0 to result count). The array is sorted
     and the resulting array represents the sorted elements of a table. The array is then added to the table.
     By sorting only indeces, it helps to speed up the process of swapping long rows in the result table.
     
@@ -47,7 +47,7 @@ namespace QueryEngine
         /// <returns> Sorted result table. </returns>
         public override ITableResults Sort()
         {
-            int[] order = new int[this.dataTable.Count];
+            int[] order = new int[this.dataTable.RowCount];
             order.AscPopulate(0);
 
             this.ArraySort(order, this.indexComparer);

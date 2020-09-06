@@ -35,13 +35,13 @@ namespace QueryEngine
         protected void ArraySort<T>(T[] arr, IComparer<T> comparer)
         {
             if (this.inParallel) HPCsharp.ParallelAlgorithm.SortMergePar(arr, comparer);
-            else HPCsharp.ParallelAlgorithm.SortMergePar(arr, comparer);
+            else HPCsharp.Algorithm.SortMerge(arr, comparer);
         }
 
         protected void ListSort<T>(List<T> ls, IComparer<T> comparer)
         {
             if (this.inParallel) HPCsharp.ParallelAlgorithm.SortMergePar(ls, comparer);
-            else HPCsharp.ParallelAlgorithm.SortMergePar(ls, comparer);
+            else HPCsharp.Algorithm.SortMerge(ls, comparer);
         }
 
     }

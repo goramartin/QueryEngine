@@ -61,9 +61,7 @@ namespace QueryEngine
 
             printer.PrintHeader();
             foreach (var item in results)
-            {
                 printer.PrintRow(item);
-            }
 
             printer.Dispose();
         }

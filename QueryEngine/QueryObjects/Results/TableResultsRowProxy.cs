@@ -48,13 +48,13 @@ namespace QueryEngine
             {
                 get
                 {
-                    return resTable.results[column][this.index];
+                    return resTable.resTable[column][this.index];
                 }
             }
 
             public int GetColumnCount()
             {
-                return this.resTable.results.Length;
+                return this.resTable.resTable.Length;
             }
 
             /// <summary>
@@ -63,7 +63,7 @@ namespace QueryEngine
             public override string ToString()
             {
                 string tmpString =  "Row: " + this.index + " result: ";
-                for (int i = 0; i < this.resTable.results.Length; i++)
+                for (int i = 0; i < this.resTable.resTable.Length; i++)
                     tmpString += " " + this[i].ID.ToString();  
             
                 return tmpString;
