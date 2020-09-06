@@ -1,13 +1,25 @@
 ﻿/*! \file 
-  File includes definition of table dictionary processor.
+File includes definition of a table dictionary processor.
 
-  Processor gets input strings and expects to be the given strings from a json array.
-  Processor creates a dictionaty of tables defined inside the json array.
+The processor creates a table from a JSON input file.
+Json array is expected to be an array of objects. 
+The objects are expected to contain a first property "Kind" with defines name of the table.
+Subsequently there are expected to be a properties that define name of a table property and the type of the property.
 
-  Json array is expected to have object containing first property as a Kind with defines name of the table.
-  Subsequently there are expected to be a properties that define name of a table property and the type of the property.
+Example:
 
-  States are singletons and flyweight since they do not encompass eny additional variables.
+[
+{
+"Kind": "TableOne",
+"FirstProp": "string"
+},
+{
+"Kind: "TableTwo"
+}
+]
+
+
+States are singletons and flyweight since they do not encompass eny additional variables.
  */
 
 using System;
@@ -19,7 +31,10 @@ using System.Threading.Tasks;
 namespace QueryEngine
 {
     /// <summary>
-    /// Creates distionary/map from data scheme with specific nodes in the graph.
+    /// Creates a distionary/map of a data types in the graph from a json schema.
+    /// The processing is done in states, where each state represents a string from the json schema. (even the [, { ... characters)
+    /// Firstly, the new table is created with the name specified in the "Kind" property in the JSON schema.
+    /// Subsequnetly, properties are parsed and added to the table.
     /// </summary>
     internal sealed class TableDictProcessor : IProcessor<Dictionary<string, Table>>
     {
@@ -49,10 +64,6 @@ namespace QueryEngine
             return this.dict;
         }
 
-        /// <summary>
-        /// A jump table which defines what method will be called in a given state.
-        /// </summary>
-        /// <param name="param"> Parameter to process. </param>
         public void Process(string param)
         {
            if (!this.finished) this.processorState.Process(this, param);
@@ -69,6 +80,9 @@ namespace QueryEngine
         }
 
 
+        /// <summary>
+        /// Begining of the JSON array which contains the definitions of the tables.
+        /// </summary>
         sealed class TableDictLeftSquareBraceState : IProcessorState<Dictionary<string, Table>>
         {
             static TableDictLeftSquareBraceState instance =
@@ -90,6 +104,9 @@ namespace QueryEngine
             }
         }
 
+        /// <summary>
+        /// Start of the table object in the JSON schama.
+        /// </summary>
         sealed class TableDictLeftBracketState : IProcessorState<Dictionary<string, Table>>
         {
             static TableDictLeftBracketState instance =
@@ -112,6 +129,9 @@ namespace QueryEngine
             }
         }
 
+        /// <summary>
+        /// Reading of the starting """ can lead further into more states, the states are defined based on the preceeding state.
+        /// </summary>
         sealed class TableDictLeftMarkState : IProcessorState<Dictionary<string, Table>>
         {
             static TableDictLeftMarkState instance =
@@ -130,14 +150,23 @@ namespace QueryEngine
 
                 if (param != "\"") throw new ArgumentException(($"{this.GetType()}, expected left quotations."));
 
+                // The next string is "Kind": "Name"
                 if (proc.lastProcessorState == TableDictLeftBracketState.Instance) proc.SetNewState(TableDictKindState.Instance);
+                // The next string is a name of the table. 
                 else if (proc.lastProcessorState == TableDictKindState.Instance) proc.SetNewState(TableDictNameState.Instance);
+                // The next string is a name of a property "PropName": "PropType"
                 else if (proc.lastProcessorState == TableDictNameState.Instance) proc.SetNewState(TableDictPropNameState.Instance);
+                // The next string is a type of the property 
                 else if (proc.lastProcessorState == TableDictPropNameState.Instance) proc.SetNewState(TableDictPropTypeState.Instance);
+                // The next string is a name of a property
                 else if (proc.lastProcessorState == TableDictPropTypeState.Instance) proc.SetNewState(TableDictPropNameState.Instance);
+                else throw new ArgumentException(($"{this.GetType()}, unexpected state occured."));
             }
         }
 
+        /// <summary>
+        /// Parsing of the "Kind"
+        /// </summary>
         sealed class TableDictKindState : IProcessorState<Dictionary<string, Table>>
         {
             static TableDictKindState instance =
@@ -161,6 +190,9 @@ namespace QueryEngine
             }
         }
 
+        /// <summary>
+        /// Parsing of a ending """
+        /// </summary>
         sealed class TableDictRightMarkState : IProcessorState<Dictionary<string, Table>>
         {
             static TableDictRightMarkState instance =
@@ -186,6 +218,9 @@ namespace QueryEngine
             }
         }
 
+        /// <summary>
+        /// Parsing of the ":"
+        /// </summary>
         sealed class TableDictDoubleDotState : IProcessorState<Dictionary<string, Table>>
         {
             static TableDictDoubleDotState instance =
@@ -208,7 +243,8 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Processes name of the table. Call for creating of a table.
+        /// Processes name of the table. 
+        /// Creates a new table with the given name.
         /// </summary>
         sealed class TableDictNameState : IProcessorState<Dictionary<string, Table>>
         {
@@ -235,6 +271,10 @@ namespace QueryEngine
             }
         }
 
+        /// <summary>
+        /// After a property value, there can be either a comma which signals another property definition,
+        /// or a bracket, which signal that there might be another comma == a new table object or end of the json array..
+        /// </summary>
         sealed class TableDictCommaAfterPropState : IProcessorState<Dictionary<string, Table>>
         {
             static TableDictCommaAfterPropState instance =
@@ -256,6 +296,10 @@ namespace QueryEngine
             }
         }
 
+        /// <summary>
+        /// After a bracket, there can be a comma which can signal beginning of a new table object.
+        /// Or there is end of the json array (end of a schema).
+        /// </summary>
         sealed class TableDictCommaAfterBracketState : IProcessorState<Dictionary<string, Table>>
         {
             static TableDictCommaAfterBracketState instance =
@@ -282,7 +326,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Saves property name for a later usage.
+        /// Saves a property name for a property class creation to the table being created later on.
         /// </summary>
         sealed class TableDictPropNameState : IProcessorState<Dictionary<string, Table>>
         {
@@ -308,7 +352,7 @@ namespace QueryEngine
 
         /// <summary>
         /// Processes property type.
-        /// Creates new proprty based on type with a property name stored before.
+        /// Creates a new proprty based on type with a property name stored beforehand.
         /// </summary>
         sealed class TableDictPropTypeState : IProcessorState<Dictionary<string, Table>>
         {

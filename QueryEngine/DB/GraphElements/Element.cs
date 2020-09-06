@@ -1,9 +1,13 @@
 ﻿/*! \file 
-  Includes definition of a base class for each element in the graph.
-  Each elements need an unique ID in the entire graph, table where the properties
-  of the element are stored and a position in the containing structure.
+Includes definition of a base class for each element in the graph.
+Each element needs an unique ID in the entire graph, table (type of an element) where the properties
+of the element are stored and a position in the containing structure (such as an index in a list).
+Hash codes are based on the unique ID of the element.
+Properties of elements are accessed through generic method which is given the name of the property 
+and a type of the accessing property. The method then calls methods of the table to retrieve the 
+data from the database.
 
-  Hash codes are based on the unique id of the element.
+Note that the ID of an element is not directly a property in the table.
  */
 
 
@@ -16,10 +20,10 @@ using System.Threading.Tasks;
 namespace QueryEngine
 {
     /// <summary>
-    /// Base class for edges and nodes.
-    /// Table represents the table where is the element stored.
-    /// Position is location inside a vertex list or node list.
-    /// NOTICE id of can be same for vertex and edge.
+    /// A base class for edges and nodes.
+    /// The table represents the type of the element.
+    /// The element data are stored in the table as well.
+    /// The position is a location inside a vertex list or a node list.
     /// </summary>
     internal abstract class Element
     {
@@ -48,6 +52,11 @@ namespace QueryEngine
             return this.Table.TryGetPropertyValue(this.ID, propName,out value);
         }
 
+        /// <summary>
+        /// This method returns type of a graph element.
+        /// It is used instead of the reflection method which is a bit slower.
+        /// </summary>
+        /// <returns></returns>
         public abstract Type GetElementType();
 
     }

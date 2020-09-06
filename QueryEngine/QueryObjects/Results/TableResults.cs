@@ -76,13 +76,19 @@ namespace QueryEngine
             }
         }
 
-        public TableResults(List<Element>[][] elements, int threadIndex)
+        /// <summary>
+        /// Gets results from a non merged matcher results.
+        /// The index indicates which thread results should be picked to create the instance.
+        /// </summary>
+        /// <param name="elements"> Matcher results merged on the zeroth index. </param>
+        /// <param name="threadNumber"> Number of a thread to pick results from. </param>
+        public TableResults(List<Element>[][] elements, int threadNumber)
         {
             this.order = null;
             this.resTable = new List<Element>[elements.Length];
             for (int i = 0; i < elements.Length; i++)
             {
-                this.resTable[i] = elements[i][threadIndex];
+                this.resTable[i] = elements[i][threadNumber];
             }
         }
 

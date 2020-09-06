@@ -1,13 +1,14 @@
 ﻿/*! \file 
-  File includes definition of vertices list processor.
+File includes definition of vertices list processor.
 
-  Processor creates a list of vertices. The edges position for each vertex are not filled.
-  Processor expects the vertices to have a unique id, preferably sorted by ascending order.
-  The unput file should look like: ID TYPE PROPERTIES.
-  Properties are set to a table defined by a type and ID is a unique identifier in the entire graph.
-  Hence the ID is not direcly a property of the element.
+Processor creates a list of vertices. The edges position for each vertex are not filled (set to -1).
+Processor expects the vertices to have a unique id, preferably sorted by ascending order.
 
-  States of a processor are singletons and flyweight since they do not encompass any additional varibales.
+The input file should look like: ID TYPE PROPERTIES.
+Properties are set to a table defined by a TYPE and ID is a unique identifier in the entire graph.
+Hence the ID is not direcly a property of the element.
+
+States of a processor are singletons and flyweight since they do not encompass any additional varibales.
 
  */
 
@@ -22,6 +23,7 @@ namespace QueryEngine
 {
     /// <summary>
     /// Creates vertices list from a file.
+    /// Preferably the vertices in the data file are sorted in an ascending order by their ids.
     /// </summary>
     internal sealed class VerticesListProcessor : IProcessor<List<Vertex>>
     {
@@ -67,8 +69,8 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// First state of processor. Tries to parse ID of a node and inits a new vertex.
-        /// After parsing ID, the type of node is a next state.
+        /// First state of the processor.
+        /// Tries to parse ID of a node and inits a new vertex.
         /// </summary>
         sealed class NodeIDState : IProcessorState<List<Vertex>>
         {
@@ -99,13 +101,15 @@ namespace QueryEngine
                 proc.vertex = new Vertex();
                 proc.vertex.PositionInList = proc.vertices.Count;
                 proc.vertex.ID = id;
+
+                // Next state is a parsing of a TYPE
                 proc.SetNewState(NodeTypeState.Instance);
             }
         }
 
         /// <summary>
-        /// Mid state between end of parameters reading. Serves only as a method implementation FinishParams for children.
-        /// If reading of parameters of the node was finished next state if ID, that is reading a new node.
+        /// Class provides a method for finishing reading of parameters of the vertex.
+        /// If reading of parameters of the vertex was finished then the next state is parsing of the ID, that is reading a new vertex.
         /// Otherwise, we continue reading next parameters.
         /// </summary>
         abstract class NodeParamsEndState : IProcessorState<List<Vertex>>
@@ -119,19 +123,21 @@ namespace QueryEngine
                 // For no more parameters to parse left
                 if (proc.paramsToReadLeft == 0)
                 {
+                    // Add the new vertex to the list of vertices.
                     proc.vertices.Add(proc.vertex);
+                    // Try to read another vertex.
                     proc.SetNewState(NodeIDState.Instance);
                 }
-                // Continue parsing parameters
+                // Else continue in parsing parameters
                 else proc.SetNewState(NodeParametersState.Instance);
             }
         }
 
 
         /// <summary>
-        /// Finds table based on a parameter and set it to a node.
-        /// Also inserts ID of the node into the table.
-        /// Next state should parse data of the node.
+        /// Finds a table of the vertex based on a given parameter and sets it to the vertex.
+        /// Also, inserts ID of the vertex into the table.
+        /// Next state parses data of the vertex.
         /// </summary>
         sealed class NodeTypeState : NodeParamsEndState
         {
@@ -154,13 +160,16 @@ namespace QueryEngine
                 proc.vertex.Table = table;
                 proc.vertex.Table.AddID(proc.vertex.ID);
 
+                // Start reading properties of the vertex
                 proc.paramsToReadLeft = proc.vertex.Table.GetPropertyCount();
                 FinishParams(processor);
             }
         }
 
         /// <summary>
-        /// Gets position of accessed property and parses its value to its list.
+        /// The property of the vertex is expected.
+        /// Get the position of the property where adding the passed parameter.
+        /// Add the parameter there and try to read another property.
         /// </summary>
         sealed class NodeParametersState : NodeParamsEndState
         {
@@ -178,10 +187,13 @@ namespace QueryEngine
             {
                 var proc = (VerticesListProcessor)processor;
 
-                // Get position of accessed property and insert given parameter to appropriate list.
+                // Get the position of a property inside the table of the out edge. 
                 int accessedPropertyPosition = proc.vertex.Table.GetPropertyCount() - proc.paramsToReadLeft;
+
+                // Parse the value from parameter.
                 proc.vertex.Table.Properties[accessedPropertyPosition].ParsePropFromStringToList(param);
 
+                // Try to read another property.
                 proc.paramsToReadLeft--;
                 FinishParams(proc);
             }

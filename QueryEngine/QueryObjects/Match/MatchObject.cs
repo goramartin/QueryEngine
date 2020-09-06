@@ -107,7 +107,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Starts searching of the graph.
+        /// Starts searching of the graph and returns results of the search.
         /// </summary>
         /// <param name="executionHelper"> Match execution helper. </param>
         /// <returns> Results of search algorithm </returns>

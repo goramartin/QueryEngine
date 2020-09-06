@@ -1,18 +1,19 @@
 ﻿/*! \file
   
-  File includes definition of tables.
-  Each graph element has a pointer to a type, that is to say, a table.
-  Each table holds all the nodes of the same type.
-  Table has got one list,dictionary and a hash table, list for properties = named lists with values of a single type of a node,
-  dictionary of IDs, each object is a representation of a node, on that object lies the position index of the element in table.
-  On the same index we will find values of properties of the node in the property lists.
-  And a hash set for fast access to property labels.
+File includes definition of tables.
+Each graph element has a pointer to a type, that is to say, a table.
+Each table holds all the nodes of the same type.
+Table has got a list, a dictionary and a hash table. 
+The list for properties = named lists with values of a single type.
+The dictionary of IDs, each entry is a representation of a graph element (element ID), on that entry lies the position of the element in table.
+On the same position we will find values of properties of the element in the property lists.
+The hash set is used for fast access to property labels.
   
-  Properties are form from an abstract type Property that is visible from within a table.
-  Generic properties extend Property, and specialisations are created separately. 
-  Properties are created with a help of an Activator class based on a passed name.
+Properties are formed from an abstract type Property that is visible from within a table.
+Generic properties extend Property, and specialisations are created separately. 
+Properties are created with a help of an Activator class based on a passed name.
   
-  This file contains also static factory for creation of tables.
+This file contains also static factory for creation of tables.
  */
 
 using System;
@@ -23,14 +24,16 @@ using System.IO;
 namespace QueryEngine
 {
      /// <summary>
-     /// Class representing single node type.
-     /// Encompasses table of properties pertaining to the type. 
-     /// List IDs consists of added nodes into the table. Values of the node we can find 
-     /// on the same position in the properties.
+     /// A class representing a single node type.
+     /// Encompasses a table of properties pertaining to the type. 
+     /// List IDs consists of added nodes into the table. Values of the elements can be found 
+     /// on the same positions in the property lists.
      /// </summary>
     internal sealed class Table
     {
-        // Name of the table (type of node)
+        /// <summary>
+        /// Name of the table (type of node)
+        /// </summary> 
         public string IRI { get; private set; } 
 
         /// <summary>
@@ -44,8 +47,10 @@ namespace QueryEngine
         /// </summary>
         private Dictionary<string, int> PropertyLabels {  get; set; }
 
-        // Represents nodes inside a table. An index represents also an index inside the property lists.
-        // First int is an id of a node inside the table, and second int is the position inside the table.
+        /// <summary>
+        /// Represents nodes inside a table. An index represents also an index inside the property lists.
+        /// First int is an id of a node inside the table, and second int is the position inside the table.
+        /// </summary>
         public Dictionary<int,int> IDs { get; private set; }
 
         public Table(string tableName)

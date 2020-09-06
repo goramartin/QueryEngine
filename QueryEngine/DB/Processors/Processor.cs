@@ -1,14 +1,12 @@
-﻿
-/*! \file
-  
-   Contains base class for processors. Processors gets input parameters and creates
-   object defined in a template paramter. Used by a creator class.
-
-   Each processor imlements state pattern.
-   
-   There are three processors, for tables (same for edges and node tables),
-   one that creates vertices from a data file and the third that creates list of 
-   edges (in/out).
+﻿/*! \file
+Contains base class for processors. Processors gets input parameters and create
+objects defined in a template parameter. Processors are used inside of a Creator class.
+Each processor implements state pattern.
+There are three processors, one for loading definitions of tables (same for edges and node tables),
+one that creates a list of vertices from a data file and the third that creates a list of 
+edges (in/out) from a data file.
+The processor states are singletons and flyweight, they are available for the entire run of the program.
+In case the program wants to read more definitions.
  */
 
 

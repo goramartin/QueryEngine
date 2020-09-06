@@ -1,11 +1,12 @@
-﻿
-/*! \file
+﻿/*! \file
  
-  Contains definition of creators from file.
-  
-  Creator is an interface for a class that creates a defined object in the template paramter.
-  Creator makes use of a processor and optionaly some reader. Where processor build the entire objects.
-
+Contains generic definition of an interface for creators from file.
+A creator is an interface for a class that creates an object defined
+in the template parameter.
+Creators make use of a processor and optionally a reader from a file. 
+Creators are used during creation of a database. They load data of 
+vertices and edges into dictionaries, also they load the vertices and
+edges into the database lists.
  */
 
 
@@ -19,9 +20,10 @@ namespace QueryEngine
 {
    
     /// <summary>
-    /// Creator interface. Each creator object will create an object specified in a template.
+    /// Creator interface. Each creator object will create
+    /// an object specified in a template.
     /// </summary>
-    /// <typeparam name="T"> Value to be created. </typeparam>
+    /// <typeparam name="T"> A value/class to be created. </typeparam>
     internal interface ICreator<T>
     {
         T Create();

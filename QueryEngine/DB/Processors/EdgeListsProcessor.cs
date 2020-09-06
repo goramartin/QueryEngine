@@ -1,16 +1,16 @@
 ﻿/*! \file 
-  File includes definition of Edge list processor.
+File includes definition of Edge list processor.
 
-  Processor creates lists of in edges and out edges, the return value is a holder for both lists.
-  Firstly, the in edges defined in a file are read. It is expected that the edges are sorted based
-  on the vertices input file in the same ascending order. That means if the first element is a vertex with id 1
-  the edges in the file are edges with the starting vertex of the id 1 and vice versa.
+Processor creates lists of in edges and out edges, the return value is a holder for both lists.
+Firstly, the in edges defined in a file are read. It is expected that the edges are sorted based
+on the vertices IDs in the same ascending order. That means, if the first element is a vertex with id 1
+the edges in the file are edges with the starting vertex with the id 1 and vice versa.
 
-  The file is expected to look like: ID TYPE FROMID TOID PROPERTIES
-  Type defines the table of the edge. And from id and to id forms the starting vertex id and the end vertex id.
-  Properties are inputed to the table defined in the TYPE.
+The file is expected to look like: ID TYPE FROMID TOID (PROPERTIES)*
+Type defines the table of the edge. And from id and to id forms the starting vertex id and the end vertex id.
+Properties are inputed to the table defined in the TYPE.
 
-  States are singletons and flyweight since they do not contain any additional variables.
+States are singletons and flyweight since they do not contain any additional variables.
  */
 
 using System;
@@ -23,9 +23,13 @@ namespace QueryEngine
 {
     /// <summary>
     /// Creates edge lists from data file.
-    /// We suppose vertices in datafile are stored based on their id in ascending order.
-    /// We suppose edges in datafile are stored based on id of the from vertex in ascending order.
-    /// That is to say, having three vertices with ids 1, 2, 3... first all edges are from vertex 1, then edges from vertex 2 etc. 
+    /// We suppose vertices in  a datafile are stored based on their id in ascending order.
+    /// We suppose edges in datafile are stored based on id of the FROMID vertex in ascending order.
+    /// That is to say, having three vertices with ids 1, 2, 3... first all edges are from vertex 1, then edges from vertex 2 etc...
+    /// More about creation is written at the state classes.
+    /// Note that during parsing of an out edge, simultaneously the reverse edge is created (in edge).
+    /// Note that each vertex has its own bin for in edges. The bins are then emptied to the final in edge list.
+    /// The bins are used because otherwise the assignment of in edges takes way too much time even on a small graph.
     /// </summary>
     internal sealed class EdgeListProcessor : IProcessor<EdgeListHolder>
     {
@@ -81,6 +85,10 @@ namespace QueryEngine
             CreateVerticesIndex();
         }
 
+        /// <summary>
+        /// The method creates an index from the vertices IDs to speed up 
+        /// adding of a new edges to appropriate vertices.
+        /// </summary>
         private void CreateVerticesIndex()
         {
             this.verticesIndex = new Dictionary<int, int>();
@@ -89,7 +97,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// A jump table which defines what method will be called in a given state.
+        /// A jump method which defines what method will be called in a given state.
         /// </summary>
         /// <param name="param"> Parameter to process. </param>
         public void Process(string param)
@@ -105,6 +113,7 @@ namespace QueryEngine
         /// <summary>
         /// Processes id of an edge.
         /// Creates new outgoing edge. Next state is processing of a type.
+        /// New edges are added to the end of the list containing out edges.
         /// </summary>
         sealed class EdgeIDState : IProcessorState<EdgeListHolder>
         {
@@ -135,6 +144,7 @@ namespace QueryEngine
                     return; 
                 }
 
+                // Create a new out edge.
                 int id = 0;
                 if (!int.TryParse(param, out id))
                     throw new ArgumentException($"{this.GetType()}, reading wrong node ID. ID is not a number. ID = {param}");
@@ -142,13 +152,15 @@ namespace QueryEngine
                 proc.outEdge = new OutEdge();
                 proc.outEdge.PositionInList = proc.outEdges.Count;
                 proc.outEdge.ID = id;
+
+                // Next state is a parsing of a TYPE.
                 proc.SetNewState(EdgeTypeState.Instance);
             }
         }
 
         /// <summary>
-        /// Finds table assiciated with the edge and inserts the edge inside.
-        /// Also sets the table for the edge.
+        /// Finds a table assiciated with the out edge and inserts the out edge inside.
+        /// Also sets the table for the out edge.
         /// </summary>
         sealed class EdgeTypeState : IProcessorState<EdgeListHolder>
         {
@@ -166,18 +178,23 @@ namespace QueryEngine
             {
                 var proc = (EdgeListProcessor)processor;
 
+                // Find the table.
                 Table table;
                 proc.edgeTables.TryGetValue(param, out table);
                 proc.outEdge.Table = table;
+
+                // Add the edge id to the found table.
                 proc.outEdge.Table.AddID(proc.outEdge.ID);
+
+                // Next state is a parsing of a FROMID
                 proc.SetNewState(EdgeFromIDState.Instance);
             }
         }
 
         /// <summary>
-        /// Find vertex the edge starts from. If edge processed is first edge of vertex, set edge position.
-        /// Note the Count is pointing to the empty space where the processed edge will be added in FinishParams.
-        /// Also sets values to the opposite edge.
+        /// Find vertex the out edge starts from. If the out edge being processed is the first
+        /// out edge of the vertex, set a starting edge position of out edges for the vertex.
+        /// Start creation of a reverse edge to the one being read.
         /// </summary>
         sealed class EdgeFromIDState : IProcessorState<EdgeListHolder>
         {
@@ -195,19 +212,24 @@ namespace QueryEngine
             {
                 var proc = (EdgeListProcessor)processor;
 
+                
                 Vertex fromVertex = proc.FindVertex(param);
                 if (!fromVertex.HasOutEdges()) fromVertex.OutEdgesStartPosition = proc.outEdges.Count;
+               
+                
                 proc.incomingEdge = new InEdge();
                 proc.incomingEdge.EndVertex = fromVertex;
+
+                // Next state is a parsing of a TOID
                 proc.SetNewState(EdgeToIDState.Instance);
             }
         }
 
 
         /// <summary>
-        /// Mid state between end of parameters reading. Serves only as a method implementation FinishParams for children.
-        /// If reading of parameters of the node was finished next state if ID, that is reading a new node.
-        /// Otherwise, we continue reading next parameters.
+        /// Class provides a method for finishing reading of parameters of the out edge.
+        /// If reading of parameters of the node was finished next state is parsing of an ID, that is reading a new edge.
+        /// Otherwise, we continue reading more parameters pertaining to the out edge.
         /// </summary>
         abstract class EdgeParamsEndState : IProcessorState<EdgeListHolder>
         {
@@ -220,17 +242,20 @@ namespace QueryEngine
                 //For no more parameters to parse left
                 if (proc.paramsToReadLeft == 0)
                 {
+                    // Add completed out edge to the end of out edges list. 
                     proc.outEdges.Add(proc.outEdge);
+                    // Next step is to try reading a new out edge.
                     proc.SetNewState(EdgeIDState.Instance);
                 }
-                //continue parsing parameters
+                // Continue parsing parameters
                 else proc.SetNewState(EdgeParameterState.Instance);
             }
         }
 
         /// <summary>
-        /// Finds end vertex of an edge and sets him to the end position of out edge.
+        /// Finds the end vertex of the out edge.
         /// Finishes processing of in edge and adds it to the appropriate table of the vertex.
+        /// Start reading parameters of the out edge.
         /// </summary>
         sealed class EdgeToIDState : EdgeParamsEndState
         {
@@ -251,18 +276,22 @@ namespace QueryEngine
                 Vertex endVertex = proc.FindVertex(param);
                 proc.outEdge.EndVertex = endVertex;
 
+                // Finish creation of the reverse edge.
                 proc.incomingEdge.Table = proc.outEdge.Table;
                 proc.incomingEdge.ID = proc.outEdge.ID;
                 proc.incomingEdgesTable[endVertex.PositionInList].Add(proc.incomingEdge);
 
+                // Start reading properties of the out edge.
+                // This indicates the number of parameters that the out edge has.
                 proc.paramsToReadLeft = proc.outEdge.Table.GetPropertyCount();
                 FinishParams(proc);
             }
         }
 
         /// <summary>
-        ///Get the position of property where adding the parameter.
-        ///Add the parameter there.
+        /// The property of the out edge is expected.
+        /// Get the position of the property where adding the passed parameter.
+        /// Add the parameter there and try to read another property.
         /// </summary>
         sealed class EdgeParameterState : EdgeParamsEndState
         {
@@ -279,12 +308,19 @@ namespace QueryEngine
             public override void Process(IProcessor<EdgeListHolder> processor, string param)
             {
                 var proc = (EdgeListProcessor)processor;
+
+                // Get the position of a property inside the table of the out edge. 
                 int accessedPropertyPosition = proc.outEdge.Table.GetPropertyCount() - proc.paramsToReadLeft;
+
+                // Parse the value from parameter.
                 proc.outEdge.Table.Properties[accessedPropertyPosition].ParsePropFromStringToList(param);
+                
+                // Try to read another property.
                 proc.paramsToReadLeft--;
                 FinishParams(proc);
             }
         }
+
 
 
         /// <summary>
@@ -304,18 +340,25 @@ namespace QueryEngine
 
 
         /// <summary>
-        ///Merge results from inedges tables into one. -> Creates inEdges list.
-        ///Set positions for inEdges field in vertices.
-        ///Set positions for inEdges in their own list.
+        /// Merge results from inedges tables into one. -> Creates inEdges list.
+        /// Set positions for inEdges field in vertices. (start and end of a range)
+        /// Set positions for inEdges in their own list.
         /// </summary>
         private void FinalizeInEdges()
         {
             int count = 0;
 
+            // Iteration over all vertices in the graph.
             for (int i = 0; i < incomingEdgesTable.Length; i++)
             {
                 int c = incomingEdgesTable[i].Count;
+                
+                // If there are no in edges, dont set the position to the vertex.
+                // The position will be set to -1.
                 if (c == 0) continue;
+
+                // Otherwise set the position.
+                // And add them to the in edge list.
                 vertices[i].InEdgesStartPosition = count;
                 for (int k = 0; k < c; k++)
                     inEdges.Add(incomingEdgesTable[i][k]);
@@ -337,6 +380,7 @@ namespace QueryEngine
 
         /// <summary>
         /// Creates list for each vertex. Each table will include incoming edges.
+        /// To these list the in edges will be added.
         /// </summary>
         private void InicialiseInEdgesTables()
         {
@@ -346,7 +390,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Set count on in/out edges.
+        /// Set end positions for a vertex for its in/out edges.
         /// </summary>
         private void FinalizeVertices()
         {
@@ -363,7 +407,7 @@ namespace QueryEngine
         /// </summary>
         /// <param name="isOut"> Wheter we are setting in or out edges.</param>
         /// <param name="p"> Position of a processed vertex.</param>
-        /// <returns></returns>
+        /// <returns> End position of in/out edges for a given vertex. </returns>
         private int FindEndPositionOfEdges(bool isOut, int p)
         {
             if ((isOut) && (!vertices[p].HasOutEdges())) return -1;

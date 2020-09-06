@@ -1,11 +1,10 @@
 ﻿/*! \file 
-  Includes definition of a vertex in the graph.
-  Vertex is an element of a graph.
-  Each vertex knows the starting and ending position in the structure containing the explicit edges.
+Includes definition of a vertex. The vertex is an element of a graph. Each vertex is stored in a vertex list in the graph.
+Vertices are connected with edges. Each vertex knows the edges that are going outward and also inward.
+The edges are contained in lists (one list for outward and one list for inward edges) of edges in the database.
+The vertices contain information about the starting and ending positions of edges in the structures containing the edges, so that
+the edges can be accessed quickly.
  */
-
-
-
 
 using System;
 using System.Collections.Generic;
@@ -18,9 +17,9 @@ namespace QueryEngine
     /// <summary>
     /// Vertex serves as a node in a graph.
     /// Each vertex is stored in a vertex list in a graph.
-    /// TO each vertex there are two corresponding lists of edges, one list includes outgoing edges,
-    /// and the other one encompasses inwards edges.
-    /// If the vertex does now have any edges (in or out) the positions are set to -1.
+    /// To each vertex there are two corresponding lists of edges, one list includes outgoing edges,
+    /// and the other encompasses inwards edges.
+    /// If the vertex does now have any edges (in or out), then the corresponding positions (start and end) are set to -1.
     /// </summary>
     internal sealed class Vertex : Element
     {

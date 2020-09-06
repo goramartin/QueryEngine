@@ -1,15 +1,11 @@
 ﻿/*! \file 
-  Includes definition of a edge in the graph.
-  Edge is an element of a graph.
-  All edges are oriented edges in the graph.
-  So far there are only out edges and inward edges.
-
-  Out edges are defined in the input file.
-  In edges are former after out edges are created. (There are only the starting positions of the edge)
-  Note that if there is an edge  1 -> 2 with ID 7, then out edge end vertex is 2 and in edge vertex is 1,
-  however the id of in and out edge is the same.
-
-  Each edge knows the ending vertex.
+Includes definition of an edge in the graph. Edge is an element of the graph.
+All edges are oriented edges in the graph. So far there are only out edges and inward edges (only the semantic meaning is different).
+The outward edges, outgoing edges from vertices, are defined in a file. They are created first and then
+the inward edges are created and assigned to appropriate vertices by using information from the newly created out edges.
+Each edge knows the ending vertex it points to. So each vertex has assigned its out an in edges.
+For example, if there is an edge  1 -> 2 with ID 7, then out edge end vertex is 2 and in edge out vertex is 1,
+however, the ids of in and out edge is the same because they point to the same properties in the database.
  */
 
 using System;
@@ -22,8 +18,10 @@ namespace QueryEngine
 {
 
     /// <summary>
-    /// Edge represents edge in a graph. The type of an edge is based on the list that contains the list.
-    /// Each edge has an end vertex, that is which vertex the edge is leading to.
+    /// Edge represents edge in a graph.
+    /// Each edge has an end vertex, that ia a vertex the edge is pointing to.
+    /// The specialisations are used namely to differentiate the semantic meaning, because
+    /// during searching of a graph, there is a difference whether an out or an in edge is picked.
     /// </summary>
     internal abstract class Edge : Element
     {
