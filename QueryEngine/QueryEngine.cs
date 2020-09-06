@@ -180,7 +180,6 @@ namespace QueryEngine
                 Console.ReadLine();
             }
 
-            // TestClass.RunTest();
         }
     }
 }

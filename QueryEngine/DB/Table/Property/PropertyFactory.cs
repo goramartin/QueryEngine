@@ -1,8 +1,6 @@
 ﻿/*! \file
-  
   File includes definition of a specialised property factory.
   Properties are created by inputed string that contains the type of the property.
-
  */
 
 using System;
@@ -65,21 +63,18 @@ namespace QueryEngine
         /// </summary>
         /// <param name="token"> Property type </param>
         /// <param name="name"> Type of a property type. </param>
-        /// <returns></returns>
+        /// <returns> Specialiased property on a given type. </returns>
         public static Property CreateProperty(string token, string name)
         {
             if (token == null || name == null)
                 throw new ArgumentException($"PropertyFactory, passed null name or null token.");
-
-            if (!registry.ContainsKey(token))
-                throw new ArgumentException($"PropertyFactory, token not found. Token = {token}.");
 
             Type propType = null;
             if (registry.TryGetValue(token, out propType))
             {
                 return (Property)Activator.CreateInstance(propType, name);
             }
-            else throw new ArgumentException($"PropertyFactory, failed to load type from registry. Type = {name}.");
+            else throw new ArgumentException($"PropertyFactory, failed to load type from registry. Type = {token}.");
 
         }
     }

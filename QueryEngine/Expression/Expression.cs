@@ -1,9 +1,19 @@
 ﻿/*! \file
- 
-    This file includes base class for all expression nodes.
+This file includes a base class for all expression nodes.
+Each node has evaluation method that tries to evaluate the expression that returns bool and a value.
+If the evaluation fails (missing property value on an element) it returns false, otherwise the value
+can be found in the "out" argument.
 
-    Each node has evaluation method that tries to evalue the expression.
-    If the evaluation fails (missing property value on element) it returns false.
+Expressions are part of the pgql expressions, such as SELECT, ORDER BY, GROUP BY...
+For example SELECT x, y, x.AGE MATCH (x) - (y);
+The "x", "y", "x.AGE" in select clause are expression that are evaluated for every individual 
+results of the query.
+
+Expressions work as follows.
+Accessing an expression is done via an expression holder, that lets the user evaluate the containing expression
+and return its value.
+Expression themself are forming a syntax tree. Where each node evaluates it self and returns information about
+evaluation to its predecessor.
 */
 
 using System;

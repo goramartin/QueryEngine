@@ -1,10 +1,12 @@
 ﻿/*! \file
   
-  File includes definition of a base class for a property.
-  Each property contains the name of the property defined in the json input scheme.
-  It also form an interface to the table that enclose the property.
-  
+File includes definition of a base class for a property that is visible to the Table class.
+Properties are enclosed in the Table class.
+Each property contains the name of the property defined in the json input schema.
 
+Specialisations are generic and contain a list of values of the properties.
+The base non generic property must be used to create a list of properties in the table,
+because the types of properties are unknown before runtime.
  */
 
 

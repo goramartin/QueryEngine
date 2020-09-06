@@ -1,13 +1,7 @@
 ﻿/*! \file
-  
-  File includes definition of a specialised properties (e.i string, integer).
-  Each speicalised property can parse it self from a string.
-
-  There is a templated class property that inherits from a base property class.
-  Subsequently, specialisations are created because of the need to treat different types
-  differently.
-
-  Each property contains a list of typed values.
+This file includes definitions of specialised properties (e.i string, integer).
+Each speicalised property can parse its values itself from a string.
+Each property contains a list of typed values.
  */
 
 

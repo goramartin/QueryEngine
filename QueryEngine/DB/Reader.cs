@@ -1,8 +1,9 @@
 ﻿/*! \file 
- 
-    This file contains definition of file readers.
-    These readers are used for loading a graph.
-
+This file contains definition of file readers.
+These readers are used for loading a graph.
+There are two readers, one reader is used for parsing edges and vertices from a file.
+The second one is used for parsing a JSON schema for table definitions.
+The difference is that reader for the schema must not omit certain special characters.
  */
 
 
@@ -24,7 +25,7 @@ namespace QueryEngine
         string Read();
     }
     /// <summary>
-    /// Interface to reader entire words from a stream.
+    /// Interface to reader entire words from a file.
     /// </summary>
     internal interface IWordReader :IReader
     {
@@ -36,7 +37,7 @@ namespace QueryEngine
     /// Gets one file and pulls each word from the file.
     /// If it is at the end of file, it returns null.
     /// Delimeters can be set.
-    /// Reader is used to read data files with edges and vertices.
+    /// Note this reader is used to read data files with edges and vertices.
     /// It needs to read words from a stream but must ommit certain special characters.
     /// </summary>
     internal class WordReader : IWordReader
@@ -136,11 +137,11 @@ namespace QueryEngine
     }
 
      /// <summary>
-    /// Class for reading text files.
+    /// A class for reading text files.
     /// Gets one file and pulls each non whitespace character from the file.
     /// If it is at the end of file, it returns null.
-    /// This reader is used for reading a file with definition of tables in JSON format.
-    /// Reader stripes words or a special characters from a file
+    /// Note this reader is used for reading a file with definition of tables in JSON format.
+    /// Reader stripes words or a special characters from a file and returns it.
     /// </summary>
     internal class TableFileReader : IReader
     {

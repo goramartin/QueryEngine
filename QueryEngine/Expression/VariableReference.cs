@@ -1,9 +1,9 @@
 ﻿/*! \file 
- 
-    This file includes definitions of variable references expression.
-    This expressions will evaluate based on given element result.
-    Templated properties or variable references are holders of property values.
- 
+This file includes definitions of variable references expression.
+These are the references to a variable or a property of a variable or an id of a variable.
+These expressions will evaluate based on a given element result.
+The references contain holder that includes information what part of a result they refer to.
+This file also includes a factory for references stated above.
  */
 
 

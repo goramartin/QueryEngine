@@ -1,15 +1,9 @@
 ﻿/*! \file 
-  File includes definition of graph.
-  Graph contains three lists... inward edges, outgoing edges and vertices.
-  Base class for nodes and edges is Element class, each element in a graph has got an ID and
-  a table (type). Also each element knows its position in the list where it is included. 
-  
-  Each vertex has got a positions for edges in edge lists, one positions for incoming edges and 
-  one for outgoing edges. Starting position means that on that position the edge from this vertex is leading and
-  end position means that on that position, edges from a consecutive vertex are starting.
- 
-  Graph also contains a list of all labels from a data scheme input file to ensure a quick access to the label type.
-
+File includes definition of graph.
+Graph contains three lists... inward edges, outgoing edges and vertices.
+The base class for nodes and edges is the Element class, each element in a graph has an ID and
+a table (type). Also each element knows its position in the list where it is included. 
+Graph also contains a list of all labels from a data scheme input file to ensure a quick access to the label type.
  */
 using System;
 using System.Collections.Generic;
@@ -20,10 +14,9 @@ using System.Threading.Tasks;
 namespace QueryEngine
 {
 
-   
     /// <summary>
     /// The class serves only for holder purpose during creation inside Processor.
-    /// It enables us to pass a all the the required graph lists from withing one function.
+    /// It enables us to pass a all the the required graph lists from within one function.
     /// </summary>
     internal class EdgeListHolder
     {
@@ -48,7 +41,7 @@ namespace QueryEngine
         public List<InEdge> inEdges;
 
         /// <summary>
-        /// Loads a graph from a files. Files should not be changed.
+        /// Loads a graph from a files. File names must not be changed.
         /// </summary>
         public Graph()
         {
@@ -144,9 +137,7 @@ namespace QueryEngine
         private void AdjustLabels(Dictionary<string, Table> tables)
         {
             foreach (var item in tables)
-            {
                 this.AddTableLabels(item.Value);
-            }
         }
 
 
