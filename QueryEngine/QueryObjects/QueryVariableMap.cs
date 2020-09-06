@@ -1,8 +1,6 @@
 ﻿/*! \file
- 
- This file contains definition of variable map.
- Variable map stores information about variables defined in match expression.
-
+This file contains definition of variable map.
+Variable map stores information about variables defined in match expression.
  */
 
 
@@ -17,19 +15,22 @@ namespace QueryEngine
 {
 
     /// <summary>
-    /// VariableMap represents a map of variables in the whole query during pattern matching.
-    /// When the Pattern is flattned the integer value that resides on given variable name
-    /// corresponds to the index in the flattened pattern.
-    /// That is done because we need to retrieve the variable from the matched elements from within the flattened pattern.
+    /// VariableMap represents a map of variables in the whole query.
+    /// Variables are given indeces that correspond to the position in a result row + their type if included.
+    /// For example, let the match clause be (x) -> (z), in the query there are two variables.
+    /// The results of the matching algorithm will take a form of table, where first column represents 
+    /// the x variable and the second column represents the z variable. So the indeces for the variables of x and z are
+    /// 0 and 1, because when accessing x variable the 0 th column is used and vice versa.
     /// 
+    /// Note that this pattern is very simple and in case the patterns are connected and shuffled the indeces might not be 
+    /// visible to the user.
     /// Each variable is inserted only once despite possible multiple occurences of the same variable.
-    /// The main purpose of the variableMap is to obtain Elements that is the repetition does not change the desired value.
     /// </summary>
     internal class VariableMap : IEnumerable<KeyValuePair<string, Tuple<int, Table>>>
     {
      
         /// <summary>
-        /// Map with information about defined variables.
+        /// A map with information about defined variables.
         /// </summary>
         private Dictionary<string, Tuple<int, Table>> variableMap;
         

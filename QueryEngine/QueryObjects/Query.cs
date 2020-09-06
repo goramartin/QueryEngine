@@ -1,12 +1,21 @@
-﻿
-/*! \file
-  This file includes definition of one query. 
-  This could be considered as a facade because it includes classes that form more complicated 
-  structures.
-  Query is formed by query objects, those are match object, select object ...
-  Those objects represents information parsed from the inputted query.
-  They also perform the duties that involves eg implementing search algorithm for match object or
-  printing results in defined fashion for select object.
+﻿/*! \file
+This file includes definition of one query. 
+This could be considered as a facade because it includes classes that form more complicated 
+structures.
+Query is formed by query objects, those are match object, select object, order by ...
+Those objects represent information parsed from the inputted query.
+They also perform the duties with relation to their semantic meaning, such as, match object conducts matching on the graph,
+select prints results to the output and orderby sorts the results.
+
+The query is given a graph to compute the query on, a reader that reads user input query, a query execution helper that provides neccessary information
+for the query object (for example the number of threads available).
+
+The query itself is constructed as follows.
+Firstly the user input is tokenized from the reader. Then parsed trees are created from the tokens.
+The trees are evaluated and crutial information is obtained and passed to the query objects.
+
+Some query clauses must be present every time. Those are the select and the match clause.
+Other clauses are purely optional.
  */
 
 using System;

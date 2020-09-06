@@ -1,10 +1,7 @@
-﻿
-/*! \file
-  
-    This file includes definition of Formater which is used by a printer.
-    Formater formats out put of a select expression.
-    So far there are two formaters and those are simple and markdown formater.
- 
+﻿/*! \file
+This file includes definition of Formater which is used by a printer.
+Formater formats out put of a select expression.
+So far there are two formaters and those are simple and markdown formater.
  */
 
 

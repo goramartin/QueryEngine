@@ -1,12 +1,10 @@
 ﻿/*! \file
-   
-    This file includes definition of a file printer.
-    The file printer prints results into a file.
-    The file name is given in one of the program arguments.
+This file includes definition of a file printer.
+The file printer prints results into a file.
+The file name is given in one of the program arguments.
 
-    If multiple queries are computed during program runtime, the printer
-    always appends results into the same file.
-
+If multiple queries are computed during program runtime, the printer
+always appends results into the same file.
 */
 
 using System;

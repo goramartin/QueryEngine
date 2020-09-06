@@ -1,9 +1,8 @@
 ﻿
 /*! \file
-  
-    This file includes definition of a Printer.
-    Printer is used by a select object to print results with appropriate format.
-    Printer holds a formater and manages printing of results.
+This file includes definition of a Printer.
+Printer is used by a select object to print results with appropriate format.
+Printer holds a formater and manages printing of results to output.
 */
 
 using System;

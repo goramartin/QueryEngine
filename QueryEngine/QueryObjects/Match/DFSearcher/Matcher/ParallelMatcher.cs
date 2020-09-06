@@ -1,14 +1,12 @@
 ﻿/*! \file
+This class includes definitions of dfs search parallel algorithm used to find pattern defined in query match expression.
   
-  This class includes definitions of dfs search parallel algorithm used to find pattern defined in query match expression.
-  
-  This paralel version only uses single threaded version of the dfs search algorithm.
-  The one single threaded should not be used alone because it was made to be used by the parallel.
-  The parallel algorithm is lock-free algorithm, saving results have been made lock free thanks to 
-  storing result into their own place inside query result structure (thread index).
-  And division of work is done lock free thanks to interlocked class that allows to perform 
-  certain operation atomicaly.
-  
+This paralel version only uses single threaded version of the dfs search algorithm.
+The one single threaded should not be used alone because it was made to be used by the parallel.
+The parallel algorithm is lock-free algorithm, saving results have been made lock free thanks to 
+storing result into their own place inside query result structure (thread index).
+And division of work is done lock free thanks to interlocked class that allows to perform 
+certain operation atomicaly.
  */
 
 
@@ -90,7 +88,6 @@ namespace QueryEngine
                 TimeSpan tss = QueryEngine.stopwatch.Elapsed;
                 string eelapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", tss.Hours, tss.Minutes, tss.Seconds, tss.Milliseconds / 10);
                 Console.WriteLine("Query time " + eelapsedTime);
-
 
                 if (this.IsMergeNeeded)
                     this.ParallelMergeThreadResults();

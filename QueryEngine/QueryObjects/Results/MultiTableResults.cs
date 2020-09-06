@@ -1,4 +1,20 @@
-﻿using System;
+﻿/*! \file 
+This file contains definitions of a multi table results.
+This results table is used when merging results from the matching algorithm is not needed and 
+can be immediately return for printing to a select expression.
+
+The class obtains pure match results and because the data will be only enumerated the indexer and 
+order can be left empty.
+
+The enumeration works as follows.
+It internally iterates over thread indeces.
+So the enumeration starts with results only from the first thread and so on.
+Each time the next thread results should be enumerated, the simple TableResult class is created from them.
+And then the enumeration over the simpler class is started.
+*/
+
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -8,6 +24,12 @@ using System.Threading.Tasks;
 
 namespace QueryEngine
 {
+    /// <summary>
+    /// A class is used for enumerating unmerged results from the matching algorithm.
+    /// The indexer and order will never be used so they can be ommited.
+    /// The enumeration is done by creating a simpler result table for each single thread,
+    /// and start iteration over the simpler result table.
+    /// </summary>
     internal class MultiTableResults : ITableResults
     {
         /// <summary>
@@ -24,7 +46,6 @@ namespace QueryEngine
 
         public int RowCount
         { 
-            
             get
             {
                 int count = 0;
@@ -51,6 +72,10 @@ namespace QueryEngine
             throw new NotImplementedException();
         }
 
+
+        /// <summary>
+        /// Enumerate over results from each thread.
+        /// </summary>
         public IEnumerator<TableResults.RowProxy> GetEnumerator()
         {
             for (int i = 0; i < this.ThreadCount; i++)

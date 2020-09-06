@@ -1,10 +1,8 @@
 ﻿/*! \file
-    
-    This file contains definitions of a print variables.
-    These classes are used to obtain string representation of an expression value during select expression.
-    There is a need to obtains string values from evaluated expressions. Because we cannot implicitly work with the 
-    generic type, there must be a middle medium, which is this generic class.
-
+This file contains definitions of a print variables.
+These classes are used to obtain string representation of an expression value during printing.
+There is a need to obtains string values from evaluated expressions. Because we cannot implicitly work with the 
+generic types, there must be a middle medium, which is this generic class.
 */
 using System;
 using System.Collections.Generic;

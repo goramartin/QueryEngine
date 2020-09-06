@@ -1,9 +1,16 @@
 ﻿/*! \file 
- 
-    This file includes definition of a order by object.
-    His purpose is to contain information about sorting of results from a query.
-    It contains a list of comparers that will be used during sorting.
-    
+This file includes definition of a order by object.
+His purpose is to contain information about sorting of results from a query.
+It contains a list of comparers that will be used during sorting.
+
+Sorting is done with the help of HPC sharp library Merge sort in both parallel and single thread cases.
+Merge sort is chosen because it does the least amount of comparisons. The comparisons are really expensive
+because the database need to be accessed and expression must be computed in order to compare the results rows.
+
+The ordering works as follows.
+Firstly, the array of integers is created where each index represents a index to the results table (just like pointers).
+The array is then passed to the sorter with comparer. Each time the comparer compares the indeces the actual rows are
+compared instead. It saves a lot of time because moving rows in a table is very time consuming.
  */
 
 

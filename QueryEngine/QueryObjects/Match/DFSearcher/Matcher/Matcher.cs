@@ -1,7 +1,6 @@
 ﻿/*! \file
-    
-    This file includes interfaces to all dfs matchers.
-  
+This file includes interfaces to all dfs matchers.
+Matchers are used during matching algorithm. They search the graph for user inpputed match expression.
 */
 
 
@@ -15,6 +14,7 @@ namespace QueryEngine
 {
     /// <summary>
     /// Base interface for all matchers.
+    /// The returning of the results should be done separately from the searching.
     /// </summary>
     internal interface IPatternMatcher
     {

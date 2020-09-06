@@ -1,13 +1,13 @@
 ﻿
 /*! \file
-  
-    File contains definition of select object and select variable that is parsed from a select expression.
-    Select object is included inside Query class and prepresents printing of an input of a query.
-    Select object remembers the columns the user wants to print and creates an appropriate printer and formater
-    based on user needs.
+File contains definition of select object and select variable that is parsed from a select expression.
+Select object is included inside Query class and prepresents printing of an input of a query.
+Select object remembers the columns the user wants to print and creates an appropriate printer and formater
+based on the user needs.
 
-    Notice that during creation of the select expression it only stores the expression holders.
-    It is because printing needs both print variables and expression holders to specify headings. 
+Notice that during creation of the select expression, it only stores the expression holders.
+It is because printing needs both print variables and expression holders to specify headings, but the
+print variables are created only on demand when printing.
  */
 
 
@@ -21,7 +21,7 @@ namespace QueryEngine
 {
     /// <summary>
     /// Select represents list of variables to be printed.
-    /// List of select variables contains names and proprty names to be printed from the result.
+    /// List of select variables contains names and property names to be printed from the result.
     /// </summary>
     internal sealed class SelectObject
     {

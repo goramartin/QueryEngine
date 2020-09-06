@@ -1,15 +1,15 @@
 ﻿/*! \file 
  
-    This file contains definitions of a row comparer and a expression comparer.
+This file contains definitions of a row comparer and a expression comparer.
     
-    Each row comparer contains a list of expression comparers.
-    During row comparing each expression comparer compares values computed with the given row.
-    Based on the result it decides whether to continue comparing expression or returns resulting value.
+Each row comparer contains a list of expression comparers.
+During row comparing each expression comparer compares values computed with the given row.
+Based on the result it decides whether to continue comparing expression or returns resulting value.
  
-    Expression comparer is given to rows and computes expression value with the both rows. The values are then compared
-    using templated compare methods. 
+Expression comparer is given to rows and computes expression value with the both rows. The values are then compared
+using templated compare methods. 
 
-    Null values in descenging order appear as last elements.
+Null values in descenging order appear as last elements.
  
 */
 

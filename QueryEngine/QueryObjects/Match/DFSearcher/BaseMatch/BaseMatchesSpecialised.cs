@@ -1,8 +1,6 @@
 ﻿/*! \file
- 
-    This file include definitions of a specialised matches used to form a dfs pattern.
-    There are a vertex and edges match classes. 
- 
+This file include definitions of a specialised matches used to form a dfs pattern.
+There are a vertex and edges match classes. 
  */
 
 using System;

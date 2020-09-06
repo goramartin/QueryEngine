@@ -1,10 +1,9 @@
 ﻿/*! \file 
- 
 This file contains definition of a result class that is used by a matcher to store its sub results of each
 working thread.
  
 Class behaves like a two dimensional array. Where first array contains columns (column is representing a single variable from the pgql match expression), the second index contains 
-list of graph elements representing the varible of a column pertaining to a thread. That is to say, each thread stores results onto its specified index. Now, a row is formed 
+list of graph elements representing the varible of a column pertaining to a thread. That is to say, each thread stores results onto its specified index (the results of a thread are on the same row). Now, a row is formed 
 by lists of results from a single thread.
 
 */ 

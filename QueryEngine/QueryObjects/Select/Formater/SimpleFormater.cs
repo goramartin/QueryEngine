@@ -1,12 +1,8 @@
-﻿
-/*! \file
-  
-    This file includes definition of a simple formater which is used by a printer.
-    Simple formater formats output columns only with defined number od spaces.
-    Header and values are separated only by a line of dashes.
-
+﻿/*! \file
+This file includes definition of a simple formater which is used by a printer.
+Simple formater formats output columns only with defined number od spaces.
+Header and values are separated only by a line of dashes.
  */
-
 
 using System;
 using System.Collections.Generic;
@@ -17,7 +13,6 @@ using System.IO;
 
 namespace QueryEngine
 {
-
     /// <summary>
     /// Simple formater prints output with normalised length of a one column in a row.
     /// No table and separators are only spaces.

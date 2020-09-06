@@ -1,10 +1,8 @@
 ﻿/*! \file 
-
-    This file contains definitions of a proxy row struct.
-    Struct is readonly and contains only reference to a result table and index of a row.
-    Then it implements an indexer to provide access to each column of the row.
-
-    It is used during enumeration of results classes and as a argument to evaluation of expression.
+This file contains definitions of a proxy row struct.
+Struct is readonly and contains only reference to a result table and index of a row.
+Then it implements an indexer to provide access to each column of the row.
+It is used during enumeration of results classes and as a argument to evaluation of expression.
 */
 
 using System;

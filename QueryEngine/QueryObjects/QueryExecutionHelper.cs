@@ -1,8 +1,7 @@
 ﻿/*! \file
- 
- This file contains definition of a execution helper.
- Execution helper's job is to help with execution of a specific clauses of a query computation.
- Each query object adds interface to the helper that the object needs.
+This file contains definition of a execution helper.
+Execution helper's job is to help with execution of a specific clauses of a query computation.
+Each query object adds interface to the helper that the object needs.
  */
 
 using System;
@@ -15,6 +14,10 @@ using System.Threading.Tasks;
 namespace QueryEngine
 {
  
+    /// <summary>
+    /// A base interface for every execution helper extension.
+    /// Must be visible to all query objects.
+    /// </summary>
     internal interface BaseExecutionHelper
     {
         /// <summary>
@@ -75,6 +78,11 @@ namespace QueryEngine
     {
     }
 
+    /// <summary>
+    /// A execution helper that is used inside query. 
+    /// The query passes this execution helper to its query objects and each object
+    /// sees only the neccessary information for its own execution.
+    /// </summary>
     internal class QueryExecutionHelper : MatchExecutionHelper, SelectExecutionHelper, OrderByExecutionHelper
     {
         public int ThreadCount {get; set; }
