@@ -1,40 +1,41 @@
 ﻿
 /*! \file
-   This file contains definitions of a Parser.
+This file contains definitions of a Parser.
+(Sometimes in comments there are used "o-" instead of "<-" because it destroys xml formatting)
   
-  Parsing is done via Deep descend parsing (Top to bottom).
-  The whole query expression forms a single tree. Each parser method (ParseSelectExpr, ParseMatchExpr...)
-  parses only the part corresponding to the query word and leaves the internal position of the next parsed token
-  to the next token after the last token parsed by methods above.
+Parsing is done via Deep descend parsing (Top to bottom).
+The whole query expression forms a single tree. Each parser method (ParseSelectExpr, ParseMatchExpr...)
+parses only the part corresponding to the query word and leaves the internal position of the next parsed token
+to the next token after the last token parsed by methods above.
   
-  Visitors then create structures that are used to create query objects.
+Visitors then create structures that are used to create query objects.
 
-  Grammar:
-  Query -> Select Match (OrderBy)? ;
+Grammar:
+Query -> Select Match (OrderBy)? ;
   
-  Select -> SELECT (\*|(SelectPrintTerm (, SelectPrintTerm)*)
-  SelectPrintTerm -> Expression
+Select -> SELECT (\*|(SelectPrintTerm (, SelectPrintTerm)*)
+SelectPrintTerm -> Expression
   
-  Match -> MATCH MatchTerm (, MatchTerm)*
-  MatchTerm -> Vertex (Edge Vertex)*
-  Vertex -> (MatchVariable)
-  Edge -> (EmptyAnyEdge|EmptyOutEdge|EmptyInEdge|AnyEdge|InEdge|OutEdge) 
-  EmptyAnyEdge -> -
-  EmptyOutEdge -> <-
-  EmptyInEdge -> ->
-  AnyEdge -> -[MatchVariable]-
-  InEdge -> <-[MatchVariable]-
-  OutEdge -> -[MatchVariable]->
-  MatchVariable -> (VariableNameReference)?(:TableType)?
-  TableType -> IDENTIFIER
+Match -> MATCH MatchTerm (, MatchTerm)*
+MatchTerm -> Vertex (Edge Vertex)*
+Vertex -> (MatchVariable)
+Edge -> (EmptyAnyEdge|EmptyOutEdge|EmptyInEdge|AnyEdge|InEdge|OutEdge) 
+EmptyAnyEdge -> -
+EmptyOutEdge -> <-
+EmptyInEdge -> ->
+AnyEdge -> -[MatchVariable]-
+InEdge -> <-[MatchVariable]-
+OutEdge -> -[MatchVariable]->
+MatchVariable -> (VariableNameReference)?(:TableType)?
+TableType -> IDENTIFIER
  
-  OrderBy -> ORDER BY OrderTerm (, OrderTerm)*
-  OrderTerm -> Expression (ASC|DESC)?
+OrderBy -> ORDER BY OrderTerm (, OrderTerm)*
+OrderTerm -> Expression (ASC|DESC)?
  
-  Expression -> VariableNameReference(.VariablePropertyReference)? AS Label
-  Label -> IDENTIFIER
-  VariableNameReference -> IDENTIFIER
-  VariablePropertyReference -> IDENTIFIER
+Expression -> VariableNameReference(.VariablePropertyReference)? AS Label
+Label -> IDENTIFIER
+VariableNameReference -> IDENTIFIER
+VariablePropertyReference -> IDENTIFIER
  */
 
 using System;
@@ -185,10 +186,10 @@ namespace QueryEngine
         /// Vertex -> (MatchVariable)
         /// Edge -> (EmptyAnyEdge|EmptyOutEdge|EmptyInEdge|AnyEdge|InEdge|OutEdge) 
         /// EmptyAnyEdge -> -
-        /// EmptyOutEdge -> <-
+        /// EmptyOutEdge -> o-
         /// EmptyInEdge -> ->
         /// AnyEdge -> -[MatchVariable]-
-        /// InEdge -> <-[MatchVariable]-
+        /// InEdge -> o-[MatchVariable]-
         /// OutEdge -> -[MatchVariable]->
         /// MatchVariable -> (VariableNameReference)?(:TableType)?
         /// TableType -> IDENTIFIER
