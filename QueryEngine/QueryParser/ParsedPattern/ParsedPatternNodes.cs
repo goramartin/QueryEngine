@@ -1,10 +1,9 @@
 ﻿/*! \file
-  
-    This file includes definitions of parsed pattern nodes.
-    Parsed pattern nodes represent single elements that will be matched during matching algorithm.
-    For example if the user inputs pattern (a) -> (q) - (p)
-    The parsed pattern nodes inside parsed pattern class will be : vertex parsed node, out edge parsed node etc..
-    These nodes are latern used for creating appropriate base matches.
+This file includes definitions of parsed pattern nodes.
+Parsed pattern nodes represent single elements that will be matched during matching algorithm.
+For example if the user inputs pattern (a) -> (q) - (p)
+The parsed pattern nodes inside parsed pattern class will be : vertex parsed node, out edge parsed node etc..
+These nodes are subsequently used for creating appropriate base matches during the final pattern creation.
  */
 
 

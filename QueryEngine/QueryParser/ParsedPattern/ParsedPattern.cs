@@ -1,13 +1,13 @@
-﻿
-/*! \file
-  This file includes definitions of parsed pattern that is later on used for creating pattern 
-  that is used in the search algorithm.
-  PGQL syntax for match section is done via "chains" connected with commas.
-  e.g. MATCH (x) - (y), (y) - (p)
-  First chain is (x) - (y) and the second one is (y) - (p).
-  Parsed pattern is class that encapsulated one chain of the parsed pattern nodes and allows certain operations 
-  to allow working with the pattern more easily. Such as splitting.
-  Spliting is used to make search pattern linear (it matches only forward) and it helps connect interconnected patterns.
+﻿/*! \file
+This file includes definitions of a parsed pattern that is later on used for creating pattern 
+that is, at the end, used in the search algorithm.
+PGQL syntax for match section is done via "chains" connected with commas.
+e.g. MATCH (x) - (y), (y) - (p)
+First chain is (x) - (y) and the second one is (y) - (p).
+Parsed pattern is class that encapsulated one chain that consists of the parsed pattern nodes and allows certain operations 
+to allow working with the pattern more easily. Such as splitting.
+Spliting is used to make search pattern linear (it matches only forward) and it helps connect interconnected patterns through out 
+all other chains.
  */
 
 using System;
@@ -19,10 +19,9 @@ using System.Threading.Tasks;
 namespace QueryEngine
 {
     /// <summary>
-    /// Class used to shallow parsing of match expression.
+    /// Class used to shallow parsing of match expression from user inputted query.
     /// Pattern contains single nodes with their corresponding attributes collected when parsed.
-    /// Can be splited by a certain parsed pattern node which contains given string variable
-    /// Is used when creating specialised pattern, such as DFS.
+    /// Can be splited by a split variable if set and creating two separate patterns.
     /// </summary>
     internal sealed class ParsedPattern
     {
@@ -79,8 +78,8 @@ namespace QueryEngine
         /// Instance on which we split, the pattern is reduced from the beginning.
         /// The new build pattern (the nodes taken into account from the reduction from the instance) is build in a reversed order.
         /// For example: (a) - (b) - (c) splited by var. b == (b) - (a) , (b) - (c).
-        /// Split is done only if the splitVariable is not located in on the first index of the pattern.
-        /// If the variable is located in the end of the pattern, the pattern is only reversed inplace.
+        /// Split is done only if the splitVariable is not located on the first index of the pattern.
+        /// If the variable is located in the end of the pattern, the pattern is only reversed in place.
         /// </summary>
         /// <returns> Returns the part before split variable (reverse order) or null if it is the first one. </returns>
         public ParsedPattern TrySplitParsedPattern()
@@ -96,8 +95,8 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Intead of spliting into one normal part and the other empty part.
-        /// We only reverse order of the nodes in the pattern of this instance.
+        /// This method is called if the split index if the last index of the pattern.
+        /// Then the spilliting is uneccessary and the chain can be reversed in place.
         /// Note we are removing former nodes from the end of the list, and add the reversed ones to the end.
         /// The size of array after one iteration stays the same as before calling the method.
         /// </summary>
@@ -115,15 +114,15 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Splits the pattern of the instance into two parts. 
+        /// Splits the pattern of this instance into two parts. 
         /// First part starts with variable on the split index and contains reversed pattern from the index to the beginning
-        /// of the pattern with reversed edges.
+        /// of the pattern ( reversed edges as well ).
         /// The second part starts with variable on the split index and contains former pattern from the index to the end of the pattern
         /// unchanged.
         /// Note that the last part stays in the instance while the first part is used to create a new instance of Parsed pattern
         /// Example:
-        /// For parsed pattern: (x) -> (z) <- (p) - () where the split variable is p. The result looks:
-        /// The first part = (p) -> (z) <- (x), the second part = (p) - () 
+        /// For parsed pattern: (x) -o (z) o- (p) - () where the split variable is p. The result looks:
+        /// The first part = (p) -o (z) o- (x), the second part = (p) - () 
         /// </summary>
         /// <param name="splitVariableIndex"> Index of split variable </param>
         /// <returns> New instance of Parsed Pattern </returns>
@@ -141,17 +140,17 @@ namespace QueryEngine
 
 
         /// <summary>
-        /// Finds index of split variable. Split variable is used to split the pattern into two parts.
+        /// Finds index of a split variable. The split variable is used to split the pattern into two parts.
         /// </summary>
-        /// <returns> Index of split variable, -1 for not containing any split variable.</returns>
+        /// <returns> Index of the split variable, -1 for not containing any split variable.</returns>
         private int FindIndexOfSplitVariable()
         {
             if (this.splitBy == null) return -1;
+           
             //Find index of splitVariable
             for (int i = 0; i < this.GetCount(); i++)
-            {
                 if (this.splitBy == this.Pattern[i].Name) return i;
-            }
+            
             return -1;
         }
 

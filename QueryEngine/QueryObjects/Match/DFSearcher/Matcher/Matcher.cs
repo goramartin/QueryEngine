@@ -1,6 +1,7 @@
 ﻿/*! \file
-This file includes interfaces to all dfs matchers.
+This file includes interfaces to all matchers.
 Matchers are used during matching algorithm. They search the graph for user inpputed match expression.
+Returning results from the matching should be handled independently.
 */
 
 

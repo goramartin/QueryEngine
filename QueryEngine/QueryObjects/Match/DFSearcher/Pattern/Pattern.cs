@@ -1,15 +1,19 @@
 ﻿/*! \file
   
-  This file includes definition of pattern used by a dfs match algorithm.
+This file includes definition of pattern used by a dfs match algorithm.
   
-  Pattern itself is created from ParsedPattern nodes that visitor of match expression tree collects.
-  The chains are sorted and connected so that they form a connected pattern if the chains are connected.
-  (Connected, that means that they share a variable.)
-  This allows the search algorithm iterate over chains and choose the right vertices to start search for the 
-  particular pattern without repeating any unneccessary iterations. Also if the same variable occurs,
-  the chain might be split into two chains  (a) - (b) - (c) where the repeating variable is b
-  New chains will be (b) - (a), (b) - (c). This helps search algorithm connect chains together.
- 
+Pattern itself is created from ParsedPattern nodes that visitor of match expression tree collects.
+The chains are sorted and connected so that they form a connected pattern (if the chains are connected.
+Connected, that means that they share a variable.)
+This allows the search algorithm iterate over chains in forward manner and choose the right vertices to start search for the 
+particular pattern without repeating any unneccessary iterations. Also if the same variable occurs,
+the chain might be split into two chains  (a) - (b) - (c) where the repeating variable is b
+New chains will be (b) - (a), (b) - (c). This helps search algorithm connect chains together, because newly created chains,
+it can be simply connected with variable b and proceed forward to -(a), -(c) without the need to go backwards to (a)-.
+
+The matching algorith tries to apply in every step elements it finds and the matcher can ask the pattern if it reached end of chain
+or end of entire pattern. During matching, variables are stored in a scope. Then they can be access properly with the indeces
+stored in the variable map. Hence, only elements from scope are copies into result tables.
  */
 
 using System;
@@ -23,7 +27,7 @@ namespace QueryEngine
     /// <summary>
     /// Class that implements basic DFS pattern.
     /// Creates it self from parsed pattern.
-    /// Pattern is represented by the lists of matching nodes.
+    /// Pattern is represented by the lists of base match nodes.
     /// Also it remembers the state of the matched variables and state
     /// which nodes and chains should be matched.
     /// The matched variables are stored in the scope.
@@ -76,8 +80,8 @@ namespace QueryEngine
         /// <summary>
         /// Creates a pattern from parsed patterns.
         /// Creation is done as follow: Ordering of patters (based on connection between chains)
-        /// then spliting is done if neccessary in order to make search alogirth linear then 
-        /// proper match nodes are created with match node factory.
+        /// then spliting is done if neccessary in order to ensure that match algorithm can match only forward, then 
+        /// proper match nodes are created with a match node factory.
         /// </summary>
         /// <param name="map"></param>
         /// <param name="parsedPatterns"></param>
@@ -99,11 +103,12 @@ namespace QueryEngine
 
         #region PatternCreation
         /// <summary>
-        /// Creates pattern from Parsed Pattern made by match visitor, also creates a map for variables
-        /// during pattern matching.
-        /// Given pattern is check for correctness and ordered so each connected patterns go after each 
-        /// Then the resulting pattern is created. Patterns to be splited are splited into two based on split variable.
+        /// Creates pattern from Parsed Pattern passed from match visitor, also actualises a map for variables.
+        /// Given pattern is ordered so that each connected pattern go after one another and form a connected components. 
+        /// Subsequently, the resulting pattern formed by base match node is created.
+        /// Patterns to be splited are splited into two based on split variable. So that match algorithm can match only forward. 
         /// For example: (a) - (b) - (c) splited by var. b == (b) - (a) , (b) - (c)
+        /// Note that (a) - (b) was reversed in order ( oriented edges are reversed as well )
         /// </summary>
         /// <param name="parsedPatterns"> Pattern created by Match Visitor </param>
         /// <param name="variableMap"> Query map of variables (empty) </param>
@@ -111,15 +116,15 @@ namespace QueryEngine
         {
             var orderedPatterns = OrderParsedPatterns(parsedPatterns);
 
-            Console.ReadLine();
             // For every Parsed Pattern
             for (int i = 0; i < parsedPatterns.Count; i++)
             {
-                // Try to split pattern into two parts. Only the first part is return and the second one is stored at the parsedPatterns[i]
+                // Try to split pattern into two parts.
+                // If split, then only the first part is returned and the second one is stored at the parsedPatterns[i]
                 var firstPart = orderedPatterns[i].TrySplitParsedPattern();
 
                 // If the parsed pattern was splited
-                // Add both parts into the real Pattern
+                // Add both parts into the real pattern
                 if (firstPart != null)
                 {
                     this.Patterns.Add(CreateChain(firstPart.Pattern, variableMap));
@@ -130,88 +135,85 @@ namespace QueryEngine
 
             // Check that each subpattern has at least one element.
             for (int i = 0; i < this.Patterns.Count; i++)
-            {
-                if (this.Patterns[i].Count == 0) throw new ArgumentException($"{this.GetType()} one of the patterns is empty.");
-            }
+                if (this.Patterns[i].Count == 0) 
+                    throw new ArgumentException($"{this.GetType()} one of the patterns is empty.");
 
         }
 
         /// <summary>
-        /// Orders patterns so that each consecutive pattern can be connected with patterns before.
-        /// Map used patterns in an array of bools (true meaning that the pattern has been ordered). If we found two patterns that have the same variable,
-        /// then check if one of these patterns was ordered and do following:
-        /// 1, If the first was ordered and the second did not, then, we add the second to ordered sequence, mark that
-        ///    it was ordered and set its split variable to the common variable.
-        /// 2, If the first was not ordered and the second was ordered, we add the first to results and set its split variable to the common variable.
-        /// 3, If both were ordered we skip them, if non of them are used we add both and set split variable to the second pattern.
-        /// Usused patterns, those that couldnt be connected to any other pattern, are added at the end. 
-        /// Their splitBy property remains set to Null, the same counts.
+        /// Purpose of the ordering is to ensure that the chains in the final list form
+        /// a connected components and to find the variable that the chains are connected by.
+        /// By doing so, the matching algorithm can simply start dfs by picking the variable that the chains were
+        /// connected by. If there are more separate connected components. They are put after one another.
+        /// 
+        /// Unused patterns are pattern that were not placed into final ordered result.
+        /// Connected pattern indeces queue is a queue for indeces of pattern that can be connected by currently 
+        /// processed pattern.
+        /// Ordering is done as follows:
+        /// For every pattern -
+        /// 1. if it has not been used, pick him and add him to final results, mark it as used
+        ///    and enqueue its index adn proceed to step 2.
+        /// 2. We enequeud the index. Iterate over all unused parsed patterns and check for common variables.
+        ///    If a common variable was found, put the chain into results and set his split by variable and enqueue him.
+        ///    Repeat until the queue is empty.
+        /// Note that patterns that are not connected or are firstly picked have not got set their split by variable.
         /// </summary>
-        /// <param name="parsedPatterns"> Parser Pattern from MatchVisitor </param>
+        /// <param name="parsedPatterns"> Parser Patterns from MatchVisitor. </param>
         /// <returns> Ordered parsed patterns. </returns>
         private List<ParsedPattern> OrderParsedPatterns(List<ParsedPattern> parsedPatterns)
         {
             List<ParsedPattern> result = new List<ParsedPattern>();
             bool[] usedPatterns = new bool[parsedPatterns.Count];
             usedPatterns.Populate(false);
+            Queue<int> connectedPatternsIndeces = new Queue<int>();
 
-            // For each pattern in ParsedPatterns
+            // For every pattern
             for (int i = 0; i < parsedPatterns.Count; i++)
             {
-                var currentParsedPattern = parsedPatterns[i];
-                // Take all following patterns
-                for (int j = i + 1; j < parsedPatterns.Count; j++)
+                // If it is used already, skip to the next one
+                if (usedPatterns[i] == true) continue;
+                else
                 {
-                    var otherParsedPattern = parsedPatterns[j];
-                    if (currentParsedPattern.TryFindEqualVariable(otherParsedPattern, out string varName))
+                    // Else add it to the results, mark it as used and enqueu it
+                    result.Add(parsedPatterns[i]); 
+                    usedPatterns[i] = true;
+                    connectedPatternsIndeces.Enqueue(i);
+                    while (connectedPatternsIndeces.Count != 0)
                     {
-                        // Both patterns are ordered -> add both of them to results.
-                        if (!usedPatterns[i] && !usedPatterns[j])
+                        // Take the last inserted pattern and try to iterate over all other unused patterns and check
+                        // for common variables
+                        ParsedPattern currentPattern = parsedPatterns[connectedPatternsIndeces.Dequeue()];
+                        for (int j = 0; j < parsedPatterns.Count; j++)
                         {
-                            usedPatterns[i] = true; usedPatterns[j] = true;
-                            result.Add(parsedPatterns[i]); result.Add(parsedPatterns[j]);
-                            parsedPatterns[j].splitBy = varName;
-                        }
-                        // The first one is ordered and the second one is not -> add second one to the results.
-                        else if (usedPatterns[i] && !usedPatterns[j])
-                        {
-                            usedPatterns[j] = true;
-                            result.Add(parsedPatterns[j]);
-                            parsedPatterns[j].splitBy = varName;
-                        }
-                        // Both were ordered. 
-                        else if (usedPatterns[i] && usedPatterns[j])
-                        {
-                            // Special case, Added two unconnected nodes but the first one is later connected by later one
-                            if (parsedPatterns[i].splitBy == null) parsedPatterns[i].splitBy = varName;
-                        } 
-                        // The first one is not ordered and the second one is -> add the first one to the results.
-                        else if (!usedPatterns[i] && usedPatterns[j])
-                        {
-                            usedPatterns[i] = true;
-                            result.Add(parsedPatterns[i]);
-                            parsedPatterns[i].splitBy = varName;
+                            // If the pattern is used, it was already connected by other pattern
+                            // else we can connected it to the results.
+                            if (usedPatterns[j] == true) continue;
+                            else if (currentPattern.TryFindEqualVariable(parsedPatterns[j], out string name)){
+                                result.Add(parsedPatterns[j]);
+                                usedPatterns[j] = true;
+                                parsedPatterns[j].splitBy = name;
+                                connectedPatternsIndeces.Enqueue(j);
+                            } else { /* continue */}
                         }
                     }
                 }
-            }
-
-            // Add rest of unconnected patterns to results.
-            for (int i = 0; i < usedPatterns.Length; i++)
-            {
-                if (usedPatterns[i] == false) result.Add(parsedPatterns[i]);
             }
 
             return result;
         }
 
         /// <summary>
-        /// Creates pattern chain used in a matcher.
-        /// 
+        /// Creates a pattern chain formed by base matches that create a final pattern used in a matcher.
+        /// Iterates over a list of given pattern nodes and creates
+        /// appropriate base match classes with the attributes based on properties
+        /// of each pattern node. During this iteration, the variable map for entire
+        /// query is actualised. (The names of pattern nodes represent variables.)
+        /// And the order of added variable form an order that will be used to access each variable throughout
+        /// the entire query computation.
         /// </summary>
         /// <param name="patternNodes"> Parsed pattern </param>
-        /// <param name="map"> Map to store info about veriables </param>
-        /// <returns> Chain of base matched for search algorithm. </returns>
+        /// <param name="map"> A map to store info about variables. </param>
+        /// <returns> Chain of base matches for the search algorithm. </returns>
         private List<DFSBaseMatch> CreateChain(List<ParsedPatternNode> patternNodes, VariableMap map)
         {
             List<DFSBaseMatch> tmpChain = new List<DFSBaseMatch>();
@@ -248,7 +250,8 @@ namespace QueryEngine
         #region PatternInterface
 
         /// <summary>
-        /// Calls apply on match object.
+        /// Calls apply on match object. The element is checked whether it sufficces condition if yes,
+        /// the scope is actualised if necessary.
         /// </summary>
         /// <param name="element"> Element to be tested. </param>
         /// <returns> True if the element can be applied, false if it cannot be applied. </returns>
@@ -258,8 +261,8 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Prepares subsequent pattern. That is, increment pattern index and set current node index to 0;
-        /// Algorithm must ensure that the method is not called after last pattern.
+        /// Prepares subsequent pattern (Moving in dfs forward). The only need is to actualise the indeces. It proceed to the next pattern,
+        /// thus current pattern must be increased and position of base match node set to start. 
         /// </summary>
         public void PrepareNextSubPattern()
         {
@@ -269,8 +272,9 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Algorithm should ensure that the method is not called after first pattern.
-        /// Prepares previous pattern, reduces pattern index and sets current node index to last node in the pattern.
+        /// Algorithm should ensure that the method is not called after the first pattern.
+        /// Prepares previous pattern (Moving backwards in dfs). Only indeces must be reduced, variables were unset
+        /// during return from each base match node.
         /// </summary>
         public void PreparePreviousSubPattern()
         {
@@ -282,6 +286,7 @@ namespace QueryEngine
         /// <summary>
         /// The algorithm should ensure that the method is not called after the last match node.
         /// Moves indeces to the next match node.
+        /// Proceeds to next element to be matched.
         /// </summary>
         public void PrepareNextNode()
         {
@@ -290,10 +295,9 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Prepares previous node.
-        /// If the current node is not anonymous, we need to reset variable inside the scope and
-        /// also from the sideways scope. The unset method can be called even if the variable is not set,
-        /// in that case the outcomes are none.
+        /// Proceeds to previous element that was matched.
+        /// If the current node is not anonymous, we need to reset variable inside the scope.
+        /// The unset method is called even if the variable is not set.
         /// </summary>
         public void PreparePreviousNode()
         {
@@ -306,8 +310,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Unsets the variable representing current match node.
-        /// Both from scope and used elements.
+        /// Unsets the variable representing current matched node from the scope.
         /// </summary>
         public void UnsetCurrentVariable()
         {
@@ -315,17 +318,17 @@ namespace QueryEngine
         }
 
         /// <summary>
-        ///  Gets starting element of the current chain.
+        /// Gets starting element of the current chain (if it was connected to the ones before).
         /// </summary>
-        /// <returns> Null if anonymous/first appearance else element from scope. </returns>
+        /// <returns> Null if anonymous/firstAppearance else it is picked from the scope. </returns>
         public Element GetCurrentChainConnection()
         {
             return this.Patterns[this.CurrentPatternIndex][0].GetVariable(this.Scope);
         }
 
         /// <summary>
-        /// Gets starting element of the next chain.
-        /// This method is called only when there is another pattern.
+        /// Gets starting element of the next chain (if it was connected to the ones before).
+        /// This method is called only when there is another pattern to be processed.
         /// If the next chain contains a variable that was already used it returns it from the scope.
         /// </summary>
         /// <returns>Null if anonymous/first appearance else element from scope. </returns>
@@ -345,7 +348,7 @@ namespace QueryEngine
         }
 
        /// <summary>
-       /// Returns edge type of a current match node.
+       /// Returns type of the graph element represented by the current match node.
        /// </summary>
         public Type GetMatchType()
         {
@@ -362,7 +365,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Returns variables that have been matched so far.
+        /// Returns all variables that have been matched so far.
         /// </summary>
         public Element[] GetMatchedVariables()
         {

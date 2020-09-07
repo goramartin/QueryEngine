@@ -1,9 +1,7 @@
 ﻿/*! \file
- 
- This file contains factory for match expression.
- Matchers and patterns are saved inside a registry.
-
- Each matcher has a set of available patterns.
+This file contains factory for match expression.
+Matchers and patterns are saved inside a registry.
+Each matcher has a set of available patterns.
  */
 
 
