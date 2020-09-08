@@ -95,6 +95,16 @@ namespace QueryEngine
             return this.resTable;
         }
 
+        public List<Element>[] GetThreadResults(int threadIndex)
+        {
+            List<Element>[] resultRow = new List<Element>[this.ColumnCount];
+
+            for (int i = 0; i < this.ColumnCount; i++)
+                resultRow[i] = this.resTable[i][threadIndex];
+
+            return resultRow;
+        }
+
         /// <summary>
         /// Merges results of a one column into the first thread index.
         /// And clears the rest.

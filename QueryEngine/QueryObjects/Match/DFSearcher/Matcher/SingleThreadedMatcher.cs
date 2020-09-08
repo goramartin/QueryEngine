@@ -48,12 +48,12 @@ namespace QueryEngine
     {
         private Graph graph;
         private DFSPattern pattern;
-        private Element[] result;
+        private Element[] matchedElements;
         private bool processingVertex;
+        private List<Element>[] results;
         private int threadIndex; // Based on thread, implicitly 0
         private int startVerticesIndex;
         private int startVerticesEndIndex;
-        private MatchResultsStorage queryResults;
 
         public int Count = 0;
         /// <summary>
@@ -69,12 +69,12 @@ namespace QueryEngine
                 throw new ArgumentException($"{this.GetType()}, passed null to a constructor.");
 
             this.graph = graph;
-            this.result = new Element[pattern.AllNodeCount];
+            this.matchedElements = new Element[pattern.AllNodeCount];
             this.pattern = (DFSPattern)pattern;
-            this.queryResults = results;
             this.threadIndex = threadIndex;
-
-            // Implicit range of vertices to iterate over.
+            this.results = results.GetThreadResults(this.threadIndex);
+            
+            // Implicit range of vertices to iterate over the entire graph.
             this.startVerticesIndex = 0;
             this.startVerticesEndIndex = graph.vertices.Count;
 
@@ -224,7 +224,7 @@ namespace QueryEngine
                     if (pattern.CurrentMatchNodeIndex <= 0)
                     {
                         // The 0th variable must be unset here, because we cant anticipate if we failed on 0th match.
-                        this.ClearCurrentFromResult();
+                        ClearCurrentFromResult();
                         pattern.PreparePreviousNode();
                         break;
                     }
@@ -251,7 +251,7 @@ namespace QueryEngine
         /// </summary>
         /// <param name="lastUsedElement"> Last matched Element. </param>
         /// <param name="lastUsedEdge"> Last matched edge. </param>
-        /// <returns> Next element that will be tried to applied. </returns>
+        /// <returns> Next element that will be tried to be applied. </returns>
         private Element DoDFSForward(Element lastUsedElement, Edge lastUsedEdge)
         {
             if (processingVertex)
@@ -299,7 +299,7 @@ namespace QueryEngine
             else
             {
                 // Take the edge on the current position in result array. (Edge that was matched before, can be null if no edge was there.)
-                Element lastUsedEdgeInResult = (Edge)result[pattern.OverAllIndex];
+                Element lastUsedEdgeInResult = (Edge)matchedElements[pattern.OverAllIndex];
 
                 // lastElement is null only when we are returning from the removed vertex -> we take the last used edge in the result.
                 // Else we always use the newest edge we failed on. 
@@ -314,7 +314,7 @@ namespace QueryEngine
                 // Try to find new edge from the last vertex.
                 processingVertex = true; // To jump into dfs forward.
                 Element nextElement =
-                    DoDFSForward((Vertex)result[pattern.OverAllIndex - 1], (Edge)lastElement);
+                    DoDFSForward((Vertex)matchedElements[pattern.OverAllIndex - 1], (Edge)lastElement);
 
                 // If no edge was found, we want to remove also the last vertex. (because we consumed all of his edges)
                 // Returning null in this position removes the vertex in the next cycle of the main algorithm.
@@ -421,7 +421,7 @@ namespace QueryEngine
         /// <param name="element">Element to be added to result.</param>
         private void AddToResult(Element element)
         {
-            result[pattern.OverAllIndex] = element;
+            matchedElements[pattern.OverAllIndex] = element;
         }
 
         /// <summary>
@@ -429,7 +429,7 @@ namespace QueryEngine
         /// </summary>
         private void ClearCurrentFromResult()
         {
-            result[pattern.OverAllIndex] = null;
+            matchedElements[pattern.OverAllIndex] = null;
         }
 
 
@@ -467,8 +467,8 @@ namespace QueryEngine
             var scope = this.pattern.GetMatchedVariables();
             this.Count++;
 
-           for (int i = 0; i < this.queryResults.ColumnCount; i++)
-                    this.queryResults.AddElement(scope[i], i, this.threadIndex);
+           for (int i = 0; i < this.results.Length; i++)
+                    this.results[i].Add(scope[i]);
         }
 
         /// <summary>
