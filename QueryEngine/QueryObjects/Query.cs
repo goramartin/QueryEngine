@@ -83,7 +83,7 @@ namespace QueryEngine
 
             if (this.qEhelper.IsSetOrderBy) this.orderBy.Sort(this.results, this.qEhelper);
 
-            this.select.Print(this.results, this.qEhelper);
+            //this.select.Print(this.results, this.qEhelper);
         }
     }
 

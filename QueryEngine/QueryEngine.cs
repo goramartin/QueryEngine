@@ -13,7 +13,7 @@ using System.Text;
 using System.Threading;
 using System.IO;
 using System.Diagnostics;
-
+using System.Runtime.CompilerServices;
 
 namespace QueryEngine
 {
@@ -104,6 +104,38 @@ namespace QueryEngine
             else return null; 
         }
 
+        /// <summary>
+        /// Parses program arguments.
+        /// </summary>
+        /// <param name="args"> Program arguments. </param>
+        /// <returns> Returns query execution helper actualised with parsed arguments. </returns>
+        private static QueryExecutionHelper ParseProgramArguments(string[] args)
+        {
+            QueryExecutionHelper qEHelper = new QueryExecutionHelper();
+            qEHelper.ThreadCount = GetThreadCount(args[0]);
+            qEHelper.Printer = GetPrinter(args[1]);
+            qEHelper.Formater = GetFormater(args[2]);
+            qEHelper.VerticesPerThread = GetVerticesPerhread(qEHelper.ThreadCount, args);
+            qEHelper.FileName = GetFileName(qEHelper.ThreadCount, qEHelper.Printer, args);
+            return qEHelper;
+        }
+
+        /// <summary>
+        /// Awaits an user to input answer whether the user wants to input another query.
+        /// </summary>
+        /// <returns> True if user wants to continue. Otherwise, false. </returns>
+        private static bool ContinueWithAnotherQuery()
+        {
+            Console.WriteLine();
+            Console.WriteLine("Do you want to continue with another query? y/n (single character answer):");
+            Console.WriteLine();
+
+            string unfinishedLine = Console.ReadLine();
+            string userValue = Console.ReadLine(); 
+            
+            if (userValue[0] != 'y') return false;
+            else return true;
+        }
 
     /// <summary>
     /// Main algorith.
@@ -114,24 +146,18 @@ namespace QueryEngine
     private static void Run(string[] args, TextReader reader)
         {
             if (args.Length < 3) throw new ArgumentException("Wrong number of program parameters.");
+            QueryExecutionHelper qEHelper = ParseProgramArguments(args);
 
-            // Parse program arguments
-            QueryExecutionHelper qEHelper = new QueryExecutionHelper();
-            qEHelper.ThreadCount = GetThreadCount(args[0]);
-            qEHelper.Printer = GetPrinter(args[1]);
-            qEHelper.Formater = GetFormater(args[2]);
-            qEHelper.VerticesPerThread = GetVerticesPerhread(qEHelper.ThreadCount, args);
-            qEHelper.FileName = GetFileName(qEHelper.ThreadCount, qEHelper.Printer, args);
-
-
-
+            // Set only if on a desktop machine
             using (Process p = Process.GetCurrentProcess())
             p.PriorityClass = ProcessPriorityClass.RealTime; //High;
 
+            // Set a number of threads in the thread pool that will be immediatelly spawned on demand,
+            // without the need to wait.
             if (qEHelper.ThreadCount != 1)
                 ThreadPool.SetMinThreads(qEHelper.ThreadCount, 0);
 
-            // Load graph.
+            // Load the graph.
             Graph graph = new Graph();
             Console.Clear();
 
@@ -141,29 +167,29 @@ namespace QueryEngine
             while (true)
             {
                 Console.WriteLine("Enter Query:");
-                Query query = new Query(reader, graph, qEHelper);
+                try
+                {
+                    Console.WriteLine();
+                    Query query = new Query(reader, graph, qEHelper);
+                    Console.WriteLine();
 
-                Console.WriteLine();
-                query.ComputeQuery();
+                    query.ComputeQuery();
+                   
+                    stopwatch.Stop();
+                    TimeSpan ts = QueryEngine.stopwatch.Elapsed;
+                    string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
+                    Console.WriteLine("Query time " + elapsedTime);
+                    stopwatch.Reset();
 
-
-
-                stopwatch.Stop();
-                TimeSpan ts = QueryEngine.stopwatch.Elapsed;
-                string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-                Console.WriteLine("Query time " + elapsedTime);
-                stopwatch.Reset();
-
-
-
-                Console.WriteLine("Finished computing. Pres enter to continue...");
-                Console.ReadLine();
-                Console.WriteLine();
-                Console.WriteLine("Continue with another query? y/n (single character answer):");
-                string c;
-                c = (Console.ReadLine());
-                if (c[0] != 'y') break;
-                Console.Clear();
+                    Console.WriteLine("Finished the computation of the query.");
+                    if (!ContinueWithAnotherQuery()) return;
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                    if (!ContinueWithAnotherQuery()) return;
+                    stopwatch.Reset();
+                }
             }
         }
 
@@ -173,9 +199,9 @@ namespace QueryEngine
             {
                Run(args, Console.In);
             }
-            catch (Exception e )
+            catch (Exception e)
             {
-                Console.WriteLine(e);
+                Console.WriteLine(e.Message);
                 Console.WriteLine("Press enter to close the application.");
                 Console.ReadLine();
             }

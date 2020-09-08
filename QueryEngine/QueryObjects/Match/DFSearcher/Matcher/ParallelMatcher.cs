@@ -90,13 +90,14 @@ namespace QueryEngine
                 string eelapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", tss.Hours, tss.Minutes, tss.Seconds, tss.Milliseconds / 10);
                 Console.WriteLine("Query time " + eelapsedTime);
 
-                if (this.IsMergeNeeded)
-                    this.ParallelMergeThreadResults();
+              //  if (this.IsMergeNeeded)
+                  //  this.ParallelMergeThreadResults();
                
             }
             TimeSpan ts = QueryEngine.stopwatch.Elapsed;
             string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
             Console.WriteLine("Query + merge time " + elapsedTime);
+
         }
 
        
@@ -266,9 +267,9 @@ namespace QueryEngine
         /// </summary>
         private void ParallelMergeThreadResults()
         {
-             if (this.ThreadCount / 2 > this.Results.ColumnCount)
-                MergeRows();
-             else
+          //   if (this.ThreadCount / 2 > this.Results.ColumnCount)
+            //    MergeRows();
+          //   else
                 MergeColumn();
 
         }

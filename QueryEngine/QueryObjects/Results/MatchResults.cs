@@ -72,9 +72,7 @@ namespace QueryEngine
             {
                 this.resTable[i] = new List<Element>[threadCount];
                 for (int j = 0; j < threadCount; j++)
-                {
-                    this.resTable[i][j] = new List<Element>();
-                }
+                    this.resTable[i][j] = new List<Element>(1024*(j+i));
             }
 
             this.ColumnCount = columnCount;

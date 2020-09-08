@@ -467,7 +467,7 @@ namespace QueryEngine
             var scope = this.pattern.GetMatchedVariables();
             this.Count++;
 
-            for (int i = 0; i < this.queryResults.ColumnCount; i++)
+           for (int i = 0; i < this.queryResults.ColumnCount; i++)
                     this.queryResults.AddElement(scope[i], i, this.threadIndex);
         }
 
