@@ -14,6 +14,7 @@ using System.Collections;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace QueryEngine
 {
@@ -105,6 +106,7 @@ namespace QueryEngine
             return resultRow;
         }
 
+
         /// <summary>
         /// Merges results of a one column into the first thread index.
         /// And clears the rest.
@@ -114,6 +116,7 @@ namespace QueryEngine
         {
             for (int i = 1; i < this.ThreadCount; i++)
             {
+                if (this.resTable[columnIndex][i].Count == 0) continue;
                 this.resTable[columnIndex][0].AddRange(this.resTable[columnIndex][i]);
                 this.resTable[columnIndex][i].Clear();
             }

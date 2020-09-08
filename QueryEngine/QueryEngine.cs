@@ -114,9 +114,9 @@ namespace QueryEngine
             QueryExecutionHelper qEHelper = new QueryExecutionHelper();
             qEHelper.ThreadCount = GetThreadCount(args[0]);
             qEHelper.Printer = GetPrinter(args[1]);
-            qEHelper.Formater = GetFormater(args[2]);
+            qEHelper.Formater =  GetFormater(args[2]);
             qEHelper.VerticesPerThread = GetVerticesPerhread(qEHelper.ThreadCount, args);
-            qEHelper.FileName = GetFileName(qEHelper.ThreadCount, qEHelper.Printer, args);
+            qEHelper.FileName =  GetFileName(qEHelper.ThreadCount, qEHelper.Printer, args);
             return qEHelper;
         }
 
@@ -145,7 +145,7 @@ namespace QueryEngine
     /// <param name="reader"> Reader from which to read input. </param>
     private static void Run(string[] args, TextReader reader)
         {
-            if (args.Length < 3) throw new ArgumentException("Wrong number of program parameters.");
+           // if (args.Length < 3) throw new ArgumentException("Wrong number of program parameters.");
             QueryExecutionHelper qEHelper = ParseProgramArguments(args);
 
             // Set only if on a desktop machine
@@ -186,7 +186,7 @@ namespace QueryEngine
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e.Message);
+                    Console.WriteLine(e);
                     if (!ContinueWithAnotherQuery()) return;
                     stopwatch.Reset();
                 }
