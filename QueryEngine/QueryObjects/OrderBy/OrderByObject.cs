@@ -28,7 +28,7 @@ namespace QueryEngine
     /// </summary>
     internal sealed class OrderByObject
     {
-        private List<ResultRowComparer> comparers;
+        private readonly List<ResultRowComparer> comparers;
 
         /// <summary>
         /// Creates Order by object. 
@@ -47,7 +47,7 @@ namespace QueryEngine
         /// <param name="variableMap"> Map of query variables. </param>
         /// <param name="executionHelper"> Orderby execution helper. </param>
         /// <returns> Null if there is no order by token or QueryOrderBy object.</returns>
-        public static OrderByObject CreateOrderBy(List<Token> tokens, Graph graph, VariableMap variableMap, OrderByExecutionHelper executionHelper)
+        public static OrderByObject CreateOrderBy(List<Token> tokens, Graph graph, VariableMap variableMap, IOrderByExecutionHelper executionHelper)
         {
             OrderByNode orderNode = Parser.ParseOrderBy(tokens);
             if (orderNode == null)
@@ -72,9 +72,9 @@ namespace QueryEngine
         /// <param name="sortData"> Query reults to be sorted. </param>
         /// <param name="executionHelper"> Order by execution helper. </param>
         /// <returns> Sorted data. </returns>
-        public ITableResults Sort(ITableResults sortData, OrderByExecutionHelper executionHelper)
+        public ITableResults Sort(ITableResults sortData, IOrderByExecutionHelper executionHelper)
         {
-             Sorter sorter = new MultiColumnSorter(sortData, this.comparers, executionHelper.IsParallel());
+             Sorter sorter = new MultiColumnSorter(sortData, this.comparers, executionHelper.IsParallel);
              var sortedResults =  sorter.Sort();
 
             TimeSpan ts = QueryEngine.stopwatch.Elapsed;

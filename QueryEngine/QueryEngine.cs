@@ -28,6 +28,12 @@ namespace QueryEngine
     {
         public static Stopwatch stopwatch = new Stopwatch();
 
+        public static void PrintElapsedTime()
+        {
+            TimeSpan ts = QueryEngine.stopwatch.Elapsed;
+            string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
+            Console.WriteLine("Elapsed: " + elapsedTime);
+        }
         /// <summary>
         /// Parses argument that expects to be a thread count.
         /// </summary>
@@ -176,9 +182,7 @@ namespace QueryEngine
                     query.ComputeQuery();
                    
                     stopwatch.Stop();
-                    TimeSpan ts = QueryEngine.stopwatch.Elapsed;
-                    string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-                    Console.WriteLine("Query time " + elapsedTime);
+                    PrintElapsedTime();
                     stopwatch.Reset();
 
                     Console.WriteLine("Finished the computation of the query.");

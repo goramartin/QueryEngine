@@ -29,6 +29,7 @@ namespace QueryEngine
     /// </summary>
     internal interface ITableResults : IEnumerable<TableResults.RowProxy>
     {
+        int Count { get;  }
         int ColumnCount { get; }
         int RowCount { get; }
         TableResults.RowProxy this[int rowIndex] { get; }
@@ -51,6 +52,8 @@ namespace QueryEngine
         private List<Element>[] resTable;
         private int[] order;
 
+
+        public int Count { get; private set; }
         /// <summary>
         /// Number of columns.
         /// </summary>
@@ -66,7 +69,7 @@ namespace QueryEngine
         /// It expects that the results will be merged in the first thread index.
         /// </summary>
         /// <param name="elements"> Matcher results merged on the zeroth index. </param>
-        public  TableResults(List<Element>[][] elements)
+        public  TableResults(List<Element>[][] elements, int count)
         {
             this.order = null;
             this.resTable = new List<Element>[elements.Length];
@@ -74,6 +77,7 @@ namespace QueryEngine
             {
                 this.resTable[i] = elements[i][0];
             }
+            this.Count = count;
         }
 
         /// <summary>
@@ -82,7 +86,7 @@ namespace QueryEngine
         /// </summary>
         /// <param name="elements"> Matcher results merged on the zeroth index. </param>
         /// <param name="threadNumber"> Number of a thread to pick results from. </param>
-        public TableResults(List<Element>[][] elements, int threadNumber)
+        public TableResults(List<Element>[][] elements, int threadNumber, int count)
         {
             this.order = null;
             this.resTable = new List<Element>[elements.Length];
@@ -90,6 +94,8 @@ namespace QueryEngine
             {
                 this.resTable[i] = elements[i][threadNumber];
             }
+
+            this.Count = count;
         }
 
         /// <summary>

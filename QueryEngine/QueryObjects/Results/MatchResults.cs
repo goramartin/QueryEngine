@@ -37,6 +37,7 @@ namespace QueryEngine
         /// </summary>
         private List<Element>[][] resTable;
 
+        public int Count { get; set; }
         /// <summary>
         /// Number of threads that will be adding to the instance.
         /// </summary>

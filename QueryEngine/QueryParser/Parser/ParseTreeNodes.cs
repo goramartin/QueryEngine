@@ -34,7 +34,6 @@ namespace QueryEngine {
         }
     }
 
-
     #region RootNodes
 
     /// <summary>
@@ -294,4 +293,13 @@ namespace QueryEngine {
         }
     }
     #endregion ExprNodes
+
+    internal class CountProvisional : Node
+    {
+        public override void Accept<T>(IVisitor<T> visitor)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
 }

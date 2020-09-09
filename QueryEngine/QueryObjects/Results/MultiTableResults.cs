@@ -37,6 +37,7 @@ namespace QueryEngine
         /// </summary>
         private List<Element>[][] resTables;
         
+        public int Count { get; private set; }
         public int ColumnCount { get; private set; }
 
         /// <summary>
@@ -57,11 +58,12 @@ namespace QueryEngine
             }
         }
 
-        public MultiTableResults(List<Element>[][] matchResults)
+        public MultiTableResults(List<Element>[][] matchResults, int count)
         {
             this.ColumnCount = matchResults.Length;
             this.ThreadCount = matchResults[0].Length;
             this.resTables = matchResults;
+            this.Count = count;
         }
 
 

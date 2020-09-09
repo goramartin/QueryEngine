@@ -131,6 +131,15 @@ namespace QueryEngine
                 variableNode.AddName(new IdentifierNode("*"));
                 IncrementPosition();
                 return variableNode;
+            } // Provisional count
+            else if (CheckToken(position, Token.TokenType.Count, tokens))
+            {
+                IncrementPosition();
+                CheckLeftParen(tokens);
+                if (!CheckToken(position, Token.TokenType.Asterix, tokens)) throw new ArgumentException("SelectParser, expected asterix.");
+                else IncrementPosition();
+                CheckRightParen(tokens);
+                return new CountProvisional();
             }
             else
             {
@@ -171,7 +180,7 @@ namespace QueryEngine
         {
             Node nextSelectPrintTermNode = ParseSelectPrintTerm(tokens);
             if (nextSelectPrintTermNode == null)
-                throw new NullReferenceException("SelectParser, expected Indentifier after comma.");
+                throw new NullReferenceException("SelectParser, expected Indentifier after a comma.");
             else return nextSelectPrintTermNode;
         }
 

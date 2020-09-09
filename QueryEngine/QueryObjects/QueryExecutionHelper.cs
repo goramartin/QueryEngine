@@ -18,7 +18,7 @@ namespace QueryEngine
     /// A base interface for every execution helper extension.
     /// Must be visible to all query objects.
     /// </summary>
-    internal interface BaseExecutionHelper
+    internal interface IBaseExecutionHelper
     {
         /// <summary>
         /// Defines whether optional clause order by was defined in the user input query.
@@ -33,11 +33,13 @@ namespace QueryEngine
         /// <summary>
         /// If more than one thread must be used return true, otherwise false.
         /// </summary>
-        bool IsParallel();  
+        bool IsParallel { get; }
+
+        bool IsStoringResult { get; set; }
 
     }
 
-    internal interface MatchExecutionHelper : BaseExecutionHelper
+    internal interface IMatchExecutionHelper : IBaseExecutionHelper
     {
         /// <summary>
         /// If more than one thread is used to search,
@@ -50,11 +52,11 @@ namespace QueryEngine
         /// speed up the returning of the results.
         /// </summary>
         /// <returns> True if other clauses were defined. </returns>
-        bool IsMergeNeeded();
+        bool IsMergeNeeded { get; }
 
     }
 
-    internal interface SelectExecutionHelper : BaseExecutionHelper
+    internal interface ISelectExecutionHelper : IBaseExecutionHelper
     {
         /// <summary>
         /// Type of printer for printing results.
@@ -74,7 +76,7 @@ namespace QueryEngine
 
     }
 
-    internal interface OrderByExecutionHelper : BaseExecutionHelper
+    internal interface IOrderByExecutionHelper : IBaseExecutionHelper
     {
     }
 
@@ -83,7 +85,7 @@ namespace QueryEngine
     /// The query passes this execution helper to its query objects and each object
     /// sees only the neccessary information for its own execution.
     /// </summary>
-    internal class QueryExecutionHelper : MatchExecutionHelper, SelectExecutionHelper, OrderByExecutionHelper
+    internal class QueryExecutionHelper : IMatchExecutionHelper, ISelectExecutionHelper, IOrderByExecutionHelper
     {
         public int ThreadCount {get; set; }
         public bool IsSetOrderBy { get; set; }
@@ -93,16 +95,10 @@ namespace QueryEngine
         public string Printer {get; set;}
         public string Formater {get; set;}
         public string FileName {get; set; }
-
-        public bool IsMergeNeeded()
-        {
-            return (this.IsSetOrderBy);
-        }
-
-        public bool IsParallel()
-        {
-            return this.ThreadCount == 1 ? false : true;
-        }
+        
+        public bool IsStoringResult { get; set; } = true;
+        public bool IsMergeNeeded => (this.IsSetOrderBy);
+        public bool IsParallel => ThreadCount != 1;
      
         public QueryExecutionHelper()
         {

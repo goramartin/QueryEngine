@@ -28,7 +28,7 @@ namespace QueryEngine
         /// <summary>
         /// List of arguments to print from a select expression.
         /// </summary>
-        private List<PrintVariable> rowFormat;
+        private readonly List<PrintVariable> rowFormat;
 
         /// <summary>
         /// Creates Select object.
@@ -38,15 +38,21 @@ namespace QueryEngine
         /// <param name="map"> Variable map. </param>
         /// <param name="selectNode"> Parsed tokens from input query. </param>
         /// <param name="executionHelper"> Select execution helper. </param>
-        public SelectObject(Graph graph, VariableMap map, SelectNode selectNode, SelectExecutionHelper executionHelper)
+        public SelectObject(Graph graph, VariableMap map, SelectNode selectNode, ISelectExecutionHelper executionHelper)
         {
             if (executionHelper.Printer == null || executionHelper.Formater == null) throw new ArgumentNullException($"{this.GetType()}, got printer or formater as null.");
-           
-            // Process parse tree and create list of variables to be printed
-            SelectVisitor visitor = new SelectVisitor(graph.Labels, map);
-            selectNode.Accept(visitor);
 
-            this.rowFormat = visitor.GetResult();
+            // For provisional Count(*);
+            if (selectNode.next.GetType() == typeof(CountProvisional))
+                executionHelper.IsStoringResult = false;
+            else
+            {
+                // Process parse tree and create list of variables to be printed
+                SelectVisitor visitor = new SelectVisitor(graph.Labels, map);
+                selectNode.Accept(visitor);
+                this.rowFormat = visitor.GetResult();
+            }
+
         }
 
 
@@ -55,8 +61,15 @@ namespace QueryEngine
         /// </summary>
         /// <param name="results"> Results from query. </param>
         /// <param name="executionHelper"> Select execution helper. </param>
-        public void Print(ITableResults results, SelectExecutionHelper executionHelper)
+        public void Print(ITableResults results, ISelectExecutionHelper executionHelper)
         {
+            // For Provisional Count(*)
+            if (executionHelper.IsStoringResult == false)
+            {
+                Console.WriteLine("Count: {0}", results.Count);
+                return; 
+            }
+
             var printer = Printer.PrinterFactory(executionHelper.Printer, rowFormat, executionHelper.Formater, executionHelper.FileName);
 
             printer.PrintHeader();

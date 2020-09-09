@@ -29,6 +29,7 @@ namespace QueryEngine
     internal interface ISingleThreadMatcher : IPatternMatcher
     {
         void SetStartingVerticesIndeces(int start, int end);
+        void SetStoringResults(bool storeResults);
     }
 
 }

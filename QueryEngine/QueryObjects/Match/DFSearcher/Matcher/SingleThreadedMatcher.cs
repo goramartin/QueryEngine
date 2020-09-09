@@ -49,13 +49,16 @@ namespace QueryEngine
         private Graph graph;
         private DFSPattern pattern;
         private Element[] matchedElements;
-        private bool processingVertex;
         private List<Element>[] results;
+        private bool processingVertex;
         private int threadIndex; // Based on thread, implicitly 0
         private int startVerticesIndex;
         private int startVerticesEndIndex;
-
+        private bool isStoringResults;
+        
+        // For provisional count(*);
         public int Count = 0;
+
         /// <summary>
         /// Starting vertices are implicitly set to entire graph.
         /// </summary>
@@ -63,7 +66,7 @@ namespace QueryEngine
         /// <param name="graph"> Graph to search. </param>
         /// <param name="results"> Object to store found results. </param>
         /// <param name="threadIndex"> Index to store results on. => 0 </param>
-        public DFSPatternMatcher(IDFSPattern pattern, Graph graph, MatchResultsStorage results, int threadIndex)
+        public DFSPatternMatcher(IDFSPattern pattern, Graph graph, MatchResultsStorage results, int threadIndex )
         {
             if (pattern == null || graph == null || results == null)
                 throw new ArgumentException($"{this.GetType()}, passed null to a constructor.");
@@ -77,7 +80,6 @@ namespace QueryEngine
             // Implicit range of vertices to iterate over the entire graph.
             this.startVerticesIndex = 0;
             this.startVerticesEndIndex = graph.vertices.Count;
-
         }
 
         /// <summary>
@@ -467,8 +469,11 @@ namespace QueryEngine
             var scope = this.pattern.GetMatchedVariables();
             this.Count++;
 
-           for (int i = 0; i < this.results.Length; i++)
+            if (this.isStoringResults)
+            {
+                for (int i = 0; i < this.results.Length; i++)
                     this.results[i].Add(scope[i]);
+            }
         }
 
         /// <summary>
@@ -487,5 +492,13 @@ namespace QueryEngine
             }
         }
 
+        /// <summary>
+        /// Sets value whether the matcher should store its results or not.
+        /// </summary>
+        /// <param name="storeResults"> True if the matcher must store results, otherwise false. </param>
+        public void SetStoringResults(bool storeResults)
+        {
+            this.isStoringResults = storeResults;
+        }
     }
 }

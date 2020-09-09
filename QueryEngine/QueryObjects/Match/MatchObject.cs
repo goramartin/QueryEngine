@@ -28,9 +28,9 @@ namespace QueryEngine
     /// </summary>
     internal sealed class MatchObject
     {
-        private  IPatternMatcher Matcher;
-        private  IPattern Pattern;
-        private MatchResultsStorage queryResults;
+        private readonly IPatternMatcher Matcher;
+        private readonly IPattern Pattern;
+        private readonly MatchResultsStorage queryResults;
 
         /// <summary>
         /// Creates Match object.
@@ -42,7 +42,7 @@ namespace QueryEngine
         /// <param name="graph"> Graph to conduct a query on. </param>
         /// <param name="variableMap"> Empty map of variables. </param>
         /// <param name="executionHelper"> Match execution helper. </param>
-        public MatchObject(List<Token> tokens, VariableMap variableMap, Graph graph, MatchExecutionHelper executionHelper)
+        public MatchObject(List<Token> tokens, VariableMap variableMap, Graph graph, IMatchExecutionHelper executionHelper)
         {
             if (tokens == null || variableMap == null || graph == null)
                 throw new ArgumentNullException($"{this.GetType()}, passing null arguments to the constructor.");
@@ -111,13 +111,13 @@ namespace QueryEngine
         /// </summary>
         /// <param name="executionHelper"> Match execution helper. </param>
         /// <returns> Results of search algorithm </returns>
-        public ITableResults Search(MatchExecutionHelper executionHelper)
+        public ITableResults Search(IMatchExecutionHelper executionHelper)
         {
             this.Matcher.Search();
 
             if (this.queryResults.IsMerged)
-                return new TableResults(this.queryResults.GetResults());
-            else return new MultiTableResults(this.queryResults.GetResults());
+                return new TableResults(this.queryResults.GetResults(), this.queryResults.Count);
+            else return new MultiTableResults(this.queryResults.GetResults(), this.queryResults.Count);
         }
     }
 }

@@ -34,12 +34,12 @@ namespace QueryEngine
     /// </summary>
     sealed class Query
     {
-        VariableMap variableMap;
-        SelectObject select;
-        MatchObject match;
-        OrderByObject orderBy;
-        ITableResults results;
-        QueryExecutionHelper qEhelper;
+        private readonly VariableMap variableMap;
+        private readonly SelectObject select;
+        private readonly MatchObject match;
+        private readonly OrderByObject orderBy;
+        private ITableResults results;
+        private readonly QueryExecutionHelper qEhelper;
 
         /// <summary>
         /// Creates all neccessary object for query.
@@ -79,11 +79,8 @@ namespace QueryEngine
         public void ComputeQuery()
         {
             this.results = this.match.Search(this.qEhelper);
-            this.match = null;
-
-            if (this.qEhelper.IsSetOrderBy) this.orderBy.Sort(this.results, this.qEhelper);
-
-            //this.select.Print(this.results, this.qEhelper);
+            if (this.qEhelper.IsSetOrderBy && this.qEhelper.IsStoringResult) this.orderBy.Sort(this.results, this.qEhelper);
+            this.select.Print(this.results, this.qEhelper);
         }
     }
 
