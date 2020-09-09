@@ -54,8 +54,7 @@ namespace QueryEngine
         private bool isStoringResults;
         private int startVerticesIndex;
         private int startVerticesEndIndex;
-        public int Count;
-        public int NumberOfMatchedElements { get; private set; }
+        private int NumberOfMatchedElements;
 
         /// <summary>
         /// Starting vertices are implicitly set to entire graph.
@@ -462,13 +461,13 @@ namespace QueryEngine
         private void StoreResult()
         {
             var scope = this.pattern.GetMatchedVariables();
-            this.Count++;
+            this.NumberOfMatchedElements++;
 
-           // if (this.isStoringResults)
-           // {
-          //      for (int i = 0; i < this.results.Length; i++)
-          //          this.results[i].Add(scope[i]);
-          //  }
+            if (this.isStoringResults)
+            {
+                for (int i = 0; i < this.results.Length; i++)
+                    this.results[i].Add(scope[i]);
+            }
         }
 
         /// <summary>
@@ -495,6 +494,8 @@ namespace QueryEngine
         {
             this.isStoringResults = storeResults;
         }
+
+        public int GetNumberOfMatchedElements() => this.NumberOfMatchedElements;
 
     }
 }

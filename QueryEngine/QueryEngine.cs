@@ -1,10 +1,7 @@
-﻿
-/*! \file
-    
+﻿/*! \file
     This file is an entry point of a program.
     Contains static class of a query engine and provides a simple api for user defined queries.
  */
-
 
 using System;
 using System.Collections.Generic;

@@ -10,7 +10,6 @@ And division of work is done lock free thanks to interlocked class that allows t
 certain operation atomicaly.
  */
 
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -122,7 +121,7 @@ namespace QueryEngine
         private void CollectCountFromMatchers()
         {
             for (int i = 0; i < this.Matchers.Length; i++)
-                this.Results.NumberOfMatchedElements += this.Matchers[i].NumberOfMatchedElements;
+                this.Results.NumberOfMatchedElements += this.Matchers[i].GetNumberOfMatchedElements();
         }
 
         // This section contains structures and algorithm for handling parallel matching.
