@@ -1,13 +1,15 @@
 ﻿/*! \file 
- 
-    This file contains definition of a tokenizer.
-    Tokenizer tokenizes the inputed query.
-    It creates a list of tokens that are subsequently parsed.
- 
-    Tokenizer has set ending character of a query.
+This file contains definition of a tokenizer.
+Tokenizer tokenizes the inputed query.
+It creates a list of tokens that are subsequently parsed.
+Tokenizer has set ending character of a query.
+
+Tokenizer reads input by single character and stops when it reaches a character that signals the end of 
+user input. When it reads the character if firstly tries to find a token from the registry (a single
+character token) otherwise it expects a string that is either a token or an identifier (which is also a token).
+
+Notice that only inputted identifiers are considered case sensitive (e.g names of variables).
 */
-
-
 
 using System;
 using System.Collections.Generic;
@@ -70,13 +72,14 @@ namespace QueryEngine
                     string ident = GetIdentifier((char)ch, reader);
 
                     // Try whether it is a Query word.
+                    // Query words are always considered in lower case.
                     // Query word is a SELECT, MATCH ...
-                    Token.TokenType tok = default;
-                    if (tokenTypes.TryGetValue(ident, out tok))
+                    if (tokenTypes.TryGetValue(ident.ToLower(), out Token.TokenType tok))
                     {
                         tokens.Add(new Token(null, tok));
                     }
-                    //Else it is identifier that has got a string value.
+                    // Else it is identifier that has got a string value.
+                    // Identifiers are case sensitive.
                     else { tokens.Add(new Token(ident, Token.TokenType.Identifier)); }
                 }
                 else throw new ArgumentException($"{(char)ch} Found character that could not be parsed. Tokenizer.");
@@ -129,6 +132,7 @@ namespace QueryEngine
 
         /// <summary>
         /// Inserts all possible tokens with their assiciative string values in input.
+        /// Note that Identifier token is not included.
         /// </summary>
         private static void InitialiseRegistry()
         {
@@ -143,20 +147,14 @@ namespace QueryEngine
             RegisterToken("]", Token.TokenType.RightBrace);
             RegisterToken("(", Token.TokenType.LeftParen);
             RegisterToken(")", Token.TokenType.RightParen);
-            RegisterToken("MATCH", Token.TokenType.Match);
-            RegisterToken("SELECT", Token.TokenType.Select);
             RegisterToken("match", Token.TokenType.Match);
             RegisterToken("select", Token.TokenType.Select);
-            RegisterToken("AS", Token.TokenType.AsLabel);
             RegisterToken("as", Token.TokenType.AsLabel);
-            RegisterToken("BY", Token.TokenType.By);
             RegisterToken("by", Token.TokenType.By);
-            RegisterToken("ORDER", Token.TokenType.Order);
             RegisterToken("order", Token.TokenType.Order);
             RegisterToken("asc", Token.TokenType.Asc);
-            RegisterToken("ASC", Token.TokenType.Asc);
             RegisterToken("desc", Token.TokenType.Desc);
-            RegisterToken("DESC", Token.TokenType.Desc);
+            RegisterToken("count", Token.TokenType.Count);
         }
 
     }

@@ -21,10 +21,29 @@ namespace QueryEngine
     {
         public enum TokenType
         {
-            Match, Select, Order, By, Asc, Desc,
+            Match,
+            Select,
+            Order,
+            By,
+            Asc,
+            Desc,
 
-            Asterix, Dot, DoubleDot, Comma, Dash, Less, Greater, LeftParen, RightParen, LeftBrace, RightBrace,
-            Identifier, AsLabel
+            Asterix,
+            Dot,
+            DoubleDot,
+            Comma,
+            Dash,
+            Less,
+            Greater,
+            LeftParen,
+            RightParen,
+            LeftBrace,
+            RightBrace,
+            Identifier,
+            AsLabel,
+
+            Count
+
         }
         public readonly string strValue;
         public TokenType type;

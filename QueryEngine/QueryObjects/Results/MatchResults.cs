@@ -116,9 +116,9 @@ namespace QueryEngine
         {
             for (int i = 1; i < this.ThreadCount; i++)
             {
-                if (this.resTable[columnIndex][i].Count == 0) continue;
+                if (this.resTable[columnIndex][i] == null) continue;
                 this.resTable[columnIndex][0].AddRange(this.resTable[columnIndex][i]);
-                this.resTable[columnIndex][i].Clear();
+                this.resTable[columnIndex][i] = null;
             }
         }
 
@@ -131,8 +131,9 @@ namespace QueryEngine
         {
             for (int i = 0; i < this.ColumnCount; i++)
             {
+                if (this.resTable[i][second] == null) continue;
                 this.resTable[i][first].AddRange(this.resTable[i][second]);
-                this.resTable[i][second].Clear();
+                this.resTable[i][second] = null;
             }
         }
     }
