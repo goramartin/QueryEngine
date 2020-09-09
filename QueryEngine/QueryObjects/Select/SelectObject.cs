@@ -66,7 +66,7 @@ namespace QueryEngine
             // For Provisional Count(*)
             if (executionHelper.IsStoringResult == false)
             {
-                Console.WriteLine("Count: {0}", results.Count);
+                Console.WriteLine("Count: {0}", results.NumberOfMatchedElements);
                 return; 
             }
 

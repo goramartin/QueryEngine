@@ -35,16 +35,25 @@ namespace QueryEngine
         /// <summary>
         /// [x][y] x = column, y = thread number
         /// </summary>
-        private List<Element>[][] resTables;
+        private readonly List<Element>[][] resTables;
         
-        public int Count { get; private set; }
+        /// <summary>
+        /// Number of columns in the table.
+        /// </summary>
         public int ColumnCount { get; private set; }
-
         /// <summary>
         /// Number of threads that were active during matching algorithm.
         /// </summary>
         public int ThreadCount { get; private set; }
 
+        /// <summary>
+        /// Number of elements that actually were matched, if the query needs only count and not results explicitly.
+        /// </summary>
+        public int NumberOfMatchedElements { get; private set; }
+
+        /// <summary>
+        /// Number of rows in the table. Might be 0 even thought the matched elements are set.
+        /// </summary>
         public int RowCount
         { 
             get
@@ -58,12 +67,18 @@ namespace QueryEngine
             }
         }
 
+
+        /// <summary>
+        /// Gets results from a non merged matcher results.
+        /// </summary>
+        /// <param name="elements"> Matched non merged results. </param>
+        /// <param name="count"> Number of matched elements even though they might not be stored in the table. </param>
         public MultiTableResults(List<Element>[][] matchResults, int count)
         {
             this.ColumnCount = matchResults.Length;
             this.ThreadCount = matchResults[0].Length;
             this.resTables = matchResults;
-            this.Count = count;
+            this.NumberOfMatchedElements = count;
         }
 
 
@@ -82,7 +97,7 @@ namespace QueryEngine
         {
             for (int i = 0; i < this.ThreadCount; i++)
             {
-                TableResults table = new TableResults(this.resTables, i);
+                TableResults table = new TableResults(this.resTables, i, this.NumberOfMatchedElements);
 
                 foreach (var row in table)
                     yield return row;

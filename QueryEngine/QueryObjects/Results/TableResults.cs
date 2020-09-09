@@ -29,7 +29,7 @@ namespace QueryEngine
     /// </summary>
     internal interface ITableResults : IEnumerable<TableResults.RowProxy>
     {
-        int Count { get;  }
+        int NumberOfMatchedElements { get; }
         int ColumnCount { get; }
         int RowCount { get; }
         TableResults.RowProxy this[int rowIndex] { get; }
@@ -49,19 +49,22 @@ namespace QueryEngine
     /// </summary>
     internal partial class TableResults : ITableResults
     {
-        private List<Element>[] resTable;
+        private readonly List<Element>[] resTable;
         private int[] order;
 
-
-        public int Count { get; private set; }
         /// <summary>
         /// Number of columns.
         /// </summary>
         public int ColumnCount => this.resTable.Length;
         /// <summary>
-        /// Number of rows in the table.
+        /// Number of rows in the table. Might be zero even if the matched elements are set.
         /// </summary>
         public int RowCount => this.resTable[0].Count;
+
+        /// <summary>
+        /// Number of elements that actually were matched, if the query needs only count and not results explicitly.
+        /// </summary>
+        public int NumberOfMatchedElements { get; private set; }
 
 
         /// <summary>
@@ -69,6 +72,7 @@ namespace QueryEngine
         /// It expects that the results will be merged in the first thread index.
         /// </summary>
         /// <param name="elements"> Matcher results merged on the zeroth index. </param>
+        /// <param name="count"> Number of matched elements even though they might not be stored in the table. </param>
         public  TableResults(List<Element>[][] elements, int count)
         {
             this.order = null;
@@ -77,7 +81,7 @@ namespace QueryEngine
             {
                 this.resTable[i] = elements[i][0];
             }
-            this.Count = count;
+            this.NumberOfMatchedElements = count;
         }
 
         /// <summary>
@@ -86,6 +90,7 @@ namespace QueryEngine
         /// </summary>
         /// <param name="elements"> Matcher results merged on the zeroth index. </param>
         /// <param name="threadNumber"> Number of a thread to pick results from. </param>
+        /// <param name="count"> Number of matched elements even though they might not be stored in the table. </param>
         public TableResults(List<Element>[][] elements, int threadNumber, int count)
         {
             this.order = null;
@@ -95,7 +100,7 @@ namespace QueryEngine
                 this.resTable[i] = elements[i][threadNumber];
             }
 
-            this.Count = count;
+            this.NumberOfMatchedElements = count;
         }
 
         /// <summary>

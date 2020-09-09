@@ -35,9 +35,12 @@ namespace QueryEngine
         /// <summary>
         /// [x][y] x = column, y = thread number
         /// </summary>
-        private List<Element>[][] resTable;
+        private readonly List<Element>[][] resTable;
 
-        public int Count { get; set; }
+        /// <summary>
+        /// A number of results found  (Migh be set even if the results are not stored in resTable).
+        /// </summary>
+        public int NumberOfMatchedElements { get; set; }
         /// <summary>
         /// Number of threads that will be adding to the instance.
         /// </summary>

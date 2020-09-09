@@ -30,6 +30,7 @@ namespace QueryEngine
     {
         void SetStartingVerticesIndeces(int start, int end);
         void SetStoringResults(bool storeResults);
+        int NumberOfMatchedElements { get; }
     }
 
 }

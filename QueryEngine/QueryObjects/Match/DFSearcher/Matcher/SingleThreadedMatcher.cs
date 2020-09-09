@@ -46,40 +46,36 @@ namespace QueryEngine
     /// </summary>
     internal sealed class DFSPatternMatcher : ISingleThreadMatcher
     {
-        private Graph graph;
-        private DFSPattern pattern;
-        private Element[] matchedElements;
-        private List<Element>[] results;
+        private readonly Graph graph;
+        private readonly DFSPattern pattern;
+        private readonly Element[] matchedElements;
+        private readonly List<Element>[] results;
         private bool processingVertex;
-        private int threadIndex; // Based on thread, implicitly 0
+        private bool isStoringResults;
         private int startVerticesIndex;
         private int startVerticesEndIndex;
-        private bool isStoringResults;
-        
-        // For provisional count(*);
-        public int Count = 0;
+        public int Count;
+        public int NumberOfMatchedElements { get; private set; }
 
         /// <summary>
         /// Starting vertices are implicitly set to entire graph.
         /// </summary>
-        /// <param name="pattern"> Pattern to find.</param>
-        /// <param name="graph"> Graph to search. </param>
-        /// <param name="results"> Object to store found results. </param>
-        /// <param name="threadIndex"> Index to store results on. => 0 </param>
-        public DFSPatternMatcher(IDFSPattern pattern, Graph graph, MatchResultsStorage results, int threadIndex )
+        /// <param name="pat"> The pattern to find.</param>
+        /// <param name="gr"> The graph to search. </param>
+        /// <param name="res"> The object to store found results. </param>
+        public DFSPatternMatcher(IDFSPattern pat, Graph gr, List<Element>[] res)
         {
-            if (pattern == null || graph == null || results == null)
+            if (gr == null || pat == null || res == null)
                 throw new ArgumentException($"{this.GetType()}, passed null to a constructor.");
 
-            this.graph = graph;
-            this.matchedElements = new Element[pattern.AllNodeCount];
-            this.pattern = (DFSPattern)pattern;
-            this.threadIndex = threadIndex;
-            this.results = results.GetThreadResults(this.threadIndex);
+            this.graph = gr;
+            this.matchedElements = new Element[pat.AllNodeCount];
+            this.pattern = (DFSPattern)pat;
+            this.results = res;
             
             // Implicit range of vertices to iterate over the entire graph.
             this.startVerticesIndex = 0;
-            this.startVerticesEndIndex = graph.vertices.Count;
+            this.startVerticesEndIndex = gr.vertices.Count;
         }
 
         /// <summary>
@@ -198,7 +194,7 @@ namespace QueryEngine
             while (true)
             {
                 // Try to apply the new element to the pattern.
-                bool success =  (nextElement != null) ? pattern.Apply(nextElement) : false;
+                bool success =  ((nextElement != null) && pattern.Apply(nextElement));
                 if (success)
                 {
                     // If it is the last node in the pattern, we check if it is the last pattern.
@@ -383,7 +379,6 @@ namespace QueryEngine
         private Edge FindAnyEdge(Vertex vertex, Edge lastUsedEdge)
         {
             Edge nextEdge = null;
-
             // If no edge has been used -> pick in edge /or/ it hasnt finished iteration over in edges 
             if (lastUsedEdge == null || lastUsedEdge.GetElementType() == typeof(InEdge))
             {
@@ -469,11 +464,11 @@ namespace QueryEngine
             var scope = this.pattern.GetMatchedVariables();
             this.Count++;
 
-            if (this.isStoringResults)
-            {
-                for (int i = 0; i < this.results.Length; i++)
-                    this.results[i].Add(scope[i]);
-            }
+           // if (this.isStoringResults)
+           // {
+          //      for (int i = 0; i < this.results.Length; i++)
+          //          this.results[i].Add(scope[i]);
+          //  }
         }
 
         /// <summary>
@@ -500,5 +495,6 @@ namespace QueryEngine
         {
             this.isStoringResults = storeResults;
         }
+
     }
 }

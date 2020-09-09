@@ -33,7 +33,7 @@ namespace QueryEngine
         /// <summary>
         /// If more than one thread must be used return true, otherwise false.
         /// </summary>
-        bool IsParallel { get; }
+        bool InParallel { get; }
 
         bool IsStoringResult { get; set; }
 
@@ -98,7 +98,7 @@ namespace QueryEngine
         
         public bool IsStoringResult { get; set; } = true;
         public bool IsMergeNeeded => (this.IsSetOrderBy);
-        public bool IsParallel => ThreadCount != 1;
+        public bool InParallel => ThreadCount != 1;
      
         public QueryExecutionHelper()
         {

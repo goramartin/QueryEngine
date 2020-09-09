@@ -24,7 +24,7 @@ namespace QueryEngine
     /// </summary>
     internal sealed class MultiColumnSorter : SimpleSorter
     {
-        private IndexToRowProxyComparer indexComparer;
+        private readonly IndexToRowProxyComparer indexComparer;
 
         /// <summary>
         /// Constructs multi column sorter.

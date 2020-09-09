@@ -30,10 +30,10 @@ namespace QueryEngine
     /// </summary>
     internal sealed class DFSParallelPatternMatcher : IPatternMatcher
     {
-        readonly ISingleThreadMatcher[] Matchers;
-        readonly Graph Graph;
-        readonly IMatchExecutionHelper executionHelper;
-        readonly MatchResultsStorage Results;
+         ISingleThreadMatcher[] Matchers;
+         Graph Graph;
+         IMatchExecutionHelper executionHelper;
+         MatchResultsStorage Results;
 
         /// <summary>
         /// Creates a parallel matchers.
@@ -59,28 +59,29 @@ namespace QueryEngine
                                    .CreateMatcher("DFSSingleThread",                  // Type of Matcher 
                                                   i == 0 ? pattern : pattern.Clone(), // Cloning of pattern (one was already created)
                                                   graph,
-                                                  results,
-                                                  i);                                // Index where to store thread results
+                                                  results.GetThreadResults(i));
             }
         }
 
         /// <summary>
         /// Initiates search on graph.
-        /// There are two possibilities as it can go.
-        /// Based on number of threads. Either the main thread does the search it self, if
-        /// only one thread can be used. Or parallel search is used if more threads can be used.
-        /// Parallel search work in two steps, first step is the graph search where each thread 
-        /// saves its results into separate bins (however, still inside one result structure). The bins are 
-        /// accessed via indices that were given to matchers instances. When the matchers finish, the results are then
-        /// parallelly merged into one bin.
+        /// There are two possibilities.
+        /// Based on number of threads. Either the main thread does the search it self,
+        /// or the parallel search is used if more threads can be used.
+        /// The Parallel search works in two steps, the first step is the graph search where each thread 
+        /// saves its results into separate bins (however, still inside one result structure).
+        /// When the matchers finish, the results are then parallelly merged into one bin.
+        /// Notice the setting if the matchers should store the results directly is done here,
+        /// because during parsing of the user input, the value can be changed later on. (For exmample seting order by).
+        /// At the end, the counts of matched results are collected direcly, since sometimes user can input 
+        /// only count(*) and using one shared count is time consuming.
         /// </summary>
         public void Search()
         {
-
             this.SetStoringResultsOnMatchers();
             QueryEngine.stopwatch.Start();
 
-            if (this.executionHelper.ThreadCount == 1) 
+            if (!this.executionHelper.InParallel) 
             { 
                 this.Matchers[0].Search();
                 this.Results.IsMerged = true;
@@ -92,7 +93,7 @@ namespace QueryEngine
                 Console.WriteLine("Finished Search:");
                 QueryEngine.PrintElapsedTime();
 
-                if (this.executionHelper.IsMergeNeeded)
+                if (this.executionHelper.IsMergeNeeded && this.executionHelper.IsStoringResult)
                 {
                     this.ParallelMergeThreadResults();
                     this.Results.IsMerged = true;
@@ -100,9 +101,7 @@ namespace QueryEngine
                     QueryEngine.PrintElapsedTime();
                 }
             }
-            // For provisional count(*)
-            for (int i = 0; i < this.Matchers.Length; i++)
-                this.Results.Count += ((DFSPatternMatcher)this.Matchers[i]).Count;
+            this.CollectCountFromMatchers();
 
         }
 
@@ -115,7 +114,17 @@ namespace QueryEngine
                 this.Matchers[i].SetStoringResults(this.executionHelper.IsStoringResult);
         }
 
-       
+        /// <summary>
+        /// Collects result count from each mather.
+        /// This is done separately because sometimes the results are not stored in the result structure
+        /// but only count is needed... such as "select count(*) match (x);).
+        /// </summary>
+        private void CollectCountFromMatchers()
+        {
+            for (int i = 0; i < this.Matchers.Length; i++)
+                this.Results.NumberOfMatchedElements += this.Matchers[i].NumberOfMatchedElements;
+        }
+
         // This section contains structures and algorithm for handling parallel matching.
         #region ParalelSearch
 

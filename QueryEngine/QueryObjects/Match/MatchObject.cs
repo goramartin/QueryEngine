@@ -116,8 +116,8 @@ namespace QueryEngine
             this.Matcher.Search();
 
             if (this.queryResults.IsMerged)
-                return new TableResults(this.queryResults.GetResults(), this.queryResults.Count);
-            else return new MultiTableResults(this.queryResults.GetResults(), this.queryResults.Count);
+                return new TableResults(this.queryResults.GetResults(), this.queryResults.NumberOfMatchedElements);
+            else return new MultiTableResults(this.queryResults.GetResults(), this.queryResults.NumberOfMatchedElements);
         }
     }
 }
