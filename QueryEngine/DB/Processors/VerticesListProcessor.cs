@@ -27,13 +27,12 @@ namespace QueryEngine
     /// </summary>
     internal sealed class VerticesListProcessor : IProcessor<List<Vertex>>
     {
-        IProcessorState<List<Vertex>> processorState { get; set; }
-        List<Vertex> vertices;
-        Dictionary<string, Table> nodeTables;
-        Vertex vertex;
-        int paramsToReadLeft;
-        bool finished;
-
+        private IProcessorState<List<Vertex>> processorState;
+        private List<Vertex> vertices;
+        private Dictionary<string, Table> nodeTables;
+        private Vertex vertex;
+        private int paramsToReadLeft;
+        private bool finished;
 
         public VerticesListProcessor()
         {
@@ -94,13 +93,14 @@ namespace QueryEngine
                     return;
                 };
 
-                int id = 0;
-                if (!int.TryParse(param, out id))
+                if (!int.TryParse(param, out int id))
                     throw new ArgumentException($"{this.GetType()}, reading wrong node ID. ID is not a number. ID = {param}");
 
-                proc.vertex = new Vertex();
-                proc.vertex.PositionInList = proc.vertices.Count;
-                proc.vertex.ID = id;
+                proc.vertex = new Vertex
+                {
+                    PositionInList = proc.vertices.Count,
+                    ID = id
+                };
 
                 // Next state is a parsing of a TYPE
                 proc.SetNewState(NodeTypeState.Instance);
@@ -155,8 +155,7 @@ namespace QueryEngine
             {
                 var proc = (VerticesListProcessor)processor;
 
-                Table table;
-                proc.nodeTables.TryGetValue(param, out table);
+                proc.nodeTables.TryGetValue(param, out Table table);
                 proc.vertex.Table = table;
                 proc.vertex.Table.AddID(proc.vertex.ID);
 

@@ -24,12 +24,7 @@ namespace QueryEngine
     /// </summary>
     internal abstract class Property
     {
-        private string propiri;
-        public string IRI
-        {
-            get => this.propiri;
-            protected set => this.propiri = value;
-        }
+        public string IRI { get; protected set; }
 
         public Property() { this.IRI = null; }
 

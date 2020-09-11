@@ -28,7 +28,7 @@ namespace QueryEngine
     /// </summary>
     internal sealed class OrderByObject
     {
-        private readonly List<ResultRowComparer> comparers;
+        private List<ResultRowComparer> comparers;
 
         /// <summary>
         /// Creates Order by object. 
@@ -57,7 +57,7 @@ namespace QueryEngine
             }
             else
             {
-                var orderVisitor = new OrderByVisitor(graph.Labels, variableMap);
+                var orderVisitor = new OrderByVisitor(graph.labels, variableMap);
                 orderVisitor.Visit(orderNode);
                 var comparers = orderVisitor.GetResult();
 

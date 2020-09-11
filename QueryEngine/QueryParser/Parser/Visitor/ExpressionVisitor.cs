@@ -19,10 +19,10 @@ namespace QueryEngine
     /// </summary>
     internal sealed class ExpressionVisitor : IVisitor<ExpressionBase>
     {
-        ExpressionBase Expr;
-        VariableReferenceNameHolder nameHolder;
-        VariableMap variableMap;
-        Dictionary<string, Type> Labels;
+        private ExpressionBase Expr;
+        private VariableReferenceNameHolder nameHolder;
+        private VariableMap variableMap;
+        private Dictionary<string, Type> Labels;
 
         public ExpressionBase GetResult()
         {

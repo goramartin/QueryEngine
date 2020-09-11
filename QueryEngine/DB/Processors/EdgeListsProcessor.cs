@@ -33,27 +33,25 @@ namespace QueryEngine
     /// </summary>
     internal sealed class EdgeListProcessor : IProcessor<EdgeListHolder>
     {
-        IProcessorState<EdgeListHolder> processorState;
-        Dictionary<string, Table> edgeTables;
-
-        List<Vertex> vertices;
-        List<OutEdge> outEdges;
-        List<InEdge> inEdges;
-
+        private IProcessorState<EdgeListHolder> processorState;
+        private Dictionary<string, Table> edgeTables;
+        private List<Vertex> vertices;
+        private List<OutEdge> outEdges;
+        private List<InEdge> inEdges;
         /// <summary>
         /// Index of vertices IDs to a position in their list. To speed up loading of edges.
         /// (vertex ID, position)
         /// </summary>
-        Dictionary<int, int> verticesIndex;
+        private Dictionary<int, int> verticesIndex;
         /// <summary>
         /// Each vertex has a set of inwards edges
         /// </summary>
-        List<InEdge>[] incomingEdgesTable;
+        private List<InEdge>[] incomingEdgesTable;
 
-        bool finished;
-        InEdge incomingEdge;
-        OutEdge outEdge;
-        int paramsToReadLeft;
+        private bool finished;
+        private InEdge incomingEdge;
+        private OutEdge outEdge;
+        private int paramsToReadLeft;
 
         public EdgeListProcessor()
         {
@@ -71,9 +69,11 @@ namespace QueryEngine
 
         public EdgeListHolder GetResult()
         {
-            var tmp = new EdgeListHolder();
-            tmp.outEdges = this.outEdges;
-            tmp.inEdges = this.inEdges;
+            var tmp = new EdgeListHolder
+            {
+                outEdges = this.outEdges,
+                inEdges = this.inEdges
+            };
             return tmp;
         }
 
@@ -145,13 +145,14 @@ namespace QueryEngine
                 }
 
                 // Create a new out edge.
-                int id = 0;
-                if (!int.TryParse(param, out id))
+                if (!int.TryParse(param, out int id))
                     throw new ArgumentException($"{this.GetType()}, reading wrong node ID. ID is not a number. ID = {param}");
 
-                proc.outEdge = new OutEdge();
-                proc.outEdge.PositionInList = proc.outEdges.Count;
-                proc.outEdge.ID = id;
+                proc.outEdge = new OutEdge
+                {
+                    PositionInList = proc.outEdges.Count,
+                    ID = id
+                };
 
                 // Next state is a parsing of a TYPE.
                 proc.SetNewState(EdgeTypeState.Instance);
@@ -179,8 +180,7 @@ namespace QueryEngine
                 var proc = (EdgeListProcessor)processor;
 
                 // Find the table.
-                Table table;
-                proc.edgeTables.TryGetValue(param, out table);
+                proc.edgeTables.TryGetValue(param, out Table table);
                 proc.outEdge.Table = table;
 
                 // Add the edge id to the found table.
@@ -215,10 +215,11 @@ namespace QueryEngine
                 
                 Vertex fromVertex = proc.FindVertex(param);
                 if (!fromVertex.HasOutEdges()) fromVertex.OutEdgesStartPosition = proc.outEdges.Count;
-               
-                
-                proc.incomingEdge = new InEdge();
-                proc.incomingEdge.EndVertex = fromVertex;
+
+                proc.incomingEdge = new InEdge
+                {
+                    EndVertex = fromVertex
+                };
 
                 // Next state is a parsing of a TOID
                 proc.SetNewState(EdgeToIDState.Instance);
@@ -331,8 +332,7 @@ namespace QueryEngine
         /// <returns> Vertex with given parameter.</returns>
         private Vertex FindVertex(string param)
         {
-            int id = 0;
-            if (!int.TryParse(param, out id))
+            if (!int.TryParse(param, out int id))
                 throw new ArgumentException($"{this.GetType()}, reading wrong node ID. ID is not a number. ID = {param}");
             else if (!this.verticesIndex.TryGetValue(id, out int value))
                 throw new ArgumentException($"{this.GetType()}, could not find corresponding ID to a vertex. ID = {id}");

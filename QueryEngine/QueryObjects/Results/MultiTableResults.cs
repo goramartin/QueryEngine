@@ -35,7 +35,7 @@ namespace QueryEngine
         /// <summary>
         /// [x][y] x = column, y = thread number
         /// </summary>
-        private readonly List<Element>[][] resTables;
+        private List<Element>[][] resTables;
         
         /// <summary>
         /// Number of columns in the table.
@@ -71,7 +71,7 @@ namespace QueryEngine
         /// <summary>
         /// Gets results from a non merged matcher results.
         /// </summary>
-        /// <param name="elements"> Matched non merged results. </param>
+        /// <param name="matchResults"> Matched non merged results. </param>
         /// <param name="count"> Number of matched elements even though they might not be stored in the table. </param>
         public MultiTableResults(List<Element>[][] matchResults, int count)
         {

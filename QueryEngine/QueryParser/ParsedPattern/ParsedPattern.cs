@@ -25,28 +25,28 @@ namespace QueryEngine
     /// </summary>
     internal sealed class ParsedPattern
     {
-        public List<ParsedPatternNode> Pattern;
+        public List<ParsedPatternNode> pattern;
         public string splitBy;
 
         public ParsedPattern()
         {
-            this.Pattern = new List<ParsedPatternNode>();
+            this.pattern = new List<ParsedPatternNode>();
             this.splitBy = null;
         }
 
         public ParsedPattern(List<ParsedPatternNode> pattern)
         {
-            this.Pattern = pattern;
+            this.pattern = pattern;
             this.splitBy = null;
         }
 
         public void AddParsedPatternNode(ParsedPatternNode node)
         {
-            this.Pattern.Add(node);
+            this.pattern.Add(node);
         }
 
-        public int GetCount() => this.Pattern.Count;
-        public ParsedPatternNode GetLastParsedPatternNode() => this.Pattern[this.Pattern.Count - 1];
+        public int GetCount() => this.pattern.Count;
+        public ParsedPatternNode GetLastParsedPatternNode() => this.pattern[this.pattern.Count - 1];
 
         /// <summary>
         /// Searches for the same variable inside two Parsed Patterns.
@@ -57,14 +57,14 @@ namespace QueryEngine
         public bool TryFindEqualVariable(ParsedPattern other, out string name)
         {
             // For each variable in current pattern check equality for variables in the other pattern
-            for (int k = 0; k < this.Pattern.Count; k++)
+            for (int k = 0; k < this.pattern.Count; k++)
             {
-                for (int l = 0; l < other.Pattern.Count; l++)
+                for (int l = 0; l < other.pattern.Count; l++)
                 {
                     // Found matching variable
-                    if (this.Pattern[k].Equals(other.Pattern[l]))
+                    if (this.pattern[k].Equals(other.pattern[l]))
                     {
-                        name = this.Pattern[k].Name;
+                        name = this.pattern[k].Name;
                         return true;
                     }
                 }
@@ -88,7 +88,7 @@ namespace QueryEngine
             if (i == 0 || i == -1) return null;
             else
             {
-                if (i == this.Pattern.Count - 1) return this.ReverseInPlace(i);
+                if (i == this.pattern.Count - 1) return this.ReverseInPlace(i);
                 else return this.SplitIntoTwo(i);
             }
 
@@ -106,9 +106,9 @@ namespace QueryEngine
         {
             for (int j = lastNodeinPatternIndex - 1; j >= 0; j--)
             {
-                var tmp = this.Pattern[j];
-                this.Pattern.RemoveAt(j);
-                this.Pattern.Add(tmp.CloneReverse());
+                var tmp = this.pattern[j];
+                this.pattern.RemoveAt(j);
+                this.pattern.Add(tmp.CloneReverse());
             }
             return null;
         }
@@ -131,9 +131,9 @@ namespace QueryEngine
             var firstPart = new List<ParsedPatternNode>();
             for (int j = 0; j <= splitVariableIndex; j++)
             {
-                firstPart.Insert(0, this.Pattern[0].CloneReverse());
+                firstPart.Insert(0, this.pattern[0].CloneReverse());
                 if (j == splitVariableIndex) break;
-                else this.Pattern.RemoveAt(0);
+                else this.pattern.RemoveAt(0);
             }
             return new ParsedPattern(firstPart);
         }
@@ -149,7 +149,7 @@ namespace QueryEngine
            
             //Find index of splitVariable
             for (int i = 0; i < this.GetCount(); i++)
-                if (this.splitBy == this.Pattern[i].Name) return i;
+                if (this.splitBy == this.pattern[i].Name) return i;
             
             return -1;
         }

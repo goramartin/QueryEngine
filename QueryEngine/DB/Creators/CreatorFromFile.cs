@@ -22,12 +22,15 @@ namespace QueryEngine
     /// <summary>
     /// Class takes reader and processor that proccesses words from reader.
     /// Main purpose is to have a general way to create objects from files.
+    /// An instance is unusable after a processor has finished.
     /// </summary>
     internal sealed class CreatorFromFile<T> : ICreator<T>
     {
-        IReader reader;
-        IProcessor<T> processor;
+        private IReader reader;
+        private IProcessor<T> processor;
 
+        /// <param name="reader"> A stream reader that returns words from a file. </param>
+        /// <param name="processor"> A processor that creates the templated type. </param>
         public CreatorFromFile(IReader reader, IProcessor<T> processor)
         {
             this.reader = reader;
@@ -38,7 +41,7 @@ namespace QueryEngine
         /// Processes file. Reading until reached end point of a processor.
         /// It assumes that the reader will not fail until the processor finishes.
         /// </summary>
-        /// <returns> Value based on template. </returns>
+        /// <returns> A value based on the template. </returns>
         public T Create()
         {
             while (!this.processor.Finished())

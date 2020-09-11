@@ -1,5 +1,4 @@
 ﻿/*! \file
- 
 Contains generic definition of an interface for creators from file.
 A creator is an interface for a class that creates an object defined
 in the template parameter.

@@ -22,7 +22,7 @@ namespace QueryEngine
         /// <summary>
         /// Endings of files based on format. 
         /// </summary>
-        public static Dictionary<string, string> fileEndings { get; }
+        public static Dictionary<string, string> FileEndings { get; }
 
         /// <summary>
         /// Contains valid Formaters.
@@ -30,7 +30,7 @@ namespace QueryEngine
         public static HashSet<string> Formaters { get;  }
 
         protected StringBuilder stringBuilder;
-        protected int columnCount { get; }
+        protected int ColumnCount { get; }
 
         /// <summary>
         /// Some formats define normalise lenght of one part of a row.
@@ -40,7 +40,7 @@ namespace QueryEngine
         /// <summary>
         /// State which remembers which column in a row is being filled next.
         /// </summary>
-        protected int columnsFilled { get; set; }
+        protected int ColumnsFilled { get; set; }
         
         protected TextWriter writer;
 
@@ -49,9 +49,9 @@ namespace QueryEngine
         /// </summary>
         static Formater()
         {
-            fileEndings = new Dictionary<string, string>();
-            fileEndings.Add("simple", ".txt");
-            fileEndings.Add("markdown", ".md");
+            FileEndings = new Dictionary<string, string>();
+            FileEndings.Add("simple", ".txt");
+            FileEndings.Add("markdown", ".md");
 
             Formaters = new HashSet<string>();
             Formaters.Add("simple");
@@ -61,7 +61,7 @@ namespace QueryEngine
         protected Formater()
         {
             this.stringBuilder = new StringBuilder();
-            this.columnsFilled = 0;
+            this.ColumnsFilled = 0;
         }
 
         /// <summary>
@@ -71,7 +71,7 @@ namespace QueryEngine
         /// <param name="writer"> Where to write output. </param>
         protected Formater(int columnCount, TextWriter writer): this()
         {
-            this.columnCount = columnCount;
+            this.ColumnCount = columnCount;
             this.writer = writer;
         }
 

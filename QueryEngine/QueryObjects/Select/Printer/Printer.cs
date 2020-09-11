@@ -22,7 +22,7 @@ namespace QueryEngine
         /// <summary>
         /// Contains valid printers.
         /// </summary>
-        public static HashSet<string> Printers;
+        public static HashSet<string> Printers { get; }
 
         /// <summary>
         /// Variables that will compute values to be printed.

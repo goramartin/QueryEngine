@@ -25,6 +25,10 @@ namespace QueryEngine
     /// </summary>
     internal abstract class Edge : Element
     {
+
+        /// <summary>
+        /// A vertex the edge points towards.
+        /// </summary>
         public Vertex EndVertex { get; internal set; }
 
         public Edge()

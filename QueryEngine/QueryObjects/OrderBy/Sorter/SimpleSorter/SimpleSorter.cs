@@ -1,8 +1,8 @@
 ﻿/*! \file 
  
-    This file includes definition of a simple sorter.
-    Simple sorter is used in case when the group by is not used. In other words it sorts only rows
-    from the matching algorithm using hpc sharp methods.
+This file includes definition of a simple sorter.
+Simple sorter is used in case when the group by is not used. In other words it sorts only rows
+from the matching algorithm using hpc sharp methods.
     
  */
 

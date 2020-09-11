@@ -26,13 +26,13 @@ namespace QueryEngine
         /// <param name="word"> Word to add to a format. </param>
         public override void AddToFormat(string word)
         {
-            if (this.columnsFilled == 0) this.stringBuilder.Append('|');
+            if (this.ColumnsFilled == 0) this.stringBuilder.Append('|');
 
             this.stringBuilder.Append(word);
             this.stringBuilder.Append('|');
 
-            this.columnsFilled++;
-            if (this.columnsFilled == this.columnCount) this.Flush();
+            this.ColumnsFilled++;
+            if (this.ColumnsFilled == this.ColumnCount) this.Flush();
         }
 
         /// <summary>
@@ -66,7 +66,7 @@ namespace QueryEngine
         {
             this.writer.WriteLine(this.stringBuilder.ToString());
             this.stringBuilder.Clear();
-            this.columnsFilled = 0;
+            this.ColumnsFilled = 0;
         }
     }
 }

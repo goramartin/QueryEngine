@@ -28,9 +28,9 @@ namespace QueryEngine
     /// </summary>
     internal sealed class MatchObject
     {
-        private readonly IPatternMatcher Matcher;
-        private readonly IPattern Pattern;
-        private readonly MatchResultsStorage queryResults;
+        private IPatternMatcher Matcher;
+        private IPattern Pattern;
+        private MatchResultsStorage queryResults;
 
         /// <summary>
         /// Creates Match object.
@@ -50,7 +50,7 @@ namespace QueryEngine
             // Create parse tree of match part of query and
             // create a shallow pattern
             MatchNode matchNode = Parser.ParseMatch(tokens);
-            MatchVisitor matchVisitor = new MatchVisitor(graph.NodeTables, graph.EdgeTables);
+            MatchVisitor matchVisitor = new MatchVisitor(graph.nodeTables, graph.edgeTables);
             matchNode.Accept(matchVisitor);
 
             //Create real pattern and variableMap

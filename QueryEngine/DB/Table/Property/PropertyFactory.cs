@@ -21,7 +21,7 @@ namespace QueryEngine
         /// <summary>
         /// Register with valid value types.
         /// </summary>
-        static Dictionary<string, Type> registry;
+        private readonly static Dictionary<string, Type> registry;
 
         /// <summary>
         /// Inicialises registry.
@@ -69,8 +69,7 @@ namespace QueryEngine
             if (token == null || name == null)
                 throw new ArgumentException($"PropertyFactory, passed null name or null token.");
 
-            Type propType = null;
-            if (registry.TryGetValue(token, out propType))
+            if (registry.TryGetValue(token, out Type propType))
             {
                 return (Property)Activator.CreateInstance(propType, name);
             }

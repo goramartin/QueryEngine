@@ -40,7 +40,7 @@ namespace QueryEngine
     /// Note this reader is used to read data files with edges and vertices.
     /// It needs to read words from a stream but must ommit certain special characters.
     /// </summary>
-    internal class WordReader : IWordReader
+    internal class DataFileReader : IWordReader
     {
         StringBuilder wordBuilder;
         StreamReader fileReader;
@@ -51,7 +51,7 @@ namespace QueryEngine
         /// Creates reader and opens given file for reading.
         /// </summary>
         /// <param name="fileName"> File name to open. </param>
-        public WordReader(string fileName)
+        public DataFileReader(string fileName)
         {
             this.wordBuilder = new StringBuilder();
             this.end = false;
@@ -182,7 +182,10 @@ namespace QueryEngine
 
         public void Dispose()
         {
-            this.fileReader.Close();
+            if (this.fileReader != null)
+            {
+                this.fileReader.Close();
+            }
         }
 
         /// <summary>

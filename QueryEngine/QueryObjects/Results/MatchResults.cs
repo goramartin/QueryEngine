@@ -35,7 +35,7 @@ namespace QueryEngine
         /// <summary>
         /// [x][y] x = column, y = thread number
         /// </summary>
-        private readonly List<Element>[][] resTable;
+        private List<Element>[][] resTable;
 
         /// <summary>
         /// A number of results found  (Migh be set even if the results are not stored in resTable).

@@ -6,10 +6,17 @@ using System.Threading.Tasks;
 
 namespace QueryEngine
 {
+    /// <summary>
+    /// A wrapper class for a row proxy comparer. 
+    /// This wrapper is given to the order algorithm.
+    /// During the ordering the order algorithm orders indeces of rows inside the result table 
+    /// instead of ordering rows explicitly. This class gives him interface for comparing the 
+    /// indeces.
+    /// </summary>
     internal sealed class IndexToRowProxyComparer : IComparer<int>
     {
-        ResultRowComparer rowComparer;
-        ITableResults results;
+        private readonly ResultRowComparer rowComparer;
+        private readonly ITableResults results;
 
         public IndexToRowProxyComparer(ResultRowComparer rowComparer, ITableResults results)
         {

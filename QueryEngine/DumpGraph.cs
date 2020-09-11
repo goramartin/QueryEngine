@@ -19,7 +19,7 @@ namespace QueryEngine
             Console.WriteLine();
             //Display whats inside dictionary of nodes 
 
-            foreach (var item in g.NodeTables)
+            foreach (var item in g.nodeTables)
             {
                 Console.WriteLine(
                     " Key:" + item.Key + 
@@ -39,7 +39,7 @@ namespace QueryEngine
             /////////////
             //Display whats inside dictionary of edges
 
-            foreach (var item in g.EdgeTables)
+            foreach (var item in g.edgeTables)
             {
                 Console.WriteLine(
                     " Key:" + item.Key + 

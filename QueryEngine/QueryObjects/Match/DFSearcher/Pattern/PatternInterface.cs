@@ -45,11 +45,11 @@ namespace QueryEngine
         /// <summary>
         /// Returns if there are more match nodes in the current pattern chain.
         /// </summary>
-        bool isLastNodeInCurrentPattern();
+        bool IsLastNodeInCurrentPattern();
         /// <summary>
         /// Retusn whether there are more pattern chains left.
         /// </summary>
-        bool isLastPattern();
+        bool IsLastPattern();
 
         /// <summary>
         /// Returns current index of currently processed pattern chain.

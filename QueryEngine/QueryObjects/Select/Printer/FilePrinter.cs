@@ -30,7 +30,7 @@ namespace QueryEngine
         /// <param name="fileName"> File to print into. </param>
         public FilePrinter(List<PrintVariable> rowFormat, string formater, string fileName) : base(rowFormat)
         {
-            if (!Formater.fileEndings.TryGetValue(formater, out string ending))
+            if (!Formater.FileEndings.TryGetValue(formater, out string ending))
                 throw new ArgumentException($"{this.GetType()}, file ending for given formater does not exist. Formater = {formater}");
 
             try

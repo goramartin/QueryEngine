@@ -38,13 +38,14 @@ namespace QueryEngine
     /// </summary>
     internal sealed class TableDictProcessor : IProcessor<Dictionary<string, Table>>
     {
-        IProcessorState<Dictionary<string, Table>> processorState;
-        IProcessorState<Dictionary<string, Table>> lastProcessorState;
+        private IProcessorState<Dictionary<string, Table>> processorState;
+        private IProcessorState<Dictionary<string, Table>> lastProcessorState;
 
-        Dictionary<string, Table> dict;
-        Table newTable;
-        string newPropName;
-        bool finished;
+        private Dictionary<string, Table> dict;
+        private Table newTable;
+        private string newPropName;
+        private bool finished;
+
         public TableDictProcessor()
         {
             this.dict = new Dictionary<string, Table>();

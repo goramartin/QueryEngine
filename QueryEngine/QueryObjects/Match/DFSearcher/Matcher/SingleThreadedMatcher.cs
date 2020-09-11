@@ -46,10 +46,10 @@ namespace QueryEngine
     /// </summary>
     internal sealed class DFSPatternMatcher : ISingleThreadMatcher
     {
-        private readonly Graph graph;
-        private readonly DFSPattern pattern;
-        private readonly Element[] matchedElements;
-        private readonly List<Element>[] results;
+        private Graph graph;
+        private DFSPattern pattern;
+        private Element[] matchedElements;
+        private List<Element>[] results;
         private bool processingVertex;
         private bool isStoringResults;
         private int startVerticesIndex;
@@ -198,9 +198,9 @@ namespace QueryEngine
                 {
                     // If it is the last node in the pattern, we check if it is the last pattern.
                     AddToResult(nextElement);
-                    if (pattern.isLastNodeInCurrentPattern())
+                    if (pattern.IsLastNodeInCurrentPattern())
                     {
-                        if (pattern.isLastPattern())
+                        if (pattern.IsLastPattern())
                         {
                             // Setting null here makes it to fail on next iteration and it is forced to dfs back.
                             StoreResult();
@@ -377,7 +377,7 @@ namespace QueryEngine
         /// <returns> Next edge of the vertex. </returns>
         private Edge FindAnyEdge(Vertex vertex, Edge lastUsedEdge)
         {
-            Edge nextEdge = null;
+            Edge nextEdge;
             // If no edge has been used -> pick in edge /or/ it hasnt finished iteration over in edges 
             if (lastUsedEdge == null || lastUsedEdge.GetElementType() == typeof(InEdge))
             {
@@ -437,7 +437,7 @@ namespace QueryEngine
         private int PickConjunctionStartIndex(int lastIndex, bool cameFromUp)
         {
             if (this.pattern.CurrentPatternIndex == 0 &&
-                (this.pattern.CurrentMatchNodeIndex == 0 || this.pattern.isLastNodeInCurrentPattern()))
+                (this.pattern.CurrentMatchNodeIndex == 0 || this.pattern.IsLastNodeInCurrentPattern()))
                 return cameFromUp ? lastIndex : this.startVerticesIndex;
             else return lastIndex;
         }
@@ -450,7 +450,7 @@ namespace QueryEngine
         private int PickConjunctionEndIndex()
         {
             if (this.pattern.CurrentPatternIndex == 0 &&
-                (this.pattern.CurrentMatchNodeIndex == 0 || this.pattern.isLastNodeInCurrentPattern()))
+                (this.pattern.CurrentMatchNodeIndex == 0 || this.pattern.IsLastNodeInCurrentPattern()))
                 return this.startVerticesEndIndex;
             else return this.graph.vertices.Count;
         }

@@ -92,8 +92,7 @@ namespace QueryEngine
         /// <param name="strProp">Value to store. </param>
         public override void ParsePropFromStringToList(string strProp)
         {
-            int value = 0;
-            if (!int.TryParse(strProp, out value))
+            if (!int.TryParse(strProp, out int value))
                 throw new ArgumentException($"{this.GetType()} Adding incorrect string to the int property.");
 
             this.propHolder.Add(value);

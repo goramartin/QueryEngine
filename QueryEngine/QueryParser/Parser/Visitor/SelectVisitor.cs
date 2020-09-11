@@ -19,9 +19,9 @@ namespace QueryEngine
     /// </summary>
     internal sealed class SelectVisitor : IVisitor<List<PrintVariable>>
     {
-        List<PrintVariable> result;
-        Dictionary<string, Type> Labels;
-        VariableMap variableMap;
+        private List<PrintVariable> result;
+        private Dictionary<string, Type> Labels;
+        private VariableMap variableMap;
 
         public SelectVisitor(Dictionary<string, Type> labels, VariableMap map)
         {

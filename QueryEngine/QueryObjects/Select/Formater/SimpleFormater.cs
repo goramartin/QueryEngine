@@ -29,8 +29,8 @@ namespace QueryEngine
         {
             this.stringBuilder.Append(word);
             this.PadWithChar(Formater.BaseColumnLength - word.Length, ' ');
-            this.columnsFilled++;
-            if (this.columnsFilled == this.columnCount) this.Flush();
+            this.ColumnsFilled++;
+            if (this.ColumnsFilled == this.ColumnCount) this.Flush();
         }
 
 
@@ -51,7 +51,7 @@ namespace QueryEngine
 
             this.Flush();
 
-            for (int i = 0; i < this.columnCount; i++)
+            for (int i = 0; i < this.ColumnCount; i++)
             {
                 this.PadWithChar(Formater.BaseColumnLength, '-');
             }
@@ -65,7 +65,7 @@ namespace QueryEngine
         {
             this.writer.WriteLine(this.stringBuilder.ToString());
             this.stringBuilder.Clear();
-            this.columnsFilled = 0;
+            this.ColumnsFilled = 0;
         }
 
         /// <summary>

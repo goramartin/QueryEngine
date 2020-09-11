@@ -24,10 +24,15 @@ namespace QueryEngine
     /// </summary>
     internal interface IProcessorState<T>
     {
+        /// <summary>
+        /// Processes a given parameter. 
+        /// </summary>
+        /// <param name="processor"> A parsed parameter from a file. </param>
+        /// <param name="param"> A processor to be used for processing the parameter. </param>
         void Process(IProcessor<T> processor, string param);
     }
     /// <summary>
-    /// Interface for state oriented processing of a file.
+    /// Interface for a state oriented processing of a file.
     /// </summary>
     /// <typeparam name="T"> Value to be created. </typeparam>
     internal interface IProcessor<T>

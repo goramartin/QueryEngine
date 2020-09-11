@@ -33,9 +33,9 @@ namespace QueryEngine
     /// </summary>
     internal class Graph
     {
-        public Dictionary<string, Table> NodeTables;
-        public Dictionary<string, Table> EdgeTables;
-        public Dictionary<string, Type> Labels;
+        public Dictionary<string, Table> nodeTables;
+        public Dictionary<string, Table> edgeTables;
+        public Dictionary<string, Type> labels;
         public List<Vertex> vertices;
         public List<OutEdge> outEdges;
         public List<InEdge> inEdges;
@@ -45,11 +45,11 @@ namespace QueryEngine
         /// </summary>
         public Graph()
         {
-            this.NodeTables = null;
+            this.nodeTables = null;
             this.vertices = null;
             this.outEdges = null;
             this.inEdges = null;
-            this.EdgeTables = null;
+            this.edgeTables = null;
 
 
             Console.WriteLine("Loading tables...");
@@ -58,9 +58,9 @@ namespace QueryEngine
             Console.WriteLine("Loading tables finished.");
 
 
-            this.Labels = new Dictionary<string, Type>();
-            this.AdjustLabels(this.EdgeTables);
-            this.AdjustLabels(this.NodeTables);
+            this.labels = new Dictionary<string, Type>();
+            this.AdjustLabels(this.edgeTables);
+            this.AdjustLabels(this.nodeTables);
 
             Console.WriteLine("Loading nodes...");
             this.LoadVertices("DataFiles\\Nodes.txt");
@@ -89,8 +89,8 @@ namespace QueryEngine
 
             return tmpTables;
         }
-        private void LoadEdgeTables(string filename) => this.EdgeTables = LoadTables(filename);
-        private void LoadNodeTables(string filename) => this.NodeTables = LoadTables(filename);
+        private void LoadEdgeTables(string filename) => this.edgeTables = LoadTables(filename);
+        private void LoadNodeTables(string filename) => this.nodeTables = LoadTables(filename);
 
         /// <summary>
         /// Loads all vetices from a file.
@@ -98,9 +98,9 @@ namespace QueryEngine
         /// <param name="filename"> File containing data of vertices. </param>
         private void LoadVertices(string filename)
         {
-            var reader = new WordReader(filename);
+            var reader = new DataFileReader(filename);
             var processor = new VerticesListProcessor();
-            processor.PassParameters(NodeTables);
+            processor.PassParameters(nodeTables);
             var creator = new CreatorFromFile<List<Vertex>>(reader, processor);
             this.vertices = creator.Create();
 
@@ -115,9 +115,9 @@ namespace QueryEngine
         /// <param name="filename"> File containing data of edges. </param>
         private void LoadEdges(string filename)
         {
-            var reader = new WordReader(filename);
+            var reader = new DataFileReader(filename);
             var processor = new EdgeListProcessor();
-            processor.PassParameters(NodeTables, EdgeTables, vertices);
+            processor.PassParameters(nodeTables, edgeTables, vertices);
             var creator = new CreatorFromFile<EdgeListHolder>(reader, processor);
             var result = creator.Create();
             this.outEdges = result.outEdges;
@@ -131,7 +131,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Adjust labels from all tables to a graph dictionary (Labels).
+        /// Add labels from all tables to a graph dictionary (Labels) if not included already.
         /// </summary>
         /// <param name="tables"> Dictionaty of graph types. </param>
         private void AdjustLabels(Dictionary<string, Table> tables)
@@ -142,18 +142,18 @@ namespace QueryEngine
 
 
         /// <summary>
-        /// Fills missing labels from a table to graph dictionary (Labels).
+        /// Fills missing labels from a table to a  graph dictionary (Labels).
         /// </summary>
         /// <param name="table"> Table to take properties from. </param>
         private void AddTableLabels(Table table)
         {
             foreach (var property in table.Properties)
             {
-                if (this.Labels.TryGetValue(property.Key, out Type type))
+                if (this.labels.TryGetValue(property.Key, out Type type))
                 {
                     if (type != property.Value.GetPropertyType())
                         throw new ArgumentException($"{this.GetType()}, found two properties with the same name but discrepant types. Adjust input scheme.");
-                } else this.Labels.Add(property.Key, property.Value.GetPropertyType());
+                } else this.labels.Add(property.Key, property.Value.GetPropertyType());
             }
         }
 

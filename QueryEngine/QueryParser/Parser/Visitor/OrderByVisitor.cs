@@ -18,10 +18,10 @@ namespace QueryEngine
     /// </summary>
     internal sealed class OrderByVisitor : IVisitor<List<ResultRowComparer>>
     {
-        List<ResultRowComparer> result;
-        Dictionary<string, Type> Labels;
-        VariableMap variableMap;
-        ExpressionHolder expressionHolder;
+        private List<ResultRowComparer> result;
+        private Dictionary<string, Type> Labels;
+        private VariableMap variableMap;
+        private ExpressionHolder expressionHolder;
 
         public OrderByVisitor(Dictionary<string, Type> labels, VariableMap map)
         {

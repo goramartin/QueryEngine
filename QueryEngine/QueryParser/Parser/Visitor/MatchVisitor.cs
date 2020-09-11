@@ -20,12 +20,12 @@ namespace QueryEngine
     /// </summary>
     internal sealed class MatchVisitor : IVisitor<List<ParsedPattern>>
     {
-        List<ParsedPattern> result;
-        ParsedPattern currentPattern;
-        Dictionary<string, Table> vTables;
-        Dictionary<string, Table> eTables;
-        bool readingName;
-        bool readingVertex;
+        private List<ParsedPattern> result;
+        private ParsedPattern currentPattern;
+        private Dictionary<string, Table> vTables;
+        private Dictionary<string, Table> eTables;
+        private bool readingName;
+        private bool readingVertex;
 
         public MatchVisitor(Dictionary<string, Table> v, Dictionary<string, Table> e)
         {

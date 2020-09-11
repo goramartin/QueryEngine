@@ -29,10 +29,10 @@ namespace QueryEngine
     /// </summary>
     internal sealed class DFSParallelPatternMatcher : IPatternMatcher
     {
-         ISingleThreadMatcher[] Matchers;
-         Graph Graph;
-         IMatchExecutionHelper executionHelper;
-         MatchResultsStorage Results;
+        private ISingleThreadMatcher[] matchers;
+        private Graph graph;
+        private IMatchExecutionHelper executionHelper;
+        private MatchResultsStorage results;
 
         /// <summary>
         /// Creates a parallel matchers.
@@ -47,14 +47,14 @@ namespace QueryEngine
             if (executionHelper.ThreadCount <= 0 || executionHelper.VerticesPerThread <= 0)
                 throw new ArgumentException($"{this.GetType()}, invalid number of threads or vertices per thread.");
 
-            this.Matchers = new ISingleThreadMatcher[executionHelper.ThreadCount];
-            this.Graph = graph;
-            this.Results = results;
+            this.matchers = new ISingleThreadMatcher[executionHelper.ThreadCount];
+            this.graph = graph;
+            this.results = results;
             this.executionHelper = executionHelper;
 
             for (int i = 0; i < executionHelper.ThreadCount; i++)
             {
-                this.Matchers[i] = (ISingleThreadMatcher)MatchFactory
+                this.matchers[i] = (ISingleThreadMatcher)MatchFactory
                                    .CreateMatcher("DFSSingleThread",                  // Type of Matcher 
                                                   i == 0 ? pattern : pattern.Clone(), // Cloning of pattern (one was already created)
                                                   graph,
@@ -82,8 +82,8 @@ namespace QueryEngine
 
             if (!this.executionHelper.InParallel) 
             { 
-                this.Matchers[0].Search();
-                this.Results.IsMerged = true;
+                this.matchers[0].Search();
+                this.results.IsMerged = true;
             }
             else
             {
@@ -95,7 +95,7 @@ namespace QueryEngine
                 if (this.executionHelper.IsMergeNeeded && this.executionHelper.IsStoringResult)
                 {
                     this.ParallelMergeThreadResults();
-                    this.Results.IsMerged = true;
+                    this.results.IsMerged = true;
                     Console.WriteLine("Finished Merge:");
                     QueryEngine.PrintElapsedTime();
                 }
@@ -109,8 +109,8 @@ namespace QueryEngine
         /// </summary>
         private void SetStoringResultsOnMatchers()
         {
-            for (int i = 0; i < this.Matchers.Length; i++)
-                this.Matchers[i].SetStoringResults(this.executionHelper.IsStoringResult);
+            for (int i = 0; i < this.matchers.Length; i++)
+                this.matchers[i].SetStoringResults(this.executionHelper.IsStoringResult);
         }
 
         /// <summary>
@@ -120,8 +120,8 @@ namespace QueryEngine
         /// </summary>
         private void CollectCountFromMatchers()
         {
-            for (int i = 0; i < this.Matchers.Length; i++)
-                this.Results.NumberOfMatchedElements += this.Matchers[i].GetNumberOfMatchedElements();
+            for (int i = 0; i < this.matchers.Length; i++)
+                this.results.NumberOfMatchedElements += this.matchers[i].GetNumberOfMatchedElements();
         }
 
         // This section contains structures and algorithm for handling parallel matching.
@@ -136,19 +136,19 @@ namespace QueryEngine
         /// </summary>
         private void ParallelSearch()
         {
-            var distributor = new VertexDistributor(this.Graph.GetAllVertices(), this.executionHelper.VerticesPerThread);
+            var distributor = new VertexDistributor(this.graph.GetAllVertices(), this.executionHelper.VerticesPerThread);
             
             // -1 because the last index is ment for the main app thread.
             Task[] tasks = new Task[this.executionHelper.ThreadCount -1];
             // Create task for each matcher except the last mather and enqueue them into thread pool.
             for (int i = 0; i < tasks.Length; i++)
             {
-                var tmp = new JobMultiThreadSearch(distributor, this.Matchers[i]);
+                var tmp = new JobMultiThreadSearch(distributor, this.matchers[i]);
                 tasks[i] = Task.Factory.StartNew(() => DFSParallelPatternMatcher.WorkMultiThreadSearch(tmp));
             }
 
             // The last matcher is used by the main app thread.
-            DFSParallelPatternMatcher.WorkMultiThreadSearch(new JobMultiThreadSearch(distributor, this.Matchers[this.executionHelper.ThreadCount - 1]));
+            DFSParallelPatternMatcher.WorkMultiThreadSearch(new JobMultiThreadSearch(distributor, this.matchers[this.executionHelper.ThreadCount - 1]));
             
             Task.WaitAll(tasks);
         }
@@ -168,15 +168,15 @@ namespace QueryEngine
             while (true)
             {
                 // Ask for more vertices to iterate over.
-                job.Distributor.DistributeVertices(ref start, ref end);
+                job.distributor.DistributeVertices(ref start, ref end);
 
                 // No more vertices. The thread can end.
                 if (start == -1 || end == -1) break;
                 else
                 {
                     // Set the range of vertices to the matcher and start searching the graph.
-                    job.Matcher.SetStartingVerticesIndeces(start, end);
-                    job.Matcher.Search();
+                    job.matcher.SetStartingVerticesIndeces(start, end);
+                    job.matcher.Search();
                 }
             }
         }
@@ -188,13 +188,13 @@ namespace QueryEngine
         /// </summary>
         private class JobMultiThreadSearch
         {
-            public VertexDistributor Distributor;
-            public ISingleThreadMatcher Matcher;
+            public VertexDistributor distributor;
+            public ISingleThreadMatcher matcher;
 
             public JobMultiThreadSearch(VertexDistributor vertexDistributor, ISingleThreadMatcher matcher)
             {
-                this.Distributor = vertexDistributor;
-                this.Matcher = matcher;
+                this.distributor = vertexDistributor;
+                this.matcher = matcher;
             }
         }
 
@@ -205,15 +205,15 @@ namespace QueryEngine
         /// </summary>
         private class VertexDistributor
         {
-            readonly List<Vertex> Vertices;
+            List<Vertex> vertices;
             /// <summary>
             /// Number of vertices to give during vertex distribution method call.
             /// </summary>
-            readonly int VerticesPerRound;
+            readonly int verticesPerRound;
             /// <summary>
             /// The index of the vertex that has not been distributed yet in the graph.
             /// </summary>
-            int NextFreeIndex;
+            int nextFreeIndex;
 
             /// <summary>
             /// Creates a vertex distributor.
@@ -226,8 +226,8 @@ namespace QueryEngine
                     throw new ArgumentException($"{this.GetType()} creating with 0 vertices or empty rounds.");
                 else
                 {
-                    this.VerticesPerRound = verticesPerRound;
-                    this.Vertices = vertices;
+                    this.verticesPerRound = verticesPerRound;
+                    this.vertices = vertices;
                 }
             }
 
@@ -245,21 +245,21 @@ namespace QueryEngine
             /// <returns> Starting index and ending index of a round or start/end set to -1 for no more vertices to be distribute.</returns>
             public void DistributeVertices(ref int start, ref int end)
             {
-                int tmpEndOfRound = Interlocked.Add(ref this.NextFreeIndex, this.VerticesPerRound);
-                int tmpStartOfRound = tmpEndOfRound - this.VerticesPerRound;
+                int tmpEndOfRound = Interlocked.Add(ref this.nextFreeIndex, this.verticesPerRound);
+                int tmpStartOfRound = tmpEndOfRound - this.verticesPerRound;
 
                 // First index is beyond the size of the array of vertices -> no more vertices to distribute.
-                if (tmpStartOfRound >= this.Vertices.Count)
+                if (tmpStartOfRound >= this.vertices.Count)
                 {
                     start = -1;
                     end = -1;
 
                 }  // Return all vertices to the end of the list. 
                    // Returned range is smaller than the round size because there is not enough vertices. 
-                else if (tmpEndOfRound >= this.Vertices.Count)
+                else if (tmpEndOfRound >= this.vertices.Count)
                 {
                     start = tmpStartOfRound;
-                    end = this.Vertices.Count;
+                    end = this.vertices.Count;
 
                 } // Return normal size range.
                 else
@@ -308,11 +308,11 @@ namespace QueryEngine
         /// </summary>
         private void MergeColumn()
         {
-            var columnDistributor = new ColumnDistributor(this.Results.ColumnCount);
-            var mergeColumnJob = new ParallelMergeColumnJob(columnDistributor, this.Results);
+            var columnDistributor = new ColumnDistributor(this.results.ColumnCount);
+            var mergeColumnJob = new ParallelMergeColumnJob(columnDistributor, this.results);
 
-            int threadsToUse = (this.executionHelper.ThreadCount < this.Results.ColumnCount ?
-                                this.executionHelper.ThreadCount : this.Results.ColumnCount);
+            int threadsToUse = (this.executionHelper.ThreadCount < this.results.ColumnCount ?
+                                this.executionHelper.ThreadCount : this.results.ColumnCount);
             
             // -1 because the main app thread will work as well.
             Task[] tasks = new Task[threadsToUse - 1];
@@ -337,10 +337,10 @@ namespace QueryEngine
             while (true)
             {
                 // Ask for a column to distribute.
-                columnIndex = job.ColumnDistributor.DistributeColumn();
+                columnIndex = job.columnDistributor.DistributeColumn();
                 
                 if (columnIndex == -1) break;
-                else job.Elements.MergeColumn(columnIndex);
+                else job.elements.MergeColumn(columnIndex);
             }
         }
 
@@ -349,12 +349,12 @@ namespace QueryEngine
         /// </summary>
         private class ParallelMergeColumnJob
         {
-            public MatchResultsStorage Elements;
-            public ColumnDistributor ColumnDistributor;
+            public MatchResultsStorage elements;
+            public ColumnDistributor columnDistributor;
             public ParallelMergeColumnJob(ColumnDistributor columnDistributor, MatchResultsStorage elements)
             {
-                this.Elements = elements;
-                this.ColumnDistributor = columnDistributor;
+                this.elements = elements;
+                this.columnDistributor = columnDistributor;
             }
         }
 
@@ -408,8 +408,8 @@ namespace QueryEngine
         /// </summary>
         private void MergeRows()
         {
-           DFSParallelPatternMatcher.ParallelMergeRowWork(this.Results, 0, this.executionHelper.ThreadCount, 1);
-           if (this.Results.ColumnCount != 1)
+           DFSParallelPatternMatcher.ParallelMergeRowWork(this.results, 0, this.executionHelper.ThreadCount, 1);
+           if (this.results.ColumnCount != 1)
                 this.MergeColumn();
         }
 

@@ -52,6 +52,10 @@ namespace QueryEngine
         /// </summary>
         public Dictionary<int,int> IDs { get; private set; }
 
+        /// <summary>
+        /// Inits a new instance of a table.
+        /// </summary>
+        /// <param name="tableName"> A name that will be used as an identifier of the new table. </param>
         public Table(string tableName)
         {
             if (tableName == null) 
@@ -152,7 +156,7 @@ namespace QueryEngine
                 throw new ArgumentException($"{this.GetType()}, accessing element that is missing in the table. Element ID = {id}.");
             else if (!this.Properties.TryGetValue(propName, out Property property))
             {
-                value = default(T);
+                value = default;
                 return false;
             }
             else

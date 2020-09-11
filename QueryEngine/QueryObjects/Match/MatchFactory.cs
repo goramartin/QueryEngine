@@ -23,20 +23,20 @@ namespace QueryEngine
         /// <summary>
         /// Register of valid matchers.
         /// </summary>
-        static Dictionary<string, Type> MatcherRegistry;
+        static readonly Dictionary<string, Type> matcherRegistry;
 
         /// <summary>
         /// Register of valid patterns for a given matcher.
         /// </summary>
-        static Dictionary<string, Dictionary<string, Type>> MatcherPatternRegistry;
+        static readonly Dictionary<string, Dictionary<string, Type>> matcherPatternRegistry;
 
         /// <summary>
         /// Inicialises registries.
         /// </summary>
         static MatchFactory()
         {
-            MatcherRegistry = new Dictionary<string, Type>();
-            MatcherPatternRegistry = new Dictionary<string, Dictionary<string, Type>>();
+            matcherRegistry = new Dictionary<string, Type>();
+            matcherPatternRegistry = new Dictionary<string, Dictionary<string, Type>>();
             InicialiseRegistry();
         }
 
@@ -62,10 +62,10 @@ namespace QueryEngine
                 throw new ArgumentNullException($"MatchFactory, cannot register null type or null token.");
 
 
-            if (MatcherRegistry.ContainsKey(matcher))
+            if (matcherRegistry.ContainsKey(matcher))
                 throw new ArgumentException($"MatchFactory, matcher Type already registered. Matcher = {matcher}. ");
 
-            MatcherRegistry.Add(matcher, type);
+            matcherRegistry.Add(matcher, type);
         }
 
 
@@ -81,18 +81,17 @@ namespace QueryEngine
                 throw new ArgumentNullException($"MatchFactory, cannot register null type or null token.");
 
 
-            if (MatcherPatternRegistry.TryGetValue(matcher, out Dictionary<string, Type> pDict))
+            if (matcherPatternRegistry.TryGetValue(matcher, out Dictionary<string, Type> pDict))
             {
-                if (pDict.TryGetValue(pattern, out Type value))
+                if (pDict.ContainsKey(pattern))
                     throw new ArgumentException($"MatchFactory, pattern Type already registered to Matcher. Pattern = {pattern}.");
                 else pDict.Add(pattern, patternType);
-
             }
             else
             {
                 var tmpDict = new Dictionary<string, Type>();
                 tmpDict.Add(pattern, patternType);
-                MatcherPatternRegistry.Add(matcher, tmpDict);
+                matcherPatternRegistry.Add(matcher, tmpDict);
             }
         }
 
@@ -107,8 +106,7 @@ namespace QueryEngine
             if (matcher == null)
                 throw new ArgumentNullException($"MatchFactory, cannot access null type or null token.");
 
-            Type matcherType = null;
-            if (MatcherRegistry.TryGetValue(matcher, out matcherType))
+            if (matcherRegistry.TryGetValue(matcher, out Type matcherType))
             {
                 return (IPatternMatcher)Activator.CreateInstance(matcherType, parameters);
             }
@@ -127,7 +125,7 @@ namespace QueryEngine
             if (matcher == null || pattern == null)
                 throw new ArgumentNullException($"MatchFactory, cannot access null type or null token.");
 
-            if (MatcherPatternRegistry.TryGetValue(matcher, out Dictionary<string, Type> pDict))
+            if (matcherPatternRegistry.TryGetValue(matcher, out Dictionary<string, Type> pDict))
             {
                 if (pDict.TryGetValue(pattern, out Type patternType))
                     return (IPattern)Activator.CreateInstance(patternType, parameters);

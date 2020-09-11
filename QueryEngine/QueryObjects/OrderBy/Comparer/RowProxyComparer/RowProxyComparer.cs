@@ -6,7 +6,7 @@ Each row comparer contains a list of expression comparers.
 During row comparing each expression comparer compares values computed with the given row.
 Based on the result it decides whether to continue comparing expression or returns resulting value.
  
-Expression comparer is given to rows and computes expression value with the both rows. The values are then compared
+Expression comparer is given two rows and computes expression value of the both rows. The values are then compared
 using templated compare methods. 
 
 Null values in descenging order appear as last elements.
@@ -39,7 +39,7 @@ namespace QueryEngine
     /// </summary>
     internal class RowComparer : ResultRowComparer
     {
-        private List<ResultRowComparer> comparers { get; }
+        private readonly List<ResultRowComparer> comparers;
 
         /// <summary>
         /// Creates a row comparer.
@@ -79,8 +79,8 @@ namespace QueryEngine
     /// </summary>
     internal abstract class ExpressionComparer : ResultRowComparer
     {
-        protected ExpressionHolder expressionHolder { get; }
-        protected bool Ascending { get; }
+        protected readonly ExpressionHolder expressionHolder;
+        protected readonly bool isAscending;
 
         /// <summary>
         /// Constructs expression comparer.
@@ -90,7 +90,7 @@ namespace QueryEngine
         protected ExpressionComparer(ExpressionHolder expressionHolder, bool ascending)
         {
             this.expressionHolder = expressionHolder;
-            this.Ascending = ascending;
+            this.isAscending = ascending;
         }
 
         /// <summary>
@@ -131,8 +131,8 @@ namespace QueryEngine
         /// Greater than zero x follows y in the sort order.</returns>
         public override int Compare(in TableResults.RowProxy x, in TableResults.RowProxy y)
         {
-            var xSuccess = expressionHolder.TryGetExpressionValue(x, out T xValue);
-            var ySuccess = expressionHolder.TryGetExpressionValue(y, out T yValue);
+            var xSuccess = this.expressionHolder.TryGetExpressionValue(x, out T xValue);
+            var ySuccess = this.expressionHolder.TryGetExpressionValue(y, out T yValue);
 
             int retValue = 0;
             if (xSuccess && !ySuccess) retValue = -1;
@@ -140,7 +140,7 @@ namespace QueryEngine
             else if (!xSuccess && !ySuccess) retValue = 0;
             else retValue = this.CompareValues(xValue, yValue);
 
-            if (!Ascending) 
+            if (!this.isAscending) 
             {
                 if (retValue == -1) retValue = 1;
                 else if (retValue == 1) retValue = -1;

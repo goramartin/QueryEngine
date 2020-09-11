@@ -48,7 +48,7 @@ namespace QueryEngine
             else
             {
                 // Process parse tree and create list of variables to be printed
-                SelectVisitor visitor = new SelectVisitor(graph.Labels, map);
+                SelectVisitor visitor = new SelectVisitor(graph.labels, map);
                 selectNode.Accept(visitor);
                 this.rowFormat = visitor.GetResult();
             }

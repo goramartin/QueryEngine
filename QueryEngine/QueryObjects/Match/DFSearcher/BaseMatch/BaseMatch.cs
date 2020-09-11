@@ -28,31 +28,31 @@ namespace QueryEngine
         /// <summary>
         /// The match is anonymous if it does not represent any variable.
         /// </summary>
-        readonly bool IsAnonnymous;
+        readonly bool isAnonnymous;
         /// <summary>
         /// Is true if the match object represents a variable that has it is first appereance. 
         /// </summary>
-        readonly bool IsFirstAppereance;
+        readonly bool isFirstAppereance;
         /// <summary>
         /// Represents index in scope if it is not anonymous. 
         /// </summary>
-        readonly int PositionOfRepeatedField;
+        readonly int positionOfRepeatedField;
         /// <summary>
         /// Type of a table of the element being matched.
         /// </summary>
-        readonly Table Table;
+        readonly Table table;
         /// <summary>
         /// Type of graph element to be matched. Its faster to store the information directly then call virtual methods.
         /// The pattern is never really long, so the memory overhead is negligible.
         /// </summary>
-        readonly Type MatchingType;
+        readonly Type matchingType;
 
         public DFSBaseMatch()
         {
-            this.IsAnonnymous = true;
-            this.PositionOfRepeatedField = -1;
-            this.Table = null;
-            this.IsFirstAppereance = true;
+            this.isAnonnymous = true;
+            this.positionOfRepeatedField = -1;
+            this.table = null;
+            this.isFirstAppereance = true;
         }
 
         /// <summary>
@@ -64,13 +64,13 @@ namespace QueryEngine
         /// <param name="matchingType"> Type of matching graph element. </param>
         protected DFSBaseMatch(ParsedPatternNode node, int indexInMap, bool isFirst, Type matchingType)
         {
-            this.MatchingType = matchingType;
-            if (indexInMap != -1) this.IsAnonnymous = false;
-            else this.IsAnonnymous = true;
+            this.matchingType = matchingType;
+            if (indexInMap != -1) this.isAnonnymous = false;
+            else this.isAnonnymous = true;
 
-            this.IsFirstAppereance = isFirst;
-            this.PositionOfRepeatedField = indexInMap;
-            this.Table = node.Table;
+            this.isFirstAppereance = isFirst;
+            this.positionOfRepeatedField = indexInMap;
+            this.table = node.Table;
         }
 
         /// <summary>
@@ -86,22 +86,22 @@ namespace QueryEngine
         public bool Apply(Element element, Element[] map)
         {
             // Check type, comparing references to tables.
-            if ((this.Table != null) && (this.Table != element.Table)) return false;
+            if ((this.table != null) && (this.table != element.Table)) return false;
 
             // It is anonnymous, then it can match any vertex/edge.
-            if (this.IsAnonnymous) return true;
+            if (this.isAnonnymous) return true;
             else  // it is a variable 
             {
                 // Check if any element occupies variable rep. by this match object.
-                if (map[this.PositionOfRepeatedField] != null)
+                if (map[this.positionOfRepeatedField] != null)
                 {
                     // It contains el. 
                     // Check if the two elements are same.
-                    if (map[this.PositionOfRepeatedField].ID != element.ID) return false;
+                    if (map[this.positionOfRepeatedField].ID != element.ID) return false;
                     else { /* Empty else -> it returns true at the end */ }
 
                 } // The variable is not occupied by the element -> add the element
-                else map[this.PositionOfRepeatedField] = element;
+                else map[this.positionOfRepeatedField] = element;
             }
 
             return true;
@@ -115,8 +115,8 @@ namespace QueryEngine
         /// <param name="map"> Scope of the search algorithm. </param>
         public void UnsetVariable(Element[] map)
         {
-            if (!this.IsAnonnymous && this.IsFirstAppereance)
-                map[this.PositionOfRepeatedField] = null;
+            if (!this.isAnonnymous && this.isFirstAppereance)
+                map[this.positionOfRepeatedField] = null;
         }
 
         /// <summary>
@@ -128,8 +128,8 @@ namespace QueryEngine
         /// <returns> Null if no element is used, else element of this match object. </returns>
         public Element GetVariable(Element[] map)
         {
-            if (this.IsAnonnymous) return null;
-            else return map[this.PositionOfRepeatedField];
+            if (this.isAnonnymous) return null;
+            else return map[this.positionOfRepeatedField];
         }
 
         /// <summary>
@@ -140,7 +140,7 @@ namespace QueryEngine
         /// <returns> Type of graph element to be matched. </returns>
         public Type GetMatchType()
         {
-            return this.MatchingType;
+            return this.matchingType;
         }
 
 

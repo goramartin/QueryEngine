@@ -34,20 +34,20 @@ namespace QueryEngine
     /// </summary>
     internal sealed class DFSPattern : IDFSPattern
     {
-        private List<List<DFSBaseMatch>> Patterns;
+        private List<List<DFSBaseMatch>> patterns;
         public int CurrentPatternIndex { get; private set; }
         public int CurrentMatchNodeIndex { get; private set; }
         public int OverAllIndex { get; private set; }
-        public int PatternCount { get => this.Patterns.Count; }
-        public int CurrentPatternCount { get => this.Patterns[this.CurrentPatternIndex].Count; }
+        public int PatternCount { get => this.patterns.Count; }
+        public int CurrentPatternCount { get => this.patterns[this.CurrentPatternIndex].Count; }
         public int AllNodeCount 
         { 
             get
             {
                 int Count = 0;
-                for (int i = 0; i < this.Patterns.Count; i++)
+                for (int i = 0; i < this.patterns.Count; i++)
                 {
-                    Count += this.Patterns[i].Count;
+                    Count += this.patterns[i].Count;
                 }
                 return Count;
             }
@@ -58,7 +58,7 @@ namespace QueryEngine
         /// We need to ensure that the indexes when retrieved are the same. 
         /// Integer here is the positionOfRepeated variable (index in Map of variables.)
         /// </summary>
-        private Element[] Scope;
+        private Element[] scope;
 
         /// <summary>
         /// Creates a pattern from a given matches. Used only inside clone method.
@@ -70,8 +70,8 @@ namespace QueryEngine
             if (dFSBaseMatches == null || dFSBaseMatches.Count == 0) 
                 throw new ArgumentException($"{this.GetType()} passed null or empty matches.");
 
-            this.Patterns = dFSBaseMatches;
-            this.Scope = new Element[variableCount];
+            this.patterns = dFSBaseMatches;
+            this.scope = new Element[variableCount];
             this.CurrentMatchNodeIndex = 0;
             this.CurrentPatternIndex = 0;
             this.OverAllIndex = 0;
@@ -90,11 +90,11 @@ namespace QueryEngine
             if (parsedPatterns == null || parsedPatterns.Count == 0) 
                 throw new ArgumentException($"{this.GetType()} passed null or empty parsed pattern.");
 
-            this.Patterns = new List<List<DFSBaseMatch>>();
+            this.patterns = new List<List<DFSBaseMatch>>();
             this.CreatePattern(parsedPatterns, map);
 
-            this.Scope = new Element[map.GetCount()];
-            this.Scope.Populate(null);
+            this.scope = new Element[map.GetCount()];
+            this.scope.Populate(null);
 
             this.CurrentMatchNodeIndex = 0;
             this.CurrentPatternIndex = 0;
@@ -127,15 +127,15 @@ namespace QueryEngine
                 // Add both parts into the real pattern
                 if (firstPart != null)
                 {
-                    this.Patterns.Add(CreateChain(firstPart.Pattern, variableMap));
+                    this.patterns.Add(CreateChain(firstPart.Pattern, variableMap));
                 }
                 // Always add the second part even if the has not been splitted.
-                this.Patterns.Add(CreateChain(orderedPatterns[i].Pattern, variableMap));
+                this.patterns.Add(CreateChain(orderedPatterns[i].Pattern, variableMap));
             }
 
             // Check that each subpattern has at least one element.
-            for (int i = 0; i < this.Patterns.Count; i++)
-                if (this.Patterns[i].Count == 0) 
+            for (int i = 0; i < this.patterns.Count; i++)
+                if (this.patterns[i].Count == 0) 
                     throw new ArgumentException($"{this.GetType()} one of the patterns is empty.");
 
         }
@@ -257,7 +257,7 @@ namespace QueryEngine
         /// <returns> True if the element can be applied, false if it cannot be applied. </returns>
         public bool Apply(Element element)
         {
-            return this.Patterns[this.CurrentPatternIndex][this.CurrentMatchNodeIndex].Apply(element, this.Scope);
+            return this.patterns[this.CurrentPatternIndex][this.CurrentMatchNodeIndex].Apply(element, this.scope);
         }
 
         /// <summary>
@@ -314,7 +314,7 @@ namespace QueryEngine
         /// </summary>
         public void UnsetCurrentVariable()
         {
-            this.Patterns[this.CurrentPatternIndex][this.CurrentMatchNodeIndex].UnsetVariable(this.Scope);
+            this.patterns[this.CurrentPatternIndex][this.CurrentMatchNodeIndex].UnsetVariable(this.scope);
         }
 
         /// <summary>
@@ -323,7 +323,7 @@ namespace QueryEngine
         /// <returns> Null if anonymous/firstAppearance else it is picked from the scope. </returns>
         public Element GetCurrentChainConnection()
         {
-            return this.Patterns[this.CurrentPatternIndex][0].GetVariable(this.Scope);
+            return this.patterns[this.CurrentPatternIndex][0].GetVariable(this.scope);
         }
 
         /// <summary>
@@ -334,17 +334,17 @@ namespace QueryEngine
         /// <returns>Null if anonymous/first appearance else element from scope. </returns>
         public Element GetNextChainConnection()
         {
-            return this.Patterns[this.CurrentPatternIndex + 1][0].GetVariable(this.Scope);
+            return this.patterns[this.CurrentPatternIndex + 1][0].GetVariable(this.scope);
         }
 
-        public bool isLastNodeInCurrentPattern()
+        public bool IsLastNodeInCurrentPattern()
         {
-            return (this.Patterns[this.CurrentPatternIndex].Count - 1) == this.CurrentMatchNodeIndex ? true : false;
+            return (this.patterns[this.CurrentPatternIndex].Count - 1) == this.CurrentMatchNodeIndex ? true : false;
         }
 
-        public bool isLastPattern()
+        public bool IsLastPattern()
         {
-            return this.CurrentPatternIndex == (this.Patterns.Count - 1) ? true : false;
+            return this.CurrentPatternIndex == (this.patterns.Count - 1) ? true : false;
         }
 
        /// <summary>
@@ -352,7 +352,7 @@ namespace QueryEngine
        /// </summary>
         public Type GetMatchType()
         {
-            return (this.Patterns[this.CurrentPatternIndex][this.CurrentMatchNodeIndex]).GetMatchType();
+            return (this.patterns[this.CurrentPatternIndex][this.CurrentMatchNodeIndex]).GetMatchType();
         }
 
         /// <summary>
@@ -360,7 +360,7 @@ namespace QueryEngine
         /// </summary>
         public IDFSPattern Clone()
         {
-            var tmpPattern = new DFSPattern(this.Patterns, this.Scope.Length);
+            var tmpPattern = new DFSPattern(this.patterns, this.scope.Length);
             return tmpPattern;
         }
 
@@ -369,7 +369,7 @@ namespace QueryEngine
         /// </summary>
         public Element[] GetMatchedVariables()
         {
-            return this.Scope;
+            return this.scope;
         }
 
         #endregion PatternInterface
