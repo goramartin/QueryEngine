@@ -127,10 +127,10 @@ namespace QueryEngine
                 // Add both parts into the real pattern
                 if (firstPart != null)
                 {
-                    this.patterns.Add(CreateChain(firstPart.Pattern, variableMap));
+                    this.patterns.Add(CreateChain(firstPart.pattern, variableMap));
                 }
                 // Always add the second part even if the has not been splitted.
-                this.patterns.Add(CreateChain(orderedPatterns[i].Pattern, variableMap));
+                this.patterns.Add(CreateChain(orderedPatterns[i].pattern, variableMap));
             }
 
             // Check that each subpattern has at least one element.

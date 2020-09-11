@@ -148,7 +148,7 @@ namespace QueryEngine
     /// <param name="reader"> Reader from which to read input. </param>
     private static void Run(string[] args, TextReader reader)
         {
-           // if (args.Length < 3) throw new ArgumentException("Wrong number of program parameters.");
+            if (args.Length < 3) throw new ArgumentException("Wrong number of program parameters.");
             QueryExecutionHelper qEHelper = ParseProgramArguments(args);
 
             // Set only if on a desktop machine

@@ -82,7 +82,7 @@ namespace QueryEngine
             Dictionary<string, ParsedPatternNode> tmpDict = new Dictionary<string, ParsedPatternNode>();
             for (int i = 0; i < parsedPatterns.Count; i++)
             {
-                var tmpPattern = parsedPatterns[i].Pattern;
+                var tmpPattern = parsedPatterns[i].pattern;
                 for (int j = 0; j < tmpPattern.Count; j++)
                 {
                     string name = tmpPattern[j].Name;
