@@ -1,5 +1,5 @@
 # QueryEngine
-Is a query program for graphs. It gets four files, schemas for edges and vertices, and lastly, files with particular nodes and edges. Then, the user is asked to enter a query. (Query language is a subset of PGQL).
+Is a query program for graphs. It gets four files, schemas for edges and vertices, and lastly, files with particular nodes and edges. Then, the user is asked to enter a query. The Query language is a subset of [PGQL](https://pgql-lang.org/spec/1.2/).
 
 ## Input files
 
@@ -87,7 +87,7 @@ The expression consists, so far, only of variable reference or property referenc
 
     Select consits of expressions. That is, SELECT expression, expression ..., given a query: select x, x.Age as Age match (x); it consits of two expressions x and x.Age which name is set to Age. The results will be printed into two columns where the displayed values in those columns are values computed of these two expressions. The header of the printed table have  the same the names as either the expressions as they were written or the labels.
 
-### Select syntax
+### Select 
 SELECT expression starts with SELECT word and expects expressions (consisting only of variable and property references).
 Each expression represents one column of the final printed table. Values in the columns are computed for each row of the result with the given expressions. The header of the final table is defined as the name of the expression.
 
@@ -108,9 +108,9 @@ Each expression is comma separated.
     SELECT x as xID, x.Age as xAge, y match (x)->(y);
     SELECT * match (x) -[e]-> (y); <=> SELECT x, e, y match (x) -[e]-> (y);
 
-### Match syntax
+### Match 
 Match expression starts with MATCH word and expects pattern to match. There can be more patterns separated by comma.
-Variables must consist of alpha characters, and the names are case sensitive.
+Variables must consist of alpha characters, and the names are case sensitive. 
 
 Types of vertices:
 
@@ -138,7 +138,7 @@ Types of edges:
 |  -[e:BasicEdge]->  | Defined edge with defined type        |
 
 
-Every vertex is enveloped in () and every non-anonymous edge is enveloped in []. Variables of vertices can repeat (edges cannot) and also edge variables and vertex variables cannot have the same name. Moreover, once a variable is defined, the type cannot change in next repetition of variable. When repeating variable with defined type, the type must be included in every occurence.
+Every vertex is enveloped in () and every non-anonymous edge is enveloped in []. Variables of vertices can repeat (edges cannot) and also edge variables and vertex variables cannot have the same name. Moreover, once a variable is defined with a type, the type cannot change in the next repetition of a variable. When repeating a variable with a defined type, the type must be included in every occurence. Important note is that matching algorithm can bound the same element into multiple variables. The matching checks for similarity only when repeating the same variable name multiple times. In other words, the matching supports [**pattern homomorphism**](https://www.google.com).
 
 >Example: 
 
