@@ -138,7 +138,7 @@ Types of edges:
 |  -[e:BasicEdge]->  | Defined edge with defined type        |
 
 
-Every vertex is enveloped in () and every non-anonymous edge is enveloped in []. Variables of vertices can repeat (edges cannot) and also edge variables and vertex variables cannot have the same name. Moreover, once a variable is defined with a type, the type cannot change in the next repetition of a variable. When repeating a variable with a defined type, the type must be included in every occurence. Important note is that matching algorithm can bound the same element into multiple variables. The matching checks for similarity only when repeating the same variable name multiple times. In other words, the matching supports [**pattern homomorphism**](https://www.google.com).
+Every vertex is enveloped in () and every non-anonymous edge is enveloped in []. Variables of vertices can repeat (edges cannot) and also edge variables and vertex variables cannot have the same name. Moreover, once a variable is defined with a type, the type cannot change in the next repetition of a variable. When repeating a variable with a defined type, the type must be included in every occurence. Important note is that matching algorithm can bound the same element into multiple variables. The matching checks for similarity only when repeating the same variable name multiple times. In other words, the matching supports [**pattern homomorphism**](https://neo4j.com/docs/cypher-manual/current/introduction/uniqueness/).
 
 >Example: 
 
