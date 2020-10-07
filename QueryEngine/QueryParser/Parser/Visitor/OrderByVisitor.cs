@@ -19,14 +19,14 @@ namespace QueryEngine
     internal sealed class OrderByVisitor : IVisitor<List<ResultRowComparer>>
     {
         private List<ResultRowComparer> result;
-        private Dictionary<string, Type> Labels;
+        private Dictionary<string, Tuple<int, Type>> labels;
         private VariableMap variableMap;
         private ExpressionHolder expressionHolder;
 
-        public OrderByVisitor(Dictionary<string, Type> labels, VariableMap map)
+        public OrderByVisitor(Dictionary<string, Tuple<int, Type>> labels, VariableMap map)
         {
             this.result = new List<ResultRowComparer>();
-            this.Labels = labels;
+            this.labels = labels;
             this.variableMap = map;
         }
 
@@ -65,7 +65,7 @@ namespace QueryEngine
                 throw new ArgumentException($"{this.GetType()}, expected expression.");
             else
             {
-                var tmpVisitor = new ExpressionVisitor(this.variableMap, this.Labels);
+                var tmpVisitor = new ExpressionVisitor(this.variableMap, this.labels);
                 node.exp.Accept(tmpVisitor);
                 expr = tmpVisitor.GetResult();
             }

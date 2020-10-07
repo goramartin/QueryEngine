@@ -160,7 +160,7 @@ namespace QueryEngine
                 proc.vertex.Table.AddID(proc.vertex.ID);
 
                 // Start reading properties of the vertex
-                proc.paramsToReadLeft = proc.vertex.Table.GetPropertyCount();
+                proc.paramsToReadLeft = proc.vertex.Table.PropertyCount;
                 FinishParams(processor);
             }
         }
@@ -188,7 +188,7 @@ namespace QueryEngine
                 var tmpTable = proc.vertex.Table;
 
                 // Get the position of a property inside the table of the out edge. 
-                int accessedPropertyPosition = tmpTable.GetPropertyCount() - proc.paramsToReadLeft;
+                int accessedPropertyPosition = tmpTable.PropertyCount - proc.paramsToReadLeft;
 
                 // Parse the value from parameter.
                 tmpTable.Properties[tmpTable.PropertyLabels[accessedPropertyPosition]].ParsePropFromStringToList(param);

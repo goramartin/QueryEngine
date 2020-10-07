@@ -22,17 +22,17 @@ namespace QueryEngine
         private ExpressionBase Expr;
         private VariableReferenceNameHolder nameHolder;
         private VariableMap variableMap;
-        private Dictionary<string, Type> Labels;
+        private Dictionary<string, Tuple<int, Type>> labels;
 
         public ExpressionBase GetResult()
         {
             return this.Expr;
         }
 
-        public ExpressionVisitor(VariableMap map, Dictionary<string, Type> labels)
+        public ExpressionVisitor(VariableMap map, Dictionary<string, Tuple<int, Type>> labels)
         {
             this.variableMap = map;
-            this.Labels = labels;
+            this.labels = labels;
         }
 
         /// <summary>
@@ -61,10 +61,10 @@ namespace QueryEngine
             else
             {
                 // Get type of accessed property.
-                if (!this.Labels.TryGetValue(this.nameHolder.PropName, out Type propType))
+                if (!this.labels.TryGetValue(this.nameHolder.PropName, out Tuple<int, Type> tuple))
                     throw new ArgumentException($"{this.GetType()}, property {this.nameHolder.PropName} does not exists in the graph.");
                 else
-                    this.Expr = VariableReferencePropertyFactory.Create(this.nameHolder, varIndex, propType);
+                    this.Expr = VariableReferencePropertyFactory.Create(this.nameHolder, varIndex, tuple.Item2, tuple.Item1);
             }
 
         }

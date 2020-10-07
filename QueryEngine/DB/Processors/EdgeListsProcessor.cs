@@ -79,8 +79,8 @@ namespace QueryEngine
 
         public void PassParameters(params object[] prms)
         {
-            this.edgeTables = (Dictionary<string, Table>)prms[1];
-            this.vertices = (List<Vertex>)prms[2];
+            this.edgeTables = (Dictionary<string, Table>)prms[0];
+            this.vertices = (List<Vertex>)prms[1];
             InicialiseInEdgesTables();
             CreateVerticesIndex();
         }
@@ -284,7 +284,7 @@ namespace QueryEngine
 
                 // Start reading properties of the out edge.
                 // This indicates the number of parameters that the out edge has.
-                proc.paramsToReadLeft = proc.outEdge.Table.GetPropertyCount();
+                proc.paramsToReadLeft = proc.outEdge.Table.PropertyCount;
                 FinishParams(proc);
             }
         }
@@ -312,7 +312,7 @@ namespace QueryEngine
                 var tmpTable = proc.outEdge.Table;
 
                 // Get the position of a property inside the table of the out edge. 
-                int accessedPropertyPosition = tmpTable.GetPropertyCount() - proc.paramsToReadLeft;
+                int accessedPropertyPosition = tmpTable.PropertyCount - proc.paramsToReadLeft;
 
                 // Parse the value from parameter.
                 tmpTable.Properties[tmpTable.PropertyLabels[accessedPropertyPosition]].ParsePropFromStringToList(param);

@@ -35,7 +35,7 @@ namespace QueryEngine
     {
         public Dictionary<string, Table> nodeTables;
         public Dictionary<string, Table> edgeTables;
-        public Dictionary<string, Type> labels;
+        public Dictionary<string, Tuple<int, Type>> labels;
         public List<Vertex> vertices;
         public List<OutEdge> outEdges;
         public List<InEdge> inEdges;
@@ -50,6 +50,7 @@ namespace QueryEngine
             this.outEdges = null;
             this.inEdges = null;
             this.edgeTables = null;
+            this.labels = new Dictionary<string, Tuple<int, Type>>();
 
 
             Console.WriteLine("Loading tables...");
@@ -58,9 +59,6 @@ namespace QueryEngine
             Console.WriteLine("Loading tables finished.");
 
 
-            this.labels = new Dictionary<string, Type>();
-            this.AdjustLabels(this.edgeTables);
-            this.AdjustLabels(this.nodeTables);
 
             Console.WriteLine("Loading nodes...");
             this.LoadVertices("DataFiles\\Nodes.txt");
@@ -81,6 +79,7 @@ namespace QueryEngine
         {
             var reader = new TableFileReader(filename);
             var processor = new TableDictProcessor();
+            processor.PassParameters(labels);
             var creator = new CreatorFromFile<Dictionary<string, Table>>(reader, processor);
             var tmpTables = creator.Create();
             
@@ -117,7 +116,7 @@ namespace QueryEngine
         {
             var reader = new DataFileReader(filename);
             var processor = new EdgeListProcessor();
-            processor.PassParameters(nodeTables, edgeTables, vertices);
+            processor.PassParameters(edgeTables, vertices);
             var creator = new CreatorFromFile<EdgeListHolder>(reader, processor);
             var result = creator.Create();
             this.outEdges = result.outEdges;
@@ -128,33 +127,6 @@ namespace QueryEngine
             if (this.inEdges.Count == 0) 
                 throw new ArgumentException($"{this.GetType()} In edges of the graph are empty. Filename = {filename}");
 
-        }
-
-        /// <summary>
-        /// Add labels from all tables to a graph dictionary (Labels) if not included already.
-        /// </summary>
-        /// <param name="tables"> Dictionaty of graph types. </param>
-        private void AdjustLabels(Dictionary<string, Table> tables)
-        {
-            foreach (var item in tables)
-                this.AddTableLabels(item.Value);
-        }
-
-
-        /// <summary>
-        /// Fills missing labels from a table to a  graph dictionary (Labels).
-        /// </summary>
-        /// <param name="table"> Table to take properties from. </param>
-        private void AddTableLabels(Table table)
-        {
-            foreach (var property in table.Properties)
-            {
-                if (this.labels.TryGetValue(property.Key, out Type type))
-                {
-                    if (type != property.Value.GetPropertyType())
-                        throw new ArgumentException($"{this.GetType()}, found two properties with the same name but discrepant types. Adjust input scheme.");
-                } else this.labels.Add(property.Key, property.Value.GetPropertyType());
-            }
         }
 
         public List<Vertex> GetAllVertices() => this.vertices;

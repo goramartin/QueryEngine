@@ -40,7 +40,8 @@ namespace QueryEngine
     {
         private IProcessorState<Dictionary<string, Table>> processorState;
         private IProcessorState<Dictionary<string, Table>> lastProcessorState;
-
+        
+        private Dictionary<string, Tuple<int, Type>> labels;
         private Dictionary<string, Table> dict;
         private Table newTable;
         private string newPropName;
@@ -77,7 +78,7 @@ namespace QueryEngine
 
         public void PassParameters(params object[] prms)
         {
-            this.dict = (Dictionary<string, Table>)prms[0];
+            this.labels = (Dictionary<string, Tuple<int, Type>>)prms[0];
         }
 
 
@@ -370,11 +371,18 @@ namespace QueryEngine
             public void Process(IProcessor<Dictionary<string, Table>> processor, string param)
             {
                 var proc = (TableDictProcessor)processor;
-
+                // to do add creation of new indes into labels map
                 Property newProp = PropertyFactory.CreateProperty(param, proc.newPropName);
-                proc.newTable.AddNewProperty(newProp);
+
+                if (proc.labels.TryGetValue(newProp.IRI, out Tuple<int, Type> tuple))
+                {
+                    if (tuple.Item2 != newProp.GetPropertyType())
+                        throw new ArgumentException($"{this.GetType()}, found two properties with the same name but discrepant types. Adjust input scheme.");
+                }
+                else proc.labels.Add(newProp.IRI, Tuple.Create<int, Type>(proc.labels.Count, newProp.GetPropertyType()));
 
 
+                proc.newTable.AddNewProperty(proc.labels[newProp.IRI].Item1, newProp);
                 proc.lastProcessorState = TableDictPropTypeState.Instance;
                 proc.SetNewState(TableDictCommaAfterPropState.Instance);
             }

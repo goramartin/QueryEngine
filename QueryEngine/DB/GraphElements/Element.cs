@@ -44,12 +44,12 @@ namespace QueryEngine
         /// Gets property value of an element based on property name.
         /// </summary>
         /// <typeparam name="T"> Type of property.</typeparam>
-        /// <param name="propName"> Property name. </param>
-        /// <param name="value"> Vale where to store the property value on success, </param>
+        /// <param name="propID"> Property name. </param>
+        /// <param name="retValue"> Vale where to store the property value on success, </param>
         /// <returns> True if the property is on the table otherwise false. </returns>
-        public bool TryGetPropertyValue<T>(string propName, out T value)
+        public bool TryGetPropertyValue<T>(int propID, out T retValue)
         {
-            return this.Table.TryGetPropertyValue(this.ID, propName,out value);
+            return this.Table.TryGetPropertyValue(this.ID, propID, out retValue);
         }
 
         /// <summary>

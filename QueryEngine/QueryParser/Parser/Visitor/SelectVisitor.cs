@@ -20,13 +20,13 @@ namespace QueryEngine
     internal sealed class SelectVisitor : IVisitor<List<PrintVariable>>
     {
         private List<PrintVariable> result;
-        private Dictionary<string, Type> Labels;
+        private Dictionary<string, Tuple<int,Type>> labels;
         private VariableMap variableMap;
 
-        public SelectVisitor(Dictionary<string, Type> labels, VariableMap map)
+        public SelectVisitor(Dictionary<string, Tuple<int, Type>> labels, VariableMap map)
         {
             this.result = new List<PrintVariable>();
-            this.Labels = labels;
+            this.labels = labels;
             this.variableMap = map;
         }
 
@@ -80,7 +80,7 @@ namespace QueryEngine
                 throw new ArgumentException($"{this.GetType()}, Expected expression.");
             else
             {
-                var tmpVisitor = new ExpressionVisitor(this.variableMap, this.Labels);
+                var tmpVisitor = new ExpressionVisitor(this.variableMap, this.labels);
                 node.exp.Accept(tmpVisitor);
                 expr = tmpVisitor.GetResult();
             }
