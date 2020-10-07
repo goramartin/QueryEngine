@@ -28,7 +28,7 @@ namespace QueryEngine
         /// <param name="rowFormat"> Format of a columns. </param>
         /// <param name="formater"> Type of formater. </param>
         /// <param name="fileName"> File to print into. </param>
-        public FilePrinter(List<PrintVariable> rowFormat, string formater, string fileName) : base(rowFormat)
+        public FilePrinter(List<ExpressionToStringWrapper> rowFormat, string formater, string fileName) : base(rowFormat)
         {
             if (!Formater.FileEndings.TryGetValue(formater, out string ending))
                 throw new ArgumentException($"{this.GetType()}, file ending for given formater does not exist. Formater = {formater}");
@@ -41,7 +41,7 @@ namespace QueryEngine
             {
                 throw new IOException($"{this.GetType()}, failed to open file for writing. File name = {fileName}.");
             }
-            this.formater = Formater.FormaterFactory(formater, rowFormat.Count, writer);
+            this.formater = Formater.Factory(formater, rowFormat.Count, writer);
 
         }
 

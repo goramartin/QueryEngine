@@ -27,7 +27,7 @@ namespace QueryEngine
         /// <summary>
         /// Variables that will compute values to be printed.
         /// </summary>
-        protected List<PrintVariable> rowFormat;
+        protected List<ExpressionToStringWrapper> rowFormat;
 
         /// <summary>
         /// Defines what resulting table will look like.
@@ -55,7 +55,7 @@ namespace QueryEngine
             this.writer = null;
         }
 
-        protected Printer(List<PrintVariable> rowFormat) : this()
+        protected Printer(List<ExpressionToStringWrapper> rowFormat) : this()
         {
             if (rowFormat.Count <= 0) 
                 throw new ArgumentException($"{this.GetType()}, was given empty header or row format.");
@@ -91,7 +91,7 @@ namespace QueryEngine
         /// <param name="formater"> Formater type. </param>
         /// <param name="fileName"> File name if defined file printer. </param>
         /// <returns> Printer instance. </returns>
-        public static Printer PrinterFactory(string printerType, List<PrintVariable> rowFormat, string formater, string fileName= null)
+        public static Printer Factory(string printerType, List<ExpressionToStringWrapper> rowFormat, string formater, string fileName= null)
         {
             if (printerType == "console")
                 return new ConsolePrinter(rowFormat, formater);

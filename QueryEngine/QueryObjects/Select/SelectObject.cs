@@ -28,7 +28,7 @@ namespace QueryEngine
         /// <summary>
         /// List of arguments to print from a select expression.
         /// </summary>
-        private readonly List<PrintVariable> rowFormat;
+        private readonly List<ExpressionToStringWrapper> rowFormat;
 
         /// <summary>
         /// Creates Select object.
@@ -70,7 +70,7 @@ namespace QueryEngine
                 return; 
             }
 
-            var printer = Printer.PrinterFactory(executionHelper.Printer, rowFormat, executionHelper.Formater, executionHelper.FileName);
+            var printer = Printer.Factory(executionHelper.Printer, rowFormat, executionHelper.Formater, executionHelper.FileName);
 
             printer.PrintHeader();
             foreach (var item in results)

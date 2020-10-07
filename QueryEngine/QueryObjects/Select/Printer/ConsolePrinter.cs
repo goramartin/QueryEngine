@@ -24,7 +24,7 @@ namespace QueryEngine
         /// </summary>
         /// <param name="rowFormat"> Format of a columns. </param>
         /// <param name="formater"> Type of formater. </param>
-        public ConsolePrinter(List<PrintVariable> rowFormat, string formater) : base(rowFormat)
+        public ConsolePrinter(List<ExpressionToStringWrapper> rowFormat, string formater) : base(rowFormat)
         {
             try
             {
@@ -34,7 +34,7 @@ namespace QueryEngine
             {
                 throw new IOException($"{this.GetType()}, failed to open console for writing.");
             }
-            this.formater = Formater.FormaterFactory(formater, rowFormat.Count, writer);
+            this.formater = Formater.Factory(formater, rowFormat.Count, writer);
 
         }
 

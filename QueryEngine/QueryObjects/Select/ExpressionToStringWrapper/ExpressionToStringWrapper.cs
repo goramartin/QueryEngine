@@ -1,5 +1,5 @@
 ﻿/*! \file
-This file contains definitions of a print variables.
+This file contains definitions of a expressionToStringWrappers.
 These classes are used to obtain string representation of an expression value during printing.
 There is a need to obtains string values from evaluated expressions. Because we cannot implicitly work with the 
 generic types, there must be a middle medium, which is this generic class.
@@ -16,7 +16,7 @@ namespace QueryEngine
     /// Class serves as a medium for evaluating expressions and obtaining string representation of the computed value.
     /// From this class inherits generic class which does explicit call to a generic method for evaluation of the expression.
     /// </summary>
-    internal abstract class PrintVariable
+    internal abstract class ExpressionToStringWrapper
     {
         /// <summary>
         /// Expression to be evaluated.
@@ -24,10 +24,10 @@ namespace QueryEngine
         protected ExpressionHolder expressionHolder;
 
         /// <summary>
-        /// Construsts print variable.
+        /// Construsts wrapper.
         /// </summary>
         /// <param name="expressionHolder"> Expression. </param>
-        public PrintVariable(ExpressionHolder expressionHolder)
+        public ExpressionToStringWrapper(ExpressionHolder expressionHolder)
         {
             this.expressionHolder = expressionHolder;
         }
@@ -39,36 +39,33 @@ namespace QueryEngine
         public abstract string GetValueAsString(in TableResults.RowProxy elements);
 
         /// <summary>
-        /// Print variable factory. Creates specialised print variable based on a given type.
+        /// Print variable factory. Creates specialised wrapper based on a given type.
         /// </summary>
         /// <param name="expressionHolder"> Expression. </param>
         /// <param name="typeofPrintVariable"> Type of print variable. (Same as the expression type). </param>
         /// <returns> Specialised print variable. </returns>
-        public static PrintVariable PrintVariableFactory(ExpressionHolder expressionHolder, Type typeofPrintVariable)
+        public static ExpressionToStringWrapper Factory(ExpressionHolder expressionHolder, Type typeofPrintVariable)
         {
             if (typeofPrintVariable == (typeof(int)))
-                return new PrintVariable<int>(expressionHolder);
+                return new ExpressionToStringWrapper<int>(expressionHolder);
             else if (typeofPrintVariable == (typeof(string)))
-                return new PrintVariable<string>(expressionHolder);
+                return new ExpressionToStringWrapper<string>(expressionHolder);
             else throw new ArgumentException($"PrintVariable, unknown type passed to a print variable factory.");
         }
-
-
-
     }
 
     /// <summary>
-    /// Specialised print variable.
+    /// Specialised wrapper.
     /// Does explicit call to evaluate the containing expression.
     /// </summary>
     /// <typeparam name="T"> Type of value that will be computed and printed. </typeparam>
-    internal sealed class PrintVariable<T> : PrintVariable
+    internal sealed class ExpressionToStringWrapper<T> : ExpressionToStringWrapper
     {
         /// <summary>
-        /// Constructs specialised print variable.
+        /// Constructs specialised wrapper.
         /// </summary>
         /// <param name="expressionHolder">Expression to be evaluated.</param>
-        public PrintVariable(ExpressionHolder expressionHolder) : base (expressionHolder){}
+        public ExpressionToStringWrapper(ExpressionHolder expressionHolder) : base (expressionHolder){}
 
         /// <summary>
         /// Calls evaluation of containing expression for a given search result.

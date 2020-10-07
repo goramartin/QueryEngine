@@ -41,7 +41,7 @@ namespace QueryEngine
         /// header and results. Columns are also | separated on sides.
         /// </summary>
         /// <param name="variables"> Header format. </param>
-        public override void FormatHeader(List<PrintVariable> variables)
+        public override void FormatHeader(List<ExpressionToStringWrapper> variables)
         {
             this.stringBuilder.Append('|');
             for (int i = 0; i < variables.Count; i++)

@@ -17,20 +17,20 @@ namespace QueryEngine
     /// <summary>
     /// Creates list of variable (Name.Prop) to be displayed in Select expr.
     /// </summary>
-    internal sealed class SelectVisitor : IVisitor<List<PrintVariable>>
+    internal sealed class SelectVisitor : IVisitor<List<ExpressionToStringWrapper>>
     {
-        private List<PrintVariable> result;
+        private List<ExpressionToStringWrapper> result;
         private Dictionary<string, Tuple<int,Type>> labels;
         private VariableMap variableMap;
 
         public SelectVisitor(Dictionary<string, Tuple<int, Type>> labels, VariableMap map)
         {
-            this.result = new List<PrintVariable>();
+            this.result = new List<ExpressionToStringWrapper>();
             this.labels = labels;
             this.variableMap = map;
         }
 
-        public List<PrintVariable> GetResult()
+        public List<ExpressionToStringWrapper> GetResult()
         {
             if (this.result == null || this.result.Count == 0)
                 throw new ArgumentException($"{this.GetType()} final result is empty or null");
@@ -90,7 +90,7 @@ namespace QueryEngine
                 label = ((IdentifierNode)(node.asLabel)).value;
 
             var tmpExprHolder = new ExpressionHolder(expr, label);
-            this.result.Add(PrintVariable.PrintVariableFactory(tmpExprHolder, tmpExprHolder.ExpressionType));
+            this.result.Add(ExpressionToStringWrapper.Factory(tmpExprHolder, tmpExprHolder.ExpressionType));
 
         }
 
@@ -106,7 +106,7 @@ namespace QueryEngine
             foreach (var item in variableMap)
             {
                 var tmpExprHolder = new ExpressionHolder(new VariableIDReference(new VariableReferenceNameHolder(item.Key), item.Value.Item1), null);
-                this.result.Add(PrintVariable.PrintVariableFactory(tmpExprHolder, tmpExprHolder.ExpressionType));
+                this.result.Add(ExpressionToStringWrapper.Factory(tmpExprHolder, tmpExprHolder.ExpressionType));
 
             }
 

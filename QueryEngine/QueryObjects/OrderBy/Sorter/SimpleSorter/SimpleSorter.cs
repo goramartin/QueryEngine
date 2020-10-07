@@ -22,10 +22,10 @@ namespace QueryEngine
     internal abstract class SimpleSorter : Sorter
     {
         protected ITableResults dataTable;
-        protected ResultRowComparer rowComparer;
+        protected IRowComparer rowComparer;
         protected bool inParallel;
 
-        protected SimpleSorter(ITableResults sortData, List<ResultRowComparer> rowComparers, bool inParallel)
+        protected SimpleSorter(ITableResults sortData, List<IRowComparer> rowComparers, bool inParallel)
         {
             this.inParallel = inParallel;
             this.dataTable = sortData;

@@ -28,13 +28,13 @@ namespace QueryEngine
     /// </summary>
     internal sealed class OrderByObject
     {
-        private List<ResultRowComparer> comparers;
+        private List<IRowComparer> comparers;
 
         /// <summary>
         /// Creates Order by object. 
         /// </summary>
         /// <param name="comparers"> List of comparers that the results will be sorted with.</param>
-        private OrderByObject(List<ResultRowComparer> comparers)
+        private OrderByObject(List<IRowComparer> comparers)
         {
             this.comparers = comparers;
         }

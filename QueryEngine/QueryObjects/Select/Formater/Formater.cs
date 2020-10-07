@@ -79,7 +79,7 @@ namespace QueryEngine
         /// Formats header of a table.
         /// </summary>
         /// <param name="header">Header format. </param>
-        public abstract void FormatHeader(List<PrintVariable> header);
+        public abstract void FormatHeader(List<ExpressionToStringWrapper> header);
         
         /// <summary>
         /// Adds a word to a row and formats it.
@@ -99,7 +99,7 @@ namespace QueryEngine
         /// <param name="columnCount"> Number of columns in a printed table. </param>
         /// <param name="writer"> Output writer. </param>
         /// <returns> Formater instance. </returns>
-        public static Formater FormaterFactory(string formater, int columnCount, TextWriter writer)
+        public static Formater Factory(string formater, int columnCount, TextWriter writer)
         {
             if (writer == null) 
                 throw new ArgumentNullException($"Formater factory, was given writer as null.");

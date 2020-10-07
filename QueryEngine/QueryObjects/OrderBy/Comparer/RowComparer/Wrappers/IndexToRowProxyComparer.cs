@@ -15,10 +15,10 @@ namespace QueryEngine
     /// </summary>
     internal sealed class IndexToRowProxyComparer : IComparer<int>
     {
-        private readonly ResultRowComparer rowComparer;
+        private readonly IRowComparer rowComparer;
         private readonly ITableResults results;
 
-        public IndexToRowProxyComparer(ResultRowComparer rowComparer, ITableResults results)
+        public IndexToRowProxyComparer(IRowComparer rowComparer, ITableResults results)
         {
             this.rowComparer = rowComparer;
             this.results = results;
