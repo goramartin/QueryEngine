@@ -68,6 +68,9 @@ namespace QueryEngine
         /// Greater than zero x follows y in the sort order.</returns>
         public override int Compare(in TableResults.RowProxy x, in TableResults.RowProxy y)
         {
+            // Check if used variables in expression are same
+            if (AreIdenticalVars(x, y)) return 0;
+
             var xSuccess = this.expressionHolder.TryGetExpressionValue(x, out T xValue);
             var ySuccess = this.expressionHolder.TryGetExpressionValue(y, out T yValue);
 
@@ -96,6 +99,23 @@ namespace QueryEngine
         /// Zero x occurs in the same position as y in the sort order.
         /// Greater than zero x follows y in the sort order.</returns>
         protected abstract int CompareValues(T x, T y);
+
+        /// <summary>
+        /// Checks whether used variables inside expression are same.
+        /// In case there are the same, the expression should give the same 
+        /// result.
+        /// </summary>
+        /// <param name="x"> First row. </param>
+        /// <param name="y"> Second row.</param>
+        /// <returns> True if all used variables are the same. </returns>
+        private bool AreIdenticalVars(in TableResults.RowProxy x, in TableResults.RowProxy y)
+        {
+            for (int i = 0; i < usedVars.Count; i++)
+                if (x[i].ID != y[i].ID) return false;
+
+            return true;
+        }
+        
     }
 
     internal sealed class ExpressionIntegerCompaper : ExpressionComparer<int>
