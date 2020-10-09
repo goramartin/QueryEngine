@@ -49,8 +49,7 @@ namespace QueryEngine
             if (node.exp == null) throw new ArgumentNullException($"{this.GetType()}, failed access expression.");
             else node.exp.Accept(this);
 
-            this.result.Add(ExpressionComparer.
-                            ExpressionCompaperFactory(this.expressionHolder, node.isAscending,
+            this.result.Add(ExpressionComparer.Factory(this.expressionHolder, node.isAscending,
                                                       this.expressionHolder.ExpressionType));
 
             if (node.next != null) node.next.Accept(this);

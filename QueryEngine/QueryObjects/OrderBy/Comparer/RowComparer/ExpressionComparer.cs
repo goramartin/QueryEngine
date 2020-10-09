@@ -15,7 +15,7 @@ namespace QueryEngine
     {
         protected readonly ExpressionHolder expressionHolder;
         protected readonly bool isAscending;
-
+        protected readonly List<int> usedVars;
         /// <summary>
         /// Constructs expression comparer.
         /// </summary>
@@ -25,6 +25,7 @@ namespace QueryEngine
         {
             this.expressionHolder = expressionHolder;
             this.isAscending = ascending;
+            this.usedVars = expressionHolder.CollectUsedVars(new List<int>());
         }
 
         public abstract int Compare(in TableResults.RowProxy x, in TableResults.RowProxy y);
@@ -37,7 +38,7 @@ namespace QueryEngine
         /// <param name="ascending"> Whether to use ascending order or descending. </param>
         /// <param name="typeOfExpression"> Type of comparer. </param>
         /// <returns> Specialised comparer </returns>
-        public static ExpressionComparer ExpressionCompaperFactory(ExpressionHolder expressionHolder, bool ascending, Type typeOfExpression)
+        public static ExpressionComparer Factory(ExpressionHolder expressionHolder, bool ascending, Type typeOfExpression)
         {
             if (typeOfExpression == typeof(int))
                 return new ExpressionIntegerCompaper(expressionHolder, ascending);

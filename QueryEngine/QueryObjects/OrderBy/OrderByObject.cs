@@ -74,14 +74,16 @@ namespace QueryEngine
         /// <returns> Sorted data. </returns>
         public ITableResults Sort(ITableResults sortData, IOrderByExecutionHelper executionHelper)
         {
+             Console.WriteLine("Order start");
              Sorter sorter = new MultiColumnSorter(sortData, this.comparers, executionHelper.InParallel);
              var sortedResults =  sorter.Sort();
 
-            TimeSpan ts = QueryEngine.stopwatch.Elapsed;
-            string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-            Console.WriteLine("Sort time " + elapsedTime);
+             TimeSpan ts = QueryEngine.stopwatch.Elapsed;
+             string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
+             Console.WriteLine("Sort time " + elapsedTime);
+
             
-            
+
             return sortedResults;
         }
     }

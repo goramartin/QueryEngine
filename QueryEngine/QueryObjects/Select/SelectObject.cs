@@ -72,9 +72,9 @@ namespace QueryEngine
 
             var printer = Printer.Factory(executionHelper.Printer, rowFormat, executionHelper.Formater, executionHelper.FileName);
 
-            printer.PrintHeader();
-            foreach (var item in results)
-                printer.PrintRow(item);
+          //  printer.PrintHeader();
+         //   foreach (var item in results)
+          //      printer.PrintRow(item);
 
             printer.Dispose();
         }

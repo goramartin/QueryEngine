@@ -102,6 +102,9 @@ namespace QueryEngine
             }
             this.CollectCountFromMatchers();
 
+            Console.WriteLine("Finished Search:");
+            QueryEngine.PrintElapsedTime();
+
         }
 
         /// <summary>

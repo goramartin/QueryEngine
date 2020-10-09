@@ -64,5 +64,17 @@ namespace QueryEngine
         {
             return this.ExpressionType;
         }
+
+
+        /// <summary>
+        /// Returns a list of used variable references in the expression node.
+        /// If the variable is already inside the list, the variable is not included.
+        /// </summary>
+        /// <param name="vars"> A list of already collected variables. </param>
+        /// <returns> A list of collected variables, the same list as the one in func parameters.</returns>
+        public override List<int> CollectUsedVars(List<int> vars)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

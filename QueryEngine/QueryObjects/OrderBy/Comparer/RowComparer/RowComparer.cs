@@ -20,6 +20,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Security.Policy;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace QueryEngine 
@@ -40,7 +41,8 @@ namespace QueryEngine
     internal class RowComparer : IRowComparer
     {
         private readonly List<IRowComparer> comparers;
-
+        
+        
         /// <summary>
         /// Creates a row comparer.
         /// </summary>
