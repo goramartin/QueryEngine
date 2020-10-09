@@ -74,7 +74,7 @@ namespace QueryEngine
         /// <returns> A list of collected variables, the same list as the one in func parameters.</returns>
         public override List<int> CollectUsedVars(List<int> vars)
         {
-            throw new NotImplementedException();
+            return this.Expr.CollectUsedVars(vars);
         }
     }
 }
