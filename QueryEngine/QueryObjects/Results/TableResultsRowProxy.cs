@@ -6,6 +6,7 @@ It is used during enumeration of results classes and as a argument to evaluation
 */
 
 using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -55,6 +56,7 @@ namespace QueryEngine
                 return this.resTable.resTable.Length;
             }
 
+
             /// <summary>
             /// Returns string containing the index of the row and IDs of elements in the row.
             /// </summary>
@@ -67,6 +69,18 @@ namespace QueryEngine
                 return tmpString;
             }
 
+            public static bool operator ==(RowProxy x, RowProxy y)
+            {
+                for (int i = 0; i < x.resTable.ColumnCount; i++)
+                    if (x[i].ID != y[i].ID) return false;
+
+                return true;
+            }
+
+            public static bool operator !=(RowProxy x, RowProxy y)
+            {
+                return !(x == y);
+            }
 
 
         }
