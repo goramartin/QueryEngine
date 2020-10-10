@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace QueryEngine
 {
@@ -54,6 +55,10 @@ namespace QueryEngine
     /// <typeparam name="T"> Type of expression return value that will be evaluated. </typeparam>
     internal abstract class ExpressionComparer<T> : ExpressionComparer
     {
+        ThreadLocal<T> value = new ThreadLocal<T>(() => default);
+        ThreadLocal<bool> success = new ThreadLocal<bool>(() => false);
+        ThreadLocal<int> lastRow = new ThreadLocal<int>(() => -1);
+
         protected ExpressionComparer(ExpressionHolder expressionHolder, bool ascending) : base(expressionHolder, ascending)
         { }
 
@@ -68,17 +73,24 @@ namespace QueryEngine
         /// Greater than zero x follows y in the sort order.</returns>
         public override int Compare(in TableResults.RowProxy x, in TableResults.RowProxy y)
         {
+            //select x match (x) -> (e) -> (q) order by x.Prop;
             // Check if used variables in expression are same
             if (AreIdenticalVars(x, y)) return 0;
 
-            var xSuccess = this.expressionHolder.TryGetExpressionValue(x, out T xValue);
+            if (x.index != lastRow.Value)
+            {
+                lastRow.Value = x.index;
+                success.Value = this.expressionHolder.TryGetExpressionValue(x, out T val);
+                value.Value = val;
+            }
+            
             var ySuccess = this.expressionHolder.TryGetExpressionValue(y, out T yValue);
 
             int retValue = 0;
-            if (xSuccess && !ySuccess) retValue = -1;
-            else if (!xSuccess && ySuccess) retValue = 1;
-            else if (!xSuccess && !ySuccess) retValue = 0;
-            else retValue = this.CompareValues(xValue, yValue);
+            if (success.Value && !ySuccess) retValue = -1;
+            else if (!success.Value && ySuccess) retValue = 1;
+            else if (!success.Value && !ySuccess) retValue = 0;
+            else retValue = this.CompareValues(value.Value, yValue);
 
             if (!this.isAscending)
             {
