@@ -17,11 +17,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace QueryEngine
 {
-    
-
+   
     /// <summary>
     /// Class takes console input and creates tokens based on their string representation.
     /// </summary>
@@ -38,10 +38,43 @@ namespace QueryEngine
         }
 
         /// <summary>
+        /// Generates stream from a string.
+        /// </summary>
+        /// <param name="input"> An input string. </param>
+        /// <returns> A stream containing inputed string. </returns>
+        private static Stream GenerateStreamFromString(string input)
+        {
+            var stream = new MemoryStream();
+            var writer = new StreamWriter(stream);
+            writer.Write(input);
+            writer.Flush();
+            stream.Position = 0;
+            return stream;
+        }
+
+
+        /// <summary>
+        /// Tokenizes the input query from string.
+        /// Creates a stream from the string and calls a method Tokenize(TextReader)
+        /// </summary>
+        /// <param name="input"> A query as a string. </param>
+        /// <returns> A list of parsed tokens. </returns>
+        public static List<Token> Tokenize(string input)
+        {
+            List<Token> tokens;
+            using (var stream = GenerateStreamFromString(input))
+            {
+                tokens = Tokenize(new StreamReader(stream));
+            }
+
+            return tokens;
+        }
+
+        /// <summary>
         /// Reads input char by char and parses keywords and creates tokens based on the keywords.
         /// </summary>
-        /// <param name="reader"> Console reader </param>
-        /// <returns> List of parsed tokens </returns>
+        /// <param name="reader"> A reader that reads input from a string or console. </param>
+        /// <returns> A list of parsed tokens </returns>
         public static List<Token> Tokenize(TextReader reader)
         {
             // Result

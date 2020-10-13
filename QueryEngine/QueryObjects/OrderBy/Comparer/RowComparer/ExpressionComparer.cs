@@ -69,7 +69,6 @@ namespace QueryEngine
         /// Greater than zero x follows y in the sort order.</returns>
         public override int Compare(in TableResults.RowProxy x, in TableResults.RowProxy y)
         {
-            //select x match (x) -> (e) -> (q) order by x.Prop;
             // Check if used variables in expression are same
             if (AreIdenticalVars(x, y)) return 0;
 
