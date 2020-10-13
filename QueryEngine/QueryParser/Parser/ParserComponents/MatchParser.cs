@@ -29,8 +29,9 @@ namespace QueryEngine
         /// VariableNameReference -> IDENTIFIER
         /// </summary>
         /// <param name="tokens"> Token list to parse </param>
+        ///  <param name="position"> Position of a token. </param>
         /// <returns> Tree representation of Match expression </returns>
-        static public MatchNode ParseMatch(List<Token> tokens)
+        static public MatchNode ParseMatch(ref int position, List<Token> tokens)
         {
             MatchNode matchNode = new MatchNode();
 
@@ -39,8 +40,8 @@ namespace QueryEngine
                 throw new ArgumentException("MatchParser, position is not set at Match Token.");
             else
             {
-                IncrementPosition();
-                Node node = ParseVertex(tokens);
+                position++;
+                Node node = ParseVertex(ref position, tokens);
                 if (node == null) throw new NullReferenceException("MatchParser, Failed to parse Match Expresion.");
                 matchNode.AddNext(node);
             }
@@ -53,24 +54,25 @@ namespace QueryEngine
         /// Expects  Name:Type / Name / :Type / (nothing)
         /// </summary>
         /// <param name="tokens"> Tokens to parse </param>
+        ///  <param name="position"> Position of a token. </param>
         /// <returns> Variable node </returns>
-        static private Node ParseMatchVariable(List<Token> tokens)
+        static private Node ParseMatchVariable(ref int position, List<Token> tokens)
         {
             MatchVariableNode matchVariableNode = new MatchVariableNode();
 
             //Expecting identifier, name of variable. Can be empty, if so then it is anonymous variable.
             Node name = ParseIdentifierExrp(tokens);
-            if (name != null) { IncrementPosition(); }
+            if (name != null) position++;
             matchVariableNode.AddVariableName(name);
 
             //Check for type of vairiable after :
             if (CheckToken(position, Token.TokenType.DoubleDot, tokens))
             {
-                IncrementPosition();
+                position++;
                 Node identifierNode = ParseIdentifierExrp(tokens);
                 if (identifierNode == null) throw new NullReferenceException("MatchParser, expected Indentifier after double dot.");
                 else matchVariableNode.AddVariableType(identifierNode);
-                IncrementPosition();
+                position++;
             }
 
             if (matchVariableNode.IsEmpty()) return null;
@@ -81,20 +83,21 @@ namespace QueryEngine
         /// Parses vertex node.
         /// </summary>
         /// <param name="tokens"> Tokens to parse </param>
+        ///  <param name="position"> Position of a token. </param>
         /// <returns> Vertex node </returns>
-        static private Node ParseVertex(List<Token> tokens)
+        static private Node ParseVertex(ref int position, List<Token> tokens)
         {
             VertexNode vertexNode = new VertexNode();
 
-            CheckLeftParen(tokens);
+            CheckLeftParen(ref position, tokens);
             //Parse Values of the variable.
-            Node variableNode = ParseMatchVariable(tokens);
+            Node variableNode = ParseMatchVariable(ref position, tokens);
             vertexNode.AddMatchVariable(variableNode);
-            CheckRightParen(tokens);
+            CheckRightParen(ref position, tokens);
 
             //Position incremented from leaving function PsrseVariable.
             //Try parse an Edge.
-            Node edgeNode = ParseEdge(tokens);
+            Node edgeNode = ParseEdge(ref position, tokens);
             if (edgeNode != null)
             {
                 vertexNode.AddNext(edgeNode);
@@ -102,7 +105,7 @@ namespace QueryEngine
             }
 
             //Try Parse another pattern, divided by comma.
-            Node newPattern = ParseNewPatternExpr(tokens);
+            Node newPattern = ParseNewPatternExpr(ref position, tokens);
             if (newPattern != null) vertexNode.AddNext(newPattern);
 
             //Always must return valid vertex.
@@ -115,19 +118,20 @@ namespace QueryEngine
         /// First parsing anonymous edge is tried and then edges that define variables.
         /// </summary>
         /// <param name="tokens"> Tokens to parse. </param>
+        ///  <param name="position"> Position of a token. </param>
         /// <returns> Chain of vertex/edge nodes. </returns>
-        static private Node ParseEdge(List<Token> tokens)
+        static private Node ParseEdge(ref int position, List<Token> tokens)
         {
             EdgeNode edgeNode = null;
 
-            edgeNode = (EdgeNode)TryParseEmptyEdge(tokens);
+            edgeNode = (EdgeNode)TryParseEmptyEdge(ref position, tokens);
             if (edgeNode == null)
             {
-                edgeNode = (EdgeNode)ParseEdgeWithMatchVariable(tokens);
+                edgeNode = (EdgeNode)ParseEdgeWithMatchVariable(ref position, tokens);
                 if (edgeNode == null) return null;
             }
 
-            Node vertexNode = ParseVertex(tokens);
+            Node vertexNode = ParseVertex(ref position, tokens);
             if (vertexNode != null) edgeNode.AddNext(vertexNode);
             else throw new NullReferenceException("MatchParser, expected vertex.");
 
@@ -138,26 +142,27 @@ namespace QueryEngine
         /// Tries to parse anonumous edge type.
         /// </summary>
         /// <param name="tokens"> Tokens to parse. </param>
+        ///  <param name="position"> Position of a token. </param>
         /// <returns> Anonymous edge or null. </returns>
-        static private Node TryParseEmptyEdge(List<Token> tokens)
+        static private Node TryParseEmptyEdge(ref int position,List<Token> tokens)
         {
             EdgeNode edgeNode;
-            if (CheckEmptyAnyEdge(tokens))
+            if (CheckEmptyAnyEdge(ref position, tokens))
             {
                 edgeNode = new AnyEdgeNode();
-                IncrementPosition();
+                position++;
                 return edgeNode;
             }
-            else if (CheckEmptyOutEdge(tokens))
+            else if (CheckEmptyOutEdge(ref position, tokens))
             {
                 edgeNode = new OutEdgeNode();
-                IncrementPositionBy(2);
+                position = position + 2;
                 return edgeNode;
             }
-            else if (CheckEmptyInEdge(tokens))
+            else if (CheckEmptyInEdge(ref position, tokens))
             {
                 edgeNode = new InEdgeNode();
-                IncrementPositionBy(2);
+                position = position + 2;
                 return edgeNode;
             }
             else return null;
@@ -167,8 +172,9 @@ namespace QueryEngine
         /// Check tokens for anonymous any edge
         /// </summary>
         /// <param name="tokens">Tokens to parse.</param>
+        ///  <param name="position"> Position of a token. </param>
         /// <returns> True on matched pattern.</returns>
-        private static bool CheckEmptyAnyEdge(List<Token> tokens)
+        private static bool CheckEmptyAnyEdge(ref int position, List<Token> tokens)
         {
             if (CheckToken(position, Token.TokenType.Dash, tokens) &&
                 CheckToken(position + 1, Token.TokenType.LeftParen, tokens)) return true;
@@ -179,8 +185,9 @@ namespace QueryEngine
         /// Check tokens for anonymous out edge
         /// </summary>
         /// <param name="tokens">Tokens to parse.</param>
+        ///  <param name="position"> Position of a token. </param>
         /// <returns> True on matched pattern.</returns>
-        private static bool CheckEmptyOutEdge(List<Token> tokens)
+        private static bool CheckEmptyOutEdge(ref int position, List<Token> tokens)
         {
             if (CheckToken(position, Token.TokenType.Dash, tokens) &&
                 CheckToken(position + 1, Token.TokenType.Greater, tokens) &&
@@ -192,8 +199,9 @@ namespace QueryEngine
         /// Check tokens for anonymous in edge
         /// </summary>
         /// <param name="tokens">Tokens to parse.</param>
+        ///  <param name="position"> Position of a token. </param>
         /// <returns> True on matched pattern.</returns>
-        private static bool CheckEmptyInEdge(List<Token> tokens)
+        private static bool CheckEmptyInEdge(ref int position, List<Token> tokens)
         {
             if (CheckToken(position, Token.TokenType.Less, tokens) &&
                CheckToken(position + 1, Token.TokenType.Dash, tokens) &&
@@ -206,20 +214,21 @@ namespace QueryEngine
         /// Parses edge expression with enclosed variable definition.
         /// </summary>
         /// <param name="tokens">Tokens to parse.</param>
+        ///  <param name="position"> Position of a token. </param>
         /// <returns> Null on fault match or edge node.</returns>
-        private static Node ParseEdgeWithMatchVariable(List<Token> tokens)
+        private static Node ParseEdgeWithMatchVariable(ref int position, List<Token> tokens)
         {
             EdgeNode edgeNode = null;
 
             if (CheckToken(position, Token.TokenType.Dash, tokens))
             {
-                IncrementPosition();
-                edgeNode = (EdgeNode)ParseOutAnyEdge(tokens);
+                position++;
+                edgeNode = (EdgeNode)ParseOutAnyEdge(ref position, tokens);
             }
             else if (CheckToken(position, Token.TokenType.Less, tokens))
             {
-                IncrementPosition();
-                edgeNode = (EdgeNode)ParseInEdge(tokens);
+                position++;
+                edgeNode = (EdgeNode)ParseInEdge(ref position, tokens);
             }
             else edgeNode = null;
 
@@ -232,25 +241,26 @@ namespace QueryEngine
         /// Throws on mis match.
         /// </summary>
         /// <param name="tokens">Tokens to parse.</param>
+        ///  <param name="position"> Position of a token. </param>
         /// <returns> Edge node.</returns>
-        private static Node ParseOutAnyEdge(List<Token> tokens)
+        private static Node ParseOutAnyEdge(ref int position, List<Token> tokens)
         {
             EdgeNode edgeNode;
             MatchVariableNode matchVariableNode;
 
-            CheckLeftBrace(tokens);
-            matchVariableNode = (MatchVariableNode)(ParseMatchVariable(tokens));
-            CheckRightBrace(tokens);
+            CheckLeftBrace(ref position, tokens);
+            matchVariableNode = (MatchVariableNode)(ParseMatchVariable(ref position, tokens));
+            CheckRightBrace(ref position, tokens);
 
 
             // -> || -
             if (CheckToken(position, Token.TokenType.Dash, tokens))
             {
-                IncrementPosition();
+                position++;
                 edgeNode = new AnyEdgeNode();
                 if (CheckToken(position, Token.TokenType.Greater, tokens))
                 {
-                    IncrementPosition();
+                    position++;
                     edgeNode = new OutEdgeNode();
                 }
             }
@@ -264,8 +274,9 @@ namespace QueryEngine
         /// Throws on mis match.
         /// </summary>
         /// <param name="tokens">Tokens to parse.</param>
+        ///  <param name="position"> Position of a token. </param>
         /// <returns> Edge node.</returns>
-        private static Node ParseInEdge(List<Token> tokens)
+        private static Node ParseInEdge(ref int position, List<Token> tokens)
         {
             EdgeNode edgeNode;
             MatchVariableNode matchVariableNode;
@@ -273,16 +284,16 @@ namespace QueryEngine
             // -
             if (!CheckToken(position, Token.TokenType.Dash, tokens))
                 throw new ArgumentException($"EdgeParser, expected beginning of edge.");
-            else IncrementPosition();
+            else position++;
 
-            CheckLeftBrace(tokens);
-            matchVariableNode = (MatchVariableNode)(ParseMatchVariable(tokens));
-            CheckRightBrace(tokens);
+            CheckLeftBrace(ref position, tokens);
+            matchVariableNode = (MatchVariableNode)(ParseMatchVariable(ref position, tokens));
+            CheckRightBrace(ref position, tokens);
 
             // -
             if (CheckToken(position, Token.TokenType.Dash, tokens))
             {
-                IncrementPosition();
+                position++;
                 edgeNode = new InEdgeNode();
             }
             else throw new ArgumentException($"MatchParser, expected ending of edge.");
@@ -296,11 +307,12 @@ namespace QueryEngine
         /// Throws on mismatch.
         /// </summary>
         /// <param name="tokens">Tokens to parse.</param>
+        ///  <param name="position"> Position of a token. </param>
         /// <returns> True on matched pattern.</returns>
-        private static void CheckLeftBrace(List<Token> tokens)
+        private static void CheckLeftBrace(ref int position, List<Token> tokens)
         {
             // [
-            if (CheckToken(position, Token.TokenType.LeftBrace, tokens)) IncrementPosition();
+            if (CheckToken(position, Token.TokenType.LeftBrace, tokens)) position++;
             else throw new ArgumentException("MatchParser variable, expected Leftbrace.");
 
         }
@@ -309,11 +321,12 @@ namespace QueryEngine
         /// Throws on mismatch.
         /// </summary>
         /// <param name="tokens">Tokens to parse.</param>
+        /// <param name="position"> Position of a token. </param>
         /// <returns> True on matched pattern.</returns>
-        private static void CheckRightBrace(List<Token> tokens)
+        private static void CheckRightBrace(ref int position, List<Token> tokens)
         {
             // ]
-            if (CheckToken(position, Token.TokenType.RightBrace, tokens)) IncrementPosition();
+            if (CheckToken(position, Token.TokenType.RightBrace, tokens)) position++;
             else throw new ArgumentException("MatchParser variable, expected rightbrace.");
 
         }
@@ -322,11 +335,12 @@ namespace QueryEngine
         /// Throws on mismatch.
         /// </summary>
         /// <param name="tokens">Tokens to parse.</param>
+        /// <param name="position"> Position of a token. </param>
         /// <returns> True on matched pattern.</returns>
-        private static void CheckLeftParen(List<Token> tokens)
+        private static void CheckLeftParen(ref int position, List<Token> tokens)
         {
             // (
-            if (CheckToken(position, Token.TokenType.LeftParen, tokens)) IncrementPosition();
+            if (CheckToken(position, Token.TokenType.LeftParen, tokens)) position++;
             else throw new ArgumentException("MatchParser, expected left parent.");
         }
         /// <summary>
@@ -334,11 +348,12 @@ namespace QueryEngine
         /// Throws on mismatch.
         /// </summary>
         /// <param name="tokens">Tokens to parse.</param>
+        /// <param name="position"> Position of a token. </param>
         /// <returns> True on matched pattern.</returns>
-        private static void CheckRightParen(List<Token> tokens)
+        private static void CheckRightParen(ref int position, List<Token> tokens)
         {
             // )
-            if (CheckToken(position, Token.TokenType.RightParen, tokens)) IncrementPosition();
+            if (CheckToken(position, Token.TokenType.RightParen, tokens)) position++;
             else throw new ArgumentException("MatchParser, expected right parent.");
         }
 
@@ -346,17 +361,18 @@ namespace QueryEngine
         /// Tries whether after vertex there is a comma, if there is a comma, that means there are more patterns to parse.
         /// </summary>
         /// <param name="tokens"> Tokens to parse </param>
-        /// <returns></returns>
-        static private Node ParseNewPatternExpr(List<Token> tokens)
+        /// <param name="position"> Position of a token. </param>
+        /// <returns> Start of a new pattern. </returns>
+        static private Node ParseNewPatternExpr(ref int position, List<Token> tokens)
         {
             // Checks for comma, after comma next pattern must be
             if (!CheckToken(position, Token.TokenType.Comma, tokens)) return null;
-            IncrementPosition();
+            position++;
 
             MatchDividerNode matchDivider = new MatchDividerNode();
 
 
-            Node newPattern = ParseVertex(tokens);
+            Node newPattern = ParseVertex(ref position, tokens);
             if (newPattern == null) throw new NullReferenceException("MatchParser, expected Vertex after comma.");
             matchDivider.AddNext(newPattern);
             return matchDivider;

@@ -56,16 +56,20 @@ namespace QueryEngine
     /// </summary>
     internal static partial class Parser
     {
-        // Position in token list.
-        static private int position;
-        static Parser() { position = 0; }
 
 
-        // Methods to change value of position.
-        static public int GetPosition() { return position; }
-        static public void ResetPosition() { position = 0; }
-        static private void IncrementPosition() { position++; }
-        static private  void IncrementPositionBy(int p) { position += p; }
+        private delegate Node ParsePart(ref int p, List<Token> tokens);
+        private static Dictionary<string, ParsePart> parserParts;
+
+        static Parser() { 
+        
+        
+        
+        
+        
+        
+        }
+
 
         /// <summary>
         /// Check for token on position given.

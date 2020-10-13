@@ -18,9 +18,10 @@ namespace QueryEngine
         /// Select -> SELECT (*|(SelectPrintTerm (, SelectPrintTerm)*)
         /// SelectPrintTerm -> Expression
         /// </summary>
-        /// <param name="tokens"> Token list to parse </param>
+        /// <param name="tokens"> Token list to parse. </param>
+        /// <param name="position"> Position of a token. </param>
         /// <returns> Tree representation of a SELECT query part. </returns>
-        static public SelectNode ParseSelect(List<Token> tokens)
+        static public SelectNode ParseSelect(ref int position, List<Token> tokens)
         {
             SelectNode selectNode = new SelectNode();
 
@@ -29,8 +30,8 @@ namespace QueryEngine
                 throw new ArgumentException("SelectParser, could not find a Select token, or position is not set at 0.");
             else
             {
-                IncrementPosition();
-                Node node = ParseVarExprForSelect(tokens);
+                position++;
+                Node node = ParseVarExprForSelect(ref position, tokens);
                 if (node == null) throw new NullReferenceException("SelectParser, cailed to parse Select Expresion.");
                 selectNode.AddNext(node);
             }
@@ -44,8 +45,9 @@ namespace QueryEngine
         /// There can be either only * or variable references.
         /// </summary>
         /// <param name="tokens"> Tokens to parse </param>
+        /// <param name="position"> Position of a token. </param>
         /// <returns> Chain of variable nodes </returns>
-        static private Node ParseVarExprForSelect(List<Token> tokens)
+        static private Node ParseVarExprForSelect(ref int position, List<Token> tokens)
         {
             VariableNode variableNode = null;
 
@@ -54,22 +56,22 @@ namespace QueryEngine
             {
                 variableNode = new VariableNode();
                 variableNode.AddName(new IdentifierNode("*"));
-                IncrementPosition();
+                position++;
                 return variableNode;
             } // Provisional count
             else if (CheckToken(position, Token.TokenType.Count, tokens))
             {
-                IncrementPosition();
-                CheckLeftParen(tokens);
+                position++;
+                CheckLeftParen(ref position, tokens);
                 if (!CheckToken(position, Token.TokenType.Asterix, tokens)) throw new ArgumentException("SelectParser, expected asterix.");
-                else IncrementPosition();
-                CheckRightParen(tokens);
+                else position++;
+                CheckRightParen(ref position, tokens);
                 return new CountProvisional();
             }
             else
             {
                 // SelectPrintTerm
-                return ParseSelectPrintTerm(tokens);
+                return ParseSelectPrintTerm(ref position, tokens);
             }
         }
 
@@ -78,8 +80,9 @@ namespace QueryEngine
         /// Expecting: expression, expression
         /// </summary>
         /// <param name="tokens"> Tokens to parse. </param>
+        ///  <param name="position"> Position of a token. </param>
         /// <returns> Chain of variable nodes. </returns>
-        static private Node ParseSelectPrintTerm(List<Token> tokens)
+        static private Node ParseSelectPrintTerm(ref int position, List<Token> tokens)
         {
             SelectPrintTermNode selectPrintTermNode = new SelectPrintTermNode();
 
@@ -90,8 +93,8 @@ namespace QueryEngine
             // Comma signals there is another expression node, next expression must follow.
             if (CheckToken(position, Token.TokenType.Comma, tokens))
             {
-                IncrementPosition();
-                selectPrintTermNode.AddNext(ParseNextSelectPrintNode(tokens));
+                position++;
+                selectPrintTermNode.AddNext(ParseNextSelectPrintNode(ref position, tokens));
             }
             return selectPrintTermNode;
         }
@@ -100,10 +103,11 @@ namespace QueryEngine
         /// Parses next select print term node.
         /// </summary>
         /// <param name="tokens"> Tokens to parse. </param>
+        ///  <param name="position"> Position of a token. </param>
         /// <returns> Chain of print term nodes. </returns>
-        static private Node ParseNextSelectPrintNode(List<Token> tokens)
+        static private Node ParseNextSelectPrintNode(ref int position, List<Token> tokens)
         {
-            Node nextSelectPrintTermNode = ParseSelectPrintTerm(tokens);
+            Node nextSelectPrintTermNode = ParseSelectPrintTerm(ref position, tokens);
             if (nextSelectPrintTermNode == null)
                 throw new NullReferenceException("SelectParser, expected Indentifier after a comma.");
             else return nextSelectPrintTermNode;
