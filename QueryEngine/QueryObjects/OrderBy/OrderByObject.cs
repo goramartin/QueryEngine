@@ -49,7 +49,8 @@ namespace QueryEngine
         /// <returns> Null if there is no order by token or QueryOrderBy object.</returns>
         public static OrderByObject CreateOrderBy(List<Token> tokens, Graph graph, VariableMap variableMap, IOrderByExecutionHelper executionHelper)
         {
-            OrderByNode orderNode = Parser.ParseOrderBy(tokens);
+            int position = 0;
+            OrderByNode orderNode = Parser.ParseOrderBy(ref position, tokens);
             if (orderNode == null)
             {
                 executionHelper.IsSetOrderBy = false;

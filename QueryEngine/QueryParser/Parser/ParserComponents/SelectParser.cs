@@ -32,7 +32,7 @@ namespace QueryEngine
             {
                 position++;
                 Node node = ParseVarExprForSelect(ref position, tokens);
-                if (node == null) throw new NullReferenceException("SelectParser, cailed to parse Select Expresion.");
+                if (node == null) throw new NullReferenceException("SelectParser, failed to parse Select Expresion.");
                 selectNode.AddNext(node);
             }
 
@@ -86,7 +86,7 @@ namespace QueryEngine
         {
             SelectPrintTermNode selectPrintTermNode = new SelectPrintTermNode();
 
-            var expression = ParseExpressionNode(tokens);
+            var expression = ParseExpressionNode(ref position, tokens);
             if (expression == null) throw new NullReferenceException($"SelectParser, expected expression.");
             else selectPrintTermNode.AddExpression(expression);
 

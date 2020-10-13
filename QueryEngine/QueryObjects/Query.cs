@@ -55,21 +55,26 @@ namespace QueryEngine
             // Create tokens from console.
             List<Token> tokens = Tokenizer.Tokenize(reader);
 
-            // Parse and create main object in order of the query words.
-            Parser.ResetPosition();
-            this.variableMap = new VariableMap();
 
-            SelectNode selectNode = Parser.ParseSelect(tokens);
-            this.match = new MatchObject(tokens, variableMap, graph, this.qEhelper);
-            this.select = new SelectObject(graph, variableMap, selectNode, this.qEhelper) ;
+
+            // Parse and create main object in order of the query words.
+            //Parser.ResetPosition();
+           
+            
+            
+            //this.variableMap = new VariableMap();
+
+           // SelectNode selectNode = Parser.ParseSelect(tokens);
+           // this.match = new MatchObject(tokens, variableMap, graph, this.qEhelper);
+           // this.select = new SelectObject(graph, variableMap, selectNode, this.qEhelper) ;
 
             // Optional, if ommited it returns null. 
-            this.orderBy = OrderByObject.CreateOrderBy(tokens, graph, variableMap, this.qEhelper);
+           // this.orderBy = OrderByObject.CreateOrderBy(tokens, graph, variableMap, this.qEhelper);
 
 
             // Check if it successfully parsed every token.
-            if (tokens.Count != Parser.GetPosition())
-                throw new ArgumentException("Failed to parse every token for Query.");
+         //   if (tokens.Count != Parser.GetPosition())
+          //      throw new ArgumentException("Failed to parse every token for Query.");
         }
 
 

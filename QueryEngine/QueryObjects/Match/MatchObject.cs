@@ -46,10 +46,12 @@ namespace QueryEngine
         {
             if (tokens == null || variableMap == null || graph == null)
                 throw new ArgumentNullException($"{this.GetType()}, passing null arguments to the constructor.");
-
+            
+            // TO DO REPAIR EVERYTHING
+            int position = 0;
             // Create parse tree of match part of query and
             // create a shallow pattern
-            MatchNode matchNode = Parser.ParseMatch(tokens);
+            MatchNode matchNode = Parser.ParseMatch(ref position, tokens);
             MatchVisitor matchVisitor = new MatchVisitor(graph.nodeTables, graph.edgeTables);
             matchNode.Accept(matchVisitor);
 

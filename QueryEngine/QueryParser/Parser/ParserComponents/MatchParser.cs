@@ -61,7 +61,7 @@ namespace QueryEngine
             MatchVariableNode matchVariableNode = new MatchVariableNode();
 
             //Expecting identifier, name of variable. Can be empty, if so then it is anonymous variable.
-            Node name = ParseIdentifierExrp(tokens);
+            Node name = ParseIdentifierExrp(ref position, tokens);
             if (name != null) position++;
             matchVariableNode.AddVariableName(name);
 
@@ -69,7 +69,7 @@ namespace QueryEngine
             if (CheckToken(position, Token.TokenType.DoubleDot, tokens))
             {
                 position++;
-                Node identifierNode = ParseIdentifierExrp(tokens);
+                Node identifierNode = ParseIdentifierExrp(ref position, tokens);
                 if (identifierNode == null) throw new NullReferenceException("MatchParser, expected Indentifier after double dot.");
                 else matchVariableNode.AddVariableType(identifierNode);
                 position++;

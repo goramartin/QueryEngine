@@ -27,7 +27,7 @@ namespace QueryEngine
         {
             OrderByNode orderByNode = new OrderByNode();
 
-            // We expect after reading Select expr that the position is set on the Order token.
+            // We expect after reading match expr that the position is set on the Order token.
             // ORDER
             if (!CheckToken(position, Token.TokenType.Order, tokens))
                 return null;
@@ -60,7 +60,7 @@ namespace QueryEngine
             OrderTermNode orderTermNode = new OrderTermNode();
 
             // Expression
-            var expression = ParseExpressionNode(tokens);
+            var expression = ParseExpressionNode(ref position, tokens);
             if (expression == null)
                 throw new NullReferenceException($"OrderByParser, expected expression.");
             else orderTermNode.AddExpression(expression);
