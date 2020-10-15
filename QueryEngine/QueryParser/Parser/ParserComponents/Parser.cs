@@ -84,14 +84,13 @@ namespace QueryEngine
             }
 
             if (position != tokens.Count) 
-                throw new ArgumentException("Parser, failed to parse every token for Query.");
+                throw new ArgumentException("Parser, failed to parse every token.");
             else return parsedParts;
         }
 
 
         /// <summary>
         /// Check for token on position given.
-        /// 
         /// </summary>
         /// <param name="p"> Position in list of tokens </param>
         /// <param name="type"> Type of token to be checked against </param>

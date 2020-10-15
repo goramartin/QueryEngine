@@ -108,22 +108,6 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Parses program arguments.
-        /// </summary>
-        /// <param name="args"> Program arguments. </param>
-        /// <returns> Returns query execution helper actualised with parsed arguments. </returns>
-        private static QueryExecutionHelper ParseProgramArguments(string[] args)
-        {
-            QueryExecutionHelper qEHelper = new QueryExecutionHelper();
-            qEHelper.ThreadCount = GetThreadCount(args[0]);
-            qEHelper.Printer = GetPrinter(args[1]);
-            qEHelper.Formater =  GetFormater(args[2]);
-            qEHelper.VerticesPerThread = GetVerticesPerhread(qEHelper.ThreadCount, args);
-            qEHelper.FileName =  GetFileName(qEHelper.ThreadCount, qEHelper.Printer, args);
-            return qEHelper;
-        }
-
-        /// <summary>
         /// Awaits an user to input answer whether the user wants to input another query.
         /// </summary>
         /// <returns> True if user wants to continue. Otherwise, false. </returns>
@@ -149,7 +133,13 @@ namespace QueryEngine
     private static void Run(string[] args, TextReader reader)
         {
             if (args.Length < 3) throw new ArgumentException("Wrong number of program parameters.");
-            QueryExecutionHelper qEHelper = ParseProgramArguments(args);
+
+            int ThreadCount = GetThreadCount(args[0]);
+            string Printer = GetPrinter(args[1]);
+            string Formater = GetFormater(args[2]);
+            int VerticesPerThread = GetVerticesPerhread(ThreadCount, args);
+            string FileName = GetFileName(ThreadCount, Printer, args);
+
 
             // Set only if on a desktop machine
             using (Process p = Process.GetCurrentProcess())
@@ -157,8 +147,8 @@ namespace QueryEngine
 
             // Set a number of threads in the thread pool that will be immediatelly spawned on demand,
             // without the need to wait.
-            if (qEHelper.ThreadCount != 1)
-                ThreadPool.SetMinThreads(qEHelper.ThreadCount, 0);
+            if (ThreadCount != 1)
+                ThreadPool.SetMinThreads(ThreadCount, 0);
 
             // Load the graph.
             Graph graph = new Graph();
@@ -173,10 +163,10 @@ namespace QueryEngine
                 try
                 {
                     Console.WriteLine();
-                    Query query = new Query(reader, graph, qEHelper);
+                    Query query = Query.Create(reader, graph, ThreadCount, Printer, Formater, VerticesPerThread, FileName);
                     Console.WriteLine();
 
-                    query.ComputeQuery();
+                    query.Compute();
                    
                     stopwatch.Stop();
                     PrintElapsedTime();
