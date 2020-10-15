@@ -23,25 +23,27 @@ namespace QueryEngine
     /// Select represents list of variables to be printed.
     /// List of select variables contains names and property names to be printed from the result.
     /// </summary>
-    internal sealed class SelectObject
+    internal sealed class SelectObject : QueryObject
     {
         /// <summary>
         /// List of arguments to print from a select expression.
         /// </summary>
         private readonly List<ExpressionToStringWrapper> rowFormat;
-
+        private ISelectExecutionHelper helper;
         /// <summary>
         /// Creates Select object.
         /// Parsing is done beforehand because first we need to parse match expression for variable definitions.
         /// </summary>
         /// <param name="graph"> Property graph. </param>
         /// <param name="map"> Variable map. </param>
-        /// <param name="selectNode"> Parsed tokens from input query. </param>
         /// <param name="executionHelper"> Select execution helper. </param>
-        public SelectObject(Graph graph, VariableMap map, SelectNode selectNode, ISelectExecutionHelper executionHelper)
+        /// <param name="selectNode"> Parsed tree of select expression. </param>
+        public SelectObject(Graph graph, VariableMap map, ISelectExecutionHelper executionHelper, SelectNode selectNode)
         {
-            if (executionHelper.Printer == null || executionHelper.Formater == null) throw new ArgumentNullException($"{this.GetType()}, got printer or formater as null.");
+            if (executionHelper == null || selectNode == null || executionHelper.Printer == null || executionHelper.Formater == null)
+                throw new ArgumentNullException($"{this.GetType()}, passing null arguments to constructor. ");
 
+            this.helper = executionHelper;
             // For provisional Count(*);
             if (selectNode.next.GetType() == typeof(CountProvisional))
                 executionHelper.IsStoringResult = false;
@@ -55,26 +57,36 @@ namespace QueryEngine
 
         }
 
+        public override void Compute(out ITableResults results)
+        {
+            if (next != null)
+            {
+                this.next.Compute(out results);
+                this.next = null;
+                this.Print(results);
+            }
+            else throw new NullReferenceException($"{this.GetType()}, next is set to null."); 
+        }
+
 
         /// <summary>
         /// Prints results in given format from concstructor init.
         /// </summary>
         /// <param name="results"> Results from query. </param>
-        /// <param name="executionHelper"> Select execution helper. </param>
-        public void Print(ITableResults results, ISelectExecutionHelper executionHelper)
+        public void Print(ITableResults results)
         {
             // For Provisional Count(*)
-            if (executionHelper.IsStoringResult == false)
+            if (this.helper.IsStoringResult == false)
             {
                 Console.WriteLine("Count: {0}", results.NumberOfMatchedElements);
                 return; 
             }
 
-            var printer = Printer.Factory(executionHelper.Printer, rowFormat, executionHelper.Formater, executionHelper.FileName);
+            var printer = Printer.Factory(this.helper.Printer, rowFormat, this.helper.Formater, this.helper.FileName);
 
-          //  printer.PrintHeader();
-         //   foreach (var item in results)
-          //      printer.PrintRow(item);
+            printer.PrintHeader();
+            foreach (var item in results)
+                printer.PrintRow(item);
 
             printer.Dispose();
         }

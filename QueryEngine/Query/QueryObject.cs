@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,7 +21,7 @@ namespace QueryEngine
         /// <summary>
         /// Processing unit that needs to finish before this one.
         /// </summary>
-        private QueryObject next;
+        protected QueryObject next;
 
         
         public abstract void Compute(out ITableResults results);
@@ -33,14 +34,18 @@ namespace QueryEngine
         /// <param name="helper"> A helper that contains information about execution. </param>
         /// <param name="map"> A map of variables. </param>
         /// <param name="parseTree"> A parsed tree to create the clause from. </param>
-        /// <returns></returns>
-        public static QueryObject Factory(string name, Graph graph, QueryExecutionHelper helper, VariableMap map, Node parseTree)
+        public static QueryObject Factory(Type type, Graph graph, QueryExecutionHelper helper, VariableMap map, Node parseTree)
         {
+            if (type == typeof(SelectObject)) return new SelectObject(graph, map, helper, (SelectNode)parseTree);
+            else if (type == typeof(MatchObject)) return new MatchObject(graph, map, helper, (MatchNode)parseTree);
+            else if (type == typeof(OrderByObject)) return new OrderByObject(graph, map, helper, (OrderByNode)parseTree);
+            else throw new ArgumentException($"Query object factory, cannot create type {type.ToString()}.");
+        }
 
-
-
-
-            return null;
+        public void AddToEnd(QueryObject queryObject)
+        {
+            if (this.next == null) this.next = queryObject;
+            else this.next.AddToEnd(queryObject);
         }
     }
 }

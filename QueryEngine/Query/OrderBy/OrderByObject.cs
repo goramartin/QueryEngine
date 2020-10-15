@@ -26,45 +26,42 @@ namespace QueryEngine
     /// Class represents order by part of a query.
     /// It sorts given results with defined comparers.
     /// </summary>
-    internal sealed class OrderByObject
+    internal sealed class OrderByObject : QueryObject
     {
         private List<IRowComparer> comparers;
+        private IOrderByExecutionHelper helper;
 
         /// <summary>
-        /// Creates Order by object. 
+        /// Creates an order by object.
         /// </summary>
-        /// <param name="comparers"> List of comparers that the results will be sorted with.</param>
-        private OrderByObject(List<IRowComparer> comparers)
-        {
-            this.comparers = comparers;
-        }
-
-        /// <summary>
-        /// Tries to create an order by object if it failes to parse it, it returns null.
-        /// </summary>
-        /// <param name="tokens"> Tokens to parse.</param>
         /// <param name="graph"> Graph the query is computed on. </param>
         /// <param name="variableMap"> Map of query variables. </param>
         /// <param name="executionHelper"> Orderby execution helper. </param>
-        /// <returns> Null if there is no order by token or QueryOrderBy object.</returns>
-        public static OrderByObject CreateOrderBy(List<Token> tokens, Graph graph, VariableMap variableMap, IOrderByExecutionHelper executionHelper)
+        /// <param name="orderByNode"> Parse tree of order by expression. </param>
+        public OrderByObject(Graph graph, VariableMap variableMap, IOrderByExecutionHelper executionHelper, OrderByNode orderByNode)
         {
-            int position = 0;
-            OrderByNode orderNode = Parser.ParseOrderBy(ref position, tokens);
-            if (orderNode == null)
-            {
-                executionHelper.IsSetOrderBy = false;
-                return null;
-            }
-            else
-            {
-                var orderVisitor = new OrderByVisitor(graph.labels, variableMap);
-                orderVisitor.Visit(orderNode);
-                var comparers = orderVisitor.GetResult();
+            if (executionHelper == null || orderByNode == null || variableMap == null || graph == null)
+                throw new ArgumentNullException($"{this.GetType()}, passing null arguments to the constructor.");
+            
+            this.helper = executionHelper;
 
-                executionHelper.IsSetOrderBy = true;
-                return new OrderByObject(comparers);
+            var orderByVisitor = new OrderByVisitor(graph.labels, variableMap);
+            orderByVisitor.Visit(orderByNode);
+            var comps = orderByVisitor.GetResult();
+
+            executionHelper.IsSetOrderBy = true;
+            this.comparers = comps;
+        }
+
+        public override void Compute(out ITableResults results)
+        {
+            if (this.next != null)
+            {
+                this.next.Compute(out results);
+                this.next = null;
+                if (this.helper.IsStoringResult) this.Sort(results);
             }
+            else throw new NullReferenceException($"{this.GetType()}, next is set to null.");
         }
 
         /// <summary>
@@ -73,17 +70,15 @@ namespace QueryEngine
         /// <param name="sortData"> Query reults to be sorted. </param>
         /// <param name="executionHelper"> Order by execution helper. </param>
         /// <returns> Sorted data. </returns>
-        public ITableResults Sort(ITableResults sortData, IOrderByExecutionHelper executionHelper)
+        public ITableResults Sort(ITableResults sortData)
         {
              Console.WriteLine("Order start");
-             Sorter sorter = new MultiColumnSorter(sortData, this.comparers, executionHelper.InParallel);
+             Sorter sorter = new MultiColumnSorter(sortData, this.comparers, this.helper.InParallel);
              var sortedResults =  sorter.Sort();
 
              TimeSpan ts = QueryEngine.stopwatch.Elapsed;
              string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
              Console.WriteLine("Sort time " + elapsedTime);
-
-            
 
             return sortedResults;
         }

@@ -75,20 +75,28 @@ namespace QueryEngine
 
             // Parse input query.
             var parsedClauses = Parser.Parse(tokens);
+
+            // Create execution chain. // 
+
+            // Compulsory clauses
+            // Match is always leaf.
+            QueryObject match = QueryObject.Factory
+                (typeof(MatchObject), graph, qEhelper, variableMap, parsedClauses["match"]);
             
-            // Create execution chain.
+            // Select is the last one to process the resuls.
+            this.query = QueryObject.Factory
+                (typeof(SelectObject), graph, qEhelper, variableMap, parsedClauses["select"]);
 
+            // Optional clauses
+            if (parsedClauses.ContainsKey("orderby"))
+            {
+                var orderby = QueryObject.Factory
+                (typeof(OrderByObject), graph, qEhelper, variableMap, parsedClauses["orderby"]);
+                this.query.AddToEnd(orderby);
+            }
 
-
-           // SelectNode selectNode = Parser.ParseSelect(tokens);
-           // this.match = new MatchObject(tokens, variableMap, graph, this.qEhelper);
-           // this.select = new SelectObject(graph, variableMap, selectNode, this.qEhelper) ;
-
-            // Optional, if ommited it returns null. 
-           // this.orderBy = OrderByObject.CreateOrderBy(tokens, graph, variableMap, this.qEhelper);
-
-
-
+            // Add match to the end of the chain.
+            query.AddToEnd(match);
         }
 
         /// <summary>

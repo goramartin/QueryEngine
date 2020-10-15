@@ -26,11 +26,12 @@ namespace QueryEngine
     /// When creating the variable map is filled when constructor of pattern is called and query results are appropriately created
     /// based on number of threads passed and columns which are stored in created pattern.
     /// </summary>
-    internal sealed class MatchObject
+    internal sealed class MatchObject : QueryObject
     {
         private IPatternMatcher Matcher;
         private IPattern Pattern;
         private MatchResultsStorage queryResults;
+        private IMatchExecutionHelper helper;
 
         /// <summary>
         /// Creates Match object.
@@ -38,20 +39,16 @@ namespace QueryEngine
         /// Firstly the match expression is parsed and traversed with visitors. Visitor returns parsed pattern nodes.
         /// The parsed pattern nodes are used to create a pattern and the created pattern is passed to a matcher constructor.
         /// </summary>
-        /// <param name="tokens"> Tokens to be parsed. (Expecting first token to be a Match token.)</param>
         /// <param name="graph"> Graph to conduct a query on. </param>
         /// <param name="variableMap"> Empty map of variables. </param>
         /// <param name="executionHelper"> Match execution helper. </param>
-        public MatchObject(List<Token> tokens, VariableMap variableMap, Graph graph, IMatchExecutionHelper executionHelper)
+        /// <param name="matchNode"> Parse tree of match expression. </param>
+        public MatchObject(Graph graph, VariableMap variableMap, IMatchExecutionHelper executionHelper, MatchNode matchNode)
         {
-            if (tokens == null || variableMap == null || graph == null)
+            if (executionHelper == null || matchNode == null || variableMap == null || graph == null)
                 throw new ArgumentNullException($"{this.GetType()}, passing null arguments to the constructor.");
-            
-            // TO DO REPAIR EVERYTHING
-            int position = 0;
-            // Create parse tree of match part of query and
-            // create a shallow pattern
-            MatchNode matchNode = Parser.ParseMatch(ref position, tokens);
+
+            this.helper = executionHelper;
             MatchVisitor matchVisitor = new MatchVisitor(graph.nodeTables, graph.edgeTables);
             matchNode.Accept(matchVisitor);
 
@@ -113,13 +110,18 @@ namespace QueryEngine
         /// </summary>
         /// <param name="executionHelper"> Match execution helper. </param>
         /// <returns> Results of search algorithm </returns>
-        public ITableResults Search(IMatchExecutionHelper executionHelper)
+        public ITableResults Search()
         {
             this.Matcher.Search();
 
             if (this.queryResults.IsMerged)
                 return new TableResults(this.queryResults.GetResults(), this.queryResults.NumberOfMatchedElements);
             else return new MultiTableResults(this.queryResults.GetResults(), this.queryResults.NumberOfMatchedElements);
+        }
+
+        public override void Compute(out ITableResults results)
+        {
+            results = this.Search();
         }
     }
 }

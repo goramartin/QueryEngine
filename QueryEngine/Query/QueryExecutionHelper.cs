@@ -88,7 +88,7 @@ namespace QueryEngine
     internal class QueryExecutionHelper : IMatchExecutionHelper, ISelectExecutionHelper, IOrderByExecutionHelper
     {
         public int ThreadCount {get; set; }
-        public bool IsSetOrderBy { get; set; }
+        public bool IsSetOrderBy { get; set; } = false;
 
         public int VerticesPerThread { get; set; }
         
@@ -97,7 +97,7 @@ namespace QueryEngine
         public string FileName {get; set; }
         
         public bool IsStoringResult { get; set; } = true;
-        public bool IsMergeNeeded => (this.IsSetOrderBy);
+        public bool IsMergeNeeded => (this.IsSetOrderBy && this.IsStoringResult);
         public bool InParallel => ThreadCount != 1;
      
         public QueryExecutionHelper()

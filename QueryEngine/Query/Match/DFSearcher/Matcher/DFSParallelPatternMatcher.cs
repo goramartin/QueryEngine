@@ -92,7 +92,7 @@ namespace QueryEngine
                 Console.WriteLine("Finished Search:");
                 QueryEngine.PrintElapsedTime();
 
-                if (this.executionHelper.IsMergeNeeded && this.executionHelper.IsStoringResult)
+                if (this.executionHelper.IsMergeNeeded)
                 {
                     this.ParallelMergeThreadResults();
                     this.results.IsMerged = true;
