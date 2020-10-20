@@ -51,7 +51,6 @@ namespace QueryEngine
     /// Each query words is parsed separately.
     /// Parsing should always start with parsing select and match
     /// since they are compulsory to use.
-    /// Parsing Select always starts at position 0.
     /// When finished parsing query token, the position is set on the next token.
     /// Query -> Select Match (OrderBy)? ;
     /// </summary>
@@ -64,6 +63,7 @@ namespace QueryEngine
             parts = new List<Tuple<string, ParsePart>>();
             parts.Add(Tuple.Create<string, ParsePart>("select", Parser.ParseSelect));
             parts.Add(Tuple.Create<string, ParsePart>("match", Parser.ParseMatch));
+            parts.Add(Tuple.Create<string, ParsePart>("groupby", Parser.ParseGroupBy));
             parts.Add(Tuple.Create<string, ParsePart>("orderby", Parser.ParseOrderBy));
         }
 

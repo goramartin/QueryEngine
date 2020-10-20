@@ -2,7 +2,6 @@
 
 This file contains definition of a group by object.
 
-
 */
 
 using System;

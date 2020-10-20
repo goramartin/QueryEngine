@@ -54,5 +54,10 @@ namespace QueryEngine
             this.strValue = value;
             this.type = type;
         }
+
+        public override string ToString()
+        {
+            return type.ToString() + ( this.strValue == null ? "" : this.strValue);
+        }
     }
 }

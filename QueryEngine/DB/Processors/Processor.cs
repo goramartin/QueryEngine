@@ -9,7 +9,6 @@ The processor states are singletons and flyweight, they are available for the en
 In case the program wants to read more definitions.
  */
 
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
