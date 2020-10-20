@@ -24,6 +24,7 @@ namespace QueryEngine
             Match,
             Select,
             Order,
+            Group
             By,
             Asc,
             Desc,

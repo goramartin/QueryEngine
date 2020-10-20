@@ -187,6 +187,7 @@ namespace QueryEngine
             RegisterToken("order", Token.TokenType.Order);
             RegisterToken("asc", Token.TokenType.Asc);
             RegisterToken("desc", Token.TokenType.Desc);
+            RegisterToken("group", Token.TokenType.Group);
             RegisterToken("count", Token.TokenType.Count);
         }
 

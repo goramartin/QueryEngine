@@ -1,13 +1,18 @@
-﻿
-/*! \file
-File contains definition of select object and select variable that is parsed from a select expression.
-Select object is included inside Query class and prepresents printing of an input of a query.
-Select object remembers the columns the user wants to print and creates an appropriate printer and formater
-based on the user needs.
+﻿/*! \file
+File contains definition of select object.
+The class consists of a list of expressions enclosed in a generic wrapper.
+The wrapper helps to compute expression values and convert them to string.
 
-Notice that during creation of the select expression, it only stores the expression holders.
-It is because printing needs both print variables and expression holders to specify headings, but the
-print variables are created only on demand when printing.
+The list it self can be perceived as one row of the output.
+That is to say, for each individual result, the expressions are computed and printed on
+the same line.
+
+The printing is done via printer class that contains a formater class.
+The printer class defines where the output will be printed and the formater 
+formats the output into desired format.
+
+The results are always printed in a form of a table. A header of the table is created
+by calling ToString() method on the list of expressions.
  */
 
 

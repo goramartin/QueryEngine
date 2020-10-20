@@ -1,5 +1,4 @@
-﻿
-/*! \file
+﻿/*! \file
   
 This file includes definition of match object.
 This class should contain information from the query match expression that is,
@@ -7,7 +6,7 @@ pattern to search and algorithm to perform the search.
 Note that during this class creation happens also definitions 
 of variables to be used by the entire query, that means it fills the 
 variable map of for the query.
-  
+
 */
 
 using System;

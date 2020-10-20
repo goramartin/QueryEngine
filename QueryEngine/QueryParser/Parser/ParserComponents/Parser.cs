@@ -13,7 +13,7 @@ Query -> Select Match (OrderBy)? ;
   
 Select -> SELECT (\*|(SelectPrintTerm (, SelectPrintTerm)*)
 SelectPrintTerm -> Expression
-  
+
 Match -> MATCH MatchTerm (, MatchTerm)*
 MatchTerm -> Vertex (Edge Vertex)*
 Vertex -> (MatchVariable)
