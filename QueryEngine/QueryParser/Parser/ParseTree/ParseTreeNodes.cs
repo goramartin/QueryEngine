@@ -212,7 +212,6 @@ namespace QueryEngine {
 
     #endregion GroupByNodes
 
-
     #region OrderByNodes
 
     /// <summary>
@@ -241,9 +240,6 @@ namespace QueryEngine {
             this.isAscending = isAscending;
         }
     }
-
-
-
 
     #endregion OrderByNodes
 

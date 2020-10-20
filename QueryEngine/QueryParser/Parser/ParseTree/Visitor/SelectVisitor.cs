@@ -155,6 +155,16 @@ namespace QueryEngine
             throw new NotImplementedException();
         }
 
+        public void Visit(GroupByNode node)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Visit(GroupByTermNode node)
+        {
+            throw new NotImplementedException();
+        }
+
 
         #endregion NotImpl
 

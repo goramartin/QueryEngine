@@ -22,22 +22,28 @@ namespace QueryEngine
     {
         T GetResult();
         void Visit(SelectNode node);
+        void Visit(SelectPrintTermNode node);
+        
+            
         void Visit(MatchNode node);
         void Visit(MatchDividerNode node);
         void Visit(VertexNode node);
-
         void Visit(InEdgeNode node);
         void Visit(OutEdgeNode node);
         void Visit(AnyEdgeNode node);
-
-
-        void Visit(VariableNode node);
-        void Visit(IdentifierNode node);
-        void Visit(ExpressionNode node);
         void Visit(MatchVariableNode node);
+
         void Visit(OrderByNode node);
         void Visit(OrderTermNode node);
-        void Visit(SelectPrintTermNode node);
+
+        void Visit(GroupByNode node);
+        void Visit(GroupByTermNode node);
+
+        
+        void Visit(ExpressionNode node);
+        void Visit(VariableNode node);
+        void Visit(IdentifierNode node);
+
     }
 
 }

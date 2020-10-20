@@ -29,7 +29,10 @@ TableType -> IDENTIFIER
  
 OrderBy -> ORDER BY OrderTerm (, OrderTerm)*
 OrderTerm -> Expression (ASC|DESC)?
- 
+
+GroupBy -> GroupByTerm (, GroupByTerm)*
+GroupByTerm -> Expression
+
 Expression -> VariableNameReference(.VariablePropertyReference)? AS Label
 Label -> IDENTIFIER
 VariableNameReference -> IDENTIFIER
