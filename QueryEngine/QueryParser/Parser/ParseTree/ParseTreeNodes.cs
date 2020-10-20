@@ -208,6 +208,11 @@ namespace QueryEngine {
         {
             visitor.Visit(this);
         }
+
+        public void AddExpression(Node expr)
+        {
+            this.exp = expr;
+        }
     }
 
     #endregion GroupByNodes
