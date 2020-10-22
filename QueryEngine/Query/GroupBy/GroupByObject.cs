@@ -41,10 +41,6 @@ namespace QueryEngine
         public GroupByObject(Graph graph, VariableMap map, IGroupByExecutionHelper executionHelper, GroupByNode groupByNode)
         {
             throw new NotImplementedException();
-
-
-
-
         }
 
         public override void Compute(out ITableResults results)

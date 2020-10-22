@@ -25,7 +25,7 @@ namespace QueryEngine
     {
         public Count(ExpressionHolder holder) : base(holder)
         {
-            this.IsAstCount = true;
+            if (holder == null) this.IsAstCount = true;
         }
 
         public override void Apply(in TableResults.RowProxy row, int position)

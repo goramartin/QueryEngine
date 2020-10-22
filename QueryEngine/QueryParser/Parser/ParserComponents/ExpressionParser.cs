@@ -56,7 +56,6 @@ namespace QueryEngine
             else return ParseVarReference(ref position, tokens);
         }
 
-
         /// <summary>
         /// AggregateFunc -> IDENTIFIER \( VarReference \)
         /// </summary>
@@ -71,7 +70,6 @@ namespace QueryEngine
             else
             {
                 AggregateFuncNode aggregate = new AggregateFuncNode();
-                
                 // Save the name of the function.
                 aggregate.funcName = tokens[position].strValue;
                 // It must inc by 2 because it was +1 moves it to left parent and another +1 moves it to next token.
