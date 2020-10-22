@@ -15,6 +15,7 @@ is not null.
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -42,6 +43,19 @@ namespace QueryEngine
         /// <param name="row"> A result table row. </param>
         /// <param name="position"> A position of a groups aggregate. </param>
         public abstract void Apply(in TableResults.RowProxy row, int position);
+
+
+        public static Aggregate Factory(string funcType, Type compType)
+        {
+            if (funcType == "count" && compType == typeof(int)) return new Count();
+            else if (funcType == "max" && compType == typeof(int)) return new IntMax();
+            else if (funcType == "max" && compType == typeof(string)) return new StrMax();
+            else if (funcType == "min" && compType == typeof(int)) return new IntMin();
+            else if (funcType == "min" && compType == typeof(string)) return new StrMin();
+            else if (funcType == "avg" && compType == typeof(int)) return new IntAvg();
+            else if (funcType == "sum" && compType == typeof(int)) return new IntSum();
+            else throw new ArgumentException($"Aggregate factory, trying to create a non existent aggregate. {funcType}, {compType}");
+        }
     }
 
     /// <summary>
