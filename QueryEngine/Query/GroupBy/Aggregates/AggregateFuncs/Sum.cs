@@ -25,5 +25,11 @@ namespace QueryEngine
                 else this.aggVals[position] += returnValue;
             }
         }
+
+
+        public override string ToString()
+        {
+            return "Sum(" + this.exp.ToString() + ")";
+        }
     }
 }

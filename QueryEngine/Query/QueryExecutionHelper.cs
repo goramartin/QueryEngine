@@ -24,6 +24,11 @@ namespace QueryEngine
         /// Defines whether optional clause order by was defined in the user input query.
         /// </summary>
         bool IsSetOrderBy { get; set; }
+
+        /// <summary>
+        /// Defines whether optional clause group by was defined in the user input query.
+        /// </summary>
+        bool IsSetGroupBy { get; set; }
         
         /// <summary>
         /// Number of threads that will be used during query execution.
@@ -77,18 +82,21 @@ namespace QueryEngine
     }
 
     internal interface IOrderByExecutionHelper : IBaseExecutionHelper
-    {
-    }
+    { }
+
+    internal interface IGroupByExecutionHelper : IBaseExecutionHelper 
+    { }
 
     /// <summary>
     /// A execution helper that is used inside query. 
     /// The query passes this execution helper to its query objects and each object
     /// sees only the neccessary information for its own execution.
     /// </summary>
-    internal class QueryExecutionHelper : IMatchExecutionHelper, ISelectExecutionHelper, IOrderByExecutionHelper
+    internal class QueryExecutionHelper : IMatchExecutionHelper, ISelectExecutionHelper, IOrderByExecutionHelper, IGroupByExecutionHelper
     {
-        public int ThreadCount {get; set; }
+        public int ThreadCount {get; set;}
         public bool IsSetOrderBy { get; set; } = false;
+        public bool IsSetGroupBy { get; set; } = false;
 
         public int VerticesPerThread { get; set; }
         
@@ -97,9 +105,10 @@ namespace QueryEngine
         public string FileName {get; set; }
         
         public bool IsStoringResult { get; set; } = true;
-        public bool IsMergeNeeded => (this.IsSetOrderBy && this.IsStoringResult);
+        public bool IsMergeNeeded => ((this.IsSetOrderBy || this.IsSetGroupBy) && this.IsStoringResult);
         public bool InParallel => ThreadCount != 1;
-     
+
+
         public QueryExecutionHelper()
         {
 

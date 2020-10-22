@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace QueryEngine
 {
-    class RowHasher
-    {
+    internal class RowHasher
+    { 
     }
 }

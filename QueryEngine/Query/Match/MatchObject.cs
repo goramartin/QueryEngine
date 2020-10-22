@@ -109,7 +109,7 @@ namespace QueryEngine
         /// </summary>
         /// <param name="executionHelper"> Match execution helper. </param>
         /// <returns> Results of search algorithm </returns>
-        public ITableResults Search()
+        private ITableResults Search()
         {
             this.Matcher.Search();
 

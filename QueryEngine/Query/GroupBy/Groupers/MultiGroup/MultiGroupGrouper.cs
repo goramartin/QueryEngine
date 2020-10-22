@@ -8,5 +8,9 @@ namespace QueryEngine
 {
     internal class MultiGroupGrouper : Grouper
     {
+        public override void Group(ITableResults resTable)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

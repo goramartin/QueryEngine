@@ -70,7 +70,7 @@ namespace QueryEngine
         /// <param name="sortData"> Query reults to be sorted. </param>
         /// <param name="executionHelper"> Order by execution helper. </param>
         /// <returns> Sorted data. </returns>
-        public ITableResults Sort(ITableResults sortData)
+        private ITableResults Sort(ITableResults sortData)
         {
              Console.WriteLine("Order start");
              Sorter sorter = new MultiColumnSorter(sortData, this.comparers, this.helper.InParallel);

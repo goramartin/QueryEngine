@@ -23,6 +23,11 @@ namespace QueryEngine
                 else if (this.aggVals[position] < returnValue) this.aggVals[position] = returnValue;
             }
         }
+
+        public override string ToString()
+        {
+            return "Max(" + this.exp.ToString() + ")";
+        }
     }
 
     /// <summary>
@@ -40,6 +45,11 @@ namespace QueryEngine
                 if (position == this.aggVals.Count) this.aggVals.Add(returnValue);
                 else if (this.aggVals[position].CompareTo(returnValue) < 0) this.aggVals[position] = returnValue;
             }
+        }
+
+        public override string ToString()
+        {
+            return "Max(" + this.exp.ToString() + ")";
         }
     }
 }

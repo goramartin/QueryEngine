@@ -4,11 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace QueryEngine 
+namespace QueryEngine
 {
-    internal class RowEqualityComparer : IEqualityComparer<>
+    internal class AggregationInfo
     {
-        
-
     }
 }

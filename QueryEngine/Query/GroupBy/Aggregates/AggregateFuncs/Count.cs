@@ -48,5 +48,12 @@ namespace QueryEngine
             if (position == this.aggVals.Count) this.aggVals.Add(value);
             else this.aggVals[position] += value;
         }
+
+        public override string ToString()
+        {
+            if (this.IsAstCount) return "Count(*)";
+            else return "Count(" + this.exp.ToString() + ")";
+        }
+    
     }
 }

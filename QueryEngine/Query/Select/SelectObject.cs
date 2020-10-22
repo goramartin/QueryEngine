@@ -78,7 +78,7 @@ namespace QueryEngine
         /// Prints results in given format from concstructor init.
         /// </summary>
         /// <param name="results"> Results from query. </param>
-        public void Print(ITableResults results)
+        private void Print(ITableResults results)
         {
             // For Provisional Count(*)
             if (this.helper.IsStoringResult == false)
