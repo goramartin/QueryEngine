@@ -49,17 +49,11 @@ namespace QueryEngine
                 throw new ArgumentNullException($"{this.GetType()}, passing null arguments to constructor. ");
 
             this.helper = executionHelper;
-            // For provisional Count(*);
-            if (selectNode.next.GetType() == typeof(CountProvisional))
-                executionHelper.IsStoringResult = false;
-            else
-            {
+            
                 // Process parse tree and create list of variables to be printed
                 SelectVisitor visitor = new SelectVisitor(graph.labels, map);
                 selectNode.Accept(visitor);
                 this.rowFormat = visitor.GetResult();
-            }
-
         }
 
         public override void Compute(out ITableResults results)

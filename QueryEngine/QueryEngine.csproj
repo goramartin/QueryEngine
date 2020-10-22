@@ -84,7 +84,13 @@
     <Compile Include="Query\GroupBy\Aggregates\AggregateFuncs\Max.cs" />
     <Compile Include="Query\GroupBy\Aggregates\AggregateFuncs\Min.cs" />
     <Compile Include="Query\GroupBy\Aggregates\AggregateFuncs\Sum.cs" />
+    <Compile Include="Query\GroupBy\AggregationInfo.cs" />
+    <Compile Include="Query\GroupBy\Groupers\Grouper.cs" />
+    <Compile Include="Query\GroupBy\Groupers\MultiGroup\EqualityComparer\RowEqualityComparer.cs" />
     <Compile Include="Query\GroupBy\GroupByObject.cs" />
+    <Compile Include="Query\GroupBy\Groupers\MultiGroup\Hasher\RowHasher.cs" />
+    <Compile Include="Query\GroupBy\Groupers\MultiGroup\MultiGroupGrouper.cs" />
+    <Compile Include="Query\GroupBy\Groupers\SingleGroup\SingleGroupGrouper.cs" />
     <Compile Include="Query\Match\DFSearcher\BaseMatch\BaseMatch.cs" />
     <Compile Include="Query\Match\DFSearcher\BaseMatch\BaseMatchesSpecialised.cs" />
     <Compile Include="Query\Match\DFSearcher\Pattern\DFSPatternInterface.cs" />
@@ -159,8 +165,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Query\GroupBy\EqualityComparer\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

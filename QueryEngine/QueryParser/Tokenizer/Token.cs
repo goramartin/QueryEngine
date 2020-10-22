@@ -42,9 +42,6 @@ namespace QueryEngine
             RightBrace,
             Identifier,
             AsLabel,
-
-            Count
-
         }
         public readonly string strValue;
         public TokenType type;

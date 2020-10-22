@@ -31,7 +31,6 @@ namespace QueryEngine
                 return null;
             else
             {
-
                 position++;
                 // BY
                 if (!CheckToken(position, Token.TokenType.By, tokens))

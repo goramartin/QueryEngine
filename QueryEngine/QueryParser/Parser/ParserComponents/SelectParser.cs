@@ -58,16 +58,7 @@ namespace QueryEngine
                 variableNode.AddName(new IdentifierNode("*"));
                 position++;
                 return variableNode;
-            } // Provisional count
-            else if (CheckToken(position, Token.TokenType.Count, tokens))
-            {
-                position++;
-                CheckLeftParen(ref position, tokens);
-                if (!CheckToken(position, Token.TokenType.Asterix, tokens)) throw new ArgumentException("SelectParser, expected asterix.");
-                else position++;
-                CheckRightParen(ref position, tokens);
-                return new CountProvisional();
-            }
+            } 
             else
             {
                 // SelectPrintTerm

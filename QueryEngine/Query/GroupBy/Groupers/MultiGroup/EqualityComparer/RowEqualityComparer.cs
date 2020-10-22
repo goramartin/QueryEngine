@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace QueryEngine 
 {
-    internal class RowEqualityComparer : IEqualityComparer<>
+    internal class RowEqualityComparer
     {
         
 

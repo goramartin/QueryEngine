@@ -42,7 +42,6 @@ namespace QueryEngine
             return expressionNode;
         }
 
-
         /// <summary>
         /// Prases expression, so far parses only variable reference because there is no other value expression or operators.
         /// </summary>

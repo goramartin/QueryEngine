@@ -324,14 +324,4 @@ namespace QueryEngine {
     }
     #endregion ExprNodes
 
-
-    // Provisional count
-    internal class CountProvisional : Node
-    {
-        public override void Accept<T>(IVisitor<T> visitor)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
 }
