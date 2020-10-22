@@ -14,11 +14,12 @@ namespace QueryEngine
         #region Expression
 
         /// <summary>
-        /// Parsing of reference variables in select expression: var.PropName AS Label
-        /// Expression -> VariableNameReference(.VariablePropertyReference)? AS Label
+        /// Expression -> ExpressionTerm AS Label
+        /// ExpressionTerm -> AggregateFunc|VarReference
+        /// AggregateFunc -> IDENTIFIER \( VarReference \)
+        /// VarReference -> ReferenceName(.ReferenceName)?
         /// Label -> IDENTIFIER
-        /// VariableNameReference -> IDENTIFIER
-        /// VariablePropertyReference -> IDENTIFIER
+        /// ReferenceName -> IDENTIFIER
         /// </summary>
         /// <param name="tokens"> Tokens to parse. </param>
         /// <param name="position"> Position of a token. </param>
@@ -28,7 +29,7 @@ namespace QueryEngine
             ExpressionNode expressionNode = new ExpressionNode();
 
             // Expecting successful parse otherwise it would throw inside.
-            expressionNode.AddExpression(ParseExpression(ref position, tokens));
+            expressionNode.AddExpression(ParseExpressionTerm(ref position, tokens));
 
             // AS Label 
             if (CheckToken(position, Token.TokenType.AsLabel, tokens))
@@ -43,12 +44,56 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Prases expression, so far parses only variable reference because there is no other value expression or operators.
+        /// ExpressionTerm -> AggregateFunc|VarReference
+        /// </summary>
+        /// <param name="tokens"> Tokens to parse. </param>
+        /// <param name="position"> Position of a token. </param>
+        /// <returns> Non empty aggregate node or variable reference node. </returns>
+        static private Node ParseExpressionTerm(ref int position, List<Token> tokens)
+        {
+            Node aggFunc = ParseAggregateFunc(ref position, tokens);
+            if (aggFunc != null) return aggFunc;
+            else return ParseVarReference(ref position, tokens);
+        }
+
+
+        /// <summary>
+        /// AggregateFunc -> IDENTIFIER \( VarReference \)
+        /// </summary>
+        /// <param name="tokens"> Tokens to parse. </param>
+        /// <param name="position"> Position of a token. </param>
+        /// <returns> Non empty aggregate node. </returns>
+        static private Node ParseAggregateFunc(ref int position, List<Token> tokens)
+        {
+            // FuncName (
+            if (!((CheckToken(position, Token.TokenType.Identifier, tokens)) &&
+                    (CheckToken(position + 1, Token.TokenType.LeftParen, tokens)))) return null;
+            else
+            {
+                AggregateFuncNode aggregate = new AggregateFuncNode();
+                
+                // Save the name of the function.
+                aggregate.func = tokens[position].strValue;
+                // It must inc by 2 because it was +1 moves it to left parent and another +1 moves it to next token.
+                position += 2;
+                aggregate.next = ParseVarReference(ref position, tokens);
+
+                // ) // also moves position on success
+                CheckRightParen(ref position, tokens);
+
+                return aggregate;
+            }
+        }
+
+        /// <summary>
+        /// Parses only variable reference because there is no other value expression or operators.
+        /// VarReference -> ReferenceName(.ReferenceName)?
+        /// ReferenceName -> IDENTIFIER
         /// </summary>
         /// <param name="tokens"> Tokens to parse. </param>
         /// <param name="position"> Position of a token. </param>
         /// <returns> Non empty variable node. </returns>
-        static private Node ParseExpression(ref int position, List<Token> tokens)
+        static private Node ParseVarReference(ref int position, List<Token> tokens)
         {
             VariableNode variableNode = new VariableNode();
 
