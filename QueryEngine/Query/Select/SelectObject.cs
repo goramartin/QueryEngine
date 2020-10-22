@@ -74,12 +74,6 @@ namespace QueryEngine
         /// <param name="results"> Results from query. </param>
         private void Print(ITableResults results)
         {
-            // For Provisional Count(*)
-            if (this.helper.IsStoringResult == false)
-            {
-                Console.WriteLine("Count: {0}", results.NumberOfMatchedElements);
-                return; 
-            }
 
             var printer = Printer.Factory(this.helper.Printer, rowFormat, this.helper.Formater, this.helper.FileName);
 
