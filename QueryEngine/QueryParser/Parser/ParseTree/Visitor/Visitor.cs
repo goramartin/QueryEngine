@@ -43,6 +43,7 @@ namespace QueryEngine
         void Visit(ExpressionNode node);
         void Visit(VariableNode node);
         void Visit(IdentifierNode node);
+        void Visit(AggregateFuncNode node);
 
     }
 

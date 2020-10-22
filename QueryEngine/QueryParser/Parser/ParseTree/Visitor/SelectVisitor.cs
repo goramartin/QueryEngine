@@ -165,6 +165,11 @@ namespace QueryEngine
             throw new NotImplementedException();
         }
 
+        public void Visit(AggregateFuncNode node)
+        {
+            throw new NotImplementedException();
+        }
+
 
         #endregion NotImpl
 

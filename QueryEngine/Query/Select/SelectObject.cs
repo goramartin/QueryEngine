@@ -67,14 +67,12 @@ namespace QueryEngine
             else throw new NullReferenceException($"{this.GetType()}, next is set to null."); 
         }
 
-
         /// <summary>
         /// Prints results in given format from concstructor init.
         /// </summary>
         /// <param name="results"> Results from query. </param>
         private void Print(ITableResults results)
         {
-
             var printer = Printer.Factory(this.helper.Printer, rowFormat, this.helper.Formater, this.helper.FileName);
 
             printer.PrintHeader();

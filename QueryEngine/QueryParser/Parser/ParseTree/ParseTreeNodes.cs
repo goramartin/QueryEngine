@@ -252,7 +252,6 @@ namespace QueryEngine {
 
     internal class ExpressionNode : Node
     {
-
         public Node exp;
         public Node asLabel;
 
@@ -316,6 +315,17 @@ namespace QueryEngine {
         public IdentifierNode(string v) { this.value = v; }
 
         public void AddValue(string v) { this.value = v; }
+
+        public override void Accept<T>(IVisitor<T> visitor)
+        {
+            visitor.Visit(this);
+        }
+    }
+
+
+    internal class AggregateFuncNode : NodeChain
+    {
+        public string func { get; set; }
 
         public override void Accept<T>(IVisitor<T> visitor)
         {

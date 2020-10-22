@@ -81,6 +81,10 @@ namespace QueryEngine
             else if (this.nameHolder.TrySetPropName(node.value)) return;
             else throw new ArgumentException($"{this.GetType()}, expected new name holder.");
         }
+        public void Visit(AggregateFuncNode node)
+        {
+            throw new NotImplementedException();
+        }
 
         #region NotImpl
 
@@ -142,6 +146,7 @@ namespace QueryEngine
         {
             throw new NotImplementedException();
         }
+
 
         #endregion NotImpl
     }
