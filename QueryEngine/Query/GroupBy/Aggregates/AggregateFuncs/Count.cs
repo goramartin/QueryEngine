@@ -4,7 +4,7 @@ The count function can be specialised only on "number" type.
 
 The count function have multiple uses.
 1. count(*) - the function counts each row as a valid input.
-2. count(x.PropName) - the function needs to evaluete the 
+2. count(x.PropName) - the function needs to evaluate the 
     value of x.PropName first and check if it is null or not.
  */
 
@@ -19,7 +19,7 @@ using System.Threading.Tasks;
 namespace QueryEngine
 {
     /// <summary>
-    /// Counts a number of not null entries.
+    /// Counts a number of non null entries.
     /// </summary>
     internal class Count : Aggregate<int>
     {
