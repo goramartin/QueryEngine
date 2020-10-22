@@ -73,14 +73,13 @@ namespace QueryEngine
                 AggregateFuncNode aggregate = new AggregateFuncNode();
                 
                 // Save the name of the function.
-                aggregate.func = tokens[position].strValue;
+                aggregate.funcName = tokens[position].strValue;
                 // It must inc by 2 because it was +1 moves it to left parent and another +1 moves it to next token.
                 position += 2;
                 aggregate.next = ParseVarReference(ref position, tokens);
 
                 // ) // also moves position on success
                 CheckRightParen(ref position, tokens);
-
                 return aggregate;
             }
         }

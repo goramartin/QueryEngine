@@ -325,7 +325,7 @@ namespace QueryEngine {
 
     internal class AggregateFuncNode : NodeChain
     {
-        public string func { get; set; }
+        public string funcName { get; set; }
 
         public override void Accept<T>(IVisitor<T> visitor)
         {
