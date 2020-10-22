@@ -36,6 +36,11 @@ namespace QueryEngine
         /// </summary>
         public ExpressionHolder exp { get; }
 
+        public Aggregate(ExpressionHolder holder)
+        {
+            this.exp = holder;
+        }
+
         /// <summary>
         /// Computes expression value for a given row that is applied to the aggregate result.
         /// Each function handles its on computation and insertion.
@@ -45,15 +50,15 @@ namespace QueryEngine
         public abstract void Apply(in TableResults.RowProxy row, int position);
 
 
-        public static Aggregate Factory(string funcType, Type compType)
+        public static Aggregate Factory(string funcType, Type compType, ExpressionHolder holder = null)
         {
-            if (funcType == "count" && compType == typeof(int)) return new Count();
-            else if (funcType == "max" && compType == typeof(int)) return new IntMax();
-            else if (funcType == "max" && compType == typeof(string)) return new StrMax();
-            else if (funcType == "min" && compType == typeof(int)) return new IntMin();
-            else if (funcType == "min" && compType == typeof(string)) return new StrMin();
-            else if (funcType == "avg" && compType == typeof(int)) return new IntAvg();
-            else if (funcType == "sum" && compType == typeof(int)) return new IntSum();
+            if (funcType == "count" && compType == typeof(int)) return new Count(holder);
+            else if (funcType == "max" && compType == typeof(int)) return new IntMax(holder);
+            else if (funcType == "max" && compType == typeof(string)) return new StrMax(holder);
+            else if (funcType == "min" && compType == typeof(int)) return new IntMin(holder);
+            else if (funcType == "min" && compType == typeof(string)) return new StrMin(holder);
+            else if (funcType == "avg" && compType == typeof(int)) return new IntAvg(holder);
+            else if (funcType == "sum" && compType == typeof(int)) return new IntSum(holder);
             else throw new ArgumentException($"Aggregate factory, trying to create a non existent aggregate. {funcType}, {compType}");
         }
     }
@@ -67,6 +72,9 @@ namespace QueryEngine
     internal abstract class Aggregate<T> : Aggregate 
     {
         protected List<T> aggVals = new List<T>(2);
+
+        public Aggregate(ExpressionHolder holder) : base(holder)
+        {}
     }
 
 }

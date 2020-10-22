@@ -23,7 +23,7 @@ namespace QueryEngine
     /// </summary>
     internal class Count : Aggregate<int>
     {
-        public Count()
+        public Count(ExpressionHolder holder) : base(holder)
         {
             this.IsAstCount = true;
         }

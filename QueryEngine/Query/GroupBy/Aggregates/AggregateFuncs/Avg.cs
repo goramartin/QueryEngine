@@ -19,6 +19,9 @@ namespace QueryEngine
     {
         private List<int> EltUsed = new List<int>(2);
 
+        public IntAvg(ExpressionHolder holder) : base(holder)
+        { }
+
         public override void Apply(in TableResults.RowProxy row, int position)
         {
             if (this.exp.TryGetExpressionValue<int>(in row, out int returnValue))

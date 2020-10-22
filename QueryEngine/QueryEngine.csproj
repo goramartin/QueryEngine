@@ -78,6 +78,12 @@
     <Compile Include="Query\Expression\References\VariableReferenceNameHolder.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="QueryEngine.cs" />
+    <Compile Include="Query\GroupBy\Aggregates\Aggregate.cs" />
+    <Compile Include="Query\GroupBy\Aggregates\AggregateFuncs\Avg.cs" />
+    <Compile Include="Query\GroupBy\Aggregates\AggregateFuncs\Count.cs" />
+    <Compile Include="Query\GroupBy\Aggregates\AggregateFuncs\Max.cs" />
+    <Compile Include="Query\GroupBy\Aggregates\AggregateFuncs\Min.cs" />
+    <Compile Include="Query\GroupBy\Aggregates\AggregateFuncs\Sum.cs" />
     <Compile Include="Query\GroupBy\GroupByObject.cs" />
     <Compile Include="Query\Match\DFSearcher\BaseMatch\BaseMatch.cs" />
     <Compile Include="Query\Match\DFSearcher\BaseMatch\BaseMatchesSpecialised.cs" />

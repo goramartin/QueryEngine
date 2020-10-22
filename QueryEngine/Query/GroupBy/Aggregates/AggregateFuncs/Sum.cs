@@ -13,6 +13,10 @@ namespace QueryEngine
 {
     internal sealed class IntSum : Aggregate<int>
     {
+        public IntSum(ExpressionHolder holder) : base(holder)
+        { }
+
+
         public override void Apply(in TableResults.RowProxy row, int position)
         {
             if (this.exp.TryGetExpressionValue<int>(in row, out int returnValue))

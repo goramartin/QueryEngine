@@ -13,6 +13,8 @@ namespace QueryEngine
 {
     internal sealed class IntMax : Aggregate<int>
     {
+        public IntMax(ExpressionHolder holder) : base(holder)
+        { }
         public override void Apply(in TableResults.RowProxy row, int position)
         {
             if (this.exp.TryGetExpressionValue<int>(in row, out int returnValue))
@@ -29,6 +31,8 @@ namespace QueryEngine
     /// </summary>
     internal sealed class StrMax : Aggregate<string>
     {
+        public StrMax(ExpressionHolder holder) : base(holder)
+        { }
         public override void Apply(in TableResults.RowProxy row, int position)
         {
             if (this.exp.TryGetExpressionValue<string>(in row, out string returnValue))
