@@ -29,7 +29,7 @@ namespace QueryEngine
     /// Base class for every expression node.
     /// Serves only as a holder.
     /// </summary>
-    internal abstract class ExpressionBase
+    internal abstract class ExpressionBase : IEquatable<ExpressionBase>
     {
         /// <summary>
         /// Gets expression type.
@@ -45,6 +45,10 @@ namespace QueryEngine
         /// <param name="vars"> A list of already collected variables. </param>
         /// <returns> A list of collected variables, the same list as the one in func parameters.</returns>
         public abstract List<int> CollectUsedVars(List<int> vars);
+
+
+        public abstract bool ContainsAggregate();
+
     }
 
     /// <summary>

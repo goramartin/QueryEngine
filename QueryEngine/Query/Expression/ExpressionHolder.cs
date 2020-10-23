@@ -21,7 +21,7 @@ namespace QueryEngine
     internal sealed class ExpressionHolder : ExpressionBase
     {
         private string Label { get; }
-        private ExpressionBase Expr { get; }
+        public ExpressionBase Expr { get; }
         public Type ExpressionType { get; }
 
         /// <summary>
@@ -76,5 +76,11 @@ namespace QueryEngine
         {
             return this.Expr.CollectUsedVars(vars);
         }
+
+        public override bool ContainsAggregate()
+        {
+            return this.Expr.ContainsAggregate();
+        }
+
     }
 }

@@ -44,7 +44,23 @@ namespace QueryEngine
         {
             return elements[this.VariableIndex].TryGetPropertyValue(this.PropertyID, out returnValue);
         }
-    }
+
+        public override bool ContainsAggregate()
+        {
+            return false;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null) return false;
+            else if (obj.GetType() != this.GetType()) return false;
+            else
+            {
+                var tmp = (VariablePropertyReference<T>)obj;
+                if (tmp.VariableIndex == this.VariableIndex && tmp.PropertyID == this.PropertyID) return true;
+                else return false;
+            }
+        }
 
 
 

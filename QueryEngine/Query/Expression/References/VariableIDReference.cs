@@ -18,6 +18,11 @@ namespace QueryEngine
         /// <param name="varIndex"> Index in a result during evaluation.</param>
         public VariableIDReference(VariableReferenceNameHolder nHolder, int varIndex) : base(nHolder, varIndex) { }
 
+        public override bool ContainsAggregate()
+        {
+            return false;
+        }
+
         /// <summary>
         /// Returns type of this expression.
         /// </summary>
@@ -36,6 +41,18 @@ namespace QueryEngine
         {
             returnValue = elements[this.VariableIndex].ID;
             return true;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null) return false;
+            else if (obj.GetType() != this.GetType()) return false;
+            else
+            {
+                var tmp = (VariableIDReference)obj;
+                if (tmp.VariableIndex == this.VariableIndex) return true;
+                else return false;
+            }
         }
     }
 
