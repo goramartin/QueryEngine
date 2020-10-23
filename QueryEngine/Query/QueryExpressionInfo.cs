@@ -8,10 +8,11 @@ namespace QueryEngine
 {
     /// <summary>
     /// Class serves as a information collector of used expressions in a query.
+    /// 
     /// If the group by clause is defined. In the query, there can be referenced only
     /// the same expressions as in the group clause or an aggregate functions.
-    /// How ever, if the group by clause is not in the query but aggregates are inputed.
-    /// it still collects the aggregates. 
+    /// However, if the group by clause is not in the query but aggregates are inputed.
+    /// Then, there can be only aggregates referenced. 
     /// 
     /// When collecting the aggregations and expressions, this class provides data to check
     /// against the correctness of the other expressions in the query.
@@ -38,11 +39,13 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Checks whether an expression (no aggregation) is valid, in terms of grouping expressions.
+        /// Checks whether an expression (no aggregation) is valid, mainly in terms of grouping expressions.
         /// That is to say, if the group by is set, the clause provides expressions to group the results with.
         /// This function should check, whether the expressions in other clauses are as same as the grouping exp.
-        /// Because, only the same expression can be referenced throughout the query.
+        /// Because, only the same expressions can be referenced throughout the query + aggregates.
         /// 
+        /// If no group by is set. And aggregation is referenced, then only aggregations can be referenced in the entire query.
+        ///
         /// This function is very simplified becuase expressions contain only one block.
         /// Thus, it must be reimplemented in the future.
         /// </summary>
@@ -87,7 +90,7 @@ namespace QueryEngine
             if (!this.IsSetGroupBy && this.exprs.Count != 0)
                     throw new ArgumentException($"{this.GetType()}, there was referenced an aggregate and no group by. In this case, only aggregates can be referenced.");
 
-            if (this.TryFind(aggregate, out int position)) return position;
+            if (this.TryFindAggregate(aggregate, out int position)) return position;
             else
             {
                 this.aggregates.Add(aggregate);
@@ -97,11 +100,12 @@ namespace QueryEngine
 
         public void AddGroupByHash(ExpressionHolder holder)
         {
-            if (holder.ContainsAggregate()) throw new ArgumentException($"{this.GetType()}, group by clause cannot contain aggregates.");
+            if (holder.ContainsAggregate()) 
+                throw new ArgumentException($"{this.GetType()}, group by clause cannot contain aggregates.");
             else this.groupByhashExprs.Add(holder);
         }
 
-        private bool TryFind(Aggregate aggregate, out int position)
+        private bool TryFindAggregate(Aggregate aggregate, out int position)
         {
             for (int i = 0; i < this.aggregates.Count; i++)
             {
