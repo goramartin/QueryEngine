@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -60,6 +61,18 @@ namespace QueryEngine
             else if (funcType == "avg" && compType == typeof(int)) return new IntAvg(holder);
             else if (funcType == "sum" && compType == typeof(int)) return new IntSum(holder);
             else throw new ArgumentException($"Aggregate factory, trying to create a non existent aggregate. {funcType}, {compType}");
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null) return false;
+            else if (obj.GetType() != this.GetType()) return false;
+            else
+            {
+                var tmp = (Aggregate)obj;
+                if (this.exp.Equals(tmp.exp)) return true;
+                else return false;
+            }
         }
     }
 

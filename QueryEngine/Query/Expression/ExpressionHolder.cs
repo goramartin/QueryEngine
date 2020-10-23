@@ -82,5 +82,17 @@ namespace QueryEngine
             return this.Expr.ContainsAggregate();
         }
 
+        public override bool Equals(object obj)
+        {
+            if (obj == null) return false;
+            else if (this.GetType() != obj.GetType()) return false;
+            else
+            {
+                var tmp = (ExpressionHolder)obj;
+                if (this.Expr.Equals(tmp.Expr)) return true;
+                else return false;
+            }
+        }
+
     }
 }

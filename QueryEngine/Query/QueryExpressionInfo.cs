@@ -54,7 +54,7 @@ namespace QueryEngine
                     bool found = false;
                     for (int i = 0; i < this.groupByhashExprs.Count; i++)
                     {
-                        if (holder.Expr.Equals(this.groupByhashExprs[i].Expr)) found = true;
+                        if (holder.Equals(this.groupByhashExprs[i])) found = true;
                     }     
                     if (!found) throw new ArgumentException($"{this.GetType()}, expression in the query can contain only references from group by clause.");
                     else this.exprs.Add(holder);
@@ -71,27 +71,41 @@ namespace QueryEngine
 
         /// <summary>
         /// Adds an aggregate to common aggregate functions.
+        /// And returns position where it was added.
         /// </summary>
         /// <param name="aggregate">An aggregate function. </param>
-        /// <returns> Position of the aggregate. </returns>
         public int AddAggregate(Aggregate aggregate)
         {
-            // If group by is set, there can be referenced an aggregate.
-            if (this.IsSetGroupBy) this.aggregates.Add(aggregate);
+            // If no group by is set but aggregate is referenced.
+            // Only aggregates can be referenced.
+            if (!this.IsSetGroupBy && this.exprs.Count != 0)
+                    throw new ArgumentException($"{this.GetType()}, there was referenced an aggregate and no group by. In this case, only aggregates can be referenced.");
+
+            if (this.TryFind(aggregate, out int position)) return position;
             else
             {
-                // If no group by is set but aggregate is referenced.
-                // Only aggregates can be referenced.
-                if (this.exprs.Count != 0) 
-                    throw new ArgumentException($"{this.GetType()}, there was referenced an aggregate and no group by. In this case, only aggregates can be referenced.");
-                else this.aggregates.Add(aggregate);
+                this.aggregates.Add(aggregate);
+                return this.aggregates.Count - 1;
             }
-            return this.aggregates.Count - 1;
         }
 
         public void AddGroupByHash(ExpressionHolder holder)
         {
             this.groupByhashExprs.Add(holder);
+        }
+
+        private bool TryFind(Aggregate aggregate, out int position)
+        {
+            for (int i = 0; i < this.aggregates.Count; i++)
+            {
+                if (aggregate.Equals(this.aggregates[i])) 
+                { 
+                    position = i;
+                    return true;
+                }
+            }
+            position = default;
+            return false;
         }
     }
 }
