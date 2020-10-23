@@ -84,7 +84,7 @@
     <Compile Include="Query\GroupBy\Aggregates\AggregateFuncs\Max.cs" />
     <Compile Include="Query\GroupBy\Aggregates\AggregateFuncs\Min.cs" />
     <Compile Include="Query\GroupBy\Aggregates\AggregateFuncs\Sum.cs" />
-    <Compile Include="Query\GroupBy\AggregationInfo.cs" />
+    <Compile Include="Query\QueryExpressionInfo.cs" />
     <Compile Include="Query\GroupBy\Groupers\Grouper.cs" />
     <Compile Include="Query\GroupBy\Groupers\MultiGroup\EqualityComparer\RowEqualityComparer.cs" />
     <Compile Include="Query\GroupBy\GroupByObject.cs" />

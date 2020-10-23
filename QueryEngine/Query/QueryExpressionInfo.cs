@@ -32,6 +32,11 @@ namespace QueryEngine
         public readonly List<ExpressionHolder> exprs = new List<ExpressionHolder>();
         public bool IsSetGroupBy { get; private set; } = false;
     
+        public QueryExpressionInfo(bool isSetGroupBy)
+        {
+            this.IsSetGroupBy = isSetGroupBy;
+        }
+
         /// <summary>
         /// Checks whether an expression (no aggregation) is valid, in terms of grouping expressions.
         /// That is to say, if the group by is set, the clause provides expressions to group the results with.
@@ -72,6 +77,7 @@ namespace QueryEngine
         /// <summary>
         /// Adds an aggregate to common aggregate functions.
         /// And returns position where it was added.
+        /// If it already contains the aggregate, it returns the position of the containing one.
         /// </summary>
         /// <param name="aggregate">An aggregate function. </param>
         public int AddAggregate(Aggregate aggregate)
@@ -91,7 +97,8 @@ namespace QueryEngine
 
         public void AddGroupByHash(ExpressionHolder holder)
         {
-            this.groupByhashExprs.Add(holder);
+            if (holder.ContainsAggregate()) throw new ArgumentException($"{this.GetType()}, group by clause cannot contain aggregates.");
+            else this.groupByhashExprs.Add(holder);
         }
 
         private bool TryFind(Aggregate aggregate, out int position)
