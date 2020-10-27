@@ -22,12 +22,14 @@ namespace QueryEngine
         private Dictionary<string, Tuple<int, Type>> labels;
         private VariableMap variableMap;
         private ExpressionHolder expressionHolder;
+        private QueryExpressionInfo exprInfo;
 
-        public OrderByVisitor(Dictionary<string, Tuple<int, Type>> labels, VariableMap map)
+        public OrderByVisitor(Dictionary<string, Tuple<int, Type>> labels, VariableMap map, QueryExpressionInfo exprInfo)
         {
             this.result = new List<IRowComparer>();
             this.labels = labels;
             this.variableMap = map;
+            this.exprInfo = exprInfo;
         }
 
         public List<IRowComparer> GetResult()
@@ -64,7 +66,7 @@ namespace QueryEngine
                 throw new ArgumentException($"{this.GetType()}, expected expression.");
             else
             {
-                var tmpVisitor = new ExpressionVisitor(this.variableMap, this.labels);
+                var tmpVisitor = new ExpressionVisitor(this.labels, this.variableMap, this.exprInfo);
                 node.exp.Accept(tmpVisitor);
                 expr = tmpVisitor.GetResult();
             }
@@ -74,6 +76,7 @@ namespace QueryEngine
                 label = ((IdentifierNode)(node.asLabel)).value;
 
             this.expressionHolder = new ExpressionHolder(expr, label);
+            this.exprInfo.AddExpression(this.expressionHolder);
         }
 
         #region NotImpl

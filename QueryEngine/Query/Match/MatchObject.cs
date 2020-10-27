@@ -42,7 +42,8 @@ namespace QueryEngine
         /// <param name="variableMap"> Empty map of variables. </param>
         /// <param name="executionHelper"> Match execution helper. </param>
         /// <param name="matchNode"> Parse tree of match expression. </param>
-        public MatchObject(Graph graph, VariableMap variableMap, IMatchExecutionHelper executionHelper, MatchNode matchNode)
+        /// <param name="exprInfo"> A query expression information. </param>
+        public MatchObject(Graph graph, VariableMap variableMap, IMatchExecutionHelper executionHelper, MatchNode matchNode, QueryExpressionInfo exprInfo)
         {
             if (executionHelper == null || matchNode == null || variableMap == null || graph == null)
                 throw new ArgumentNullException($"{this.GetType()}, passing null arguments to the constructor.");

@@ -43,7 +43,8 @@ namespace QueryEngine
         /// <param name="map"> Variable map. </param>
         /// <param name="executionHelper"> Select execution helper. </param>
         /// <param name="selectNode"> Parsed tree of select expression. </param>
-        public SelectObject(Graph graph, VariableMap map, ISelectExecutionHelper executionHelper, SelectNode selectNode)
+        /// <param name="exprInfo"> A query expression information. </param>
+        public SelectObject(Graph graph, VariableMap map, ISelectExecutionHelper executionHelper, SelectNode selectNode, QueryExpressionInfo exprInfo)
         {
             if (executionHelper == null || selectNode == null || executionHelper.Printer == null || executionHelper.Formater == null)
                 throw new ArgumentNullException($"{this.GetType()}, passing null arguments to constructor. ");
@@ -51,7 +52,7 @@ namespace QueryEngine
             this.helper = executionHelper;
             
                 // Process parse tree and create list of variables to be printed
-                SelectVisitor visitor = new SelectVisitor(graph.labels, map);
+                SelectVisitor visitor = new SelectVisitor(graph.labels, map, exprInfo);
                 selectNode.Accept(visitor);
                 this.rowFormat = visitor.GetResult();
         }

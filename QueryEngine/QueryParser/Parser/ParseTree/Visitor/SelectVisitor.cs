@@ -22,12 +22,14 @@ namespace QueryEngine
         private List<ExpressionToStringWrapper> result;
         private Dictionary<string, Tuple<int,Type>> labels;
         private VariableMap variableMap;
+        private QueryExpressionInfo exprInfo;
 
-        public SelectVisitor(Dictionary<string, Tuple<int, Type>> labels, VariableMap map)
+        public SelectVisitor(Dictionary<string, Tuple<int, Type>> labels, VariableMap map, QueryExpressionInfo exprInfo)
         {
             this.result = new List<ExpressionToStringWrapper>();
             this.labels = labels;
             this.variableMap = map;
+            this.exprInfo = exprInfo;
         }
 
         public List<ExpressionToStringWrapper> GetResult()
@@ -80,7 +82,7 @@ namespace QueryEngine
                 throw new ArgumentException($"{this.GetType()}, Expected expression.");
             else
             {
-                var tmpVisitor = new ExpressionVisitor(this.variableMap, this.labels);
+                var tmpVisitor = new ExpressionVisitor(this.labels, this.variableMap, this.exprInfo);
                 node.exp.Accept(tmpVisitor);
                 expr = tmpVisitor.GetResult();
             }
@@ -90,6 +92,7 @@ namespace QueryEngine
                 label = ((IdentifierNode)(node.asLabel)).value;
 
             var tmpExprHolder = new ExpressionHolder(expr, label);
+            exprInfo.AddExpression(tmpExprHolder);
             this.result.Add(ExpressionToStringWrapper.Factory(tmpExprHolder, tmpExprHolder.ExpressionType));
 
         }

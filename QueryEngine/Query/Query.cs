@@ -40,13 +40,14 @@ namespace QueryEngine
     /// </summary>
     sealed class Query
     {
-        private readonly Graph graph;
-        private readonly VariableMap variableMap;
+        private Graph graph;
+        private VariableMap variableMap;
         /// <summary>
         /// An execution chain.
         /// </summary>
-        private readonly QueryObject query;
-        private readonly QueryExecutionHelper qEhelper;
+        private QueryObject query;
+        private QueryExecutionHelper qEhelper;
+        private QueryExpressionInfo exprInfo; 
         public bool Finished { get; private set; }
 
         /// <summary>
@@ -65,7 +66,8 @@ namespace QueryEngine
             this.graph = graph;
 
             this.variableMap = new VariableMap();
-            
+            this.exprInfo = new QueryExpressionInfo(false) ;
+            // Helper
             this.qEhelper = new QueryExecutionHelper();
             this.qEhelper.ThreadCount = threadCount;
             this.qEhelper.Printer = printer;
@@ -81,17 +83,17 @@ namespace QueryEngine
             // Compulsory clauses
             // Match is always leaf.
             QueryObject match = QueryObject.Factory
-                (typeof(MatchObject), graph, qEhelper, variableMap, parsedClauses["match"]);
-            
+                (typeof(MatchObject), graph, qEhelper, variableMap, parsedClauses["match"], exprInfo);
+
             // Select is the last one to process the resuls.
             this.query = QueryObject.Factory
-                (typeof(SelectObject), graph, qEhelper, variableMap, parsedClauses["select"]);
+                (typeof(SelectObject), graph, qEhelper, variableMap, parsedClauses["select"], exprInfo) ;
 
             // Optional clauses
             if (parsedClauses.ContainsKey("orderby"))
             {
                 var orderby = QueryObject.Factory
-                (typeof(OrderByObject), graph, qEhelper, variableMap, parsedClauses["orderby"]);
+                (typeof(OrderByObject), graph, qEhelper, variableMap, parsedClauses["orderby"],exprInfo);
                 this.query.AddToEnd(orderby);
             }
 

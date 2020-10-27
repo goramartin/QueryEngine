@@ -2,7 +2,7 @@
   This file includes definitions of expression visitor used to collect data from created parsed tree.
   It implements visits to a classes used inside a expression parsed tree.
   Visitor creates an expression tree that is used to compute values used during query, such as values to be printed during 
-  select expression or values during order by expression.
+  select expression or values to sort by during order by expression.
 */
 
 using System;
@@ -15,7 +15,9 @@ namespace QueryEngine
 {
     /// <summary>
     /// Visitor used to parse expressions.
-    /// So far there are implemented only variable references as a expression.
+    /// So far there are implemented only variable references and aggregation references.
+    /// There can be only either the var or agg ref. that means that the Expr variable
+    /// contains only variantions of these two classes.
     /// </summary>
     internal sealed class ExpressionVisitor : IVisitor<ExpressionBase>
     {
@@ -23,16 +25,18 @@ namespace QueryEngine
         private VariableReferenceNameHolder nameHolder;
         private VariableMap variableMap;
         private Dictionary<string, Tuple<int, Type>> labels;
+        private QueryExpressionInfo exprInfo;
 
         public ExpressionBase GetResult()
         {
             return this.Expr;
         }
 
-        public ExpressionVisitor(VariableMap map, Dictionary<string, Tuple<int, Type>> labels)
+        public ExpressionVisitor(Dictionary<string, Tuple<int, Type>> labels, VariableMap map, QueryExpressionInfo exprInfo)
         {
             this.variableMap = map;
             this.labels = labels;
+            this.exprInfo = exprInfo;
         }
 
         /// <summary>
@@ -81,9 +85,49 @@ namespace QueryEngine
             else if (this.nameHolder.TrySetPropName(node.value)) return;
             else throw new ArgumentException($"{this.GetType()}, expected new name holder.");
         }
+
+        /// <summary>
+        /// Visits aggregation node.
+        /// Creates a new aggregation function based on the provided name.
+        /// And initilises parsing of the aggregation argument.
+        /// </summary>
+        /// <param name="node"> Aggregation node. </param>
         public void Visit(AggregateFuncNode node)
         {
-            throw new NotImplementedException();
+            Aggregate aggregate = null;
+            Type aggType = null;
+
+            if (node.next == null) throw new ArgumentException($"{this.GetType()}, exprected aggregation arguments.");
+            else
+            {
+                // count(*)
+                if (node.next.GetType() == typeof(IdentifierNode))
+                {
+                    if (node.funcName.ToLower() == "count" && ((IdentifierNode)node.next).value == "*")
+                    {
+                        aggregate = Aggregate.Factory("count", typeof(int), null);
+                        aggType = typeof(int);
+                    }
+                    else throw new ArgumentException($"{this.GetType()}, expected count(*).");
+                }  
+                else
+                {
+                    // Every other aggregation
+                    
+                    // The only possibility is that the next node is VariableNode.
+                    // So the argument will be created in this.Expr, from this expr the holder must be created.
+                    // After the holder is created the aggregation is created with the expression.
+                    // After this process, the expression that will be returned is created -> aggregation reference.
+                    node.Accept(this);
+                    var tmpHolder = new ExpressionHolder(this.Expr);
+                    aggregate = Aggregate.Factory(node.funcName.ToLower(), tmpHolder.ExpressionType, tmpHolder);
+                    aggType = tmpHolder.ExpressionType;
+                }
+            }
+
+            // Rewrite the expression used for aggregation argument to aggregation reference.
+            int aggPos = this.exprInfo.AddAggregate(aggregate);
+            this.Expr = AggregateReferenceFactory.Create(aggType, aggPos, this.exprInfo.aggregates[aggPos]);
         }
 
         #region NotImpl

@@ -38,14 +38,15 @@ namespace QueryEngine
         /// <param name="variableMap"> Map of query variables. </param>
         /// <param name="executionHelper"> Orderby execution helper. </param>
         /// <param name="orderByNode"> Parse tree of order by expression. </param>
-        public OrderByObject(Graph graph, VariableMap variableMap, IOrderByExecutionHelper executionHelper, OrderByNode orderByNode)
+        /// <param name="exprInfo"> A query expression information. </param>
+        public OrderByObject(Graph graph, VariableMap variableMap, IOrderByExecutionHelper executionHelper, OrderByNode orderByNode, QueryExpressionInfo exprInfo)
         {
             if (executionHelper == null || orderByNode == null || variableMap == null || graph == null)
                 throw new ArgumentNullException($"{this.GetType()}, passing null arguments to the constructor.");
             
             this.helper = executionHelper;
 
-            var orderByVisitor = new OrderByVisitor(graph.labels, variableMap);
+            var orderByVisitor = new OrderByVisitor(graph.labels, variableMap, exprInfo);
             orderByVisitor.Visit(orderByNode);
             var comps = orderByVisitor.GetResult();
 

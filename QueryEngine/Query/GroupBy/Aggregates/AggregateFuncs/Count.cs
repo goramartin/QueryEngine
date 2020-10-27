@@ -30,11 +30,15 @@ namespace QueryEngine
 
         public override void Apply(in TableResults.RowProxy row, int position)
         {
-            if (this.exp.TryGetExpressionValue<int>(in row, out int returnValue))
+            if (!this.IsAstCount)
             {
-                if (position == this.aggVals.Count) this.aggVals.Add(1);
-                else this.aggVals[position]++;
-            }  
+                if ( this.exp.TryGetExpressionValue<int>(in row, out int returnValue))
+                {
+                    if (position == this.aggVals.Count) this.aggVals.Add(1);
+                    else this.aggVals[position]++;
+                }
+            }
+            else Inc(position);
         }
 
         public void Inc(int position)

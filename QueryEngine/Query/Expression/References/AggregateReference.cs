@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace QueryEngine
-{   
+{
     /// <summary>
     /// Class serves as an aggregation reference.
     /// The evaluation of this node is bound to the aggregate holders, thus nothing here is computed.
@@ -76,5 +76,24 @@ namespace QueryEngine
             return this.Aggr.ToString();
         }
 
+    }
+
+
+
+    internal static class AggregateReferenceFactory 
+    {
+        /// <summary>
+        /// Creates aggregation reference.
+        /// </summary>
+        /// <param name="type"> Type of aggregation. </param>
+        /// <param name="position"> Position of the aggregation in terms of entire query. </param>
+        /// <param name="aggr"> Aggregation to be referenced. The purpose is solely for overriding ToString method. </param>
+        /// <returns> Expression node that references aggregation. </returns>
+        public static ExpressionBase Create(Type type, int position, Aggregate aggr)
+        {
+            if (type == typeof(int)) return new AggregateReference<int>(position, aggr);
+            else if (type == typeof(string)) return new AggregateReference<string>(position, aggr);
+            else throw new ArgumentException($"AggregateReferenceFactory, trying to create unsupported type = {type}.");
+        }
     }
 }

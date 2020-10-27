@@ -50,7 +50,6 @@ namespace QueryEngine
         /// <param name="position"> A position of a groups aggregate. </param>
         public abstract void Apply(in TableResults.RowProxy row, int position);
 
-
         public static Aggregate Factory(string funcType, Type compType, ExpressionHolder holder = null)
         {
             if (funcType == "count" && compType == typeof(int)) return new Count(holder);

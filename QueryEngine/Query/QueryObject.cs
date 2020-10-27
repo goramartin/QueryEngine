@@ -34,11 +34,12 @@ namespace QueryEngine
         /// <param name="helper"> A helper that contains information about execution. </param>
         /// <param name="map"> A map of variables. </param>
         /// <param name="parseTree"> A parsed tree to create the clause from. </param>
-        public static QueryObject Factory(Type type, Graph graph, QueryExecutionHelper helper, VariableMap map, Node parseTree)
+        /// <param name="exprInfo"> A query expression information. </param>
+        public static QueryObject Factory(Type type, Graph graph, QueryExecutionHelper helper, VariableMap map, Node parseTree, QueryExpressionInfo exprInfo)
         {
-            if (type == typeof(SelectObject)) return new SelectObject(graph, map, helper, (SelectNode)parseTree);
-            else if (type == typeof(MatchObject)) return new MatchObject(graph, map, helper, (MatchNode)parseTree);
-            else if (type == typeof(OrderByObject)) return new OrderByObject(graph, map, helper, (OrderByNode)parseTree);
+            if (type == typeof(SelectObject)) return new SelectObject(graph, map, helper, (SelectNode)parseTree, exprInfo);
+            else if (type == typeof(MatchObject)) return new MatchObject(graph, map, helper, (MatchNode)parseTree, exprInfo);
+            else if (type == typeof(OrderByObject)) return new OrderByObject(graph, map, helper, (OrderByNode)parseTree, exprInfo);
             else throw new ArgumentException($"Query object factory, cannot create type {type.ToString()}.");
         }
 
