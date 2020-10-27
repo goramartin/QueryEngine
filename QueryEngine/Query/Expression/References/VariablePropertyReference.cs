@@ -63,7 +63,7 @@ namespace QueryEngine
         }
 
 
-
+    }
     /// <summary>
     /// Factory for templated property reference.
     /// </summary>

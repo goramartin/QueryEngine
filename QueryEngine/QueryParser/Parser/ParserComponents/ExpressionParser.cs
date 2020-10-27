@@ -74,11 +74,22 @@ namespace QueryEngine
                 aggregate.funcName = tokens[position].strValue;
                 // It must inc by 2 because it was +1 moves it to left parent and another +1 moves it to next token.
                 position += 2;
-                aggregate.next = ParseVarReference(ref position, tokens);
+                
+                if (CheckToken(position, Token.TokenType.Asterix, tokens))
+                {
+                    if (aggregate.funcName.ToLower() != "count") 
+                        throw new ArgumentException("ExpressionParser, cannot call other aggregate function than count with *.");
+                    else
+                    {
+                        aggregate.next = new IdentifierNode("*");
+                        position++;
+                    }
+                } else aggregate.next = ParseVarReference(ref position, tokens);
 
                 // ) 
-                // also moves position on success
-                CheckRightParen(ref position, tokens);
+                if (!CheckToken(position, Token.TokenType.RightParen, tokens)) 
+                    throw new ArgumentException("Expression parser, expected right parenthesis.");
+                else position++;
                 return aggregate;
             }
         }

@@ -29,7 +29,7 @@ namespace QueryEngine
     internal sealed class GroupByObject : QueryObject
     {
         private IGroupByExecutionHelper helper;
-        private AggregationInfo aggregationInfo;
+        //private AggregationInfo aggregationInfo;
 
         /// <summary>
         /// Creates group by object.

@@ -72,6 +72,7 @@
     <Compile Include="QueryParser\Parser\ParserComponents\GroupByParser.cs" />
     <Compile Include="Query\Expression\Expression.cs" />
     <Compile Include="Query\Expression\ExpressionHolder.cs" />
+    <Compile Include="Query\Expression\References\AggregateReference.cs" />
     <Compile Include="Query\Expression\References\VariableIDReference.cs" />
     <Compile Include="Query\Expression\References\VariablePropertyReference.cs" />
     <Compile Include="Query\Expression\References\VariableReference.cs" />
