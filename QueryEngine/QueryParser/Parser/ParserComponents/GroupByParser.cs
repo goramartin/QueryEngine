@@ -34,11 +34,11 @@ namespace QueryEngine
                 position++;
                 // BY
                 if (!CheckToken(position, Token.TokenType.By, tokens))
-                    throw new ArgumentException("GroupByParser, failed to parse GroupBy Expresion. Missing BY token");
+                   ThrowError("Group by parser", "Expected BY token.", position, tokens);
                 else position++;
 
                 Node node = ParseGroupByTerm(ref position, tokens);
-                if (node == null) throw new NullReferenceException("GroupByParser, failed to parse group by Expresion. GrouByTerm node is null.");
+                if (node == null) ThrowError("Group by parser", "Failed to parse group by expresion. Expected group by term.", position, tokens);
                 groupByNode.AddNext(node);
                 return groupByNode;
             }
@@ -58,7 +58,7 @@ namespace QueryEngine
             // Expression
             var expression = ParseExpressionNode(ref position, tokens);
             if (expression == null)
-                throw new NullReferenceException($"GroupByParser, expected expression.");
+                ThrowError("Group by parser", "Expected expression.", position, tokens);
             else groupByTermNode.AddExpression(expression);
 
             // Comma signals another order term.

@@ -37,12 +37,12 @@ namespace QueryEngine
 
             // We expect after reading Select expr that the position is set on the Match token.
             if (!CheckToken(position, Token.TokenType.Match, tokens))
-                throw new ArgumentException("MatchParser, position is not set at Match Token.");
+                ThrowError("Match parser", "Failed to find MATCH token.", position, tokens);
             else
             {
                 position++;
                 Node node = ParseVertex(ref position, tokens);
-                if (node == null) throw new NullReferenceException("MatchParser, Failed to parse Match Expresion.");
+                if (node == null) ThrowError("Match parser", "Failed to parse Match expression.", position, tokens);
                 matchNode.AddNext(node);
             }
             return matchNode;
@@ -70,7 +70,7 @@ namespace QueryEngine
             {
                 position++;
                 Node identifierNode = ParseIdentifierExrp(ref position, tokens);
-                if (identifierNode == null) throw new NullReferenceException("MatchParser, expected Indentifier after double dot.");
+                if (identifierNode == null) ThrowError("Match parser", "Expected IDENTIFIER after double dot.", position, tokens);
                 else matchVariableNode.AddVariableType(identifierNode);
                 position++;
             }
@@ -133,7 +133,7 @@ namespace QueryEngine
 
             Node vertexNode = ParseVertex(ref position, tokens);
             if (vertexNode != null) edgeNode.AddNext(vertexNode);
-            else throw new NullReferenceException("MatchParser, expected vertex.");
+            else ThrowError("Match parser", "Expected Vertex.", position, tokens);
 
             return edgeNode;
 
@@ -313,7 +313,7 @@ namespace QueryEngine
         {
             // [
             if (CheckToken(position, Token.TokenType.LeftBrace, tokens)) position++;
-            else throw new ArgumentException("MatchParser variable, expected Leftbrace.");
+            else ThrowError("Match parser", "Expected [.", position, tokens);
 
         }
         /// <summary>
@@ -327,7 +327,7 @@ namespace QueryEngine
         {
             // ]
             if (CheckToken(position, Token.TokenType.RightBrace, tokens)) position++;
-            else throw new ArgumentException("MatchParser variable, expected rightbrace.");
+            else ThrowError("Match parser", "Expected ].", position, tokens);
 
         }
         /// <summary>
@@ -341,7 +341,7 @@ namespace QueryEngine
         {
             // (
             if (CheckToken(position, Token.TokenType.LeftParen, tokens)) position++;
-            else throw new ArgumentException("MatchParser, expected left parent.");
+            else ThrowError("Match parser", "Expected (.", position, tokens);
         }
         /// <summary>
         /// Check token for left parent.
@@ -354,7 +354,7 @@ namespace QueryEngine
         {
             // )
             if (CheckToken(position, Token.TokenType.RightParen, tokens)) position++;
-            else throw new ArgumentException("MatchParser, expected right parent.");
+            else ThrowError("Match parser", "Expected ).", position, tokens);
         }
 
         /// <summary>
@@ -373,7 +373,7 @@ namespace QueryEngine
 
 
             Node newPattern = ParseVertex(ref position, tokens);
-            if (newPattern == null) throw new NullReferenceException("MatchParser, expected Vertex after comma.");
+            if (newPattern == null) ThrowError("Match parser", "Expected Vertex after comma.", position, tokens);
             matchDivider.AddNext(newPattern);
             return matchDivider;
         }

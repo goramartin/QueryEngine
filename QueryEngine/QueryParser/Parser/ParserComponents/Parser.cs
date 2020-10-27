@@ -108,6 +108,46 @@ namespace QueryEngine
             return false;
 
         }
+
+        /// <summary>
+        /// Builds error message.
+        /// Each parser type passes it is own type and a message.
+        /// Afterwards tokens are printed.
+        /// </summary>
+        /// <param name="parserType"> Type of parser. </param>
+        /// <param name="message"> A message to print. </param>
+        /// <param name="position"> A position of error. </param>
+        /// <param name="tokens"> Parsed tokens. </param>
+        private static void ThrowError(string parserType, string message, int position, List<Token> tokens)
+        {
+            string msg = parserType + ": " + message + " At " + position + " | Tokens:";
+
+            for (int i = 0; i < tokens.Count; i++)
+            {
+                if (i != position) msg += " " + i + ": " + tokens[i].ToString() + " ";
+                else msg += " (" + i + ": " + tokens[i].ToString() + ") ";
+            }
+            throw new ParserException(msg);
+        }
+
+        public class ParserException : Exception
+        {
+            public ParserException()
+            {
+            }
+
+            public ParserException(string message)
+                : base(message)
+            {
+            }
+
+            public ParserException(string message, Exception inner)
+                : base(message, inner)
+            {
+            }
+        }
+
+
     }
 
 }

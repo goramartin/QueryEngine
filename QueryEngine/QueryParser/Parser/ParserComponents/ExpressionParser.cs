@@ -78,7 +78,7 @@ namespace QueryEngine
                 if (CheckToken(position, Token.TokenType.Asterix, tokens))
                 {
                     if (aggregate.funcName.ToLower() != "count") 
-                        throw new ArgumentException("ExpressionParser, cannot call other aggregate function than count with *.");
+                       ThrowError("Expression parser", "Cannot call other aggregate functions with * except count.", position, tokens);
                     else
                     {
                         aggregate.next = new IdentifierNode("*");
@@ -87,8 +87,8 @@ namespace QueryEngine
                 } else aggregate.next = ParseVarReference(ref position, tokens);
 
                 // ) 
-                if (!CheckToken(position, Token.TokenType.RightParen, tokens)) 
-                    throw new ArgumentException("Expression parser, expected right parenthesis.");
+                if (!CheckToken(position, Token.TokenType.RightParen, tokens))
+                    ThrowError("Expression parser", "Expected ) .", position, tokens);
                 else position++;
                 return aggregate;
             }
@@ -133,7 +133,7 @@ namespace QueryEngine
             // Expecting identifier.
             Node ident = ParseIdentifierExrp(ref position, tokens);
             if (ident == null)
-                throw new NullReferenceException("ExpressionParser, failed to parse identifier.");
+                ThrowError("Expression parser", "Expected identifier.", position, tokens);
             return ident;
         }
 
@@ -149,8 +149,6 @@ namespace QueryEngine
                 return new IdentifierNode(tokens[position].strValue);
             else return null;
         }
-
-
         #endregion Expression
 
     }

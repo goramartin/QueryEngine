@@ -27,12 +27,12 @@ namespace QueryEngine
 
             // Parsing Select always starts at position 0.
             if (position > 0 || tokens[position].type != Token.TokenType.Select)
-                throw new ArgumentException("SelectParser, could not find a Select token, or position is not set at 0.");
+                ThrowError("Select parser", "Failed to find SELECT token.", position, tokens);
             else
             {
                 position++;
                 Node node = ParseVarExprForSelect(ref position, tokens);
-                if (node == null) throw new NullReferenceException("SelectParser, failed to parse Select Expresion.");
+                if (node == null) ThrowError("Select parser", "Expected Select print term.", position, tokens);
                 selectNode.AddNext(node);
             }
 
@@ -78,7 +78,7 @@ namespace QueryEngine
             SelectPrintTermNode selectPrintTermNode = new SelectPrintTermNode();
 
             var expression = ParseExpressionNode(ref position, tokens);
-            if (expression == null) throw new NullReferenceException($"SelectParser, expected expression.");
+            if (expression == null) ThrowError("Select parser", "Expected expression.", position, tokens);
             else selectPrintTermNode.AddExpression(expression);
 
             // Comma signals there is another expression node, next expression must follow.
@@ -100,7 +100,10 @@ namespace QueryEngine
         {
             Node nextSelectPrintTermNode = ParseSelectPrintTerm(ref position, tokens);
             if (nextSelectPrintTermNode == null)
-                throw new NullReferenceException("SelectParser, expected Indentifier after a comma.");
+            {
+                ThrowError("Select parser", "Expected another Select print term after comma.", position, tokens);
+                return null; // Cannot get here.
+            }
             else return nextSelectPrintTermNode;
         }
 

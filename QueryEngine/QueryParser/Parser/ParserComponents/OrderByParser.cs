@@ -37,12 +37,12 @@ namespace QueryEngine
                 position++;
                 // BY
                 if (!CheckToken(position, Token.TokenType.By, tokens))
-                    throw new ArgumentException("OrderByParser, failed to parse OrderBy Expresion. Missing BY token");
+                    ThrowError("Order by parser", "Expected BY.", position, tokens);
                 else position++;
 
 
                 Node node = ParseOrderTerm(ref position, tokens);
-                if (node == null) throw new NullReferenceException("OrderByParser, failed to parse order by Expresion. OrderByTerm node is null.");
+                if (node == null) ThrowError("Order by parser", "Expected order by term.", position, tokens);
                 orderByNode.AddNext(node);
                 return orderByNode;
             }
@@ -62,7 +62,7 @@ namespace QueryEngine
             // Expression
             var expression = ParseExpressionNode(ref position, tokens);
             if (expression == null)
-                throw new NullReferenceException($"OrderByParser, expected expression.");
+                ThrowError("Order by parser", "Expected expression.", position, tokens);
             else orderTermNode.AddExpression(expression);
 
             // ASC|DESC
