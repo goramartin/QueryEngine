@@ -118,7 +118,7 @@ namespace QueryEngine
                     // So the argument will be created in this.Expr, from this expr the holder must be created.
                     // After the holder is created the aggregation is created with the expression.
                     // After this process, the expression that will be returned is created -> aggregation reference.
-                    node.Accept(this);
+                    node.next.Accept(this);
                     var tmpHolder = new ExpressionHolder(this.Expr);
                     aggregate = Aggregate.Factory(node.funcName.ToLower(), tmpHolder.ExpressionType, tmpHolder);
                     aggType = tmpHolder.ExpressionType;
