@@ -76,7 +76,8 @@ namespace QueryEngine
                 position += 2;
                 aggregate.next = ParseVarReference(ref position, tokens);
 
-                // ) // also moves position on success
+                // ) 
+                // also moves position on success
                 CheckRightParen(ref position, tokens);
                 return aggregate;
             }

@@ -98,6 +98,11 @@ namespace QueryEngine
             }
         }
 
+        /// <summary>
+        /// Adds hash expression for group by.
+        /// Cannot contain aggregations.
+        /// </summary>
+        /// <param name="holder"></param>
         public void AddGroupByHash(ExpressionHolder holder)
         {
             if (holder.ContainsAggregate()) 
