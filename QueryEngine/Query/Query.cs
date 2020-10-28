@@ -108,11 +108,12 @@ namespace QueryEngine
                 orderBy = QueryObject.Factory(typeof(OrderByObject), graph, qEhelper, variableMap, parsedClauses["orderby"], exprInfo);
                 query.AddToEnd(orderBy);
             }
-
+            
             // If the single group by is set, add 
             if (this.qEhelper.IsSetSingleGroupGroupBy && !this.qEhelper.IsSetGroupBy)
                 groupBy = QueryObject.Factory(typeof(GroupByObject), null, qEhelper, null, null, exprInfo);
 
+            //
             if (groupBy != null) query.AddToEnd(groupBy);
             query.AddToEnd(match);
         }
