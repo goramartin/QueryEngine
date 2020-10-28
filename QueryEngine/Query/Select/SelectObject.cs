@@ -46,15 +46,15 @@ namespace QueryEngine
         /// <param name="exprInfo"> A query expression information. </param>
         public SelectObject(Graph graph, VariableMap map, ISelectExecutionHelper executionHelper, SelectNode selectNode, QueryExpressionInfo exprInfo)
         {
-            if (executionHelper == null || selectNode == null || executionHelper.Printer == null || executionHelper.Formater == null)
+            if (executionHelper == null || selectNode == null || executionHelper.Printer == null || executionHelper.Formater == null || exprInfo == null)
                 throw new ArgumentNullException($"{this.GetType()}, passing null arguments to constructor. ");
 
             this.helper = executionHelper;
             
-                // Process parse tree and create list of variables to be printed
-                SelectVisitor visitor = new SelectVisitor(graph.labels, map, exprInfo);
-                selectNode.Accept(visitor);
-                this.rowFormat = visitor.GetResult();
+            // Process parse tree and create list of variables to be printed
+            SelectVisitor visitor = new SelectVisitor(graph.labels, map, exprInfo);
+            selectNode.Accept(visitor);
+            this.rowFormat = visitor.GetResult();
         }
 
         public override void Compute(out ITableResults results)

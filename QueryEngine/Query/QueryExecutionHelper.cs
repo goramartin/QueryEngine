@@ -29,7 +29,9 @@ namespace QueryEngine
         /// Defines whether optional clause group by was defined in the user input query.
         /// </summary>
         bool IsSetGroupBy { get; set; }
-        
+
+        bool IsSetSingleGroupGroupBy { get; set; }
+
         /// <summary>
         /// Number of threads that will be used during query execution.
         /// </summary>
@@ -97,6 +99,7 @@ namespace QueryEngine
         public int ThreadCount {get; set;}
         public bool IsSetOrderBy { get; set; } = false;
         public bool IsSetGroupBy { get; set; } = false;
+        public bool IsSetSingleGroupGroupBy { get; set; } = false;
 
         public int VerticesPerThread { get; set; }
         

@@ -40,6 +40,7 @@ namespace QueryEngine
             if (type == typeof(SelectObject)) return new SelectObject(graph, map, helper, (SelectNode)parseTree, exprInfo);
             else if (type == typeof(MatchObject)) return new MatchObject(graph, map, helper, (MatchNode)parseTree, exprInfo);
             else if (type == typeof(OrderByObject)) return new OrderByObject(graph, map, helper, (OrderByNode)parseTree, exprInfo);
+            else if (type == typeof(GroupByObject)) return new GroupByObject(graph, map, helper, (GroupByNode)parseTree, exprInfo);
             else throw new ArgumentException($"Query object factory, cannot create type {type.ToString()}.");
         }
 

@@ -29,18 +29,42 @@ namespace QueryEngine
     internal sealed class GroupByObject : QueryObject
     {
         private IGroupByExecutionHelper helper;
-        //private AggregationInfo aggregationInfo;
-
+        private List<ExpressionHolder> hashes;
+        private List<Aggregate> aggregates;
+        private bool IsMultiGroup = true;
         /// <summary>
-        /// Creates group by object.
+        /// Creates group by object for multigroup results.
         /// </summary>
         /// <param name="graph"> Property graph. </param>
-        /// <param name="map"> Variable map. </param>
+        /// <param name="variableMap"> Variable map. </param>
         /// <param name="executionHelper"> Select execution helper. </param>
         /// <param name="selectNode"> Parsed tree of select expression. </param>
-        public GroupByObject(Graph graph, VariableMap map, IGroupByExecutionHelper executionHelper, GroupByNode groupByNode)
+        /// <param name="exprInfo"> A query expression information. </param>
+        public GroupByObject(Graph graph, VariableMap variableMap, IGroupByExecutionHelper executionHelper, GroupByNode groupByNode, QueryExpressionInfo exprInfo)
         {
-            throw new NotImplementedException();
+            if (executionHelper == null || groupByNode == null || variableMap == null || graph == null || exprInfo == null)
+                throw new ArgumentNullException($"{this.GetType()}, passing null arguments to the constructor.");
+
+            this.helper = executionHelper;
+
+            var groupbyVisitor = new GroupByVisitor(graph.labels, variableMap, exprInfo);
+            groupbyVisitor.Visit(groupByNode);
+            this.hashes = groupbyVisitor.GetResult();
+
+            this.aggregates = exprInfo.aggregates;
+            this.helper.IsSetGroupBy = true;
+        }
+
+        /// <summary>
+        /// Creates group by object for single group result.
+        /// </summary>
+        /// <param name="executionHelper"> Select execution helper. </param>
+        /// <param name="exprInfo"> A query expression information. </param>
+        public GroupByObject(IGroupByExecutionHelper executionHelper, QueryExpressionInfo exprInfo)
+        {
+            this.IsMultiGroup = false;
+            this.aggregates = exprInfo.aggregates;
+            this.helper = executionHelper;
         }
 
         public override void Compute(out ITableResults results)

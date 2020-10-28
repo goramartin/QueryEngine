@@ -41,7 +41,7 @@ namespace QueryEngine
         /// <param name="exprInfo"> A query expression information. </param>
         public OrderByObject(Graph graph, VariableMap variableMap, IOrderByExecutionHelper executionHelper, OrderByNode orderByNode, QueryExpressionInfo exprInfo)
         {
-            if (executionHelper == null || orderByNode == null || variableMap == null || graph == null)
+            if (executionHelper == null || orderByNode == null || variableMap == null || graph == null || exprInfo == null)
                 throw new ArgumentNullException($"{this.GetType()}, passing null arguments to the constructor.");
             
             this.helper = executionHelper;

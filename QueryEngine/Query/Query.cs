@@ -28,7 +28,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
-
+using System.CodeDom;
 
 namespace QueryEngine
 {
@@ -64,10 +64,7 @@ namespace QueryEngine
         private Query(List<Token> tokens, Graph graph, int threadCount, string printer, string formater, int verticesPerThread, string fileName)
         {
             this.graph = graph;
-
             this.variableMap = new VariableMap();
-            this.exprInfo = new QueryExpressionInfo(false) ;
-            // Helper
             this.qEhelper = new QueryExecutionHelper();
             this.qEhelper.ThreadCount = threadCount;
             this.qEhelper.Printer = printer;
@@ -79,25 +76,44 @@ namespace QueryEngine
             var parsedClauses = Parser.Parse(tokens);
 
             // Create execution chain. // 
-
-            // Compulsory clauses
-            // Match is always leaf.
+            if (parsedClauses.ContainsKey("groupby") && parsedClauses.ContainsKey("orderby"))
+                throw new ArgumentException($"{this.GetType()}, query cannot contain both order by and group by");
+            QueryObject groupBy = null;
+            QueryObject orderBy = null;
+            
+            
+            // MATCH is always leaf.
             QueryObject match = QueryObject.Factory
                 (typeof(MatchObject), graph, qEhelper, variableMap, parsedClauses["match"], exprInfo);
 
-            // Select is the last one to process the resuls.
+            // Second must be group by because it defines what can be in other clauses.
+            // GROUP BY
+            if (parsedClauses.ContainsKey("groupby"))
+            {
+                groupBy = QueryObject.Factory(typeof(GroupByObject), graph, qEhelper, variableMap, parsedClauses["groupby"], exprInfo);
+                this.exprInfo = new QueryExpressionInfo(true);
+            }
+            else this.exprInfo = new QueryExpressionInfo(false);
+
+            // SELECT is the last one to process the resuls.
             this.query = QueryObject.Factory
                 (typeof(SelectObject), graph, qEhelper, variableMap, parsedClauses["select"], exprInfo) ;
 
-            // Optional clauses
+            // Check if the results are in a single group.
+            this.SetSingleGroupFlags();
+
+            // ORDER BY
             if (parsedClauses.ContainsKey("orderby"))
             {
-                var orderby = QueryObject.Factory
-                (typeof(OrderByObject), graph, qEhelper, variableMap, parsedClauses["orderby"],exprInfo);
-                this.query.AddToEnd(orderby);
+                orderBy = QueryObject.Factory(typeof(OrderByObject), graph, qEhelper, variableMap, parsedClauses["orderby"], exprInfo);
+                query.AddToEnd(orderBy);
             }
 
-            // Add match to the end of the chain.
+            // If the single group by is set, add 
+            if (this.qEhelper.IsSetSingleGroupGroupBy && !this.qEhelper.IsSetGroupBy)
+                groupBy = QueryObject.Factory(typeof(GroupByObject), null, qEhelper, null, null, exprInfo);
+
+            if (groupBy != null) query.AddToEnd(groupBy);
             query.AddToEnd(match);
         }
 
@@ -110,6 +126,31 @@ namespace QueryEngine
             {
                 this.query.Compute(out ITableResults res);
                 this.Finished = true;
+            }
+        }
+
+        /// <summary>
+        /// Sets flags to execution helper after the definition of group by and select.
+        /// The flag should be set to false, in case there is not set group by and the select clause
+        /// contains only count(*) in that case the results are not needed. Otherwise they are needed.
+        /// Note that this sets to false even though the order by is set.
+        /// </summary>
+        private void SetSingleGroupFlags()
+        {
+            // No group by
+            if (!this.qEhelper.IsSetGroupBy)
+            {
+                // There are only aggregates
+                if (this.exprInfo.aggregates.Count > 0)
+                {
+                    bool foundNonAst = false;
+                    for (int i = 0; i < this.exprInfo.aggregates.Count; i++)
+                        if (!this.exprInfo.aggregates[i].IsAstCount) foundNonAst = true;
+                    
+                    // If there are only count(*) the results are not needed.
+                    if (!foundNonAst ) this.qEhelper.IsStoringResult = false;
+                    this.qEhelper.IsSetSingleGroupGroupBy = true;
+                }
             }
         }
 
