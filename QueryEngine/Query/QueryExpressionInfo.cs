@@ -16,21 +16,32 @@ namespace QueryEngine
     /// 
     /// When collecting the aggregations and expressions, this class provides data to check
     /// against the correctness of the other expressions in the query.
+    /// 
+    /// Note that AddAggregate is called only inside Expression visitor, and AddExpression is called each time final expression is created.
+    /// The adding works as follows:
+    /// 1. Aggregation is created and method AddAggregation is called.
+    /// 2. A reference to that aggregation is created which defines an expression which is then Added via AddExpression.
+    ///    The check whether there are called simple expression and aggregation when no group by is defined is done always with the AddExpression.
+    ///    
+    /// Class stores each expression into a list of expressions.
+    /// When adding the group by hash expr, the hash expr is also an expression. Thus, it is added into lists of expressions and the list of hashes.
+    /// Note that in order to make this class work properly, the group by object must be created first. Because this class assumes the 
+    /// hash expression are already inside before adding other expressions from other clauses.
     /// </summary>
     internal class QueryExpressionInfo
     {
         /// <summary>
         /// Expressions used by group by to group results.
         /// </summary>
-        public readonly List<ExpressionHolder> groupByhashExprs = new List<ExpressionHolder>();
+        public List<ExpressionHolder> groupByhashExprs { get; } = new List<ExpressionHolder>();
         /// <summary>
         /// Used aggregate functions for a group by.
         /// </summary>
-        public readonly List<Aggregate> aggregates = new List<Aggregate>();
+        public List<Aggregate> aggregates { get; } = new List<Aggregate>();
         /// <summary>
         /// Every other expression used inside query.
         /// </summary>
-        public readonly List<ExpressionHolder> exprs = new List<ExpressionHolder>();
+        public List<ExpressionHolder> exprs { get; } = new List<ExpressionHolder>();
         public bool IsSetGroupBy { get; private set; } = false;
     
         public QueryExpressionInfo(bool isSetGroupBy)
@@ -50,47 +61,39 @@ namespace QueryEngine
         /// Thus, it must be reimplemented in the future.
         /// </summary>
         /// <param name="holder"> An expression. </param>
-        public void AddExpression(ExpressionHolder holder)
+        /// <returns> A position of the added expression.  </returns>
+        public int AddExpression(ExpressionHolder holder)
         {
             // Only expressions from group by clause and aggregates can be used.
             if (this.IsSetGroupBy)
             {
                 // Aggregates in expressions can be referenced freely
-                if (holder.ContainsAggregate()) this.exprs.Add(holder);
-                else
+                if (!holder.ContainsAggregate())
                 {
-                    bool found = false;
-                    for (int i = 0; i < this.groupByhashExprs.Count; i++)
-                    {
-                        if (holder.Equals(this.groupByhashExprs[i])) found = true;
-                    }     
-                    if (!found) throw new ArgumentException($"{this.GetType()}, expression in the query can contain only references from group by clause.");
-                    else this.exprs.Add(holder);
-                }
-            } else
+                    // There can be referenced only expressions from group by.
+                    if (this.groupByhashExprs.IndexOf(holder) == -1) throw new ArgumentException($"{this.GetType()}, expression in the query can contain only references from group by clause.");
+                    else return this.exprs.IndexOf(holder);
+                } else return AddExpr(holder);
+            } 
+            else
             {
                 // No group by is set.
-                // The expression can be added only if no aggregates are referenced.
-                if (aggregates.Count != 0)
+                if ((holder.ContainsAggregate() && ContainsSimpleExpr()) || (!holder.ContainsAggregate() && this.aggregates.Count > 0))
                     throw new ArgumentException($"{this.GetType()}, there was references an aggregate and a simple expression while group by is not set.");
-                else this.exprs.Add(holder);
+                else return AddExpr(holder);
             }
         }
 
         /// <summary>
         /// Adds an aggregate to common aggregate functions.
-        /// And returns position where it was added.
+        /// And returns position where it was added or the position of the aggregate that has been already addeds.
         /// If it already contains the aggregate, it returns the position of the containing one.
         /// </summary>
         /// <param name="aggregate">An aggregate function. </param>
         public int AddAggregate(Aggregate aggregate)
         {
-            // If no group by is set but aggregate is referenced.
-            // Only aggregates can be referenced.
-            if (!this.IsSetGroupBy && this.exprs.Count != 0)
-                    throw new ArgumentException($"{this.GetType()}, there was referenced an aggregate and no group by. In this case, only aggregates can be referenced.");
-
-            if (this.TryFindAggregate(aggregate, out int position)) return position;
+            int position = -1;
+            if ((position = this.aggregates.IndexOf(aggregate)) != -1) return position;
             else
             {
                 this.aggregates.Add(aggregate);
@@ -101,27 +104,49 @@ namespace QueryEngine
         /// <summary>
         /// Adds hash expression for group by.
         /// Cannot contain aggregations.
+        /// Each hash can be added only once.
         /// </summary>
-        /// <param name="holder"></param>
+        /// <param name="holder"> An expression to hash with. </param>
         public void AddGroupByHash(ExpressionHolder holder)
         {
-            if (holder.ContainsAggregate()) 
+            if (holder.ContainsAggregate())
                 throw new ArgumentException($"{this.GetType()}, group by clause cannot contain aggregates.");
-            else this.groupByhashExprs.Add(holder);
+            else if (this.groupByhashExprs.Contains(holder))
+                throw new ArgumentException($"{this.GetType()}, group by clause cannot contain the same aggregate multiple times.");
+            else 
+            { 
+                this.groupByhashExprs.Add(holder);
+                this.exprs.Add(holder);
+            }
         }
 
-        private bool TryFindAggregate(Aggregate aggregate, out int position)
+        /// <summary>
+        /// Checks whether a simple expression was used in the query.
+        /// </summary>
+        /// <returns> True if contains simple exp, otherwise false. </returns>
+        private bool ContainsSimpleExpr()
         {
-            for (int i = 0; i < this.aggregates.Count; i++)
-            {
-                if (aggregate.Equals(this.aggregates[i])) 
-                { 
-                    position = i;
-                    return true;
-                }
-            }
-            position = default;
+            for (int i = 0; i < this.exprs.Count; i++)
+                if (!this.exprs[i].ContainsAggregate()) return true;
             return false;
         }
+
+        /// <summary>
+        /// Tried to add expression. If it contains the expression, return its position.
+        /// Otherwise add the expression and return its new position.
+        /// </summary>
+        /// <param name="holder"> An expression to add. </param>
+        /// <returns> A position of the added expression. </returns>
+        private int AddExpr(ExpressionHolder holder)
+        {
+            int position = -1;
+            if ((position = this.exprs.IndexOf(holder)) != -1) return position;
+            else
+            {
+                this.exprs.Add(holder);
+                return this.exprs.Count - 1;
+            }
+        }
+
     }
 }

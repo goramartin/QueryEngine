@@ -91,8 +91,7 @@ namespace QueryEngine
             if (node.asLabel != null)
                 label = ((IdentifierNode)(node.asLabel)).value;
 
-            var tmpExprHolder = new ExpressionHolder(expr, label);
-            exprInfo.AddExpression(tmpExprHolder);
+            var tmpExprHolder = this.exprInfo.exprs[this.exprInfo.AddExpression(new ExpressionHolder(expr, label))];
             this.result.Add(ExpressionToStringWrapper.Factory(tmpExprHolder, tmpExprHolder.ExpressionType));
 
         }
@@ -109,8 +108,8 @@ namespace QueryEngine
             foreach (var item in variableMap)
             {
                 var tmpExprHolder = new ExpressionHolder(new VariableIDReference(new VariableReferenceNameHolder(item.Key), item.Value.Item1), null);
+                tmpExprHolder = this.exprInfo.exprs[exprInfo.AddExpression(tmpExprHolder)];
                 this.result.Add(ExpressionToStringWrapper.Factory(tmpExprHolder, tmpExprHolder.ExpressionType));
-
             }
 
         }

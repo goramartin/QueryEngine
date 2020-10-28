@@ -113,7 +113,6 @@ namespace QueryEngine
                 else
                 {
                     // Every other aggregation
-                    
                     // The only possibility is that the next node is VariableNode.
                     // So the argument will be created in this.Expr, from this expr the holder must be created.
                     // After the holder is created the aggregation is created with the expression.

@@ -41,5 +41,11 @@ namespace QueryEngine
                 }
             }
         }
+
+        public override string ToString()
+        {
+            return "Avg(" + this.exp.ToString() + ")";
+        }
+
     }
 }

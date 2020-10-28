@@ -69,7 +69,8 @@ namespace QueryEngine
             else
             {
                 var tmp = (Aggregate)obj;
-                if (this.exp.Equals(tmp.exp)) return true;
+                if (this.exp == null && tmp.exp == null) return true;
+                else if (this.exp.Equals(tmp.exp)) return true;
                 else return false;
             }
         }
