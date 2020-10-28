@@ -84,14 +84,14 @@ namespace QueryEngine
             
             // MATCH is always leaf.
             QueryObject match = QueryObject.Factory
-                (typeof(MatchObject), graph, qEhelper, variableMap, parsedClauses["match"], exprInfo);
+                (typeof(MatchObject), graph, qEhelper, variableMap, parsedClauses["match"], null);
 
             // Second must be group by because it defines what can be in other clauses.
             // GROUP BY
             if (parsedClauses.ContainsKey("groupby"))
             {
-                groupBy = QueryObject.Factory(typeof(GroupByObject), graph, qEhelper, variableMap, parsedClauses["groupby"], exprInfo);
                 this.exprInfo = new QueryExpressionInfo(true);
+                groupBy = QueryObject.Factory(typeof(GroupByObject), graph, qEhelper, variableMap, parsedClauses["groupby"], exprInfo);
             }
             else this.exprInfo = new QueryExpressionInfo(false);
 
@@ -113,7 +113,6 @@ namespace QueryEngine
             if (this.qEhelper.IsSetSingleGroupGroupBy && !this.qEhelper.IsSetGroupBy)
                 groupBy = QueryObject.Factory(typeof(GroupByObject), null, qEhelper, null, null, exprInfo);
 
-            //
             if (groupBy != null) query.AddToEnd(groupBy);
             query.AddToEnd(match);
         }

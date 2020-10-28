@@ -45,7 +45,7 @@ namespace QueryEngine
         /// <param name="exprInfo"> A query expression information. </param>
         public MatchObject(Graph graph, VariableMap variableMap, IMatchExecutionHelper executionHelper, MatchNode matchNode, QueryExpressionInfo exprInfo)
         {
-            if (executionHelper == null || matchNode == null || variableMap == null || graph == null || exprInfo == null)
+            if (executionHelper == null || matchNode == null || variableMap == null || graph == null)
                 throw new ArgumentNullException($"{this.GetType()}, passing null arguments to the constructor.");
 
             this.helper = executionHelper;

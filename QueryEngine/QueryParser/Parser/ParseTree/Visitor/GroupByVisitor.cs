@@ -74,6 +74,7 @@ namespace QueryEngine
                 label = ((IdentifierNode)(node.asLabel)).value;
 
             var tmpExpr = new ExpressionHolder(expr, label);
+            this.holders.Add(tmpExpr);
             this.exprInfo.AddGroupByHash(tmpExpr);
         }
 

@@ -61,11 +61,11 @@ namespace QueryEngine
                 ThrowError("Group by parser", "Expected expression.", position, tokens);
             else groupByTermNode.AddExpression(expression);
 
-            // Comma signals another order term.
+            // Comma signals another group  term.
             if (CheckToken(position, Token.TokenType.Comma, tokens))
             {
                 position++;
-                groupByTermNode.AddNext(ParseOrderTerm(ref position, tokens));
+                groupByTermNode.AddNext(ParseGroupByTerm(ref position, tokens));
             }
 
             return groupByTermNode;
