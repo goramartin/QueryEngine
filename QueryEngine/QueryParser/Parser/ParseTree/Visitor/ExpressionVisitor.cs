@@ -1,11 +1,4 @@
-﻿/*! \file
-  This file includes definitions of expression visitor used to collect data from created parsed tree.
-  It implements visits to a classes used inside a expression parsed tree.
-  Visitor creates an expression tree that is used to compute values used during query, such as values to be printed during 
-  select expression or values to sort by during order by expression.
-*/
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -40,11 +33,9 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Visits variable node. 
         /// If it consists only of a name, variable id reference is created.
-        /// Otherwise propperty reference will be created.
+        /// Otherwise property reference will be created.
         /// </summary>
-        /// <param name="node"> Variable node.</param>
         public void Visit(VariableNode node)
         {
             this.nameHolder = new VariableReferenceNameHolder();
@@ -74,10 +65,8 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Visits identifier node.
-        /// Sets only name of variable and name of accessed property.
+        /// Sets only name of the variable and the name of accessed property.
         /// </summary>
-        /// <param name="node">Identifier node. </param>
         public void Visit(IdentifierNode node)
         {
             if (node.value == null) throw new ArgumentNullException($"{this.GetType()}, identifier value is set to null.");
@@ -91,7 +80,6 @@ namespace QueryEngine
         /// Creates a new aggregation function based on the provided name.
         /// And initilises parsing of the aggregation argument.
         /// </summary>
-        /// <param name="node"> Aggregation node. </param>
         public void Visit(AggregateFuncNode node)
         {
             Aggregate aggregate = null;

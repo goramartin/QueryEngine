@@ -42,7 +42,7 @@ namespace QueryEngine
         /// Every other expression used inside query.
         /// </summary>
         public List<ExpressionHolder> exprs { get; } = new List<ExpressionHolder>();
-        public bool IsSetGroupBy { get; private set; } = false;
+        public bool IsSetGroupBy { get; set; } = false;
     
         public QueryExpressionInfo(bool isSetGroupBy)
         {

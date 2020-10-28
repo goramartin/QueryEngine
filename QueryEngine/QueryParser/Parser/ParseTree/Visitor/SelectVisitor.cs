@@ -1,11 +1,4 @@
 ﻿
-/*! \file
-  This file includes definitions of select visitor used to collect data from created parsed tree.
-  It implements visits to a classes used inside a select parsed tree.
-  Visitor creates a list of print variables that are used during printing query results.
-*/
-
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,9 +7,6 @@ using System.Threading.Tasks;
 
 namespace QueryEngine
 {
-    /// <summary>
-    /// Creates list of variable (Name.Prop) to be displayed in Select expr.
-    /// </summary>
     internal sealed class SelectVisitor : IVisitor<List<ExpressionToStringWrapper>>
     {
         private List<ExpressionToStringWrapper> result;
@@ -40,23 +30,22 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Starts parsing from select node, does nothing only jumps to next node.
+        /// Root node of the parse tree.
+        /// Jump to the next node under root.
         /// There must be at least one variable to be displyed.
         /// </summary>
-        /// <param name="node"> Select node </param>
         public void Visit(SelectNode node)
         {
             node.next.Accept(this);
             if (result.Count < 1)
-                throw new ArgumentException($"{ this.GetType()}, failed to parse select expr.");
+                throw new ArgumentException($"{ this.GetType()}, final result is empty or null.");
         }
 
         /// <summary>
         /// Parses print term node.
-        /// Expects expression node and possibly next print term node.
+        /// Expects that there is expression node and possibly next print term node.
         /// Together it creates a chain of print expressions.
         /// </summary>
-        /// <param name="node">Select print term node. </param>
         public void Visit(SelectPrintTermNode node)
         {
             if (node.exp == null)
@@ -67,11 +56,11 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Parses expression node. Expects "variable.name as label"
+        /// Expects "Expression as label"
         /// Parses expression nodes and tries to get a label for the expression.
-        /// At the end it creates a expression holder.
+        /// At the end, it creates a expression holder.
+        /// It returns from here because there is no other node to visit.
         /// </summary>
-        /// <param name="node"></param>
         public void Visit(ExpressionNode node)
         {
             string label = null;
@@ -79,7 +68,7 @@ namespace QueryEngine
 
             // Parse expression.
             if (node.exp == null)
-                throw new ArgumentException($"{this.GetType()}, Expected expression.");
+                throw new ArgumentException($"{this.GetType()}, expected expression.");
             else
             {
                 var tmpVisitor = new ExpressionVisitor(this.labels, this.variableMap, this.exprInfo);
@@ -97,8 +86,9 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Parses asterix. That means that there are as many expressions as variables.
+        /// Select * case. That means that there are as many expressions as variables in the query.
         /// For each variable, expression that consists only of reference id will be created.
+        /// It returns from here because there is no other node to visit.
         /// </summary>
         public void Visit(VariableNode node)
         {
