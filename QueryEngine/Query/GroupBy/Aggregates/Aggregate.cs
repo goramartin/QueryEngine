@@ -50,6 +50,17 @@ namespace QueryEngine
         /// <param name="position"> A position of a groups aggregate. </param>
         public abstract void Apply(in TableResults.RowProxy row, int position);
 
+        /// <summary>
+        /// Creates a shallow copy.
+        /// The expression is a shallow copy.
+        /// The data stored inside the generic list are not coppied.
+        /// Note that field IsAstCount is set based on the exp field.
+        /// </summary>
+        public Aggregate Clone()
+        {
+            return (Aggregate)Activator.CreateInstance(this.GetType(), this.exp);
+        }
+
         public static Aggregate Factory(string funcType, Type compType, ExpressionHolder holder = null)
         {
             if (funcType == "count" && compType == typeof(int)) return new Count(holder);
