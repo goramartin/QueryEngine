@@ -108,7 +108,7 @@ namespace QueryEngine
         public string FileName {get; set; }
         
         public bool IsStoringResult { get; set; } = true;
-        public bool IsMergeNeeded => ((this.IsSetOrderBy || this.IsSetGroupBy) && this.IsStoringResult);
+        public bool IsMergeNeeded => ((this.IsSetOrderBy || this.IsSetGroupBy || this.IsSetSingleGroupGroupBy) && this.IsStoringResult);
         public bool InParallel => ThreadCount != 1;
 
 

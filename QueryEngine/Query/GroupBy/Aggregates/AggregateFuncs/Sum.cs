@@ -31,5 +31,10 @@ namespace QueryEngine
         {
             return "Sum(" + this.exp.ToString() + ")";
         }
+
+        public override void MergeOn(int position, Aggregate aggregate)
+        {
+            this.aggVals[position] += ((IntSum)aggregate).aggVals[position];
+        }
     }
 }

@@ -28,6 +28,12 @@ namespace QueryEngine
         {
             return "Min(" + this.exp.ToString() + ")";
         }
+
+        public override void MergeOn(int position, Aggregate aggregate)
+        {
+            var tmp = ((IntMin)aggregate).aggVals[position];
+            this.aggVals[position] = (this.aggVals[position]  > tmp ? tmp : this.aggVals[position]);
+        }
     }
 
     /// <summary>
@@ -50,6 +56,13 @@ namespace QueryEngine
         public override string ToString()
         {
             return "Min(" + this.exp.ToString() + ")";
+        }
+
+
+        public override void MergeOn(int position, Aggregate aggregate)
+        {
+        var tmp = ((StrMin)aggregate).aggVals[position];
+            this.aggVals[position] = (this.aggVals[position].CompareTo(tmp) > 0 ? tmp : this.aggVals[position]);
         }
     }
 }

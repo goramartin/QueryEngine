@@ -85,6 +85,8 @@ namespace QueryEngine
                 else return false;
             }
         }
+
+        public abstract void MergeOn(int position, Aggregate aggregate);
     }
 
     /// <summary>

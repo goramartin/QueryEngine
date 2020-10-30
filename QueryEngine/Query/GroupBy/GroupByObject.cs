@@ -69,7 +69,14 @@ namespace QueryEngine
 
         public override void Compute(out ITableResults results)
         {
-            throw new NotImplementedException();
+            if (next != null)
+            {
+                this.next.Compute(out results);
+                this.next = null;
+                var tmp = new SingleGroupGrouper(this.aggregates, this.helper);
+                tmp.Group(results);
+            }
+            else throw new NullReferenceException($"{this.GetType()}, next is set to null.");
         }
     }
 }

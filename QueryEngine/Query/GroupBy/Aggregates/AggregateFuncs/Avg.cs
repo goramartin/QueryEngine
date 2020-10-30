@@ -47,5 +47,10 @@ namespace QueryEngine
             return "Avg(" + this.exp.ToString() + ")";
         }
 
+        public override void MergeOn(int position, Aggregate aggregate)
+        {
+            this.aggVals[position] = (this.aggVals[position] + ((IntAvg)aggregate).aggVals[position]) / 2;
+        }
+
     }
 }

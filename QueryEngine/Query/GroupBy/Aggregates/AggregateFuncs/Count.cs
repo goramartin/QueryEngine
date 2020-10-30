@@ -47,7 +47,7 @@ namespace QueryEngine
             else this.aggVals[position]++;
         }
 
-        public void IncBy(int position, int value)
+        public void IncBy(int value, int position)
         {
             if (position == this.aggVals.Count) this.aggVals.Add(value);
             else this.aggVals[position] += value;
@@ -58,6 +58,11 @@ namespace QueryEngine
             if (this.IsAstCount) return "Count(*)";
             else return "Count(" + this.exp.ToString() + ")";
         }
-    
+
+        public override void MergeOn(int position, Aggregate aggregate)
+        {
+            this.aggVals[position] += ((Count)aggregate).aggVals[position];
+        }
+
     }
 }

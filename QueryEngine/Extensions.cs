@@ -19,6 +19,16 @@ namespace QueryEngine
             return tmpString;
         }
 
+        public static List<Aggregate> CloneAggs(this List<Aggregate> aggs)
+        {
+            var tmp = new List<Aggregate>();
+
+            for (int i = 0; i < aggs.Count; i++)
+                tmp.Add(aggs[i].Clone());
+
+            return tmp;
+        }
+
         public static void Populate<T>(this T[] arr, T value)
         {
             for (int i = 0; i < arr.Length; i++)
