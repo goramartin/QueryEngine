@@ -41,18 +41,6 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Gets property value of an element based on property name.
-        /// </summary>
-        /// <typeparam name="T"> Type of property.</typeparam>
-        /// <param name="propID"> Property name. </param>
-        /// <param name="retValue"> Vale where to store the property value on success, </param>
-        /// <returns> True if the property is on the table otherwise false. </returns>
-        public bool TryGetPropertyValue<T>(int propID, out T retValue)
-        {
-            return this.Table.TryGetPropertyValue(this.ID, propID, out retValue);
-        }
-
-        /// <summary>
         /// This method returns type of a graph element.
         /// It is used instead of the reflection method which is a bit slower.
         /// </summary>

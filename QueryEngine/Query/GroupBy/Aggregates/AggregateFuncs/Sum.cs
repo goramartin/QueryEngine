@@ -13,13 +13,13 @@ namespace QueryEngine
 {
     internal sealed class IntSum : Aggregate<int>
     {
-        public IntSum(ExpressionHolder holder) : base(holder)
+        public IntSum(ExpressionHolder expressionHolder) : base(expressionHolder)
         { }
 
 
         public override void Apply(in TableResults.RowProxy row, int position)
         {
-            if (this.exp.TryGetExpressionValue<int>(in row, out int returnValue))
+            if (this.expr.TryEvaluate(in row, out int returnValue))
             {
                 if (position == this.aggVals.Count) this.aggVals.Add(returnValue);
                 else this.aggVals[position] += returnValue;
@@ -29,7 +29,7 @@ namespace QueryEngine
 
         public override string ToString()
         {
-            return "Sum(" + this.exp.ToString() + ")";
+            return "Sum(" + this.expressionHolder.ToString() + ")";
         }
 
         public override void MergeOn(int position, Aggregate aggregate)

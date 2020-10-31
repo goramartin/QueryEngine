@@ -55,8 +55,12 @@ namespace QueryEngine
     /// <typeparam name="T"> Type of expression return value that will be evaluated. </typeparam>
     internal abstract class ExpressionComparer<T> : ExpressionComparer
     {
+        // To avoid casting every time Holder.TryGetValue()
+        ExpressionReturnValue<T> expr;
         protected ExpressionComparer(ExpressionHolder expressionHolder, bool ascending) : base(expressionHolder, ascending)
-        { }
+        {
+            this.expr = (ExpressionReturnValue<T>)expressionHolder.Expr;
+        }
 
         /// <summary>
         /// Tries to evaluate containing expression with given rows.
@@ -72,8 +76,8 @@ namespace QueryEngine
             // Check if used variables in expression are same
             if (AreIdenticalVars(x, y)) return 0;
 
-            var xSuccess = this.expressionHolder.TryGetExpressionValue(x, out T xValue);
-            var ySuccess = this.expressionHolder.TryGetExpressionValue(y, out T yValue);
+            var xSuccess = this.expr.TryEvaluate(x, out T xValue);
+            var ySuccess = this.expr.TryEvaluate(y, out T yValue);
 
             int retValue = 0;
             if (xSuccess && !ySuccess) retValue = -1;

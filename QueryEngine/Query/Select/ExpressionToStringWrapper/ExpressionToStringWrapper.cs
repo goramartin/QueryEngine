@@ -61,11 +61,17 @@ namespace QueryEngine
     /// <typeparam name="T"> Type of value that will be computed and printed. </typeparam>
     internal sealed class ExpressionToStringWrapper<T> : ExpressionToStringWrapper
     {
+        // To avoid casting with holder.TryGetExpressionValue
+        private ExpressionReturnValue<T> expr;
+
         /// <summary>
         /// Constructs specialised wrapper.
         /// </summary>
         /// <param name="expressionHolder">Expression to be evaluated.</param>
-        public ExpressionToStringWrapper(ExpressionHolder expressionHolder) : base (expressionHolder){}
+        public ExpressionToStringWrapper(ExpressionHolder expressionHolder) : base (expressionHolder)
+        {
+            this.expr = (ExpressionReturnValue<T>)expressionHolder.Expr;
+        }
 
         /// <summary>
         /// Calls evaluation of containing expression for a given search result.
@@ -74,7 +80,7 @@ namespace QueryEngine
         /// <returns>Null on failed evaluation or string prepresentation of a evaluated expression.</returns>
         public override string GetValueAsString(in TableResults.RowProxy elements)
         {
-            if (this.expressionHolder.TryGetExpressionValue(elements, out T returnValue)) 
+            if (this.expr.TryEvaluate(elements, out T returnValue)) 
                 return returnValue.ToString();
             else return "null";
         }

@@ -14,7 +14,7 @@ namespace QueryEngine
     /// </summary>
     internal sealed class ExpressionVisitor : IVisitor<ExpressionBase>
     {
-        private ExpressionBase Expr;
+        private ExpressionBase expr;
         private VariableReferenceNameHolder nameHolder;
         private VariableMap variableMap;
         private Dictionary<string, Tuple<int, Type>> labels;
@@ -22,7 +22,7 @@ namespace QueryEngine
 
         public ExpressionBase GetResult()
         {
-            return this.Expr;
+            return this.expr;
         }
 
         public ExpressionVisitor(Dictionary<string, Tuple<int, Type>> labels, VariableMap map, QueryExpressionInfo exprInfo)
@@ -52,14 +52,14 @@ namespace QueryEngine
             // Get the position of the variable in the result.
             int varIndex = this.variableMap.GetVariablePosition(this.nameHolder.Name);
             if (this.nameHolder.PropName == null)
-                this.Expr = new VariableIDReference(this.nameHolder, varIndex);
+                this.expr = new VariableIDReference(this.nameHolder, varIndex);
             else
             {
                 // Get type of accessed property.
                 if (!this.labels.TryGetValue(this.nameHolder.PropName, out Tuple<int, Type> tuple))
                     throw new ArgumentException($"{this.GetType()}, property {this.nameHolder.PropName} does not exists in the graph.");
                 else
-                    this.Expr = VariableReferencePropertyFactory.Create(this.nameHolder, varIndex, tuple.Item2, tuple.Item1);
+                    this.expr = VariableReferencePropertyFactory.Create(this.nameHolder, varIndex, tuple.Item2, tuple.Item1);
             }
 
         }
@@ -106,7 +106,7 @@ namespace QueryEngine
                     // After the holder is created the aggregation is created with the expression.
                     // After this process, the expression that will be returned is created -> aggregation reference.
                     node.next.Accept(this);
-                    var tmpHolder = new ExpressionHolder(this.Expr);
+                    var tmpHolder = new ExpressionHolder(this.expr);
                     aggregate = Aggregate.Factory(node.funcName.ToLower(), tmpHolder.ExpressionType, tmpHolder);
                     aggType = tmpHolder.ExpressionType;
                 }
@@ -114,7 +114,7 @@ namespace QueryEngine
 
             // Rewrite the expression used for aggregation argument to aggregation reference.
             int aggPos = this.exprInfo.AddAggregate(aggregate);
-            this.Expr = AggregateReferenceFactory.Create(aggType, aggPos, this.exprInfo.aggregates[aggPos]);
+            this.expr = AggregateReferenceFactory.Create(aggType, aggPos, this.exprInfo.aggregates[aggPos]);
         }
 
         #region NotImpl

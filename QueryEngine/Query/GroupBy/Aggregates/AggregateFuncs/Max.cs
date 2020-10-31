@@ -13,11 +13,11 @@ namespace QueryEngine
 {
     internal sealed class IntMax : Aggregate<int>
     {
-        public IntMax(ExpressionHolder holder) : base(holder)
+        public IntMax(ExpressionHolder expressionHolder) : base(expressionHolder)
         { }
         public override void Apply(in TableResults.RowProxy row, int position)
         {
-            if (this.exp.TryGetExpressionValue<int>(in row, out int returnValue))
+            if (this.expr.TryEvaluate(in row, out int returnValue))
             {
                 if (position == this.aggVals.Count) this.aggVals.Add(returnValue);
                 else if (this.aggVals[position] < returnValue) this.aggVals[position] = returnValue;
@@ -26,7 +26,7 @@ namespace QueryEngine
 
         public override string ToString()
         {
-            return "Max(" + this.exp.ToString() + ")";
+            return "Max(" + this.expressionHolder.ToString() + ")";
         }
 
         public override void MergeOn(int position, Aggregate aggregate)
@@ -42,11 +42,11 @@ namespace QueryEngine
     /// </summary>
     internal sealed class StrMax : Aggregate<string>
     {
-        public StrMax(ExpressionHolder holder) : base(holder)
+        public StrMax(ExpressionHolder expressionHolder) : base(expressionHolder)
         { }
         public override void Apply(in TableResults.RowProxy row, int position)
         {
-            if (this.exp.TryGetExpressionValue<string>(in row, out string returnValue))
+            if (this.expr.TryEvaluate(in row, out string returnValue))
             {
                 if (position == this.aggVals.Count) this.aggVals.Add(returnValue);
                 else if (this.aggVals[position].CompareTo(returnValue) < 0) this.aggVals[position] = returnValue;
@@ -55,7 +55,7 @@ namespace QueryEngine
 
         public override string ToString()
         {
-            return "Max(" + this.exp.ToString() + ")";
+            return "Max(" + this.expressionHolder.ToString() + ")";
         }
 
         public override void MergeOn(int position, Aggregate aggregate)

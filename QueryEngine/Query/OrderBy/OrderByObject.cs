@@ -69,7 +69,6 @@ namespace QueryEngine
         /// Sorts given data.
         /// </summary>
         /// <param name="sortData"> Query reults to be sorted. </param>
-        /// <param name="executionHelper"> Order by execution helper. </param>
         /// <returns> Sorted data. </returns>
         private ITableResults Sort(ITableResults sortData)
         {

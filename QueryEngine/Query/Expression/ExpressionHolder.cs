@@ -46,6 +46,7 @@ namespace QueryEngine
 
         /// <summary>
         /// Tries evaluating expression with given element row.
+        /// Notice that this always cast the expression. 
         /// </summary>
         /// <typeparam name="T">Return value of the expression. </typeparam>
         /// <param name="elements">One results of the search.</param>

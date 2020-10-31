@@ -17,14 +17,14 @@ namespace QueryEngine
     /// </summary>
     internal sealed class IntAvg : Aggregate<int>
     {
-        private List<int> EltUsed = new List<int>(2);
+        private List<int> EltUsed = new List<int>();
 
-        public IntAvg(ExpressionHolder holder) : base(holder)
+        public IntAvg(ExpressionHolder expressionHolder) : base(expressionHolder)
         { }
 
         public override void Apply(in TableResults.RowProxy row, int position)
         {
-            if (this.exp.TryGetExpressionValue<int>(in row, out int returnValue))
+            if (this.expr.TryEvaluate(in row, out int returnValue))
             {
                 if (position == this.aggVals.Count)
                 {
@@ -44,7 +44,7 @@ namespace QueryEngine
 
         public override string ToString()
         {
-            return "Avg(" + this.exp.ToString() + ")";
+            return "Avg(" + this.expressionHolder.ToString() + ")";
         }
 
         public override void MergeOn(int position, Aggregate aggregate)

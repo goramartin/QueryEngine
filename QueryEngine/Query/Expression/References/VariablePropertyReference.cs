@@ -42,7 +42,8 @@ namespace QueryEngine
         /// <returns> True on successful evaluation otherwise false. </returns>
         public override bool TryEvaluate(in TableResults.RowProxy elements, out T returnValue)
         {
-            return elements[this.VariableIndex].TryGetPropertyValue(this.PropertyID, out returnValue);
+            Element element = elements[this.VariableIndex];
+            return element.Table.TryGetPropertyValue(element.ID, this.PropertyID, out returnValue);
         }
 
         public override bool ContainsAggregate()

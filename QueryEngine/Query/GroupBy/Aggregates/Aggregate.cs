@@ -35,11 +35,11 @@ namespace QueryEngine
         /// <summary>
         /// The expression is evaluated with a row from Apply method.
         /// </summary>
-        public ExpressionHolder exp { get; }
+        protected ExpressionHolder expressionHolder;
 
-        public Aggregate(ExpressionHolder holder)
+        public Aggregate(ExpressionHolder expressionHolder)
         {
-            this.exp = holder;
+            this.expressionHolder = expressionHolder;
         }
 
         /// <summary>
@@ -58,7 +58,7 @@ namespace QueryEngine
         /// </summary>
         public Aggregate Clone()
         {
-            return (Aggregate)Activator.CreateInstance(this.GetType(), this.exp);
+            return (Aggregate)Activator.CreateInstance(this.GetType(), this.expressionHolder);
         }
 
         public static Aggregate Factory(string funcType, Type compType, ExpressionHolder holder = null)
@@ -80,8 +80,8 @@ namespace QueryEngine
             else
             {
                 var tmp = (Aggregate)obj;
-                if (this.exp == null && tmp.exp == null) return true;
-                else if (this.exp.Equals(tmp.exp)) return true;
+                if (this.expressionHolder == null && tmp.expressionHolder == null) return true;
+                else if (this.expressionHolder.Equals(tmp.expressionHolder)) return true;
                 else return false;
             }
         }
@@ -97,10 +97,12 @@ namespace QueryEngine
     /// <typeparam name="T"> A type of aggregate function. </typeparam>
     internal abstract class Aggregate<T> : Aggregate 
     {
-        protected List<T> aggVals = new List<T>(2);
-
-        public Aggregate(ExpressionHolder holder) : base(holder)
-        {}
+        protected List<T> aggVals = new List<T>();
+        protected ExpressionReturnValue<T> expr;
+        public Aggregate(ExpressionHolder expressionHolder) : base(expressionHolder)
+        {
+            this.expr = (ExpressionReturnValue<T>)expressionHolder.Expr;
+        }
     }
 
 }

@@ -23,16 +23,16 @@ namespace QueryEngine
     /// </summary>
     internal class Count : Aggregate<int>
     {
-        public Count(ExpressionHolder holder) : base(holder)
+        public Count(ExpressionHolder expressionHolder) : base(expressionHolder)
         {
-            if (holder == null) this.IsAstCount = true;
+            if (expressionHolder == null) this.IsAstCount = true;
         }
 
         public override void Apply(in TableResults.RowProxy row, int position)
         {
             if (!this.IsAstCount)
             {
-                if ( this.exp.TryGetExpressionValue<int>(in row, out int returnValue))
+                if ( this.expr.TryEvaluate(in row, out int returnValue))
                 {
                     if (position == this.aggVals.Count) this.aggVals.Add(1);
                     else this.aggVals[position]++;
@@ -56,7 +56,7 @@ namespace QueryEngine
         public override string ToString()
         {
             if (this.IsAstCount) return "Count(*)";
-            else return "Count(" + this.exp.ToString() + ")";
+            else return "Count(" + this.expressionHolder.ToString() + ")";
         }
 
         public override void MergeOn(int position, Aggregate aggregate)

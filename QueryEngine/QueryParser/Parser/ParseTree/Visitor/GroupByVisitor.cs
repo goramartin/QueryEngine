@@ -14,7 +14,6 @@ namespace QueryEngine
         private Dictionary<string, Tuple<int, Type>> labels;
         private VariableMap variableMap;
         private QueryExpressionInfo exprInfo;
-        private ExpressionHolder holder = null;
 
         public GroupByVisitor(Dictionary<string, Tuple<int, Type>> labels, VariableMap map, QueryExpressionInfo exprInfo)
         {

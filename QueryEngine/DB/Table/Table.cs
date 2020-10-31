@@ -164,16 +164,14 @@ namespace QueryEngine
         /// <returns>True if successful access, otherwise false. </returns>
         public bool TryGetPropertyValue<T>(int id, int propID, out T retValue)
         {
-            if (!this.IDs.TryGetValue(id, out int elementPosition)) 
-                throw new ArgumentException($"{this.GetType()}, accessing element that is missing in the table. Element ID = {id}.");
-            else if (!this.Properties.TryGetValue(propID, out Property property))
+            if (!this.Properties.TryGetValue(propID, out Property property))
             {
                 retValue = default;
                 return false;
             }
             else
             {
-                retValue = ((Property<T>)property).propHolder[elementPosition];
+                retValue = ((Property<T>)property).propHolder[this.IDs[id]];
                 return true;
             }
         }
