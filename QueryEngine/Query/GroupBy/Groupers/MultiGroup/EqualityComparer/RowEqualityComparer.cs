@@ -17,19 +17,39 @@ namespace QueryEngine
     /// </summary>
     internal class RowEqualityComparerNoHash : IEqualityComparer<GroupDictKey>
     {
-        public ITableResults results;
-        public List<ExpressionEqualityComparer> comparers;
+        public ITableResults Results { get; }
+        public List<ExpressionEqualityComparer> Comparers { get; }
+
+        public RowEqualityComparerNoHash(ITableResults results, List<ExpressionEqualityComparer> comparers)
+        {
+            this.Results = results;
+            this.Comparers = comparers;
+        }
+
         public bool Equals(GroupDictKey x, GroupDictKey y)
         {
-            for (int i = 0; i < this.comparers.Count; i++)
-                if (!this.comparers[i].Equals(results[x.position], results[y.position])) return false;
+            for (int i = 0; i < this.Comparers.Count; i++)
+                if (!this.Comparers[i].Equals(Results[x.position], Results[y.position])) return false;
 
             return true;
         }
 
-        public int GetHashCode(GroupDictKey obj)
+        public int GetHashCode(GroupDictKey key)
         {
-            return obj.hash;
+            return key.hash;
         }
+
+        /// <summary>
+        /// Clone the entire equality comparer.
+        /// It clones also the comparers because they contain cache.
+        /// </summary>
+        public RowEqualityComparerNoHash Clone()
+        {
+            var tmp = new List<ExpressionEqualityComparer>();
+            for (int i = 0; i < this.Comparers.Count; i++)
+                tmp.Add(this.Comparers[i].Clone());
+            return new RowEqualityComparerNoHash(this.Results, tmp);
+        }
+
     }
 }

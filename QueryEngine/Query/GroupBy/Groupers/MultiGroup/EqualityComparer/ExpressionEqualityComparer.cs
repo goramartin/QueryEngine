@@ -70,13 +70,14 @@ namespace QueryEngine
             return true;
         }
 
+        public abstract ExpressionEqualityComparer Clone();
     }
 
     internal class ExpressionIntegerEqualityComparer : ExpressionEqualityComparer
     {
         // To avoid casting every time Holder.TryGetValue()
         ExpressionReturnValue<int> expr;
-        int resultLastX = 0;
+        public int resultLastX = default;
 
         public ExpressionIntegerEqualityComparer(ExpressionHolder expressionHolder) : base(expressionHolder)
         {
@@ -106,13 +107,18 @@ namespace QueryEngine
             else return this.resultLastX == yValue;
         }
 
+        public override ExpressionEqualityComparer Clone()
+        {
+            return new ExpressionIntegerEqualityComparer(this.expressionHolder);
+        }
+
     }
 
     internal class ExpressionStringEqualityComparer : ExpressionEqualityComparer
     {
         // To avoid casting every time Holder.TryGetValue()
         ExpressionReturnValue<string> expr;
-        public string resultLastX = null;
+        public string resultLastX = default;
 
         public ExpressionStringEqualityComparer(ExpressionHolder expressionHolder) : base(expressionHolder)
         {
@@ -142,5 +148,9 @@ namespace QueryEngine
             else return this.resultLastX == yValue;
         }
 
+        public override ExpressionEqualityComparer Clone()
+        {
+            return new ExpressionStringEqualityComparer(this.expressionHolder);
+        }
     }
 }
