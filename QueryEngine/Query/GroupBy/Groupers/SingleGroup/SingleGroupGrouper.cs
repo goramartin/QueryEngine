@@ -79,7 +79,10 @@ namespace QueryEngine
             for (int i = 0; i < jobs.Length-1; i++)
             {
                 for (int j  = 0; j < jobs[0].aggregates.Count; j++)
-                    jobs[jobs.Length - 1].aggregates[j].MergeOn(0, jobs[i].aggregates[j]);     
+                {
+                    if (jobs[i].start != jobs[i].end)
+                        jobs[jobs.Length - 1].aggregates[j].MergeOn(0, jobs[i].aggregates[j]);     
+                }
             }
         }
         
