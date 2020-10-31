@@ -6,9 +6,12 @@ using System.Threading.Tasks;
 
 namespace QueryEngine
 {
-    internal class MultiGroupGrouper : Grouper
+    internal class LocalGroupLocalMerge : Grouper
     {
-        public MultiGroupGrouper(List<Aggregate> aggs, IGroupByExecutionHelper helper) : base(aggs, helper) { }
+        protected RowHasher hasher;
+        protected RowEqualityComparer equalityComparer;
+
+        public LocalGroupLocalMerge(List<Aggregate> aggs, IGroupByExecutionHelper helper) : base(aggs, helper) { }
 
         public override List<Aggregate> Group(ITableResults resTable)
         {

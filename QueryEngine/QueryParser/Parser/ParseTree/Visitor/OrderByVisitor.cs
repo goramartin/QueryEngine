@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace QueryEngine
 {
-    internal sealed class OrderByVisitor : IVisitor<List<IRowComparer>>
+    internal sealed class OrderByVisitor : IVisitor<List<ExpressionComparer>>
     {
-        private List<IRowComparer> result;
+        private List<ExpressionComparer> result;
         private Dictionary<string, Tuple<int, Type>> labels;
         private VariableMap variableMap;
         private ExpressionHolder expressionHolder;
@@ -16,13 +16,13 @@ namespace QueryEngine
 
         public OrderByVisitor(Dictionary<string, Tuple<int, Type>> labels, VariableMap map, QueryExpressionInfo exprInfo)
         {
-            this.result = new List<IRowComparer>();
+            this.result = new List<ExpressionComparer>();
             this.labels = labels;
             this.variableMap = map;
             this.exprInfo = exprInfo;
         }
 
-        public List<IRowComparer> GetResult()
+        public List<ExpressionComparer> GetResult()
         {
             if (this.result == null || this.result.Count == 0)
                 throw new ArgumentException($"{this.GetType()} final result is empty or null");

@@ -40,14 +40,14 @@ namespace QueryEngine
     /// </summary>
     internal class RowComparer : IRowComparer
     {
-        private readonly List<IRowComparer> comparers;
+        private readonly List<ExpressionComparer> comparers;
         
         
         /// <summary>
         /// Creates a row comparer.
         /// </summary>
         /// <param name="rowProxyComparers"> Expected a list of expression comparers.</param>
-        public RowComparer(List<IRowComparer> rowProxyComparers)
+        public RowComparer(List<ExpressionComparer> rowProxyComparers)
         {
             this.comparers = rowProxyComparers;
         }

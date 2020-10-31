@@ -25,7 +25,7 @@ namespace QueryEngine
         protected IRowComparer rowComparer;
         protected bool inParallel;
 
-        protected SimpleSorter(ITableResults sortData, List<IRowComparer> rowComparers, bool inParallel)
+        protected SimpleSorter(ITableResults sortData, List<ExpressionComparer> rowComparers, bool inParallel)
         {
             this.inParallel = inParallel;
             this.dataTable = sortData;
