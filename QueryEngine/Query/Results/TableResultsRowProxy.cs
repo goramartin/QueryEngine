@@ -25,7 +25,7 @@ namespace QueryEngine
         public readonly struct RowProxy
         {
             private readonly TableResults resTable;
-            private readonly int index;
+            public readonly int index;
 
             /// <summary>
             /// Constructs proxy row.

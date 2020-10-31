@@ -8,8 +8,8 @@ namespace QueryEngine
 {
     internal class LocalGroupLocalMerge : Grouper
     {
-        protected RowHasher hasher;
-        protected RowEqualityComparer equalityComparer;
+       // protected RowHasher hasher;
+       // protected RowEqualityComparer equalityComparer;
 
         public LocalGroupLocalMerge(List<Aggregate> aggs, IGroupByExecutionHelper helper) : base(aggs, helper) { }
 
