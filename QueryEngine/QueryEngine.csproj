@@ -94,7 +94,7 @@
     <Compile Include="Query\GroupBy\Groupers\MultiGroup\EqualityComparer\RowEqualityComparer.cs" />
     <Compile Include="Query\GroupBy\GroupByObject.cs" />
     <Compile Include="Query\GroupBy\Groupers\MultiGroup\Hasher\RowHasher.cs" />
-    <Compile Include="Query\GroupBy\Groupers\MultiGroup\MultiGroupGrouper.cs" />
+    <Compile Include="Query\GroupBy\Groupers\MultiGroup\LocalGroupLocalMerge.cs" />
     <Compile Include="Query\GroupBy\Groupers\SingleGroup\SingleGroupGrouper.cs" />
     <Compile Include="Query\Match\DFSearcher\BaseMatch\BaseMatch.cs" />
     <Compile Include="Query\Match\DFSearcher\BaseMatch\BaseMatchesSpecialised.cs" />
