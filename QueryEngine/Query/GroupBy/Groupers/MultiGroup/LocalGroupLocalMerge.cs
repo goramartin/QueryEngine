@@ -67,7 +67,7 @@ namespace QueryEngine
             int addition = results.NumberOfMatchedElements / this.ThreadCount;
             if (addition == 0)
                 throw new ArgumentException($"{this.GetType()}, a range for a thread cannot be 0.");
-
+             
             var lastComp = new RowEqualityComparerNoHash(results, this.equalityComparers);
             var lastHasher = new RowHasher(this.hashers);
 
@@ -111,11 +111,14 @@ namespace QueryEngine
             else
             { // One level before leaf level.
               // Compute and merge on the last level before leaves
-                Task[] tasks = new Task[(start == 0 ? (end - 1) : (end - start + 1))];
+                Task[] tasks = new Task[(start == 0 ? (end - 1) : (end - start - 1))];
+
+                int taskIndex = 0;
                 for (int i = start + 1; i < end; i++)
                 {
                     var tmp = jobs[i];
-                    tasks[start-1] = Task.Factory.StartNew(() => SingleThreadGroupByWork(tmp));
+                    tasks[taskIndex] = Task.Factory.StartNew(() => SingleThreadGroupByWork(tmp));
+                    taskIndex++;
                 }
                 SingleThreadGroupByWork(jobs[start]);
                 Task.WaitAll(tasks);
@@ -142,14 +145,19 @@ namespace QueryEngine
             // To avoid casting multiple times.
             for (int i = 0; i < aggs1.Count; i++)
                 aggs1[i].SetMergingWith(aggs2[i]);
-
             // Merge the result groups.
             foreach (var item in groups2)
             {
-                if (!groups1.TryGetValue(item.Key, out int position)) position = groups1.Count;
+                if (!groups1.TryGetValue(item.Key, out int position))
+                {
+                    position = groups1.Count;
+                    groups1.Add(item.Key, position);
+                }
                 for (int i = 0; i < aggs1.Count; i++)
                     aggs1[i].MergeOn(position, item.Value);
             }
+            for (int i = 0; i < aggs1.Count; i++)
+                aggs1[i].UnsetMergingWith();
         }
 
         /// <summary>
