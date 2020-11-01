@@ -28,7 +28,7 @@ namespace QueryEngine
 
         public abstract int Hash(in TableResults.RowProxy row);
 
-        public static ExpressionHasher Factory(Type type, ExpressionHolder expressionHolder, ExpressionEqualityComparer cache)
+        public static ExpressionHasher Factory(ExpressionHolder expressionHolder, Type type, ExpressionEqualityComparer cache)
         {
             if (type == typeof(int)) return new ExpressionIntegerHasher(expressionHolder, cache);
             else if (type == typeof(string)) return new ExpressionStringHasher(expressionHolder, cache);

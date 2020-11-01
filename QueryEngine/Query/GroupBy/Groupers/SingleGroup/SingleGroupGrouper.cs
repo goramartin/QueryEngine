@@ -17,7 +17,7 @@ namespace QueryEngine
     {
         private List<Aggregate> nonAsterixCountAggregates = new List<Aggregate>();
 
-        public SingleGroupGrouper(List<Aggregate> aggs, IGroupByExecutionHelper helper) : base(aggs, helper) { }
+        public SingleGroupGrouper(List<Aggregate> aggs,List<ExpressionHolder> hashes, IGroupByExecutionHelper helper) : base(aggs, hashes, helper) { }
 
         /// <summary>
         /// Sets values to the Count(*) aggregate because there is nothing to be computed.
@@ -68,6 +68,7 @@ namespace QueryEngine
             // The main thread works with the last job in the array.
             SingleThreadGroupByWork(jobs[jobs.Length - 1]);
             Task.WaitAll(tasks);
+            // Merge doesnt have to be in parallel because it s grouping only (#thread) values.
             MergeRows(jobs);
         }
 

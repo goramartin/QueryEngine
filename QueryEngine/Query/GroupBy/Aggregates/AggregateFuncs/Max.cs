@@ -34,6 +34,12 @@ namespace QueryEngine
             var tmp = ((IntMax)aggregate).aggVals[position];
             this.aggVals[position] = (this.aggVals[position] < tmp ? tmp : this.aggVals[position]);
         }
+
+        public override void MergeOn(int firstPosition, int secondPosition)
+        {
+            if (firstPosition == this.aggVals.Count) this.aggVals.Add(this.mergingWith[secondPosition]);
+            else this.aggVals[firstPosition] = (this.aggVals[firstPosition] < this.mergingWith[secondPosition] ? this.mergingWith[secondPosition] : this.aggVals[firstPosition]);
+        }
     }
 
     /// <summary>
@@ -62,6 +68,12 @@ namespace QueryEngine
         {
             var tmp = ((StrMax)aggregate).aggVals[position];
             this.aggVals[position] = (this.aggVals[position].CompareTo(tmp) < 0 ? tmp : this.aggVals[position]);
+        }
+
+        public override void MergeOn(int firstPosition, int secondPosition)
+        {
+            if (firstPosition == this.aggVals.Count) this.aggVals.Add(this.mergingWith[secondPosition]);
+            else  this.aggVals[firstPosition] = (this.aggVals[firstPosition].CompareTo(this.mergingWith[secondPosition]) < 0 ? this.mergingWith[secondPosition] : this.aggVals[firstPosition]);
         }
     }
 }

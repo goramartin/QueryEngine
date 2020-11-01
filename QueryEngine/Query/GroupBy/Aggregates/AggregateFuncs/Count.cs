@@ -64,5 +64,10 @@ namespace QueryEngine
             this.aggVals[position] += ((Count)aggregate).aggVals[position];
         }
 
+        public override void MergeOn(int firstPosition, int secondPosition)
+        {
+            if (firstPosition == this.aggVals.Count) this.aggVals.Add(this.mergingWith[secondPosition]);
+            else this.aggVals[firstPosition] += this.mergingWith[secondPosition];
+        }
     }
 }

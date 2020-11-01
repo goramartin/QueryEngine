@@ -87,6 +87,9 @@ namespace QueryEngine
         }
 
         public abstract void MergeOn(int position, Aggregate aggregate);
+        public abstract void MergeOn(int firstPosition, int secondPosition);
+        public abstract void SetMergingWith(Aggregate aggregate);
+        public abstract void UnsetMergingWith();
     }
 
     /// <summary>
@@ -99,9 +102,20 @@ namespace QueryEngine
     {
         protected List<T> aggVals = new List<T>();
         protected ExpressionReturnValue<T> expr;
+        protected List<T> mergingWith = null;
         public Aggregate(ExpressionHolder expressionHolder) : base(expressionHolder)
         {
             this.expr = (ExpressionReturnValue<T>)expressionHolder.Expr;
+        }
+
+        public override void SetMergingWith(Aggregate aggregate)
+        {
+            this.mergingWith = ((Aggregate<T>)aggregate).aggVals;
+        }
+
+        public override void UnsetMergingWith()
+        {
+            this.mergingWith = null;
         }
     }
 

@@ -73,7 +73,7 @@ namespace QueryEngine
             {
                 this.next.Compute(out results);
                 this.next = null;
-                var tmp = new SingleGroupGrouper(this.aggregates, this.helper);
+                var tmp = new SingleGroupGrouper(this.aggregates, null, this.helper);
                 tmp.Group(results);
             }
             else throw new NullReferenceException($"{this.GetType()}, next is set to null.");

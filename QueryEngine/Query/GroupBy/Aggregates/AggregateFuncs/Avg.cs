@@ -18,6 +18,7 @@ namespace QueryEngine
     internal sealed class IntAvg : Aggregate<int>
     {
         private List<int> EltUsed = new List<int>();
+        private List<int> mergingWithEltused = null;
 
         public IntAvg(ExpressionHolder expressionHolder) : base(expressionHolder)
         { }
@@ -49,8 +50,31 @@ namespace QueryEngine
 
         public override void MergeOn(int position, Aggregate aggregate)
         {
-            this.aggVals[position] = (this.aggVals[position] + ((IntAvg)aggregate).aggVals[position]) / 2;
+            var tmp = ((IntAvg)aggregate);
+            this.aggVals[position] = ((this.aggVals[position] * this.EltUsed[position]) + (tmp.aggVals[position] * tmp.EltUsed[position])) / (this.EltUsed[position] + tmp.EltUsed[position]);
         }
 
+        public override void SetMergingWith(Aggregate aggregate)
+        {
+            base.SetMergingWith(aggregate);
+            this.mergingWithEltused = ((IntAvg)aggregate).EltUsed;
+        }
+
+        public override void UnsetMergingWith()
+        {
+            base.UnsetMergingWith();
+            this.mergingWithEltused = null;
+        }
+
+        public override void MergeOn(int firstPosition, int secondPosition)
+        {
+            if (firstPosition == this.aggVals.Count)
+            {
+                this.aggVals.Add(this.mergingWith[secondPosition]);
+                this.EltUsed.Add(this.mergingWithEltused[secondPosition]);
+            }
+            else this.aggVals[firstPosition] = ((this.aggVals[firstPosition] * this.EltUsed[firstPosition]) + (this.mergingWith[secondPosition] * this.mergingWithEltused[secondPosition]))
+                                            / (this.EltUsed[firstPosition] + this.mergingWithEltused[secondPosition]);
+        }
     }
 }

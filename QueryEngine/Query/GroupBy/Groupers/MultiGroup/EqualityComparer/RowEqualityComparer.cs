@@ -50,6 +50,5 @@ namespace QueryEngine
                 tmp.Add(this.Comparers[i].Clone());
             return new RowEqualityComparerNoHash(this.Results, tmp);
         }
-
     }
 }

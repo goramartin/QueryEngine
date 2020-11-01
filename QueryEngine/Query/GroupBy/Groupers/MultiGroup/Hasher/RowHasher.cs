@@ -41,7 +41,7 @@ namespace QueryEngine
             {
                 int hash = 5381;
                 for (int i = 0; i < this.hashers.Count; i++)
-                    hash = 33 * hash + this.hashers[i].Hash(in row);
+                    hash = (((hash << 5) + hash) ^ this.hashers[i].Hash(in row));
                 return hash;
             }
         }

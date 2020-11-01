@@ -17,14 +17,15 @@ namespace QueryEngine
     {
         protected List<Aggregate> aggregates { get; }
         protected bool InParallel { get; }
-
+        protected List<ExpressionHolder> hashes { get; }
         protected int ThreadCount { get; }
 
-        protected Grouper(List<Aggregate> aggs, IGroupByExecutionHelper helper)
+        protected Grouper(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper)
         {
             this.ThreadCount = helper.ThreadCount;
             this.aggregates = aggs;
             this.InParallel = helper.InParallel;
+            this.hashes = hashes;
         }
 
         public abstract List<Aggregate> Group(ITableResults resTable);
