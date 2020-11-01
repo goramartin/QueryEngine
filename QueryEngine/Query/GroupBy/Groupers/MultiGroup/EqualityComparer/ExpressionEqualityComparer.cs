@@ -23,8 +23,8 @@ namespace QueryEngine
     {
         protected readonly ExpressionHolder expressionHolder;
         protected readonly List<int> usedVars;
-        public int rowlastX = -1;
-        public bool successLastX = false;
+        public int rowlastY = -1;
+        public bool successLastY = false;
 
         /// <summary>
         /// Constructs expression equality comparer.
@@ -77,7 +77,7 @@ namespace QueryEngine
     {
         // To avoid casting every time Holder.TryGetValue()
         ExpressionReturnValue<int> expr;
-        public int resultLastX = default;
+        public int resultLastY = default;
 
         public ExpressionIntegerEqualityComparer(ExpressionHolder expressionHolder) : base(expressionHolder)
         {
@@ -96,15 +96,15 @@ namespace QueryEngine
             // Check if used variables in expression are same
             if (AreIdenticalVars(x, y)) return true;
 
-            if (this.rowlastX != x.index)
+            var xSuccess = this.expr.TryEvaluate(y, out int xValue);
+            if (this.rowlastY != y.index)
             {
-                this.successLastX = this.expr.TryEvaluate(x, out this.resultLastX);
-                rowlastX = x.index;
+                this.successLastY = this.expr.TryEvaluate(x, out this.resultLastY);
+                rowlastY = y.index;
             }
-            var ySuccess = this.expr.TryEvaluate(y, out int yValue);
 
-            if (!this.successLastX && !ySuccess) return true;
-            else return this.resultLastX == yValue;
+            if (!this.successLastY && !xSuccess) return true;
+            else return this.resultLastY == xValue;
         }
 
         public override ExpressionEqualityComparer Clone()
@@ -118,7 +118,7 @@ namespace QueryEngine
     {
         // To avoid casting every time Holder.TryGetValue()
         ExpressionReturnValue<string> expr;
-        public string resultLastX = default;
+        public string resultLastY = null;
 
         public ExpressionStringEqualityComparer(ExpressionHolder expressionHolder) : base(expressionHolder)
         {
@@ -137,15 +137,15 @@ namespace QueryEngine
             // Check if used variables in expression are same
             if (AreIdenticalVars(x, y)) return true;
 
-            if (this.rowlastX != x.index)
+            var xSuccess = this.expr.TryEvaluate(y, out string xValue);
+            if (this.rowlastY != y.index)
             {
-                this.successLastX = this.expr.TryEvaluate(x, out this.resultLastX); 
-                this.rowlastX = x.index;
+                this.successLastY = this.expr.TryEvaluate(x, out this.resultLastY);
+                rowlastY = y.index;
             }
-            var ySuccess = this.expr.TryEvaluate(y, out string yValue);
 
-            if (!this.successLastX && !ySuccess) return true;
-            else return this.resultLastX == yValue;
+            if (!this.successLastY && !xSuccess) return true;
+            else return this.resultLastY == xValue;
         }
 
         public override ExpressionEqualityComparer Clone()

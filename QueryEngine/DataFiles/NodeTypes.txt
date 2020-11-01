@@ -1,6 +1,8 @@
 ﻿[
 {
-"Kind": "BasicNode",
-"Prop": "integer"
+"Kind": "Person",
+"Name": "string",
+"LastName": "string",
+"Age": "integer"
 }
 ]

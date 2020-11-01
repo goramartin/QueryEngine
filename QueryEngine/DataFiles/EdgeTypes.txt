@@ -1,5 +1,6 @@
 ﻿[
 {
-"Kind": "BasicEdge"
+"Kind": "isFriend",
+"For": "integer"
 }
 ]

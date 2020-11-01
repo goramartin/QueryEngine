@@ -53,7 +53,7 @@ namespace QueryEngine
         public RowHasher Clone(List<ExpressionEqualityComparer> cache)
         {
             var tmp = new List<ExpressionHasher>();
-            for (int i = 0; i < 0; i++)
+            for (int i = 0; i < cache.Count; i++)
                 tmp.Add(this.hashers[i].Clone(cache[i]));
 
             return new RowHasher(tmp);

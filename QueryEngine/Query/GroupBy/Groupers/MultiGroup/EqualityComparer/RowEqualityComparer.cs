@@ -48,6 +48,7 @@ namespace QueryEngine
             var tmp = new List<ExpressionEqualityComparer>();
             for (int i = 0; i < this.Comparers.Count; i++)
                 tmp.Add(this.Comparers[i].Clone());
+
             return new RowEqualityComparerNoHash(this.Results, tmp);
         }
     }

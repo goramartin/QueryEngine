@@ -31,7 +31,6 @@ namespace QueryEngine
         private IGroupByExecutionHelper helper;
         private List<ExpressionHolder> hashes;
         private List<Aggregate> aggregates;
-        private bool IsMultiGroup = true;
         /// <summary>
         /// Creates group by object for multigroup results.
         /// </summary>
@@ -62,7 +61,6 @@ namespace QueryEngine
         /// <param name="exprInfo"> A query expression information. </param>
         public GroupByObject(IGroupByExecutionHelper executionHelper, QueryExpressionInfo exprInfo)
         {
-            this.IsMultiGroup = false;
             this.aggregates = exprInfo.aggregates;
             this.helper = executionHelper;
         }
@@ -73,8 +71,10 @@ namespace QueryEngine
             {
                 this.next.Compute(out results);
                 this.next = null;
-                var tmp = new SingleGroupGrouper(this.aggregates, null, this.helper);
-                tmp.Group(results);
+                Grouper grouper;
+                if (this.helper.IsSetSingleGroupGroupBy) grouper = new SingleGroupGrouper(this.aggregates, null, this.helper);
+                else grouper = new LocalGroupLocalMerge(this.aggregates, this.hashes, this.helper);
+                grouper.Group(results);
             }
             else throw new NullReferenceException($"{this.GetType()}, next is set to null.");
         }

@@ -182,7 +182,7 @@ namespace QueryEngine
                 }
 
                 for (int j = 0; j < aggregates.Count; j++)
-                    aggregates[i].Apply(in row, position);
+                    aggregates[j].Apply(in row, position);
             }
         }
 

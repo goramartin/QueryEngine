@@ -30,8 +30,10 @@ namespace QueryEngine
 
         public static ExpressionHasher Factory(ExpressionHolder expressionHolder, Type type, ExpressionEqualityComparer cache)
         {
-            if (type == typeof(int)) return new ExpressionIntegerHasher(expressionHolder, cache);
-            else if (type == typeof(string)) return new ExpressionStringHasher(expressionHolder, cache);
+            if (type == typeof(int)) 
+                return new ExpressionIntegerHasher(expressionHolder, cache);
+            else if (type == typeof(string)) 
+                return new ExpressionStringHasher(expressionHolder, cache);
             else throw new ArgumentException($"Expression hasher factory, trying to create hasher with unknown type = {type}.");
         }
 
@@ -62,9 +64,9 @@ namespace QueryEngine
                 else return 0;
             } else
             {
-                this.cache.successLastX = this.expr.TryEvaluate(in row, out this.cache.resultLastX);
-                this.cache.rowlastX = row.index;
-                if (this.cache.successLastX) return this.cache.resultLastX.GetHashCode();
+                this.cache.successLastY = this.expr.TryEvaluate(in row, out this.cache.resultLastY);
+                this.cache.rowlastY = row.index;
+                if (this.cache.successLastY) return this.cache.resultLastY.GetHashCode();
                 else return 0;
             }
         }
@@ -95,9 +97,9 @@ namespace QueryEngine
                 else return 0;
             } else
             {
-                this.cache.successLastX = this.expr.TryEvaluate(in row, out this.cache.resultLastX);
-                this.cache.rowlastX = row.index;
-                if (this.cache.successLastX) return this.cache.resultLastX.GetHashCode();
+                this.cache.successLastY = this.expr.TryEvaluate(in row, out this.cache.resultLastY);
+                this.cache.rowlastY = row.index;
+                if (this.cache.successLastY) return this.cache.resultLastY.GetHashCode();
                 else return 0;
             }
         }

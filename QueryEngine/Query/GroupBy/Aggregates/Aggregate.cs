@@ -105,7 +105,8 @@ namespace QueryEngine
         protected List<T> mergingWith = null;
         public Aggregate(ExpressionHolder expressionHolder) : base(expressionHolder)
         {
-            this.expr = (ExpressionReturnValue<T>)expressionHolder.Expr;
+            if (expressionHolder != null) this.expr = (ExpressionReturnValue<T>)expressionHolder.Expr;
+            else this.expr = null;
         }
 
         public override void SetMergingWith(Aggregate aggregate)
