@@ -54,11 +54,11 @@ namespace QueryEngine
 
         /// <summary>
         /// Creates jobs for the parallel group by.
-        /// Note that the last job in the array has the end set to the end of result table.
+        /// Note that the last job in the array has the end set to the end of the result table.
         /// The addition must always be > 0.
         /// Each job will receive a range from result table, hasher, comparer and aggregates.
         /// Note that they are all copies.
-        /// The comparers and hashers build in the constructor are given to the last job, just like the aggregates passed to the construtor.
+        /// The comparers and hashers build in the constructor of this class are given to the last job, just like the aggregates passed to the construtor.
         /// </summary>
         private GroupByJob[] CreateJobs(ITableResults results, List<Aggregate> aggs)
         {
@@ -82,10 +82,10 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Creates a binary tree, where on each non leaf level, results from threads are merged and on the 
-        /// last level before the leaf level. A grouping is started for each thread based on the given range of the jobs.
+        /// Creates a binary tree, where on each non leaf level, results from threads are merged. On the 
+        /// last level before the leaf level a grouping is started for each thread based on the given range of result table.
         /// And on the same level they are also merged.
-        /// That means that it never reaches the leaf level be itself but the leaves are grouping computations started 
+        /// That means that it never reaches the leaf level by itself but the leaves represent grouping computations started 
         /// from the last level before leaf level.
         /// The results are merged on the jobs[0].
         /// </summary>
@@ -107,13 +107,14 @@ namespace QueryEngine
                 // Wait for the other task to finish and start merging its results with yours.
                 task.Wait();
                 SingleThreadMergeWork(jobs[start], jobs[middle]);
+                jobs[middle] = null;
             }
             else
-            { // One level before leaf level.
-              // Compute and merge on the last level before leaves
-                Task[] tasks = new Task[(start == 0 ? (end - 1) : (end - start - 1))];
-
+            {   // One level before leaf level.
+                Task[] tasks = new Task[end - start - 1];
                 int taskIndex = 0;
+               
+                // Start the grouping computations.
                 for (int i = start + 1; i < end; i++)
                 {
                     var tmp = jobs[i];
@@ -122,8 +123,13 @@ namespace QueryEngine
                 }
                 SingleThreadGroupByWork(jobs[start]);
                 Task.WaitAll(tasks);
+                
+                // Merge the results from the leaf level.
                 for (int i = start + 1; i < end; i++)
-                    SingleThreadMergeWork(jobs[start], jobs[i]);
+                {
+                   SingleThreadMergeWork(jobs[start], jobs[i]);
+                   jobs[i] = null;
+                }
             }
         } 
 
@@ -141,7 +147,7 @@ namespace QueryEngine
             var aggs1 = ((GroupByJob)job1).aggregates;
             var aggs2 = ((GroupByJob)job2).aggregates;
 
-            // Set their mergins with.
+            // Set their mergins with field.
             // To avoid casting multiple times.
             for (int i = 0; i < aggs1.Count; i++)
                 aggs1[i].SetMergingWith(aggs2[i]);
@@ -181,8 +187,8 @@ namespace QueryEngine
             for (int i = tmpJob.start; i < tmpJob.end; i++)
             {
                 row = results[i];
-                key = new GroupDictKey(hasher.Hash(in row), i); // It's a struct
-
+                key = new GroupDictKey(hasher.Hash(in row), i); // It's a struct.
+                
                 if (!groups.TryGetValue(key, out position))
                 {
                     position = groups.Count;
