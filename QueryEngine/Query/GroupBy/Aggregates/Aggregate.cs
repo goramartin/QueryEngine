@@ -5,8 +5,13 @@ The aggregate contains expression holder to enable computation of the desired va
 The property IsAstCount serves as a helper to avoid unneccessary passing of rows into
 count function. ( count(*) increases only the value, it doesnt have to compute the value)
 
-The aggregates will also serve as a holders for the computed values. The Aggregate<> contains
-a list of immediate values during computation and after the computation each index holds
+There are two types of aggregates, the types stem from the way the results are stored.
+The first one is array like storage and the second one is bucket like storage.
+
+The array like storage:
+The aggregates will also serve as a holders for the computed values (direct reference to the array result holders).
+This enables to omit casting of the storage classes.
+The Aggregate array results<> contains a list of immediate values that represent computes agg. values for a certain group. After the computation each index holds
 the final computed value. In other words each index represents a single group.
  
 Notice that the aggregate function compute the values only if the evaluated expression value
@@ -43,14 +48,6 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Computes expression value for a given row that is applied to the aggregate result.
-        /// Each function handles its on computation and insertion.
-        /// </summary>
-        /// <param name="row"> A result table row. </param>
-        /// <param name="position"> A position of a groups aggregate. </param>
-        public abstract void Apply(in TableResults.RowProxy row, int position);
-
-        /// <summary>
         /// Creates a shallow copy.
         /// The expression is a shallow copy.
         /// The data stored inside the generic list are not coppied.
@@ -61,15 +58,15 @@ namespace QueryEngine
             return (Aggregate)Activator.CreateInstance(this.GetType(), this.expressionHolder);
         }
 
-        public static Aggregate Factory(string funcType, Type compType, ExpressionHolder holder = null)
+        public static Aggregate FactoryArrayType(string funcType, Type compType, ExpressionHolder holder = null)
         {
-            if (funcType == "count" && compType == typeof(int)) return new Count(holder);
-            else if (funcType == "max" && compType == typeof(int)) return new IntMax(holder);
-            else if (funcType == "max" && compType == typeof(string)) return new StrMax(holder);
-            else if (funcType == "min" && compType == typeof(int)) return new IntMin(holder);
-            else if (funcType == "min" && compType == typeof(string)) return new StrMin(holder);
-            else if (funcType == "avg" && compType == typeof(int)) return new IntAvg(holder);
-            else if (funcType == "sum" && compType == typeof(int)) return new IntSum(holder);
+            if (funcType == "count" && compType == typeof(int)) return new ArrayCount(holder);
+            else if (funcType == "max" && compType == typeof(int)) return new IntArrayMax(holder);
+            else if (funcType == "max" && compType == typeof(string)) return new StrArrayMax(holder);
+            else if (funcType == "min" && compType == typeof(int)) return new IntArrayMin(holder);
+            else if (funcType == "min" && compType == typeof(string)) return new StrArrayMin(holder);
+            else if (funcType == "avg" && compType == typeof(int)) return new IntArrayAvg(holder);
+            else if (funcType == "sum" && compType == typeof(int)) return new IntArraySum(holder);
             else throw new ArgumentException($"Aggregate factory, trying to create a non existent aggregate. {funcType}, {compType}");
         }
 
@@ -86,38 +83,75 @@ namespace QueryEngine
             }
         }
 
-        public abstract void MergeOn(int position, Aggregate aggregate);
-        public abstract void MergeOn(int firstPosition, int secondPosition);
-        public abstract void SetMergingWith(Aggregate aggregate);
+        #region ArrayStorageInterface
+        public abstract void Apply(in TableResults.RowProxy row, int position);
+        public abstract void MergeOn(int into, int from);
+        public abstract void SetMergingWith(AggregateArrayResults resultsStorage2);
+        public abstract void SetAggResults(AggregateArrayResults resultsStorage);
         public abstract void UnsetMergingWith();
+        public abstract void UnsetAggResults();
+        #endregion ArrayStorageInterface
+
+        public abstract Type GetAggregateReturnType();
+        public abstract string GetFuncName();
+
     }
 
     /// <summary>
     /// A base class extension.
-    /// Adds a place to store aggregate values for each group.
-    /// An index in the list represents one group and its associated aggregate value.
     /// </summary>
-    /// <typeparam name="T"> A type of aggregate function. </typeparam>
+    /// <typeparam name="T"> A return type of an aggregate function. </typeparam>
     internal abstract class Aggregate<T> : Aggregate 
     {
-        protected List<T> aggVals = new List<T>();
         protected ExpressionReturnValue<T> expr;
-        protected List<T> mergingWith = null;
         public Aggregate(ExpressionHolder expressionHolder) : base(expressionHolder)
         {
             if (expressionHolder != null) this.expr = (ExpressionReturnValue<T>)expressionHolder.Expr;
             else this.expr = null;
         }
 
-        public override void SetMergingWith(Aggregate aggregate)
+        public override Type GetAggregateReturnType()
         {
-            this.mergingWith = ((Aggregate<T>)aggregate).aggVals;
+            return typeof(T);
+        }
+    }
+
+    /// <summary>
+    /// An aggregate fucntion base class for computing on array like storage.
+    /// It enables to set direct reference to the result storage values.
+    /// This enables to omit a lot of casts to the appropriate types.
+    /// The methods SET stores the appropriate reference from the result storage holder.
+    /// The methods UNSET unsets these references.
+    /// </summary>
+    /// <typeparam name="T"> A return type of the aggregate function. </typeparam>
+    internal abstract class AggregateArray<T> : Aggregate<T>
+    {
+        protected List<T> aggResults = null;
+        protected List<T> mergingWithAggResults = null;
+
+        public AggregateArray(ExpressionHolder expressionHolder) : base(expressionHolder)
+        {}
+
+        public override void SetMergingWith(AggregateArrayResults resultsStorage2)
+        {
+            this.mergingWithAggResults = ((AggregateArrayResults<T>)resultsStorage2).values;
+        }
+
+        public override void SetAggResults(AggregateArrayResults resultsStorage1) 
+        {
+            this.aggResults = ((AggregateArrayResults<T>)resultsStorage1).values;
+        }
+
+        public override void UnsetAggResults()
+        {
+            this.aggResults = null;
         }
 
         public override void UnsetMergingWith()
         {
-            this.mergingWith = null;
+            this.mergingWithAggResults = null;
         }
     }
+
 
 }

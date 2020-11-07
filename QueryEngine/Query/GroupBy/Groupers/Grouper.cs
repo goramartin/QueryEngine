@@ -28,6 +28,6 @@ namespace QueryEngine
             this.hashes = hashes;
         }
 
-        public abstract List<Aggregate> Group(ITableResults resTable);
+        public abstract List<AggregateArrayResults> Group(ITableResults resTable);
     }
 }

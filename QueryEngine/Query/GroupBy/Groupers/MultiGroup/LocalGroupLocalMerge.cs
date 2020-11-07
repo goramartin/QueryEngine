@@ -32,24 +32,24 @@ namespace QueryEngine
             }
         }
 
-        public override List<Aggregate> Group(ITableResults resTable)
+        public override List<AggregateArrayResults> Group(ITableResults resTable)
         {
             if (this.InParallel && ((resTable.NumberOfMatchedElements / this.ThreadCount) > 1)) return ParallelGroupBy(resTable);
             else return SingleThreadGroupBy(resTable);
 
         }
-        private List<Aggregate> SingleThreadGroupBy(ITableResults resTable)
+        private List<AggregateArrayResults> SingleThreadGroupBy(ITableResults resTable)
         {
             var tmp = new GroupByJob(new RowHasher(this.hashers), new RowEqualityComparerNoHash(resTable, this.equalityComparers), this.aggregates, resTable, 0, resTable.NumberOfMatchedElements);
             SingleThreadGroupByWork(tmp);
-            return tmp.aggregates;
+            return tmp.aggResults;
         }
 
-        private List<Aggregate> ParallelGroupBy(ITableResults resTable)
+        private List<AggregateArrayResults> ParallelGroupBy(ITableResults resTable)
         {
             GroupByJob[] jobs = CreateJobs(resTable, this.aggregates);
             ParallelWork(jobs, 0, ThreadCount);
-            return jobs[0].aggregates;
+            return jobs[0].aggResults;
         }
 
         /// <summary>
@@ -145,12 +145,12 @@ namespace QueryEngine
             var groups1 = ((GroupByJob)job1).groups;
             var groups2 = ((GroupByJob)job2).groups;
             var aggs1 = ((GroupByJob)job1).aggregates;
-            var aggs2 = ((GroupByJob)job2).aggregates;
+            var aggsResults2 = ((GroupByJob)job2).aggResults;
 
             // Set their mergins with field.
             // To avoid casting multiple times.
             for (int i = 0; i < aggs1.Count; i++)
-                aggs1[i].SetMergingWith(aggs2[i]);
+                aggs1[i].SetMergingWith(aggsResults2[i]);
             // Merge the result groups.
             foreach (var item in groups2)
             {
@@ -207,6 +207,7 @@ namespace QueryEngine
             public List<Aggregate> aggregates;
             public ITableResults results;
             public Dictionary<GroupDictKey, int> groups;
+            public List<AggregateArrayResults> aggResults;
             public int start;
             public int end;
 
@@ -219,6 +220,10 @@ namespace QueryEngine
                 this.start = start;
                 this.end = end;
                 this.groups = new Dictionary<GroupDictKey, int>((IEqualityComparer<GroupDictKey>)comparer);
+                this.aggResults = AggregateArrayResults.CreateArrayResults(this.aggregates);
+
+                for (int i = 0; i < this.aggregates.Count; i++)
+                    this.aggregates[i].SetAggResults(this.aggResults[i]);
             }
         }
     }

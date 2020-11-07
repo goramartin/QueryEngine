@@ -21,9 +21,9 @@ namespace QueryEngine
     /// <summary>
     /// Counts a number of non null entries.
     /// </summary>
-    internal class Count : Aggregate<int>
+    internal class ArrayCount : AggregateArray<int>
     {
-        public Count(ExpressionHolder expressionHolder) : base(expressionHolder)
+        public ArrayCount(ExpressionHolder expressionHolder) : base(expressionHolder)
         {
             if (expressionHolder == null) this.IsAstCount = true;
         }
@@ -34,8 +34,8 @@ namespace QueryEngine
             {
                 if ( this.expr.TryEvaluate(in row, out int returnValue))
                 {
-                    if (position == this.aggVals.Count) this.aggVals.Add(1);
-                    else this.aggVals[position]++;
+                    if (position == this.aggResults.Count) this.aggResults.Add(1);
+                    else this.aggResults[position]++;
                 }
             }
             else Inc(position);
@@ -43,14 +43,14 @@ namespace QueryEngine
 
         public void Inc(int position)
         {
-            if (position == this.aggVals.Count) this.aggVals.Add(1);
-            else this.aggVals[position]++;
+            if (position == this.aggResults.Count) this.aggResults.Add(1);
+            else this.aggResults[position]++;
         }
 
         public void IncBy(int value, int position)
         {
-            if (position == this.aggVals.Count) this.aggVals.Add(value);
-            else this.aggVals[position] += value;
+            if (position == this.aggResults.Count) this.aggResults.Add(value);
+            else this.aggResults[position] += value;
         }
 
         public override string ToString()
@@ -59,15 +59,15 @@ namespace QueryEngine
             else return "Count(" + this.expressionHolder.ToString() + ")";
         }
 
-        public override void MergeOn(int position, Aggregate aggregate)
+        public override void MergeOn(int into, int from)
         {
-            this.aggVals[position] += ((Count)aggregate).aggVals[position];
+            if (into == this.aggResults.Count) this.aggResults.Add(this.mergingWithAggResults[from]);
+            else this.aggResults[into] += this.mergingWithAggResults[from];
         }
 
-        public override void MergeOn(int firstPosition, int secondPosition)
+        public override string GetFuncName()
         {
-            if (firstPosition == this.aggVals.Count) this.aggVals.Add(this.mergingWith[secondPosition]);
-            else this.aggVals[firstPosition] += this.mergingWith[secondPosition];
+            return "count";
         }
     }
 }
