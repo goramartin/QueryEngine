@@ -89,11 +89,12 @@
     <Compile Include="Query\GroupBy\Aggregates\AggregateArrayTypeFuncs\Min.cs" />
     <Compile Include="Query\GroupBy\Aggregates\AggregateArrayTypeFuncs\Sum.cs" />
     <Compile Include="Query\GroupBy\Groupers\MultiGroup\EqualityComparer\ExpressionEqualityComparer.cs" />
+    <Compile Include="Query\GroupBy\Groupers\MultiGroup\EqualityComparer\RowEqualityComparerNoHash.cs" />
     <Compile Include="Query\GroupBy\Groupers\MultiGroup\Hasher\DictKeyStruct.cs" />
     <Compile Include="Query\GroupBy\Groupers\MultiGroup\Hasher\ExpressionHasher.cs" />
     <Compile Include="Query\QueryExpressionInfo.cs" />
     <Compile Include="Query\GroupBy\Groupers\Grouper.cs" />
-    <Compile Include="Query\GroupBy\Groupers\MultiGroup\EqualityComparer\RowEqualityComparer.cs" />
+    <Compile Include="Query\GroupBy\Groupers\MultiGroup\EqualityComparer\RowEqualityComparerWithHash.cs" />
     <Compile Include="Query\GroupBy\GroupByObject.cs" />
     <Compile Include="Query\GroupBy\Groupers\MultiGroup\Hasher\RowHasher.cs" />
     <Compile Include="Query\GroupBy\Groupers\MultiGroup\LocalGroupLocalMerge.cs" />
