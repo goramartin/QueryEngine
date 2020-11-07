@@ -35,10 +35,8 @@ namespace QueryEngine
                     this.EltUsed.Add(1);
                 }
                 else
-                {   // n = a number of used elements for prev_avg
-                    // prev_avg = a value of already computed average
-                    // (new_avg = prev_avg * n + addedValue) / (n + 1)
-                    this.aggResults[position] = (this.aggResults[position] * this.EltUsed[position] + returnValue) / (this.EltUsed[position] + 1);
+                { 
+                    this.aggResults[position] += returnValue;
                     this.EltUsed[position]++;
                 }
             }
@@ -56,8 +54,12 @@ namespace QueryEngine
                 this.aggResults.Add(this.mergingWithAggResults[from]);
                 this.EltUsed.Add(this.mergingWithEltUsed[from]);
             }
-            // resAvg = (( intoAvg * intoN ) + (fromAvg * fromN)) / (intoN + fromN)
-            else this.aggResults[into] = ((this.aggResults[into] * this.EltUsed[into]) + (this.mergingWithAggResults[from] * this.mergingWithEltUsed[from])) / (this.EltUsed[into] + this.mergingWithEltUsed[from]);
+            else
+            { 
+                this.aggResults[into] += this.mergingWithAggResults[from];
+                this.EltUsed[into] += this.mergingWithEltUsed[from];
+            }
+
         }
 
         public override void SetAggResults(AggregateArrayResults resultsStorage1)
