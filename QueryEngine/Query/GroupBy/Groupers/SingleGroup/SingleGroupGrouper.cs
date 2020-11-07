@@ -13,7 +13,8 @@ namespace QueryEngine
     /// </summary>
     internal class SingleGroupGrouper : Grouper
     {
-        public SingleGroupGrouper(List<Aggregate> aggs,List<ExpressionHolder> hashes, IGroupByExecutionHelper helper) : base(aggs, hashes, helper) { }
+        public SingleGroupGrouper(List<Aggregate> aggs,List<ExpressionHolder> hashes, IGroupByExecutionHelper helper) : base(aggs, hashes, helper)
+        { }
 
         /// <summary>
         /// Sets values to the Count(*) aggregates because there is nothing to be computed.
@@ -132,7 +133,6 @@ namespace QueryEngine
             var groupByJob = (GroupByJob)job;
             var results = groupByJob.results;
             var aggregates = groupByJob.aggregates;
-            var aggResults = groupByJob.aggResults;
 
             for (int i = groupByJob.start; i < groupByJob.end; i++)
             {

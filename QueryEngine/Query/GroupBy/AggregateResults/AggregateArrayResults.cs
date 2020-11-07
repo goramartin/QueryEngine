@@ -29,11 +29,11 @@ namespace QueryEngine
 
     internal  class AggregateArrayResults<T> : AggregateArrayResults
     {
-        public List<T> values;
+        public List<T> values = new List<T>();
     }
 
     internal class AggregateArrayAvgResults<T> : AggregateArrayResults<T>
     {
-        public List<T> eltUsed;
+        public List<T> eltUsed = new List<T>();
     }
 }
