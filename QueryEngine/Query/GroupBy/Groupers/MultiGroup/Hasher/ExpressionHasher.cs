@@ -42,6 +42,8 @@ namespace QueryEngine
         /// Expects that the cache is different than the containing one in (this).
         /// </summary>
         public abstract ExpressionHasher Clone(ExpressionEqualityComparer cache);
+
+        public abstract void SetCache(ExpressionEqualityComparer cache);
     }
 
     internal class ExpressionIntegerHasher : ExpressionHasher
@@ -74,6 +76,11 @@ namespace QueryEngine
         public override ExpressionHasher Clone(ExpressionEqualityComparer cache)
         {
             return new ExpressionIntegerHasher(this.expressionHolder, cache);
+        }
+
+        public override void SetCache(ExpressionEqualityComparer cache)
+        {
+            this.cache = (ExpressionIntegerEqualityComparer)cache;
         }
     }
 
@@ -108,6 +115,13 @@ namespace QueryEngine
         {
             return new ExpressionStringHasher(this.expressionHolder, cache);
         }
+
+        public override void SetCache(ExpressionEqualityComparer cache)
+        {
+            this.cache = (ExpressionStringEqualityComparer)cache;
+
+        }
+
     }
 
 }
