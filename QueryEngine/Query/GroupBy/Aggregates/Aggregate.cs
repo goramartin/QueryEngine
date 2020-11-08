@@ -93,7 +93,23 @@ namespace QueryEngine
             else if (funcName == "sum" && compType == typeof(int)) return new IntBucketSum(holder);
             else throw new ArgumentException($"Aggregate factory, trying to create a non existent bucket bound aggregate. {funcName}, {compType}");
         }
+        /// <summary>
+        /// Creates an aggregate that is bound with the bucket type results.
+        /// </summary>
+        /// <param name="agg"> A aggregate to build from. </param>
+        public static Aggregate FactoryBucketType(Aggregate agg)
+        {
+            return FactoryBucketType(agg.GetFuncName(), agg.GetAggregateReturnType(), agg.expressionHolder);
+        }
+        /// <summary>
+        /// Creates an aggregate that is bound with the array type results.
+        /// </summary>
+        /// <param name="agg"> A aggregate to build from. </param>
+        public static Aggregate FactoryArrayType(Aggregate agg)
+        {
+            return FactoryArrayType(agg.GetFuncName(), agg.GetAggregateReturnType(), agg.expressionHolder);
 
+        }
 
         public override bool Equals(object obj)
         {

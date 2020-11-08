@@ -27,8 +27,11 @@ namespace QueryEngine
                     if (tmpBucket.aggResult > returnValue) tmpBucket.aggResult = returnValue;
                     else { /* nothing */ }
                 }
-                else tmpBucket.aggResult = returnValue;
-
+                else
+                {
+                    tmpBucket.aggResult = returnValue;
+                    tmpBucket.IsSet = true;
+                }
             }
         }
 
@@ -89,7 +92,11 @@ namespace QueryEngine
                     if (tmpBucket.aggResult.CompareTo(returnValue) > 0) tmpBucket.aggResult = returnValue;
                     else { /* nothing */ }
                 }
-                else tmpBucket.aggResult = returnValue;
+                else
+                {
+                    tmpBucket.aggResult = returnValue;
+                    tmpBucket.IsSet = true;
+                }
             }
         }
 

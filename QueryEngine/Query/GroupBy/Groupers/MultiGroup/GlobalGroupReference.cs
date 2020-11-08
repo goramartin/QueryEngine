@@ -18,7 +18,11 @@ namespace QueryEngine
 
         public override List<AggregateArrayResults> Group(ITableResults resTable)
         {
-            this.bucketAggregates = (List<AggregateBucket>)this.aggregates.Cast<AggregateBucket>();
+            // Create bucket aggregates
+            this.bucketAggregates = new List<AggregateBucket>();
+            for (int i = 0; i < this.aggregates.Count; i++)
+                this.bucketAggregates.Add((AggregateBucket)Aggregate.FactoryBucketType(this.aggregates[i]));
+
             // Create hashers and equality comparers.
             // The hashers receive also the equality comparer as cache.
             var equalityComparers = new List<ExpressionEqualityComparer>();

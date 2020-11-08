@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace QueryEngine
 {
+    /*
     internal class GlobalMerge : Grouper
     {
         public override List<AggregateArrayResults> Group(ITableResults resTable)
@@ -13,4 +14,5 @@ namespace QueryEngine
             throw new NotImplementedException();
         }
     }
+     */
 }
