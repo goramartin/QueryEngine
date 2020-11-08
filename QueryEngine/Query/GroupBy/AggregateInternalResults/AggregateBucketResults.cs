@@ -13,7 +13,7 @@ namespace QueryEngine
     /// </summary>
     internal class AggregateBucketResult
     {
-        public static AggregateBucketResult[] CreateBucketResults(List<Aggregate> aggregates)
+        public static AggregateBucketResult[] CreateBucketResults(List<AggregateBucket> aggregates)
         {
             var aggResults = new AggregateBucketResult[aggregates.Count];
             for (int i = 0; i < aggResults.Length; i++)
@@ -24,7 +24,9 @@ namespace QueryEngine
 
         public static AggregateBucketResult Factory(Type type, string funcName)
         {
-            if (type == typeof(int) && funcName == "avg") return new AggregateBucketResult<int>();
+            if (type == typeof(int) && funcName == "avg") return new AggregateBucketAvgResult<int>();
+            else if (type == typeof(int) && (funcName == "min" || funcName == "max")) return new AggregateBucketResultWithSetFlag<int>();
+            else if (type == typeof(string) && (funcName == "min" || funcName == "max")) return new AggregateBucketResultWithSetFlag<string>();
             else if (type == typeof(int)) return new AggregateBucketResult<int>();
             else if (type == typeof(string)) return new AggregateBucketResult<string>();
             else throw new ArgumentException($"Aggregate bucket results factory, cannot create a results holder with the type {type} for function {funcName}.");

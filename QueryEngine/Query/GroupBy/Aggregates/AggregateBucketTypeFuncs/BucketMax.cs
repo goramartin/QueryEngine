@@ -19,8 +19,14 @@ namespace QueryEngine
         {
             if (this.expr.TryEvaluate(in row, out int returnValue))
             {
-                var tmpBucket = ((AggregateBucketResult<int>)bucket);
-                if (tmpBucket.aggResult < returnValue) tmpBucket.aggResult = returnValue;
+
+                var tmpBucket = ((AggregateBucketResultWithSetFlag<int>)bucket); ;
+                if (tmpBucket.IsSet)
+                {
+                    if (tmpBucket.aggResult < returnValue) tmpBucket.aggResult = returnValue;
+                    else { /* nothing */ }
+                }
+                else tmpBucket.aggResult = returnValue;
             }
         }
 
@@ -75,8 +81,13 @@ namespace QueryEngine
         {
             if (this.expr.TryEvaluate(in row, out string returnValue))
             {
-                var tmpBucket = ((AggregateBucketResult<string>)bucket);
-                if (tmpBucket.aggResult.CompareTo(returnValue) < 0) tmpBucket.aggResult = returnValue;
+                var tmpBucket = ((AggregateBucketResultWithSetFlag<string>)bucket);
+                if (tmpBucket.IsSet)
+                {
+                    if (tmpBucket.aggResult.CompareTo(returnValue) < 0) tmpBucket.aggResult = returnValue;
+                    else { /* nothing */ }
+                }
+                else tmpBucket.aggResult = returnValue;
             }
         }
 

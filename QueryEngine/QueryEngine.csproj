@@ -82,8 +82,8 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="QueryEngine.cs" />
     <Compile Include="Query\GroupBy\Aggregates\AggregateBucket.cs" />
-    <Compile Include="Query\GroupBy\AggregateResults\AggregateArrayResults.cs" />
-    <Compile Include="Query\GroupBy\AggregateResults\AggregateBucketResults.cs" />
+    <Compile Include="Query\GroupBy\AggregateInternalResults\AggregateArrayResults.cs" />
+    <Compile Include="Query\GroupBy\AggregateInternalResults\AggregateBucketResults.cs" />
     <Compile Include="Query\GroupBy\Aggregates\Aggregate.cs" />
     <Compile Include="Query\GroupBy\Aggregates\AggregateArray.cs" />
     <Compile Include="Query\GroupBy\Aggregates\AggregateArrayTypeFuncs\ArrayAvg.cs" />
@@ -98,6 +98,8 @@
     <Compile Include="Query\GroupBy\Aggregates\AggregateBucketTypeFuncs\BucketSum.cs" />
     <Compile Include="Query\GroupBy\Groupers\MultiGroup\EqualityComparer\ExpressionEqualityComparer.cs" />
     <Compile Include="Query\GroupBy\Groupers\MultiGroup\EqualityComparer\RowEqualityComparerNoHash.cs" />
+    <Compile Include="Query\GroupBy\Groupers\MultiGroup\GlobalGroup.cs" />
+    <Compile Include="Query\GroupBy\Groupers\MultiGroup\GlobalGroupReference.cs" />
     <Compile Include="Query\GroupBy\Groupers\MultiGroup\Hasher\DictKeyStruct.cs" />
     <Compile Include="Query\GroupBy\Groupers\MultiGroup\Hasher\ExpressionHasher.cs" />
     <Compile Include="Query\GroupBy\Groupers\MultiGroup\LocalGroupLocalMergeReference.cs" />
@@ -130,7 +132,7 @@
     <Compile Include="Query\QueryObject.cs" />
     <Compile Include="Query\QueryVariableMap.cs" />
     <Compile Include="Query\Results\AggregateResults.cs" />
-    <Compile Include="Query\Results\MatchResults.cs" />
+    <Compile Include="Query\Match\DFSearcher\MatchInternalResults.cs" />
     <Compile Include="Query\Results\MultiTableResults.cs" />
     <Compile Include="Query\Results\TableResults.cs" />
     <Compile Include="Query\Results\TableResultsRowProxy.cs" />

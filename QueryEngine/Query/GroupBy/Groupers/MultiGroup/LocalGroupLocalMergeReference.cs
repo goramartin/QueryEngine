@@ -58,8 +58,8 @@ namespace QueryEngine
                     groups.Add(i, position);
                 }
 
-                for (int j = 0; j < arrayAggregates.Count; j++)
-                    arrayAggregates[j].Apply(in row, position);
+                for (int j = 0; j < this.arrayAggregates.Count; j++)
+                   this.arrayAggregates[j].Apply(in row, position);
             }
 
             return aggResults;
