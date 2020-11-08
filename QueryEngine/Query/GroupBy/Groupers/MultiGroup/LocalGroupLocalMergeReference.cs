@@ -12,11 +12,13 @@ namespace QueryEngine
     /// </summary>
     internal class LocalGroupLocalMergeReference : Grouper
     {
+        private List<AggregateArray> arrayAggregates = null;
         public LocalGroupLocalMergeReference(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper) : base(aggs, hashes, helper)
         { }
 
         public override List<AggregateArrayResults> Group(ITableResults resTable)
         {
+            this.arrayAggregates = (List<AggregateArray>)this.aggregates.Cast<AggregateArray>();
             // Create hashers and equality comparers.
             // The hashers receive also the equality comparer as cache.
             var equalityComparers = new List<ExpressionEqualityComparer>();
@@ -37,14 +39,14 @@ namespace QueryEngine
         /// <returns> Aggregate results. </returns>
         private List<AggregateArrayResults> GroupWork(RowEqualityComparerWithHash equalityComparer, ITableResults results)
         {
-            var aggResults = AggregateArrayResults.CreateArrayResults(this.aggregates);
+            var aggResults = AggregateArrayResults.CreateArrayResults(this.arrayAggregates);
             var groups = new Dictionary<int, int>(equalityComparer);
             int position;
             TableResults.RowProxy row;
 
             // Set internal results of the aggregates.
-            for (int i = 0; i < this.aggregates.Count; i++)
-                this.aggregates[i].SetAggResults(aggResults[i]);
+            for (int i = 0; i < this.arrayAggregates.Count; i++)
+                this.arrayAggregates[i].SetAggResults(aggResults[i]);
 
             // Create groups and compute aggregates for each individual group.
             for (int i = 0; i < results.NumberOfMatchedElements; i++)
@@ -56,8 +58,8 @@ namespace QueryEngine
                     groups.Add(i, position);
                 }
 
-                for (int j = 0; j < aggregates.Count; j++)
-                    aggregates[j].Apply(in row, position);
+                for (int j = 0; j < arrayAggregates.Count; j++)
+                    arrayAggregates[j].Apply(in row, position);
             }
 
             return aggResults;

@@ -58,16 +58,22 @@ namespace QueryEngine
             return (Aggregate)Activator.CreateInstance(this.GetType(), this.expressionHolder);
         }
 
-        public static Aggregate FactoryArrayType(string funcType, Type compType, ExpressionHolder holder = null)
+        /// <summary>
+        /// creates an aggregate that is bound with the array type results.
+        /// </summary>
+        /// <param name="funcName"> A name of the aggregate function.  </param>
+        /// <param name="compType"> A return type of the aggregate function. </param>
+        /// <param name="holder"> An expression to compute values with for the aggregate.</param>
+        public static Aggregate FactoryArrayType(string funcName, Type compType, ExpressionHolder holder = null)
         {
-            if (funcType == "count" && compType == typeof(int)) return new ArrayCount(holder);
-            else if (funcType == "max" && compType == typeof(int)) return new IntArrayMax(holder);
-            else if (funcType == "max" && compType == typeof(string)) return new StrArrayMax(holder);
-            else if (funcType == "min" && compType == typeof(int)) return new IntArrayMin(holder);
-            else if (funcType == "min" && compType == typeof(string)) return new StrArrayMin(holder);
-            else if (funcType == "avg" && compType == typeof(int)) return new IntArrayAvg(holder);
-            else if (funcType == "sum" && compType == typeof(int)) return new IntArraySum(holder);
-            else throw new ArgumentException($"Aggregate factory, trying to create a non existent aggregate. {funcType}, {compType}");
+            if (funcName == "count" && compType == typeof(int)) return new ArrayCount(holder);
+            else if (funcName == "max" && compType == typeof(int)) return new IntArrayMax(holder);
+            else if (funcName == "max" && compType == typeof(string)) return new StrArrayMax(holder);
+            else if (funcName == "min" && compType == typeof(int)) return new IntArrayMin(holder);
+            else if (funcName == "min" && compType == typeof(string)) return new StrArrayMin(holder);
+            else if (funcName == "avg" && compType == typeof(int)) return new IntArrayAvg(holder);
+            else if (funcName == "sum" && compType == typeof(int)) return new IntArraySum(holder);
+            else throw new ArgumentException($"Aggregate factory, trying to create a non existent aggregate. {funcName}, {compType}");
         }
 
         public override bool Equals(object obj)
@@ -82,76 +88,8 @@ namespace QueryEngine
                 else return false;
             }
         }
-
-        #region ArrayStorageInterface
-        public abstract void Apply(in TableResults.RowProxy row, int position);
-        public abstract void MergeOn(int into, int from);
-        public abstract void SetMergingWith(AggregateArrayResults resultsStorage2);
-        public abstract void SetAggResults(AggregateArrayResults resultsStorage);
-        public abstract void UnsetMergingWith();
-        public abstract void UnsetAggResults();
-        #endregion ArrayStorageInterface
-
         public abstract Type GetAggregateReturnType();
         public abstract string GetFuncName();
 
     }
-
-    /// <summary>
-    /// A base class extension.
-    /// </summary>
-    /// <typeparam name="T"> A return type of an aggregate function. </typeparam>
-    internal abstract class Aggregate<T> : Aggregate 
-    {
-        protected ExpressionReturnValue<T> expr;
-        public Aggregate(ExpressionHolder expressionHolder) : base(expressionHolder)
-        {
-            if (expressionHolder != null) this.expr = (ExpressionReturnValue<T>)expressionHolder.Expr;
-            else this.expr = null;
-        }
-
-        public override Type GetAggregateReturnType()
-        {
-            return typeof(T);
-        }
-    }
-
-    /// <summary>
-    /// An aggregate fucntion base class for computing on array like storage.
-    /// It enables to set direct reference to the result storage values.
-    /// This enables to omit a lot of casts to the appropriate types.
-    /// The methods SET stores the appropriate reference from the result storage holder.
-    /// The methods UNSET unsets these references.
-    /// </summary>
-    /// <typeparam name="T"> A return type of the aggregate function. </typeparam>
-    internal abstract class AggregateArray<T> : Aggregate<T>
-    {
-        protected List<T> aggResults = null;
-        protected List<T> mergingWithAggResults = null;
-
-        public AggregateArray(ExpressionHolder expressionHolder) : base(expressionHolder)
-        {}
-
-        public override void SetMergingWith(AggregateArrayResults resultsStorage2)
-        {
-            this.mergingWithAggResults = ((AggregateArrayResults<T>)resultsStorage2).values;
-        }
-
-        public override void SetAggResults(AggregateArrayResults resultsStorage1) 
-        {
-            this.aggResults = ((AggregateArrayResults<T>)resultsStorage1).values;
-        }
-
-        public override void UnsetAggResults()
-        {
-            this.aggResults = null;
-        }
-
-        public override void UnsetMergingWith()
-        {
-            this.mergingWithAggResults = null;
-        }
-    }
-
-
 }

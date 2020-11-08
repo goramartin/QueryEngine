@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,11 +14,13 @@ namespace QueryEngine
     /// </summary>
     internal class LocalGroupLocalMerge : Grouper
     {
+        private List<AggregateArray> arrayAggregates = null;
         public LocalGroupLocalMerge(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper) : base(aggs, hashes, helper) 
         { }
 
         public override List<AggregateArrayResults> Group(ITableResults resTable)
         {
+            this.arrayAggregates = (List<AggregateArray>)this.aggregates.Cast<AggregateArray>();
             // Create hashers and equality comparers.
             // The hashers receive also the equality comparer as cache.
             var equalityComparers = new List<ExpressionEqualityComparer>();
@@ -34,14 +37,14 @@ namespace QueryEngine
         }
         private List<AggregateArrayResults> SingleThreadGroupBy(ITableResults resTable, List<ExpressionEqualityComparer> equalityComparers, List<ExpressionHasher> hashers)
         {
-            var tmp = new GroupByJob(new RowHasher(hashers), new RowEqualityComparerNoHash(resTable, equalityComparers), this.aggregates, resTable, 0, resTable.NumberOfMatchedElements);
+            var tmp = new GroupByJob(new RowHasher(hashers), new RowEqualityComparerNoHash(resTable, equalityComparers), this.arrayAggregates, resTable, 0, resTable.NumberOfMatchedElements);
             SingleThreadGroupByWork(tmp);
             return tmp.aggResults;
         }
 
         private List<AggregateArrayResults> ParallelGroupBy(ITableResults resTable, List<ExpressionEqualityComparer> equalityComparers, List<ExpressionHasher> hashers)
         {
-            GroupByJob[] jobs = CreateJobs(resTable, this.aggregates, equalityComparers, hashers);
+            GroupByJob[] jobs = CreateJobs(resTable, this.arrayAggregates, equalityComparers, hashers);
             ParallelWork(jobs, 0, ThreadCount);
             return jobs[0].aggResults;
         }
@@ -54,7 +57,7 @@ namespace QueryEngine
         /// Note that they are all copies.
         /// The comparers and hashers build in the constructor of this class are given to the last job, just like the aggregates passed to the construtor.
         /// </summary>
-        private GroupByJob[] CreateJobs(ITableResults results, List<Aggregate> aggs, List<ExpressionEqualityComparer> equalityComparers, List<ExpressionHasher> hashers)
+        private GroupByJob[] CreateJobs(ITableResults results, List<AggregateArray> aggs, List<ExpressionEqualityComparer> equalityComparers, List<ExpressionHasher> hashers)
         {
             GroupByJob[] jobs = new GroupByJob[this.ThreadCount];
             int current = 0;
@@ -198,14 +201,14 @@ namespace QueryEngine
         {
             public RowHasher hasher;
             public RowEqualityComparerNoHash comparer;
-            public List<Aggregate> aggregates;
+            public List<AggregateArray> aggregates;
             public ITableResults results;
             public Dictionary<GroupDictKey, int> groups;
             public List<AggregateArrayResults> aggResults;
             public int start;
             public int end;
 
-            public GroupByJob(RowHasher hasher, RowEqualityComparerNoHash comparer, List<Aggregate> aggregates, ITableResults results, int start, int end)
+            public GroupByJob(RowHasher hasher, RowEqualityComparerNoHash comparer, List<AggregateArray> aggregates, ITableResults results, int start, int end)
             {
                 this.hasher = hasher;
                 this.comparer = comparer;

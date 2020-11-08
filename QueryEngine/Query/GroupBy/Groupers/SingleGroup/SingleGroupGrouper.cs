@@ -13,6 +13,7 @@ namespace QueryEngine
     /// </summary>
     internal class SingleGroupGrouper : Grouper
     {
+        private List<AggregateArray> arrayAggregates = null;
         public SingleGroupGrouper(List<Aggregate> aggs,List<ExpressionHolder> hashes, IGroupByExecutionHelper helper) : base(aggs, hashes, helper)
         { }
 
@@ -25,22 +26,23 @@ namespace QueryEngine
         /// </summary>
         public override List<AggregateArrayResults> Group(ITableResults resTable)
         {
-            var nonAsterixCountAggregates = new List<Aggregate>();
+            this.arrayAggregates = (List<AggregateArray>)this.aggregates.Cast<AggregateArray>();
+            var nonAsterixCountAggregates = new List<AggregateArray>();
             var nonAsterixAggResults = new List<AggregateArrayResults>();
-            var aggResults = AggregateArrayResults.CreateArrayResults(this.aggregates);
+            var aggResults = AggregateArrayResults.CreateArrayResults(this.arrayAggregates);
 
-            for (int i = 0; i < this.aggregates.Count; i++)
+            for (int i = 0; i < this.arrayAggregates.Count; i++)
             {
-                if (this.aggregates[i].IsAstCount)
+                if (this.arrayAggregates[i].IsAstCount)
                 {
                     // Actualise Count(*) result array.
-                    this.aggregates[i].SetAggResults(aggResults[i]);
-                    ((ArrayCount)aggregates[i]).IncBy(resTable.NumberOfMatchedElements, 0);
+                    this.arrayAggregates[i].SetAggResults(aggResults[i]);
+                    ((ArrayCount)arrayAggregates[i]).IncBy(resTable.NumberOfMatchedElements, 0);
                 }
                 else
                 {
                     // Non astrix counts are further passed into the computatoin functions.
-                    nonAsterixCountAggregates.Add(this.aggregates[i]);
+                    nonAsterixCountAggregates.Add(this.arrayAggregates[i]);
                     nonAsterixAggResults.Add(aggResults[i]);
                 }
             }
@@ -64,7 +66,7 @@ namespace QueryEngine
         /// of aggregates.
         /// </summary>
         /// <param name="aggResults"> The results of the merge is stored in this isntances. </param>
-        private void ParallelGroupBy(ITableResults results, List<Aggregate> aggs, List<AggregateArrayResults> aggResults)
+        private void ParallelGroupBy(ITableResults results, List<AggregateArray> aggs, List<AggregateArrayResults> aggResults)
         {
             // -1 because the main thread works as well
             Task[] tasks = new Task[this.ThreadCount - 1];
@@ -94,7 +96,7 @@ namespace QueryEngine
         /// They are expected to be at the last index of the jobs => they must have at least one result assigned.
         /// </summary>
         /// <param name="aggResults"> The results of the merge is stored in this isntances. It is placed into the last job. </param>
-        private GroupByJob[] CreateJobs(ITableResults results, List<Aggregate> aggs, List<AggregateArrayResults> aggResults)
+        private GroupByJob[] CreateJobs(ITableResults results, List<AggregateArray> aggs, List<AggregateArrayResults> aggResults)
         {
             GroupByJob[] jobs = new GroupByJob[this.ThreadCount];
             int current = 0;
@@ -116,7 +118,7 @@ namespace QueryEngine
         /// Computes single threadedly aggregates.
         /// </summary>
         /// <param name="aggResults"> The results of the merge is stored in this isntances. </param>
-        private void SingleThreadGroupBy(ITableResults results, List<Aggregate> aggs, List<AggregateArrayResults> aggResults)
+        private void SingleThreadGroupBy(ITableResults results, List<AggregateArray> aggs, List<AggregateArrayResults> aggResults)
         {
             var job = new GroupByJob(aggs, aggResults, 0, results.NumberOfMatchedElements, results);
             SingleThreadGroupByWork(job);
@@ -163,13 +165,13 @@ namespace QueryEngine
         
         private class GroupByJob
         {
-            public List<Aggregate> aggregates;
+            public List<AggregateArray> aggregates;
             public List<AggregateArrayResults> aggResults;
             public int start;
             public int end;
             public ITableResults results;
 
-            public GroupByJob(List<Aggregate> aggs, List<AggregateArrayResults> aggRes, int start, int end, ITableResults res)
+            public GroupByJob(List<AggregateArray> aggs, List<AggregateArrayResults> aggRes, int start, int end, ITableResults res)
             {
                 this.aggregates = aggs;
                 this.start = start;

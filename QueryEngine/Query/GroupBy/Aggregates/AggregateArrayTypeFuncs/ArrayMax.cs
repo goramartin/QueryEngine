@@ -41,10 +41,6 @@ namespace QueryEngine
         }
     }
 
-    /// <summary>
-    /// A maximum function on string is computed with the help of 
-    /// strA.CompareTo(strB)
-    /// </summary>
     internal sealed class StrArrayMax : AggregateArray<string>
     {
         public StrArrayMax(ExpressionHolder expressionHolder) : base(expressionHolder)

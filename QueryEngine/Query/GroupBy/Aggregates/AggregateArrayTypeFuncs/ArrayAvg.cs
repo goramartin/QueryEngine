@@ -13,9 +13,8 @@ using System.Threading.Tasks;
 namespace QueryEngine
 {
     /// <summary>
-    /// A class computes avg using incremental approach.
-    /// There is a need to rememeber the number of used elements for the already
-    /// computed average.
+    /// A class computes avg by remembering the number of values and their sum.
+    /// The final result must be computed separately when accessing the aggregate results.
     /// </summary>
     internal sealed class IntArrayAvg : AggregateArray<int>
     {

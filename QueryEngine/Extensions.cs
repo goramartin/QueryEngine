@@ -19,12 +19,12 @@ namespace QueryEngine
             return tmpString;
         }
 
-        public static List<Aggregate> CloneAggs(this List<Aggregate> aggs)
+        public static List<AggregateArray> CloneAggs(this List<AggregateArray> aggs)
         {
-            var tmp = new List<Aggregate>();
+            var tmp = new List<AggregateArray>();
 
             for (int i = 0; i < aggs.Count; i++)
-                tmp.Add(aggs[i].Clone());
+                tmp.Add((AggregateArray)aggs[i].Clone());
 
             return tmp;
         }

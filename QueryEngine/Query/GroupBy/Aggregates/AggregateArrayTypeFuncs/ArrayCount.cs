@@ -18,9 +18,6 @@ using System.Threading.Tasks;
 
 namespace QueryEngine
 {
-    /// <summary>
-    /// Counts a number of non null entries.
-    /// </summary>
     internal class ArrayCount : AggregateArray<int>
     {
         public ArrayCount(ExpressionHolder expressionHolder) : base(expressionHolder)
