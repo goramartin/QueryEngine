@@ -16,8 +16,8 @@ namespace QueryEngine
     internal abstract class Grouper
     {
         protected List<Aggregate> aggregates { get; }
-        protected bool InParallel { get; }
         protected List<ExpressionHolder> hashes { get; }
+        protected bool InParallel { get; }
         protected int ThreadCount { get; }
 
         protected Grouper(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper)

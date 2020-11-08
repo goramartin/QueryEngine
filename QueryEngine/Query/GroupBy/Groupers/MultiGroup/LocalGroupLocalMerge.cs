@@ -13,41 +13,35 @@ namespace QueryEngine
     /// </summary>
     internal class LocalGroupLocalMerge : Grouper
     {
-        protected List<ExpressionHasher> hashers;
-        protected List<ExpressionEqualityComparer> equalityComparers;
-        protected List<Aggregate> aggregates;
-
         public LocalGroupLocalMerge(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper) : base(aggs, hashes, helper) 
-        {
-            this.aggregates = aggs;
+        { }
 
+        public override List<AggregateArrayResults> Group(ITableResults resTable)
+        {
             // Create hashers and equality comparers.
             // The hashers receive also the equality comparer as cache.
-            equalityComparers = new List<ExpressionEqualityComparer>();
-            hashers = new List<ExpressionHasher>();
+            var equalityComparers = new List<ExpressionEqualityComparer>();
+            var hashers = new List<ExpressionHasher>();
             for (int i = 0; i < hashes.Count; i++)
             {
                 equalityComparers.Add(ExpressionEqualityComparer.Factory(hashes[i], hashes[i].ExpressionType));
                 hashers.Add(ExpressionHasher.Factory(hashes[i], hashes[i].ExpressionType, equalityComparers[i]));
             }
-        }
 
-        public override List<AggregateArrayResults> Group(ITableResults resTable)
-        {
-            if (this.InParallel && ((resTable.NumberOfMatchedElements / this.ThreadCount) > 1)) return ParallelGroupBy(resTable);
-            else return SingleThreadGroupBy(resTable);
+            if (this.InParallel && ((resTable.NumberOfMatchedElements / this.ThreadCount) > 1)) return ParallelGroupBy(resTable, equalityComparers, hashers);
+            else return SingleThreadGroupBy(resTable, equalityComparers, hashers);
 
         }
-        private List<AggregateArrayResults> SingleThreadGroupBy(ITableResults resTable)
+        private List<AggregateArrayResults> SingleThreadGroupBy(ITableResults resTable, List<ExpressionEqualityComparer> equalityComparers, List<ExpressionHasher> hashers)
         {
-            var tmp = new GroupByJob(new RowHasher(this.hashers), new RowEqualityComparerNoHash(resTable, this.equalityComparers), this.aggregates, resTable, 0, resTable.NumberOfMatchedElements);
+            var tmp = new GroupByJob(new RowHasher(hashers), new RowEqualityComparerNoHash(resTable, equalityComparers), this.aggregates, resTable, 0, resTable.NumberOfMatchedElements);
             SingleThreadGroupByWork(tmp);
             return tmp.aggResults;
         }
 
-        private List<AggregateArrayResults> ParallelGroupBy(ITableResults resTable)
+        private List<AggregateArrayResults> ParallelGroupBy(ITableResults resTable, List<ExpressionEqualityComparer> equalityComparers, List<ExpressionHasher> hashers)
         {
-            GroupByJob[] jobs = CreateJobs(resTable, this.aggregates);
+            GroupByJob[] jobs = CreateJobs(resTable, this.aggregates, equalityComparers, hashers);
             ParallelWork(jobs, 0, ThreadCount);
             return jobs[0].aggResults;
         }
@@ -60,7 +54,7 @@ namespace QueryEngine
         /// Note that they are all copies.
         /// The comparers and hashers build in the constructor of this class are given to the last job, just like the aggregates passed to the construtor.
         /// </summary>
-        private GroupByJob[] CreateJobs(ITableResults results, List<Aggregate> aggs)
+        private GroupByJob[] CreateJobs(ITableResults results, List<Aggregate> aggs, List<ExpressionEqualityComparer> equalityComparers, List<ExpressionHasher> hashers)
         {
             GroupByJob[] jobs = new GroupByJob[this.ThreadCount];
             int current = 0;
@@ -68,8 +62,8 @@ namespace QueryEngine
             if (addition == 0)
                 throw new ArgumentException($"{this.GetType()}, a range for a thread cannot be 0.");
              
-            var lastComp = new RowEqualityComparerNoHash(results, this.equalityComparers);
-            var lastHasher = new RowHasher(this.hashers);
+            var lastComp = new RowEqualityComparerNoHash(results, equalityComparers);
+            var lastHasher = new RowHasher(hashers);
 
             for (int i = 0; i < jobs.Length - 1; i++)
             {
