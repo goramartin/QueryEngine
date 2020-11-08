@@ -41,6 +41,6 @@ namespace QueryEngine
 
     internal class AggregateArrayAvgResults<T> : AggregateArrayResults<T>
     {
-        public List<T> eltUsed = new List<T>();
+        public List<int> eltUsed = new List<int>();
     }
 }

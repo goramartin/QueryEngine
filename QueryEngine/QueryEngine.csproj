@@ -81,6 +81,7 @@
     <Compile Include="Query\Expression\References\VariableReferenceNameHolder.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="QueryEngine.cs" />
+    <Compile Include="Query\GroupBy\Aggregates\AggregateBucket.cs" />
     <Compile Include="Query\GroupBy\AggregateResults\AggregateArrayResults.cs" />
     <Compile Include="Query\GroupBy\AggregateResults\AggregateBucketResults.cs" />
     <Compile Include="Query\GroupBy\Aggregates\Aggregate.cs" />

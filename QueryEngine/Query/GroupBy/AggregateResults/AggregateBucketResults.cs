@@ -31,14 +31,22 @@ namespace QueryEngine
         }
     }
 
+    /// <typeparam name="T"> A return type of the aggregation function. </typeparam>
     internal class AggregateBucketResult<T> : AggregateBucketResult
     {
         public T aggResult = default;
     }
+    /// <typeparam name="T"> A return type of the aggregation function. </typeparam>
     internal class AggregateBucketAvgResult<T> : AggregateBucketResult<T>
     {
         public int eltUsed = 0;
     }
+    /// <summary>
+    /// Mainly its purpose is to initialise first values of the bucket, for example,
+    /// a min/max aggregates must be initialised first otherwise they could compare new values with the
+    /// default values from the constructor.
+    /// </summary>
+    /// <typeparam name="T"> A return type of the aggregation function. </typeparam>
     internal class AggregateBucketResultWithSetFlag<T> : AggregateBucketResult<T>
     {
         public bool IsSet = false;
