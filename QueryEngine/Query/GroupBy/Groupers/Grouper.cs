@@ -29,5 +29,6 @@ namespace QueryEngine
         }
 
         public abstract List<AggregateArrayResults> Group(ITableResults resTable);
+
     }
 }
