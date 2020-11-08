@@ -34,11 +34,17 @@ namespace QueryEngine
         }
     }
 
-    internal  class AggregateArrayResults<T> : AggregateArrayResults
+    /// <typeparam name="T"> A return type of the aggregation function. </typeparam>
+    internal class AggregateArrayResults<T> : AggregateArrayResults
     {
         public List<T> values = new List<T>();
     }
 
+    /// <summary>
+    /// Mainly it is used during computing average.
+    /// The class must rememeber the number of added elements to the computed average.
+    /// </summary>
+    /// <typeparam name="T"> A return type of the aggregation function. </typeparam>
     internal class AggregateArrayAvgResults<T> : AggregateArrayResults<T>
     {
         public List<int> eltUsed = new List<int>();

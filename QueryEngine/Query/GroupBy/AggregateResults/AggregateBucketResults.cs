@@ -36,6 +36,10 @@ namespace QueryEngine
     {
         public T aggResult = default;
     }
+    /// <summary>
+    /// Mainly it is used during computing average.
+    /// The class must rememeber the number of added elements to the computed average.
+    /// </summary>
     /// <typeparam name="T"> A return type of the aggregation function. </typeparam>
     internal class AggregateBucketAvgResult<T> : AggregateBucketResult<T>
     {
