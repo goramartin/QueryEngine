@@ -33,12 +33,15 @@ namespace QueryEngine
 
     internal class AggregateBucketResult<T> : AggregateBucketResult
     {
-        public T aggResult;
+        public T aggResult = default;
     }
-
     internal class AggregateBucketAvgResult<T> : AggregateBucketResult<T>
     {
-        public T eltUsed;
+        public int eltUsed = 0;
+    }
+    internal class AggregateBucketResultWithSetFlag<T> : AggregateBucketResult<T>
+    {
+        public bool IsSet = false;
     }
 
 }

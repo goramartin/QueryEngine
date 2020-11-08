@@ -59,7 +59,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// creates an aggregate that is bound with the array type results.
+        /// Creates an aggregate that is bound with the array type results.
         /// </summary>
         /// <param name="funcName"> A name of the aggregate function.  </param>
         /// <param name="compType"> A return type of the aggregate function. </param>
@@ -73,8 +73,27 @@ namespace QueryEngine
             else if (funcName == "min" && compType == typeof(string)) return new StrArrayMin(holder);
             else if (funcName == "avg" && compType == typeof(int)) return new IntArrayAvg(holder);
             else if (funcName == "sum" && compType == typeof(int)) return new IntArraySum(holder);
-            else throw new ArgumentException($"Aggregate factory, trying to create a non existent aggregate. {funcName}, {compType}");
+            else throw new ArgumentException($"Aggregate factory, trying to create a non existent array bound aggregate. {funcName}, {compType}");
         }
+
+        /// <summary>
+        /// Creates an aggregate that is bound with the bucket type results.
+        /// </summary>
+        /// <param name="funcName"> A name of the aggregate function.  </param>
+        /// <param name="compType"> A return type of the aggregate function. </param>
+        /// <param name="holder"> An expression to compute values with for the aggregate.</param>
+        public static Aggregate FactoryBucketType(string funcName, Type compType, ExpressionHolder holder = null)
+        {
+            if (funcName == "count" && compType == typeof(int)) return new BucketCount(holder);
+            else if (funcName == "max" && compType == typeof(int)) return new IntBucketMax(holder);
+            else if (funcName == "max" && compType == typeof(string)) return new StrBucketMax(holder);
+            else if (funcName == "min" && compType == typeof(int)) return new IntBucketMin(holder);
+            else if (funcName == "min" && compType == typeof(string)) return new StrBucketMin(holder);
+            else if (funcName == "avg" && compType == typeof(int)) return new IntBucketAvg(holder);
+            else if (funcName == "sum" && compType == typeof(int)) return new IntBucketSum(holder);
+            else throw new ArgumentException($"Aggregate factory, trying to create a non existent bucket bound aggregate. {funcName}, {compType}");
+        }
+
 
         public override bool Equals(object obj)
         {
