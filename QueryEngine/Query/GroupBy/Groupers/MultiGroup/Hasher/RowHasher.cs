@@ -64,5 +64,11 @@ namespace QueryEngine
             for (int i = 0; i < this.hashers.Count; i++)
                 this.hashers[i].SetCache(caches[i]);
         }
+
+        public void UnsetCache()
+        {
+            for (int i = 0; i < this.hashers.Count; i++)
+                this.hashers[i].SetCache(null);
+        }
     }
 }

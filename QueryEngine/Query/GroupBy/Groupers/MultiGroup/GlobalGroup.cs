@@ -15,10 +15,10 @@ namespace QueryEngine
     /// Subsequently, the threads start to aggrgate the results with the help of 
     /// a global ConcurrentDictionary.
     /// </summary>
-    internal class GlobalMerge : Grouper
+    internal class GlobalGroup : Grouper
     {
         private List<AggregateBucket> bucketAggregates = null;
-        public GlobalMerge(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper) : base(aggs, hashes, helper)
+        public GlobalGroup(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper) : base(aggs, hashes, helper)
         { }
 
         public override AggregateResults Group(ITableResults resTable)
@@ -41,7 +41,6 @@ namespace QueryEngine
             if (this.InParallel && ((resTable.NumberOfMatchedElements / this.ThreadCount) > 1)) return this.ParallelGroupBy(new RowEqualityComparerWithHash(resTable, equalityComparers, new RowHasher(hashers), false), resTable);
             else return SingleThreadGroupBy(new RowEqualityComparerWithHash(resTable, equalityComparers, new RowHasher(hashers), false), resTable);
         }
-
 
         /// <summary>
         /// Computes aggregates and groups in parallel.

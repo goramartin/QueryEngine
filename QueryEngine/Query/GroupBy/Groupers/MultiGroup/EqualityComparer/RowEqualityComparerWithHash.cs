@@ -31,7 +31,7 @@ namespace QueryEngine
 
             // Just in case, set the cache to null.
             if (CacheOn) this.Hasher.SetCache(this.Comparers);
-            else this.Hasher.SetCache(null);
+            else this.Hasher.UnsetCache();
         }
 
         public bool Equals(int x, int y)
