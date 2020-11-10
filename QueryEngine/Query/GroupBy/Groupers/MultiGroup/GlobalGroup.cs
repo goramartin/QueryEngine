@@ -115,6 +115,7 @@ namespace QueryEngine
         /// <param name="job"> A group by job class. </param>
         private static void SingleThreadGroupByWork(object job)
         {
+            #region DECL
             var tmpJob = ((GroupByJob)job);
             var results = tmpJob.results;
             var groups = tmpJob.groups;
@@ -122,6 +123,7 @@ namespace QueryEngine
             AggregateBucketResult[] buckets = null;
             TableResults.RowProxy row;
             var bucketFactory = tmpJob.bucketFactory;
+            #endregion DECL
 
             for (int i = tmpJob.start; i < tmpJob.end; i++)
             {

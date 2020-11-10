@@ -36,14 +36,22 @@ namespace QueryEngine
             if (this.InParallel && ((resTable.NumberOfMatchedElements / this.ThreadCount) > 1)) return ParallelGroupBy(resTable, equalityComparers, hashers);
             else return SingleThreadGroupBy(resTable, equalityComparers, hashers);
         }
+
+
+        /// <summary>
+        /// Note that the received hashers and equality comparers have already set their internal cache to each other.
+        /// </summary>
         private AggregateResults SingleThreadGroupBy(ITableResults resTable, List<ExpressionEqualityComparer> equalityComparers, List<ExpressionHasher> hashers)
         {
-            var tmp = new GroupByJob(new RowHasher(hashers), new RowEqualityComparerNoHash(resTable, equalityComparers), this.arrayAggregates, resTable, 0, resTable.NumberOfMatchedElements);
-            SingleThreadGroupByWork(tmp);
+            var tmpJob = new GroupByJob(new RowHasher(hashers), new RowEqualityComparerNoHash(resTable, equalityComparers), this.arrayAggregates, resTable, 0, resTable.NumberOfMatchedElements);
+            SingleThreadGroupByWork(tmpJob);
             //return tmp.aggResults;
             return null;
         }
 
+        /// <summary>
+        /// Note that the received hashers and equality comparers have already set their internal cache to each other.
+        /// </summary>
         private AggregateResults ParallelGroupBy(ITableResults resTable, List<ExpressionEqualityComparer> equalityComparers, List<ExpressionHasher> hashers)
         {
             GroupByJob[] jobs = CreateJobs(resTable, this.arrayAggregates, equalityComparers, hashers);
@@ -144,10 +152,12 @@ namespace QueryEngine
         /// </summary>
         private static void SingleThreadMergeWork(object job1, object job2)
         {
+            #region DECL
             var groups1 = ((GroupByJob)job1).groups;
             var groups2 = ((GroupByJob)job2).groups;
             var aggs1 = ((GroupByJob)job1).aggregates;
             var aggsResults2 = ((GroupByJob)job2).aggResults;
+            #endregion DECL
 
             // Set their mergins with field.
             // To avoid casting multiple times.
@@ -177,15 +187,16 @@ namespace QueryEngine
         /// </summary>
         private static void SingleThreadGroupByWork(object job)
         {
+            #region DECL
             var tmpJob = ((GroupByJob)job);
             var hasher = tmpJob.hasher;
             var aggregates = tmpJob.aggregates;
             var results = tmpJob.results;
             var groups = tmpJob.groups;
-
             int position;
             TableResults.RowProxy row;
             GroupDictKey key;
+            #endregion DECL
 
             for (int i = tmpJob.start; i < tmpJob.end; i++)
             {
@@ -206,7 +217,6 @@ namespace QueryEngine
         private class GroupByJob
         {
             public RowHasher hasher;
-            public RowEqualityComparerNoHash comparer;
             public List<AggregateArray> aggregates;
             public ITableResults results;
             public Dictionary<GroupDictKey, int> groups;
@@ -217,7 +227,6 @@ namespace QueryEngine
             public GroupByJob(RowHasher hasher, RowEqualityComparerNoHash comparer, List<AggregateArray> aggregates, ITableResults results, int start, int end)
             {
                 this.hasher = hasher;
-                this.comparer = comparer;
                 this.aggregates = aggregates;
                 this.results = results;
                 this.start = start;

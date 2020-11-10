@@ -41,10 +41,12 @@ namespace QueryEngine
         /// <returns> Aggregate results. </returns>
         private AggregateResults SingleThreadGroupBy(RowEqualityComparerWithHash equalityComparer, ITableResults results)
         {
+            #region DECL
             var aggResults = AggregateArrayResults.CreateArrayResults(this.arrayAggregates);
             var groups = new Dictionary<int, int>(equalityComparer);
             int position;
             TableResults.RowProxy row;
+            #endregion DECL
 
             // Set internal results of the aggregates.
             for (int i = 0; i < this.arrayAggregates.Count; i++)

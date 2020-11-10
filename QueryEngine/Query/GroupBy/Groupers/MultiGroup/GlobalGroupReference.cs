@@ -40,10 +40,11 @@ namespace QueryEngine
 
         private AggregateResults SingleThreadGroupBy(RowEqualityComparerWithHash equalityComparer, ITableResults results)
         {
+            #region DECL
             AggregateBucketResult[] buckets = null; 
             var groups = new Dictionary<int, AggregateBucketResult[]>(equalityComparer);
             TableResults.RowProxy row;
-
+            #endregion DECL
             // Create groups and compute aggregates for each individual group.
             for (int i = 0; i < results.NumberOfMatchedElements; i++)
             {

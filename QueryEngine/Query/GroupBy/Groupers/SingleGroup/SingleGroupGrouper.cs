@@ -136,9 +136,12 @@ namespace QueryEngine
         /// <param name="job"> A GroupByJob class. </param>
         private static void SingleThreadGroupByWork(Object job)
         {
+
+            #region DECL
             var groupByJob = (GroupByJob)job;
             var results = groupByJob.results;
             var aggregates = groupByJob.aggregates;
+            #endregion DECL
 
             for (int i = groupByJob.start; i < groupByJob.end; i++)
             {
