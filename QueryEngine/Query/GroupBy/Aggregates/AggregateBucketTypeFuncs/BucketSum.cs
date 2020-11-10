@@ -29,6 +29,16 @@ namespace QueryEngine
                 Interlocked.Add(ref ((AggregateBucketResult<int>)bucket).aggResult, returnValue);
         }
 
+        public override void MergeTwoBuckets(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
+        {
+            ((AggregateBucketResult<int>)bucket1).aggResult += ((AggregateBucketResult<int>)bucket2).aggResult;
+        }
+
+        public override void MergeTwoBucketsThreadSage(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
+        {
+            Interlocked.Add(ref ((AggregateBucketResult<int>)bucket1).aggResult, ((AggregateBucketResult<int>)bucket2).aggResult);
+        }
+
         public override string ToString()
         {
             return "Sum(" + this.expressionHolder.ToString() + ")";
@@ -38,5 +48,6 @@ namespace QueryEngine
         {
             return "sum";
         }
+
     }
 }

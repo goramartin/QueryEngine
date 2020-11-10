@@ -43,6 +43,15 @@ namespace QueryEngine
             else Interlocked.Increment(ref ((AggregateBucketResult<int>)bucket).aggResult);
         }
 
+        public override void MergeTwoBuckets(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
+        {
+            ((AggregateBucketResult<int>)bucket1).aggResult += ((AggregateBucketResult<int>)bucket2).aggResult;
+        }
+
+        public override void MergeTwoBucketsThreadSage(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
+        {
+            Interlocked.Add(ref ((AggregateBucketResult<int>)bucket1).aggResult, ((AggregateBucketResult<int>)bucket2).aggResult);
+        }
         public override string ToString()
         {
             if (this.IsAstCount) return "Count(*)";

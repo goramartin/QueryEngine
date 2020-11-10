@@ -74,6 +74,32 @@ namespace QueryEngine
             }
         }
 
+        public override void MergeTwoBuckets(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
+        {
+            var tmpBucket1 = ((AggregateBucketResultWithSetFlag<int>)bucket1);
+            var tmpBucket2 = ((AggregateBucketResultWithSetFlag<int>)bucket2);
+            if (tmpBucket1.aggResult > tmpBucket2.aggResult) tmpBucket1.aggResult = tmpBucket2.aggResult;
+            else { /* nothing */ }
+        }
+
+        public override void MergeTwoBucketsThreadSage(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
+        {
+            var tmpBucket1 = ((AggregateBucketResultWithSetFlag<int>)bucket1);
+            // The second is not accessed anymore, because the group in dictionary represents
+            // the first one.
+            var tmpBucket2 = ((AggregateBucketResultWithSetFlag<int>)bucket2);
+
+            // Compare-exchange mechanism.
+            int initialValue, smallerValue;
+            do
+            {
+                initialValue = tmpBucket1.aggResult;
+                if (initialValue > tmpBucket2.aggResult) smallerValue = tmpBucket2.aggResult;
+                else smallerValue = initialValue;
+            }
+            while (initialValue != Interlocked.CompareExchange(ref tmpBucket1.aggResult, smallerValue, initialValue));
+        }
+
         public override string ToString()
         {
             return "Max(" + this.expr.ToString() + ")";
@@ -149,6 +175,32 @@ namespace QueryEngine
             }
         }
 
+        public override void MergeTwoBuckets(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
+        {
+            var tmpBucket1 = ((AggregateBucketResultWithSetFlag<string>)bucket1);
+            var tmpBucket2 = ((AggregateBucketResultWithSetFlag<string>)bucket2);
+            if (tmpBucket1.aggResult.CompareTo(tmpBucket2.aggResult) < 0) tmpBucket1.aggResult = tmpBucket2.aggResult;
+            else { /* nothing */ }
+        }
+
+        public override void MergeTwoBucketsThreadSage(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
+        {
+            var tmpBucket1 = ((AggregateBucketResultWithSetFlag<string>)bucket1);
+            // The second is not accessed anymore, because the group in dictionary represents
+            // the first one.
+            var tmpBucket2 = ((AggregateBucketResultWithSetFlag<string>)bucket2);
+
+            // Compare-exchange mechanism.
+            string initialValue, smallerValue;
+            do
+            {
+                initialValue = tmpBucket1.aggResult;
+                if (initialValue.CompareTo(tmpBucket2.aggResult) < 0) smallerValue = tmpBucket2.aggResult;
+                else smallerValue = initialValue;
+            }
+            while (initialValue != Interlocked.CompareExchange(ref tmpBucket1.aggResult, smallerValue, initialValue));
+
+        }
         public override string ToString()
         {
             return "Max(" + this.expr.ToString() + ")";
