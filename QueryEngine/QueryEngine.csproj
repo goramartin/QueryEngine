@@ -102,6 +102,7 @@
     <Compile Include="Query\GroupBy\Groupers\MultiGroup\GlobalGroupReference.cs" />
     <Compile Include="Query\GroupBy\Groupers\MultiGroup\Hasher\DictKeyStruct.cs" />
     <Compile Include="Query\GroupBy\Groupers\MultiGroup\Hasher\ExpressionHasher.cs" />
+    <Compile Include="Query\GroupBy\Groupers\MultiGroup\LocalGroupGlobalMergeWithBuckets.cs" />
     <Compile Include="Query\GroupBy\Groupers\MultiGroup\LocalGroupLocalMergeReference.cs" />
     <Compile Include="Query\QueryExpressionInfo.cs" />
     <Compile Include="Query\GroupBy\Groupers\Grouper.cs" />
