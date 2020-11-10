@@ -28,7 +28,10 @@ namespace QueryEngine
             this.Results = results;
             this.Comparers = comparers;
             this.Hasher = hasher;
+
+            // Just in case, set the cache to null.
             if (CacheOn) this.Hasher.SetCache(this.Comparers);
+            else this.Hasher.SetCache(null);
         }
 
         public bool Equals(int x, int y)

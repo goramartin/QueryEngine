@@ -16,8 +16,10 @@ namespace QueryEngine
         public LocalGroupLocalMergeReference(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper) : base(aggs, hashes, helper)
         { }
 
-        public override List<AggregateArrayResults> Group(ITableResults resTable)
+        public override AggregateResults Group(ITableResults resTable)
         {
+            if (this.InParallel) throw new ArgumentException($"{this.GetType()}, cannot perform a parallel group by.");
+
             this.arrayAggregates = (List<AggregateArray>)this.aggregates.Cast<AggregateArray>();
             // Create hashers and equality comparers.
             // The hashers receive also the equality comparer as cache.
@@ -29,7 +31,7 @@ namespace QueryEngine
                 hashers.Add(ExpressionHasher.Factory(hashes[i], hashes[i].ExpressionType, null));
             }
 
-            return this.GroupWork(new RowEqualityComparerWithHash(resTable, equalityComparers, new RowHasher(hashers), true),resTable);
+           return this.SingleThreadGroupBy(new RowEqualityComparerWithHash(resTable, equalityComparers, new RowHasher(hashers), true),resTable);
         }
 
         /// <summary>
@@ -37,7 +39,7 @@ namespace QueryEngine
         /// </summary>
         /// <param name="equalityComparer"> Equality comparer where T is int and computes internaly the hash for each row from the result table.</param>
         /// <returns> Aggregate results. </returns>
-        private List<AggregateArrayResults> GroupWork(RowEqualityComparerWithHash equalityComparer, ITableResults results)
+        private AggregateResults SingleThreadGroupBy(RowEqualityComparerWithHash equalityComparer, ITableResults results)
         {
             var aggResults = AggregateArrayResults.CreateArrayResults(this.arrayAggregates);
             var groups = new Dictionary<int, int>(equalityComparer);
@@ -62,7 +64,8 @@ namespace QueryEngine
                    this.arrayAggregates[j].Apply(in row, position);
             }
 
-            return aggResults;
+            // return aggResults;
+            return null;
         }
     }
 }

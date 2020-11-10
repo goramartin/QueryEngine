@@ -19,7 +19,6 @@ namespace QueryEngine
         {
             if (this.expr.TryEvaluate(in row, out int returnValue))
             {
-
                 var tmpBucket = ((AggregateBucketResultWithSetFlag<int>)bucket); ;
                 if (tmpBucket.IsSet)
                 {
@@ -40,26 +39,36 @@ namespace QueryEngine
             if (this.expr.TryEvaluate(in row, out int returnValue))
             {
                 var tmpBucket = ((AggregateBucketResultWithSetFlag<int>)bucket);
-                if (tmpBucket.IsSet)
+                bool wasSet = false;
+                while (!wasSet)
                 {
-                    // Compare-exchange mechanism.
-                    int initialValue, greaterValue;
-                    do
+                    if (tmpBucket.IsSet)
                     {
-                        initialValue = tmpBucket.aggResult;
-                        if (initialValue < returnValue) greaterValue = returnValue;
-                        else greaterValue = initialValue;
+                        // Compare-exchange mechanism.
+                        int initialValue, greaterValue;
+                        do
+                        {
+                            initialValue = tmpBucket.aggResult;
+                            if (initialValue < returnValue) greaterValue = returnValue;
+                            else greaterValue = initialValue;
+                        }
+                        while (initialValue != Interlocked.CompareExchange(ref tmpBucket.aggResult, greaterValue, initialValue));
+                        wasSet = true;
                     }
-                    while (initialValue != Interlocked.CompareExchange(ref tmpBucket.aggResult, greaterValue, initialValue));
-                } else
-                {
-                    // Note that this branch happens only when initing the first value.
-                    lock (this)
+                    else
                     {
-                        // The sets must be in this order, because after setting IsSet flag
-                        // there must be placed the value, otherwise thread could access empty bucket.
-                        tmpBucket.aggResult = returnValue;
-                        tmpBucket.IsSet = true;
+                        // Note that this branch happens only when initing the first value.
+                        lock (this)
+                        {   // Check if other thread inited the first value while waiting.
+                            if (!tmpBucket.IsSet)
+                            {
+                                // The sets must be in this order, because after setting IsSet flag
+                                // there must be placed the value, otherwise thread could access empty bucket.
+                                tmpBucket.aggResult = returnValue;
+                                tmpBucket.IsSet = true;
+                                wasSet = true;
+                            } else { /* next cycle it will go in the other branch of if(IsSet) */}
+                        }
                     }
                 }
             }
@@ -104,27 +113,37 @@ namespace QueryEngine
             if (this.expr.TryEvaluate(in row, out string returnValue))
             {
                 var tmpBucket = ((AggregateBucketResultWithSetFlag<string>)bucket);
-                if (tmpBucket.IsSet)
+                bool wasSet = false;
+                while (!wasSet)
                 {
-                    // Compare-echange mechanism.
-                    string initialValue, greaterValue;
-                    do
+                    if (tmpBucket.IsSet)
                     {
-                        initialValue = tmpBucket.aggResult;
-                        if (initialValue.CompareTo(returnValue) < 0) greaterValue = returnValue;
-                        else greaterValue = initialValue;
+                        // Compare-echange mechanism.
+                        string initialValue, greaterValue;
+                        do
+                        {
+                            initialValue = tmpBucket.aggResult;
+                            if (initialValue.CompareTo(returnValue) < 0) greaterValue = returnValue;
+                            else greaterValue = initialValue;
+                        }
+                        while (initialValue != Interlocked.CompareExchange(ref tmpBucket.aggResult, greaterValue, initialValue));
+                        wasSet = true;
                     }
-                    while (initialValue != Interlocked.CompareExchange(ref tmpBucket.aggResult, greaterValue, initialValue));
-                }
-                else
-                {
-                    // Note that this branch happens only when initing the first value.
-                    lock (this)
+                    else
                     {
-                        // The sets must be in this order, because after setting IsSet flag
-                        // there must be placed the value, otherwise thread could access empty bucket.
-                        tmpBucket.aggResult = returnValue;
-                        tmpBucket.IsSet = true;
+                        // Note that this branch happens only when initing the first value.
+                        lock (this)
+                        {   // Check if other thread inited the first value while waiting.
+                            if (!tmpBucket.IsSet)
+                            {
+                                // The sets must be in this order, because after setting IsSet flag
+                                // there must be placed the value, otherwise thread could access empty bucket.
+                                tmpBucket.aggResult = returnValue;
+                                tmpBucket.IsSet = true;
+                                wasSet = true;
+                            }
+                            else { /* next cycle it will go in the other branch of if(IsSet) */}
+                        }
                     }
                 }
             }

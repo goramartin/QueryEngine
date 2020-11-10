@@ -9,8 +9,10 @@ namespace QueryEngine
 {
     /// <summary>
     /// The class represents multi group grouping algorithm.
+    /// The class uses aggregations with array like storage.
     /// Each thread receives an equality comparer, hasher, aggregates and range of vertices.
     /// The threads then work independently on each other. When the threads finish, the results are merged.
+    /// The results are merged in a form of a binary tree (similar to a merge sort).
     /// </summary>
     internal class LocalGroupLocalMerge : Grouper
     {
@@ -18,7 +20,7 @@ namespace QueryEngine
         public LocalGroupLocalMerge(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper) : base(aggs, hashes, helper) 
         { }
 
-        public override List<AggregateArrayResults> Group(ITableResults resTable)
+        public override AggregateResults Group(ITableResults resTable)
         {
             this.arrayAggregates = (List<AggregateArray>)this.aggregates.Cast<AggregateArray>();
             // Create hashers and equality comparers.
@@ -33,20 +35,21 @@ namespace QueryEngine
 
             if (this.InParallel && ((resTable.NumberOfMatchedElements / this.ThreadCount) > 1)) return ParallelGroupBy(resTable, equalityComparers, hashers);
             else return SingleThreadGroupBy(resTable, equalityComparers, hashers);
-
         }
-        private List<AggregateArrayResults> SingleThreadGroupBy(ITableResults resTable, List<ExpressionEqualityComparer> equalityComparers, List<ExpressionHasher> hashers)
+        private AggregateResults SingleThreadGroupBy(ITableResults resTable, List<ExpressionEqualityComparer> equalityComparers, List<ExpressionHasher> hashers)
         {
             var tmp = new GroupByJob(new RowHasher(hashers), new RowEqualityComparerNoHash(resTable, equalityComparers), this.arrayAggregates, resTable, 0, resTable.NumberOfMatchedElements);
             SingleThreadGroupByWork(tmp);
-            return tmp.aggResults;
+            //return tmp.aggResults;
+            return null;
         }
 
-        private List<AggregateArrayResults> ParallelGroupBy(ITableResults resTable, List<ExpressionEqualityComparer> equalityComparers, List<ExpressionHasher> hashers)
+        private AggregateResults ParallelGroupBy(ITableResults resTable, List<ExpressionEqualityComparer> equalityComparers, List<ExpressionHasher> hashers)
         {
             GroupByJob[] jobs = CreateJobs(resTable, this.arrayAggregates, equalityComparers, hashers);
-            ParallelWork(jobs, 0, ThreadCount);
-            return jobs[0].aggResults;
+            ParallelGroupByWork(jobs, 0, ThreadCount);
+            //return jobs[0].aggResults;
+            return null;
         }
 
         /// <summary>
@@ -54,7 +57,8 @@ namespace QueryEngine
         /// Note that the last job in the array has the end set to the end of the result table.
         /// The addition must always be > 0.
         /// Each job will receive a range from result table, hasher, comparer and aggregates.
-        /// Note that they are all copies.
+        /// Note that they are all copies, because they contain a private stete (hasher contains reference to the equality comparers to enable caching when computing the hash, aggregates
+        /// contain references to storage arrays to avoid casting in a tight loop).
         /// The comparers and hashers build in the constructor of this class are given to the last job, just like the aggregates passed to the construtor.
         /// </summary>
         private GroupByJob[] CreateJobs(ITableResults results, List<AggregateArray> aggs, List<ExpressionEqualityComparer> equalityComparers, List<ExpressionHasher> hashers)
@@ -82,14 +86,14 @@ namespace QueryEngine
         /// Creates a binary tree, where on each non leaf level, results from threads are merged. On the 
         /// last level before the leaf level a grouping is started for each thread based on the given range of result table.
         /// And on the same level they are also merged.
-        /// That means that it never reaches the leaf level by itself but the leaves represent grouping computations started 
+        /// That means that the recursion never reaches the leaf level by itself but the leaves represent grouping computations started 
         /// from the last level before leaf level.
         /// The results are merged on the jobs[0].
         /// </summary>
         /// <param name="jobs"> Jobs for each thread. </param>
         /// <param name="start"> Starting index of a jobs to finish. </param>
         /// <param name="end"> End index of a jobs to finish. </param>
-        private static void ParallelWork(GroupByJob[] jobs, int start, int end)
+        private static void ParallelGroupByWork(GroupByJob[] jobs, int start, int end)
         {
             if (end - start > 3)
             {
@@ -97,9 +101,9 @@ namespace QueryEngine
                 int middle = ((end - start) / 2) + start;
                 if (middle % 2 == 1) middle--;
 
-                Task task = Task.Factory.StartNew(() => ParallelWork(jobs, middle, end));
+                Task task = Task.Factory.StartNew(() => ParallelGroupByWork(jobs, middle, end));
                 // Current thread work.
-                ParallelWork(jobs, start, middle);
+                ParallelGroupByWork(jobs, start, middle);
 
                 // Wait for the other task to finish and start merging its results with yours.
                 task.Wait();
@@ -134,8 +138,9 @@ namespace QueryEngine
         /// Main work of a thread when merging with another threads groups.
         /// To an aggregate, a field mergingWith is set to the other aggregate.
         /// And then for each entry from the other dictionary a method MergeOn(int, int)
-        /// is called. If both groups exists in the both jobs, they are combined.
-        /// Otherwise the new entry is added to the dictionary
+        /// is called, which either combines the results of the two groups or adds it to the end of the result array.
+        /// Also, if both groups exists in the both jobs, they are combined.
+        /// Otherwise the new entry is added to the dictionary.
         /// </summary>
         private static void SingleThreadMergeWork(object job1, object job2)
         {
@@ -168,6 +173,7 @@ namespace QueryEngine
         /// For each result row.
         /// Try to add it to the dictionary and apply aggregate functions with the rows.
         /// Note that when the hash is computed. The comparer cache is set.
+        /// So when the insertion happens, it does not have to compute the values for comparison.
         /// </summary>
         private static void SingleThreadGroupByWork(object job)
         {

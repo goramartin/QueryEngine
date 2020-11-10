@@ -28,7 +28,7 @@ namespace QueryEngine
             this.hashes = hashes;
         }
 
-        public abstract List<AggregateArrayResults> Group(ITableResults resTable);
+        public abstract AggregateResults Group(ITableResults resTable);
 
     }
 }

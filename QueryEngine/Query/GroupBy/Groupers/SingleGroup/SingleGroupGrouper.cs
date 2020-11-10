@@ -24,7 +24,7 @@ namespace QueryEngine
         /// Note that the we are passing direct reference to the aggregates results and aggregates. Thus it assumes
         /// that the further methods merge data only into the passed aggregate results.
         /// </summary>
-        public override List<AggregateArrayResults> Group(ITableResults resTable)
+        public override AggregateResults Group(ITableResults resTable)
         {
             this.arrayAggregates = (List<AggregateArray>)this.aggregates.Cast<AggregateArray>();
             var nonAsterixCountAggregates = new List<AggregateArray>();
@@ -48,11 +48,11 @@ namespace QueryEngine
             }
 
             // Note that the result will reside in the aggResults variable after the computation is finished.
-            if (nonAsterixCountAggregates.Count == 0) return aggResults; 
-            else if (this.InParallel) this.ParallelGroupBy(resTable, nonAsterixCountAggregates, nonAsterixAggResults);
-            else this.SingleThreadGroupBy(resTable, nonAsterixCountAggregates, nonAsterixAggResults);
+            if (nonAsterixCountAggregates.Count == 0) return null; //return aggResults; 
+            else if (this.InParallel) return this.ParallelGroupBy(resTable, nonAsterixCountAggregates, nonAsterixAggResults);
+            else return this.SingleThreadGroupBy(resTable, nonAsterixCountAggregates, nonAsterixAggResults);
 
-            return aggResults;
+            //return aggResults;
         }
 
         /// <summary>
@@ -66,7 +66,7 @@ namespace QueryEngine
         /// of aggregates.
         /// </summary>
         /// <param name="aggResults"> The results of the merge is stored in this isntances. </param>
-        private void ParallelGroupBy(ITableResults results, List<AggregateArray> aggs, List<AggregateArrayResults> aggResults)
+        private AggregateResults ParallelGroupBy(ITableResults results, List<AggregateArray> aggs, List<AggregateArrayResults> aggResults)
         {
             // -1 because the main thread works as well
             Task[] tasks = new Task[this.ThreadCount - 1];
@@ -85,6 +85,8 @@ namespace QueryEngine
             Task.WaitAll(tasks);
             // Merge doesnt have to be in parallel because it s grouping only (#thread) values.
             MergeRows(jobs);
+
+            return null;
         }
         /// <summary>
         /// Creates jobs for the parallel group by.
@@ -92,7 +94,7 @@ namespace QueryEngine
         /// If the addition == 0, the last job receives the entire result table. In terms of other values,
         /// each thread is given at least one result row.
         /// 
-        /// Note that the passed aggregates, are the ones that the rest will be merged into.
+        /// Note that the passed aggregates results, are the ones that the rest will be merged into.
         /// They are expected to be at the last index of the jobs => they must have at least one result assigned.
         /// </summary>
         /// <param name="aggResults"> The results of the merge is stored in this isntances. It is placed into the last job. </param>
@@ -118,16 +120,18 @@ namespace QueryEngine
         /// Computes single threadedly aggregates.
         /// </summary>
         /// <param name="aggResults"> The results of the merge is stored in this isntances. </param>
-        private void SingleThreadGroupBy(ITableResults results, List<AggregateArray> aggs, List<AggregateArrayResults> aggResults)
+        private AggregateResults SingleThreadGroupBy(ITableResults results, List<AggregateArray> aggs, List<AggregateArrayResults> aggResults)
         {
             var job = new GroupByJob(aggs, aggResults, 0, results.NumberOfMatchedElements, results);
             SingleThreadGroupByWork(job);
+            // return aggResults
+            return null;
         }
 
         /// <summary>
         /// Serves as a work to a single thread.
         /// For each result row from the results table in the given range.
-        /// Compute the aggregates with the row for each aggregate.
+        /// Compute the aggregates with the row.
         /// </summary>
         /// <param name="job"> A GroupByJob class. </param>
         private static void SingleThreadGroupByWork(Object job)

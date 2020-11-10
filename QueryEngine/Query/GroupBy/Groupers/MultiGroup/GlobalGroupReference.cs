@@ -16,8 +16,10 @@ namespace QueryEngine
         public GlobalMergeReference(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper) : base(aggs, hashes, helper)
         { }
 
-        public override List<AggregateArrayResults> Group(ITableResults resTable)
+        public override AggregateResults Group(ITableResults resTable)
         {
+            if (this.InParallel) throw new ArgumentException($"{this.GetType()}, cannot perform a parallel group by.");
+            
             // Create bucket aggregates
             this.bucketAggregates = new List<AggregateBucket>();
             for (int i = 0; i < this.aggregates.Count; i++)
@@ -33,12 +35,10 @@ namespace QueryEngine
                 hashers.Add(ExpressionHasher.Factory(hashes[i], hashes[i].ExpressionType, null));
             }
 
-            this.GroupWork(new RowEqualityComparerWithHash(resTable, equalityComparers, new RowHasher(hashers), true), resTable);
-
-            return null;
+            return this.SingleThreadGroupBy(new RowEqualityComparerWithHash(resTable, equalityComparers, new RowHasher(hashers), true), resTable);
         }
 
-        private List<AggregateBucketResult> GroupWork(RowEqualityComparerWithHash equalityComparer, ITableResults results)
+        private AggregateResults SingleThreadGroupBy(RowEqualityComparerWithHash equalityComparer, ITableResults results)
         {
             AggregateBucketResult[] buckets = null; 
             var groups = new Dictionary<int, AggregateBucketResult[]>(equalityComparer);
@@ -57,6 +57,7 @@ namespace QueryEngine
                 for (int j = 0; j < this.bucketAggregates.Count; j++)
                     this.bucketAggregates[j].Apply(in row, buckets[j]);
             }
+
 
             return null;
         }
