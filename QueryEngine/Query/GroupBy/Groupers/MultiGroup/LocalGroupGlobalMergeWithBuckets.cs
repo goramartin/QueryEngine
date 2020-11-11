@@ -102,7 +102,7 @@ namespace QueryEngine
             for (int i = 0; i < jobs.Length - 1; i++)
             {
                 var tmpComp = lastComp.Clone();
-                jobs[i] = new GroupByJob(lastHasher.Clone(tmpComp.Comparers), tmpComp, aggs.CloneAggs(), results, current, current + addition, globalGroups);
+                jobs[i] = new GroupByJob(lastHasher.Clone(tmpComp.Comparers), tmpComp, aggs, results, current, current + addition, globalGroups);
                 current += addition;
             }
             jobs[jobs.Length - 1] = new GroupByJob(lastHasher, lastComp, aggs, results, current, results.NumberOfMatchedElements, globalGroups);
