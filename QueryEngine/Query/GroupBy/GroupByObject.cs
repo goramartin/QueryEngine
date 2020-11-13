@@ -37,7 +37,7 @@ namespace QueryEngine
         /// <param name="graph"> Property graph. </param>
         /// <param name="variableMap"> Variable map. </param>
         /// <param name="executionHelper"> Select execution helper. </param>
-        /// <param name="selectNode"> Parsed tree of select expression. </param>
+        /// <param name="groupByNode"> Parsed tree of select expression. </param>
         /// <param name="exprInfo"> A query expression information. </param>
         public GroupByObject(Graph graph, VariableMap variableMap, IGroupByExecutionHelper executionHelper, GroupByNode groupByNode, QueryExpressionInfo exprInfo)
         {

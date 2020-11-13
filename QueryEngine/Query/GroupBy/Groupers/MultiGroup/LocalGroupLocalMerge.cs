@@ -16,13 +16,11 @@ namespace QueryEngine
     /// </summary>
     internal class LocalGroupLocalMerge : Grouper
     {
-        private List<AggregateArray> arrayAggregates = null;
         public LocalGroupLocalMerge(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper) : base(aggs, hashes, helper) 
         { }
 
         public override AggregateResults Group(ITableResults resTable)
         {
-            this.arrayAggregates = (List<AggregateArray>)this.aggregates.Cast<AggregateArray>();
             // Create hashers and equality comparers.
             // The hashers receive also the equality comparer as cache.
             var equalityComparers = new List<ExpressionEqualityComparer>();
@@ -43,7 +41,7 @@ namespace QueryEngine
         /// </summary>
         private AggregateResults SingleThreadGroupBy(ITableResults resTable, List<ExpressionEqualityComparer> equalityComparers, List<ExpressionHasher> hashers)
         {
-            var tmpJob = new GroupByJob(new RowHasher(hashers), new RowEqualityComparerNoHash(resTable, equalityComparers), this.arrayAggregates, resTable, 0, resTable.NumberOfMatchedElements);
+            var tmpJob = new GroupByJob(new RowHasher(hashers), new RowEqualityComparerNoHash(resTable, equalityComparers), this.aggregates, resTable, 0, resTable.NumberOfMatchedElements);
             SingleThreadGroupByWork(tmpJob);
             //return tmp.aggResults;
             return null;
@@ -54,7 +52,7 @@ namespace QueryEngine
         /// </summary>
         private AggregateResults ParallelGroupBy(ITableResults resTable, List<ExpressionEqualityComparer> equalityComparers, List<ExpressionHasher> hashers)
         {
-            GroupByJob[] jobs = CreateJobs(resTable, this.arrayAggregates, equalityComparers, hashers);
+            GroupByJob[] jobs = CreateJobs(resTable, this.aggregates, equalityComparers, hashers);
             ParallelGroupByWork(jobs, 0, ThreadCount);
             //return jobs[0].aggResults;
             return null;
@@ -69,7 +67,7 @@ namespace QueryEngine
         /// contain references to storage arrays to avoid casting in a tight loop).
         /// The comparers and hashers build in the constructor of this class are given to the last job, just like the aggregates passed to the construtor.
         /// </summary>
-        private GroupByJob[] CreateJobs(ITableResults results, List<AggregateArray> aggs, List<ExpressionEqualityComparer> equalityComparers, List<ExpressionHasher> hashers)
+        private GroupByJob[] CreateJobs(ITableResults results, List<Aggregate> aggs, List<ExpressionEqualityComparer> equalityComparers, List<ExpressionHasher> hashers)
         {
             GroupByJob[] jobs = new GroupByJob[this.ThreadCount];
             int current = 0;
@@ -83,7 +81,7 @@ namespace QueryEngine
             for (int i = 0; i < jobs.Length - 1; i++)
             {
                 var tmpComp = lastComp.Clone();
-                jobs[i] = new GroupByJob(lastHasher.Clone(tmpComp.Comparers), tmpComp, aggs.CloneAggs(), results, current, current + addition);
+                jobs[i] = new GroupByJob(lastHasher.Clone(tmpComp.Comparers), tmpComp, aggs, results, current, current + addition);
                 current += addition;
             }
             jobs[jobs.Length - 1] = new GroupByJob(lastHasher, lastComp, aggs, results, current, results.NumberOfMatchedElements);
@@ -156,14 +154,10 @@ namespace QueryEngine
             var groups1 = ((GroupByJob)job1).groups;
             var groups2 = ((GroupByJob)job2).groups;
             var aggs1 = ((GroupByJob)job1).aggregates;
+            var aggsResults1 = ((GroupByJob)job1).aggResults;
             var aggsResults2 = ((GroupByJob)job2).aggResults;
             #endregion DECL
 
-            // Set their mergins with field.
-            // To avoid casting multiple times.
-            for (int i = 0; i < aggs1.Count; i++)
-                aggs1[i].SetMergingWith(aggsResults2[i]);
-            // Merge the result groups.
             foreach (var item in groups2)
             {
                 if (!groups1.TryGetValue(item.Key, out int position))
@@ -172,10 +166,8 @@ namespace QueryEngine
                     groups1.Add(item.Key, position);
                 }
                 for (int i = 0; i < aggs1.Count; i++)
-                    aggs1[i].MergeOn(position, item.Value);
+                    aggs1[i].MergeOn(aggsResults1[i], position, aggsResults2[i], item.Value);
             }
-            for (int i = 0; i < aggs1.Count; i++)
-                aggs1[i].UnsetMergingWith();
         }
 
         /// <summary>
@@ -193,6 +185,7 @@ namespace QueryEngine
             var aggregates = tmpJob.aggregates;
             var results = tmpJob.results;
             var groups = tmpJob.groups;
+            var aggResults = tmpJob.aggResults;
             int position;
             TableResults.RowProxy row;
             GroupDictKey key;
@@ -210,21 +203,21 @@ namespace QueryEngine
                 }
 
                 for (int j = 0; j < aggregates.Count; j++)
-                    aggregates[j].Apply(in row, position);
+                    aggregates[j].Apply(in row, aggResults[j], position);
             }
         }
 
         private class GroupByJob
         {
             public RowHasher hasher;
-            public List<AggregateArray> aggregates;
+            public List<Aggregate> aggregates;
             public ITableResults results;
             public Dictionary<GroupDictKey, int> groups;
-            public List<AggregateArrayResults> aggResults;
+            public List<AggregateListResults> aggResults;
             public int start;
             public int end;
 
-            public GroupByJob(RowHasher hasher, RowEqualityComparerNoHash comparer, List<AggregateArray> aggregates, ITableResults results, int start, int end)
+            public GroupByJob(RowHasher hasher, RowEqualityComparerNoHash comparer, List<Aggregate> aggregates, ITableResults results, int start, int end)
             {
                 this.hasher = hasher;
                 this.aggregates = aggregates;
@@ -232,10 +225,7 @@ namespace QueryEngine
                 this.start = start;
                 this.end = end;
                 this.groups = new Dictionary<GroupDictKey, int>((IEqualityComparer<GroupDictKey>)comparer);
-                this.aggResults = AggregateArrayResults.CreateArrayResults(this.aggregates);
-
-                for (int i = 0; i < this.aggregates.Count; i++)
-                    this.aggregates[i].SetAggResults(this.aggResults[i]);
+                this.aggResults = AggregateListResults.CreateArrayResults(this.aggregates);
             }
         }
     }

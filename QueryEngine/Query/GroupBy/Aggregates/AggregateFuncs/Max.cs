@@ -10,9 +10,9 @@ using System.Threading;
 
 namespace QueryEngine
 {
-    internal class IntBucketMax : AggregateBucket<int>
+    internal class IntMax : Aggregate<int>
     {
-        public IntBucketMax(ExpressionHolder expressionHolder) : base(expressionHolder)
+        public IntMax(ExpressionHolder expressionHolder) : base(expressionHolder)
         { }
 
         public override void Apply(in TableResults.RowProxy row, AggregateBucketResult bucket)
@@ -78,11 +78,11 @@ namespace QueryEngine
         {
             var tmpBucket1 = ((AggregateBucketResultWithSetFlag<int>)bucket1);
             var tmpBucket2 = ((AggregateBucketResultWithSetFlag<int>)bucket2);
-            if (tmpBucket1.aggResult > tmpBucket2.aggResult) tmpBucket1.aggResult = tmpBucket2.aggResult;
+            if (tmpBucket1.aggResult < tmpBucket2.aggResult) tmpBucket1.aggResult = tmpBucket2.aggResult;
             else { /* nothing */ }
         }
 
-        public override void MergeTwoBucketsThreadSage(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
+        public override void MergeTwoBucketsThreadSafe(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
         {
             var tmpBucket1 = ((AggregateBucketResultWithSetFlag<int>)bucket1);
             // The second is not accessed anymore, because the group in dictionary represents
@@ -90,14 +90,33 @@ namespace QueryEngine
             var tmpBucket2 = ((AggregateBucketResultWithSetFlag<int>)bucket2);
 
             // Compare-exchange mechanism.
-            int initialValue, smallerValue;
+            int initialValue, greaterValue;
             do
             {
                 initialValue = tmpBucket1.aggResult;
-                if (initialValue > tmpBucket2.aggResult) smallerValue = tmpBucket2.aggResult;
-                else smallerValue = initialValue;
+                if (initialValue < tmpBucket2.aggResult) greaterValue = tmpBucket2.aggResult;
+                else greaterValue = initialValue;
             }
-            while (initialValue != Interlocked.CompareExchange(ref tmpBucket1.aggResult, smallerValue, initialValue));
+            while (initialValue != Interlocked.CompareExchange(ref tmpBucket1.aggResult, greaterValue, initialValue));
+        }
+
+        public override void Apply(in TableResults.RowProxy row, AggregateListResults list, int position)
+        {
+            if (this.expr.TryEvaluate(in row, out int returnValue))
+            {
+                var tmpList = (AggregateListResults<int>)list;
+                if (position == tmpList.values.Count) tmpList.values.Add(returnValue);
+                else if (tmpList.values[position] < returnValue) tmpList.values[position] = returnValue;
+            }
+        }
+
+        public override void MergeOn(AggregateListResults list1, int into, AggregateListResults list2, int from)
+        {
+            var tmpList1 = (AggregateListResults<int>)list1;
+            var tmpList2 = (AggregateListResults<int>)list2;
+
+            if (into == tmpList1.values.Count) tmpList1.values.Add(tmpList2.values[from]);
+            else if (tmpList1.values[from] < tmpList2.values[from]) tmpList1.values[from] = tmpList2.values[from];
         }
 
         public override string ToString()
@@ -111,9 +130,9 @@ namespace QueryEngine
         }
     }
 
-    internal class StrBucketMax : AggregateBucket<string>
+    internal class StrMax : Aggregate<string>
     {
-        public StrBucketMax(ExpressionHolder expressionHolder) : base(expressionHolder)
+        public StrMax(ExpressionHolder expressionHolder) : base(expressionHolder)
         { }
 
         public override void Apply(in TableResults.RowProxy row, AggregateBucketResult bucket)
@@ -183,7 +202,7 @@ namespace QueryEngine
             else { /* nothing */ }
         }
 
-        public override void MergeTwoBucketsThreadSage(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
+        public override void MergeTwoBucketsThreadSafe(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
         {
             var tmpBucket1 = ((AggregateBucketResultWithSetFlag<string>)bucket1);
             // The second is not accessed anymore, because the group in dictionary represents
@@ -191,15 +210,35 @@ namespace QueryEngine
             var tmpBucket2 = ((AggregateBucketResultWithSetFlag<string>)bucket2);
 
             // Compare-exchange mechanism.
-            string initialValue, smallerValue;
+            string initialValue, greaterValue;
             do
             {
                 initialValue = tmpBucket1.aggResult;
-                if (initialValue.CompareTo(tmpBucket2.aggResult) < 0) smallerValue = tmpBucket2.aggResult;
-                else smallerValue = initialValue;
+                if (initialValue.CompareTo(tmpBucket2.aggResult) < 0) greaterValue = tmpBucket2.aggResult;
+                else greaterValue = initialValue;
             }
-            while (initialValue != Interlocked.CompareExchange(ref tmpBucket1.aggResult, smallerValue, initialValue));
+            while (initialValue != Interlocked.CompareExchange(ref tmpBucket1.aggResult, greaterValue, initialValue));
 
+        }
+
+
+        public override void Apply(in TableResults.RowProxy row, AggregateListResults list, int position)
+        {
+            if (this.expr.TryEvaluate(in row, out string returnValue))
+            {
+                var tmpList = (AggregateListResults<string>)list;
+                if (position == tmpList.values.Count) tmpList.values.Add(returnValue);
+                else if (tmpList.values[position].CompareTo(returnValue) < 0) tmpList.values[position] = returnValue;
+            }
+        }
+
+        public override void MergeOn(AggregateListResults list1, int into, AggregateListResults list2, int from)
+        {
+            var tmpList1 = (AggregateListResults<string>)list1;
+            var tmpList2 = (AggregateListResults<string>)list2;
+
+            if (into == tmpList1.values.Count) tmpList1.values.Add(tmpList2.values[from]);
+            else if (tmpList1.values[from].CompareTo(tmpList2.values[from]) < 0) tmpList1.values[from] = tmpList2.values[from];
         }
         public override string ToString()
         {

@@ -12,9 +12,9 @@ using System.Threading;
 
 namespace QueryEngine 
 {
-    class IntBucketAvg : AggregateBucket<int>
+    class IntAvg : Aggregate<int>
     {
-        public IntBucketAvg(ExpressionHolder expressionHolder) : base(expressionHolder)
+        public IntAvg(ExpressionHolder expressionHolder) : base(expressionHolder)
         { }
 
         public override void Apply(in TableResults.RowProxy row, AggregateBucketResult bucket)
@@ -44,13 +44,52 @@ namespace QueryEngine
             tmpBucket1.eltUsed += tmpBucket2.eltUsed;
         }
 
-        public override void MergeTwoBucketsThreadSage(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
+        public override void MergeTwoBucketsThreadSafe(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
         {
             var tmpBucket1 = ((AggregateBucketAvgResult<int>)bucket1);
             var tmpBucket2 = ((AggregateBucketAvgResult<int>)bucket2);
             Interlocked.Add(ref tmpBucket1.aggResult, tmpBucket2.aggResult);
             Interlocked.Add(ref tmpBucket1.eltUsed, tmpBucket2.eltUsed);
         }
+
+        public override void Apply(in TableResults.RowProxy row, AggregateListResults list, int position)
+        {
+            if (this.expr.TryEvaluate(in row, out int returnValue))
+            {
+                var tmpList = (AggregateListAvgResults<int>)list;
+
+                if (position == tmpList.values.Count)
+                {
+                    tmpList.values.Add(returnValue);
+                    tmpList.eltUsed.Add(1);
+                }
+                else
+                {
+                    tmpList.values[position] += returnValue;
+                    tmpList.eltUsed[position]++;
+                }
+            }
+        }
+
+        public override void MergeOn(AggregateListResults list1, int into, AggregateListResults list2, int from)
+        {
+            var tmpList1 = (AggregateListAvgResults<int>)list1;
+            var tmpList2 = (AggregateListAvgResults<int>)list2;
+
+            if (into == tmpList1.values.Count)
+            {
+                tmpList1.values.Add(tmpList2.values[from]);
+                tmpList1.eltUsed.Add(tmpList2.eltUsed[from]);
+            }
+            else
+            {
+                tmpList1.values[into] += tmpList2.values[from];
+                tmpList1.eltUsed[into] += tmpList2.eltUsed[from];
+            }
+
+        }
+
+
         public override string ToString()
         {
             return "Avg(" + this.expressionHolder.ToString() + ")";

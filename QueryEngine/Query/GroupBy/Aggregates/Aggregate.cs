@@ -64,52 +64,27 @@ namespace QueryEngine
         /// <param name="funcName"> A name of the aggregate function.  </param>
         /// <param name="compType"> A return type of the aggregate function. </param>
         /// <param name="holder"> An expression to compute values with for the aggregate.</param>
-        public static Aggregate FactoryArrayType(string funcName, Type compType, ExpressionHolder holder = null)
+        public static Aggregate Factory(string funcName, Type compType, ExpressionHolder holder = null)
         {
-            if (funcName == "count" && compType == typeof(int)) return new ArrayCount(holder);
-            else if (funcName == "max" && compType == typeof(int)) return new IntArrayMax(holder);
-            else if (funcName == "max" && compType == typeof(string)) return new StrArrayMax(holder);
-            else if (funcName == "min" && compType == typeof(int)) return new IntArrayMin(holder);
-            else if (funcName == "min" && compType == typeof(string)) return new StrArrayMin(holder);
-            else if (funcName == "avg" && compType == typeof(int)) return new IntArrayAvg(holder);
-            else if (funcName == "sum" && compType == typeof(int)) return new IntArraySum(holder);
+            if (funcName == "count" && compType == typeof(int)) return new Count(holder);
+            else if (funcName == "max" && compType == typeof(int)) return new IntMax(holder);
+            else if (funcName == "max" && compType == typeof(string)) return new StrMax(holder);
+            else if (funcName == "min" && compType == typeof(int)) return new IntMin(holder);
+            else if (funcName == "min" && compType == typeof(string)) return new StrMin(holder);
+            else if (funcName == "avg" && compType == typeof(int)) return new IntAvg(holder);
+            else if (funcName == "sum" && compType == typeof(int)) return new IntSum(holder);
             else throw new ArgumentException($"Aggregate factory, trying to create a non existent array bound aggregate. {funcName}, {compType}");
         }
 
         /// <summary>
         /// Creates an aggregate that is bound with the bucket type results.
         /// </summary>
-        /// <param name="funcName"> A name of the aggregate function.  </param>
-        /// <param name="compType"> A return type of the aggregate function. </param>
-        /// <param name="holder"> An expression to compute values with for the aggregate.</param>
-        public static Aggregate FactoryBucketType(string funcName, Type compType, ExpressionHolder holder = null)
-        {
-            if (funcName == "count" && compType == typeof(int)) return new BucketCount(holder);
-            else if (funcName == "max" && compType == typeof(int)) return new IntBucketMax(holder);
-            else if (funcName == "max" && compType == typeof(string)) return new StrBucketMax(holder);
-            else if (funcName == "min" && compType == typeof(int)) return new IntBucketMin(holder);
-            else if (funcName == "min" && compType == typeof(string)) return new StrBucketMin(holder);
-            else if (funcName == "avg" && compType == typeof(int)) return new IntBucketAvg(holder);
-            else if (funcName == "sum" && compType == typeof(int)) return new IntBucketSum(holder);
-            else throw new ArgumentException($"Aggregate factory, trying to create a non existent bucket bound aggregate. {funcName}, {compType}");
-        }
-        /// <summary>
-        /// Creates an aggregate that is bound with the bucket type results.
-        /// </summary>
         /// <param name="agg"> A aggregate to build from. </param>
-        public static Aggregate FactoryBucketType(Aggregate agg)
+        public static Aggregate Factory(Aggregate agg)
         {
-            return FactoryBucketType(agg.GetFuncName(), agg.GetAggregateReturnType(), agg.expressionHolder);
+            return Factory(agg.GetFuncName(), agg.GetAggregateReturnType(), agg.expressionHolder);
         }
-        /// <summary>
-        /// Creates an aggregate that is bound with the array type results.
-        /// </summary>
-        /// <param name="agg"> A aggregate to build from. </param>
-        public static Aggregate FactoryArrayType(Aggregate agg)
-        {
-            return FactoryArrayType(agg.GetFuncName(), agg.GetAggregateReturnType(), agg.expressionHolder);
 
-        }
 
         public override bool Equals(object obj)
         {
@@ -126,5 +101,74 @@ namespace QueryEngine
         public abstract Type GetAggregateReturnType();
         public abstract string GetFuncName();
 
+        /// <summary>
+        /// Is called only on aggregates that are bound with the array type results.
+        /// It computes the desired value from the containing expression with the given row and applies it to the aggregate.
+        /// </summary>
+        /// <param name="row"> A result table row. </param>
+        /// <param name="list"> A place to store results to. </param>
+        /// <param name="position"> A position to apply the computed value into. </param>
+        public abstract void Apply(in TableResults.RowProxy row, AggregateListResults list, int position);
+        /// <summary>
+        /// Is called during merging in LocalGroupLocalMerge grouping.
+        /// It merges aggregates values from two different result holders and merges them into the
+        /// first one on the "into" position.
+        /// </summary>
+        /// <param name="list1"> A place to store results to. </param>
+        /// <param name="into"> The position to merge value into. </param>
+        /// <param name="list2"> A place to merge results from. </param>
+        /// <param name="from"> The position to merge value from. </param>
+        public abstract void MergeOn(AggregateListResults list1, int into, AggregateListResults list2, int from);
+
+        /// <summary>
+        /// Is called only on aggregates that are bound with the bucket type results.
+        /// It computes the desired value from the containing expression with the given row and applies it to the aggregate.
+        /// </summary>
+        /// <param name="row"> A result table row. </param>
+        /// <param name="bucket"> A position to apply the computed value into. </param>
+        public abstract void Apply(in TableResults.RowProxy row, AggregateBucketResult bucket);
+        /// <summary>
+        /// A thread safe version of the simple apply method.
+        /// </summary>
+        /// <param name="row"> A result table row. </param>
+        /// <param name="bucket"> A position to apply the computed value into. </param>
+        public abstract void ApplyThreadSafe(in TableResults.RowProxy row, AggregateBucketResult bucket);
+
+        /// <summary>
+        /// Merges results of two buckets into the bucket1.
+        /// It assumes that the results were set before.
+        /// </summary>
+        /// <param name="bucket1"> A bucket that will contain the final merged results. </param>
+        /// <param name="bucket2"> A bucket that will provide value to merge for the bucket1. </param>
+        public abstract void MergeTwoBuckets(AggregateBucketResult bucket1, AggregateBucketResult bucket2);
+
+        /// <summary>
+        /// Merges results of two buckets into the bucket1 with a thread safe manner.
+        /// It assumes that the results were set before.
+        /// </summary>
+        /// <param name="bucket1"> A bucket that will contain the final merged results. </param>
+        /// <param name="bucket2"> A bucket that will provide value to merge for the bucket1. </param>
+        public abstract void MergeTwoBucketsThreadSafe(AggregateBucketResult bucket1, AggregateBucketResult bucket2);
+
+    }
+
+    /// <summary>
+    /// An aggregate fucntion base class.
+    /// </summary>
+    /// <typeparam name="T"> A return type of the aggregate function. </typeparam>
+    internal abstract class Aggregate<T> : Aggregate
+    {
+        protected ExpressionReturnValue<T> expr;
+
+        public Aggregate(ExpressionHolder expressionHolder) : base(expressionHolder)
+        {
+            if (expressionHolder != null) this.expr = (ExpressionReturnValue<T>)expressionHolder.Expr;
+            else this.expr = null;
+        }
+
+        public override Type GetAggregateReturnType()
+        {
+            return typeof(T);
+        }
     }
 }

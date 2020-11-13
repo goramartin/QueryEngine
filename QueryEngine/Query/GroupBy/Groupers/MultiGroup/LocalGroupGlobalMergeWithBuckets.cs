@@ -16,14 +16,11 @@ namespace QueryEngine
     /// </summary>
     internal class LocalGroupGlobalMergeWithBuckets : Grouper
     {
-        private List<AggregateBucket> bucketAggregates = null;
-        
         public LocalGroupGlobalMergeWithBuckets(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper) : base(aggs, hashes, helper)
         { }
 
         public override AggregateResults Group(ITableResults resTable)
         {
-            this.bucketAggregates = (List<AggregateBucket>) this.aggregates.Cast<AggregateBucket>();
             // Create hashers and equality comparers.
             // The hashers receive also the equality comparer as cache.
             var equalityComparers = new List<ExpressionEqualityComparer>();
@@ -44,7 +41,7 @@ namespace QueryEngine
         /// </summary>
         private AggregateResults ParallelGroupBy(ITableResults resTable, List<ExpressionEqualityComparer> equalityComparers, List<ExpressionHasher> hashers)
         {
-            GroupByJob[] jobs = CreateJobs(resTable, this.bucketAggregates, equalityComparers, hashers);
+            GroupByJob[] jobs = CreateJobs(resTable, this.aggregates, equalityComparers, hashers);
             var tasks = new Task[this.ThreadCount - 1];
 
             for (int i = 0; i < tasks.Length; i++)
@@ -68,7 +65,7 @@ namespace QueryEngine
         {
             var tmpComparer = new RowEqualityComparerNoHash(resTable, equalityComparers);
             var tmpGlobalDictionary = new ConcurrentDictionary<GroupDictKey, AggregateBucketResult[]>(tmpComparer);
-            var tmpJob = new GroupByJob(new RowHasher(hashers), tmpComparer, this.bucketAggregates, resTable, 0, resTable.NumberOfMatchedElements, tmpGlobalDictionary);
+            var tmpJob = new GroupByJob(new RowHasher(hashers), tmpComparer, this.aggregates, resTable, 0, resTable.NumberOfMatchedElements, tmpGlobalDictionary);
             SingleThreadGroupByWork(tmpJob);
             //return tmp.aggResults;
             return null;
@@ -85,7 +82,7 @@ namespace QueryEngine
         /// The comparers and hashers build in the constructor of this class are given to the last job, just like the aggregates passed to the construtor.
         /// The global dictionary recieves a comparer that has no internal comparers set to some hasher.
         /// </summary>
-        private GroupByJob[] CreateJobs(ITableResults results, List<AggregateBucket> aggs, List<ExpressionEqualityComparer> equalityComparers, List<ExpressionHasher> hashers)
+        private GroupByJob[] CreateJobs(ITableResults results, List<Aggregate> aggs, List<ExpressionEqualityComparer> equalityComparers, List<ExpressionHasher> hashers)
         {
             GroupByJob[] jobs = new GroupByJob[this.ThreadCount];
             int current = 0;
@@ -156,7 +153,7 @@ namespace QueryEngine
                 if (!Object.ReferenceEquals(buckets, item.Value))
                 {
                     for (int j = 0; j < aggregates.Count; j++)
-                        aggregates[j].MergeTwoBucketsThreadSage(buckets[j], item.Value[j]);
+                        aggregates[j].MergeTwoBucketsThreadSafe(buckets[j], item.Value[j]);
                 }
             }
         }
@@ -164,7 +161,7 @@ namespace QueryEngine
         private class GroupByJob
         {
             public RowHasher hasher;
-            public List<AggregateBucket> aggregates;
+            public List<Aggregate> aggregates;
             public ITableResults results;
             public Dictionary<GroupDictKey, AggregateBucketResult[]> groups;
             public int start;
@@ -174,7 +171,7 @@ namespace QueryEngine
             public GroupByJob(
                 RowHasher hasher,
                 RowEqualityComparerNoHash comparer,
-                List<AggregateBucket> aggregates,
+                List<Aggregate> aggregates,
                 ITableResults results,
                 int start,
                 int end,

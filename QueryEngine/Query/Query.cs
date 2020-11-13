@@ -54,7 +54,7 @@ namespace QueryEngine
         /// Builds a query from input.
         /// Called by static create method.
         /// </summary>
-        /// <param name="inputQuery"> An input query. </param>
+        /// <param name="tokens"> An input query. </param>
         /// <param name="graph"> A graph to compute the query on. </param>
         /// <param name="threadCount"> Maximum number of threads available to use. </param>
         /// <param name="printer"> A printer to use. </param>
@@ -191,6 +191,7 @@ namespace QueryEngine
         /// <summary>
         /// Checks arguments of constructors.
         /// Called from static create method.
+        /// </summary>
         private static void CheckArgs(Object inputQuery, Graph graph, int threadCount, string printer, string formater, int verticesPerThread, string fileName)
         {
             if (inputQuery == null || graph == null)

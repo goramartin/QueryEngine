@@ -17,17 +17,11 @@ namespace QueryEngine
     /// </summary>
     internal class GlobalGroup : Grouper
     {
-        private List<AggregateBucket> bucketAggregates = null;
         public GlobalGroup(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper) : base(aggs, hashes, helper)
         { }
 
         public override AggregateResults Group(ITableResults resTable)
         {
-            // Create bucket aggregates
-            this.bucketAggregates = new List<AggregateBucket>();
-            for (int i = 0; i < this.aggregates.Count; i++)
-                this.bucketAggregates.Add((AggregateBucket)Aggregate.FactoryBucketType(this.aggregates[i]));
-
             // Create hashers and equality comparers.
             // The hashers receive also the equality comparer as cache.
             var equalityComparers = new List<ExpressionEqualityComparer>();
@@ -71,8 +65,8 @@ namespace QueryEngine
         /// </summary>
         private AggregateResults SingleThreadGroupBy(RowEqualityComparerWithHash equalityComparer, ITableResults results)
         {
-            Func<int, AggregateBucketResult[]> bucketFactory = (int x) => { return AggregateBucketResult.CreateBucketResults(this.bucketAggregates); };
-            var tmpJob = new GroupByJob(new ConcurrentDictionary<int, AggregateBucketResult[]>(equalityComparer), this.bucketAggregates, results, 0, results.NumberOfMatchedElements, bucketFactory);
+            Func<int, AggregateBucketResult[]> bucketFactory = (int x) => { return AggregateBucketResult.CreateBucketResults(this.aggregates); };
+            var tmpJob = new GroupByJob(new ConcurrentDictionary<int, AggregateBucketResult[]>(equalityComparer), this.aggregates, results, 0, results.NumberOfMatchedElements, bucketFactory);
             SingleThreadGroupByWork(tmpJob);
            
             return null;
@@ -95,17 +89,16 @@ namespace QueryEngine
             if (addition == 0)
                 throw new ArgumentException($"{this.GetType()}, a range for a thread cannot be 0.");
 
-            Func<int, AggregateBucketResult[]> bucketFactory = (int x) => { return AggregateBucketResult.CreateBucketResults(this.bucketAggregates); };
+            Func<int, AggregateBucketResult[]> bucketFactory = (int x) => { return AggregateBucketResult.CreateBucketResults(this.aggregates); };
             var concurrentDict = new ConcurrentDictionary<int, AggregateBucketResult[]>(equalityComparer);
             for (int i = 0; i < jobs.Length - 1; i++)
             {
-                jobs[i] = new GroupByJob(concurrentDict,this.bucketAggregates, results, current, current + addition, bucketFactory);
+                jobs[i] = new GroupByJob(concurrentDict, this.aggregates, results, current, current + addition, bucketFactory);
                 current += addition;
             }
-            jobs[jobs.Length - 1] = new GroupByJob(concurrentDict, this.bucketAggregates, results, current, results.NumberOfMatchedElements, bucketFactory);
+            jobs[jobs.Length - 1] = new GroupByJob(concurrentDict, this.aggregates, results, current, results.NumberOfMatchedElements, bucketFactory);
             return jobs;
         }
-
 
         /// <summary>
         /// A main work of each thread when grouping.
@@ -136,13 +129,13 @@ namespace QueryEngine
 
         private class GroupByJob
         {
-            public List<AggregateBucket> aggregates;
+            public List<Aggregate> aggregates;
             public ITableResults results;
             public ConcurrentDictionary<int, AggregateBucketResult[]> groups;
             public int start;
             public int end;
             public Func<int, AggregateBucketResult[]> bucketFactory;
-            public GroupByJob(ConcurrentDictionary<int, AggregateBucketResult[]> groups, List<AggregateBucket> aggregates, ITableResults results, int start, int end, Func<int, AggregateBucketResult[]> bucketFactory)
+            public GroupByJob(ConcurrentDictionary<int, AggregateBucketResult[]> groups, List<Aggregate> aggregates, ITableResults results, int start, int end, Func<int, AggregateBucketResult[]> bucketFactory)
             {
                 this.aggregates = aggregates;
                 this.results = results;

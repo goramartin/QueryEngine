@@ -12,7 +12,6 @@ namespace QueryEngine
     /// </summary>
     internal class LocalGroupLocalMergeReference : Grouper
     {
-        private List<AggregateArray> arrayAggregates = null;
         public LocalGroupLocalMergeReference(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper) : base(aggs, hashes, helper)
         { }
 
@@ -20,7 +19,6 @@ namespace QueryEngine
         {
             if (this.InParallel) throw new ArgumentException($"{this.GetType()}, cannot perform a parallel group by.");
 
-            this.arrayAggregates = (List<AggregateArray>)this.aggregates.Cast<AggregateArray>();
             // Create hashers and equality comparers.
             // The hashers receive also the equality comparer as cache.
             var equalityComparers = new List<ExpressionEqualityComparer>();
@@ -38,19 +36,16 @@ namespace QueryEngine
         /// Creates groups and computes aggregate values for each group.
         /// </summary>
         /// <param name="equalityComparer"> Equality comparer where T is int and computes internaly the hash for each row from the result table.</param>
+        /// <param name="results"> A result table from the matching clause.</param>
         /// <returns> Aggregate results. </returns>
         private AggregateResults SingleThreadGroupBy(RowEqualityComparerWithHash equalityComparer, ITableResults results)
         {
             #region DECL
-            var aggResults = AggregateArrayResults.CreateArrayResults(this.arrayAggregates);
+            var aggResults = AggregateListResults.CreateArrayResults(this.aggregates);
             var groups = new Dictionary<int, int>(equalityComparer);
             int position;
             TableResults.RowProxy row;
             #endregion DECL
-
-            // Set internal results of the aggregates.
-            for (int i = 0; i < this.arrayAggregates.Count; i++)
-                this.arrayAggregates[i].SetAggResults(aggResults[i]);
 
             // Create groups and compute aggregates for each individual group.
             for (int i = 0; i < results.NumberOfMatchedElements; i++)
@@ -62,8 +57,8 @@ namespace QueryEngine
                     groups.Add(i, position);
                 }
 
-                for (int j = 0; j < this.arrayAggregates.Count; j++)
-                   this.arrayAggregates[j].Apply(in row, position);
+                for (int j = 0; j < this.aggregates.Count; j++)
+                   this.aggregates[j].Apply(in row, aggResults[j], position);
             }
 
             // return aggResults;

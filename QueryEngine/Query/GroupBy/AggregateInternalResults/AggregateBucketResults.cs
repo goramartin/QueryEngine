@@ -13,7 +13,7 @@ namespace QueryEngine
     /// </summary>
     internal class AggregateBucketResult
     {
-        public static AggregateBucketResult[] CreateBucketResults(List<AggregateBucket> aggregates)
+        public static AggregateBucketResult[] CreateBucketResults(List<Aggregate> aggregates)
         {
             var aggResults = new AggregateBucketResult[aggregates.Count];
             for (int i = 0; i < aggResults.Length; i++)

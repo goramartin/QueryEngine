@@ -14,28 +14,28 @@ namespace QueryEngine
     /// This approach can save a lot of memory because it does not have to allocate additional classes for every
     /// new group.
     /// </summary>
-    internal abstract class AggregateArrayResults
+    internal abstract class AggregateListResults
     {
-        public static List<AggregateArrayResults> CreateArrayResults(List<AggregateArray> aggregates)
+        public static List<AggregateListResults> CreateArrayResults(List<Aggregate> aggregates)
         {
-            List<AggregateArrayResults> aggResults = new List<AggregateArrayResults>();
+            List<AggregateListResults> aggResults = new List<AggregateListResults>();
             for (int i = 0; i < aggregates.Count; i++)
-                aggResults.Add(AggregateArrayResults.Factory(aggregates[i].GetAggregateReturnType(), aggregates[i].GetFuncName()));
+                aggResults.Add(AggregateListResults.Factory(aggregates[i].GetAggregateReturnType(), aggregates[i].GetFuncName()));
 
             return aggResults;
         }
 
-        public static AggregateArrayResults Factory(Type type, string funcName)
+        public static AggregateListResults Factory(Type type, string funcName)
         {
-            if (type == typeof(int) && funcName == "avg") return new AggregateArrayAvgResults<int>();
-            else if (type == typeof(int)) return new AggregateArrayResults<int>();
-            else if (type == typeof(string)) return new AggregateArrayResults<string>();
-            else throw new ArgumentException($"Aggregate array results factory, cannot create a results holder with the type {type} for function {funcName}.");
+            if (type == typeof(int) && funcName == "avg") return new AggregateListAvgResults<int>();
+            else if (type == typeof(int)) return new AggregateListResults<int>();
+            else if (type == typeof(string)) return new AggregateListResults<string>();
+            else throw new ArgumentException($"Aggregate list results factory, cannot create a results holder with the type {type} for function {funcName}.");
         }
     }
 
     /// <typeparam name="T"> A return type of the aggregation function. </typeparam>
-    internal class AggregateArrayResults<T> : AggregateArrayResults
+    internal class AggregateListResults<T> : AggregateListResults
     {
         public List<T> values = new List<T>();
     }
@@ -45,7 +45,7 @@ namespace QueryEngine
     /// The class must rememeber the number of added elements to the computed average.
     /// </summary>
     /// <typeparam name="T"> A return type of the aggregation function. </typeparam>
-    internal class AggregateArrayAvgResults<T> : AggregateArrayResults<T>
+    internal class AggregateListAvgResults<T> : AggregateListResults<T>
     {
         public List<int> eltUsed = new List<int>();
     }

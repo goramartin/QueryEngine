@@ -12,7 +12,6 @@ namespace QueryEngine
     /// </summary>
     internal class GlobalMergeReference : Grouper
     {
-        private List<AggregateBucket> bucketAggregates = null;
         public GlobalMergeReference(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper) : base(aggs, hashes, helper)
         { }
 
@@ -20,11 +19,6 @@ namespace QueryEngine
         {
             if (this.InParallel) throw new ArgumentException($"{this.GetType()}, cannot perform a parallel group by.");
             
-            // Create bucket aggregates
-            this.bucketAggregates = new List<AggregateBucket>();
-            for (int i = 0; i < this.aggregates.Count; i++)
-                this.bucketAggregates.Add((AggregateBucket)Aggregate.FactoryBucketType(this.aggregates[i]));
-
             // Create hashers and equality comparers.
             // The hashers receive also the equality comparer as cache.
             var equalityComparers = new List<ExpressionEqualityComparer>();
@@ -51,12 +45,12 @@ namespace QueryEngine
                 row = results[i];
                 if (!groups.TryGetValue(i, out buckets))
                 {
-                    buckets = AggregateBucketResult.CreateBucketResults(this.bucketAggregates);
+                    buckets = AggregateBucketResult.CreateBucketResults(this.aggregates);
                     groups.Add(i, buckets);
                 }
 
-                for (int j = 0; j < this.bucketAggregates.Count; j++)
-                    this.bucketAggregates[j].Apply(in row, buckets[j]);
+                for (int j = 0; j < this.aggregates.Count; j++)
+                    this.aggregates[j].Apply(in row, buckets[j]);
             }
 
 

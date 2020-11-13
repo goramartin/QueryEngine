@@ -17,9 +17,9 @@ using System.Threading.Tasks;
 
 namespace QueryEngine
 {
-    class BucketCount : AggregateBucket<int>
+    internal class Count : Aggregate<int>
     {
-        public BucketCount(ExpressionHolder expressionHolder) : base(expressionHolder)
+        public Count(ExpressionHolder expressionHolder) : base(expressionHolder)
         {
             if (expressionHolder == null) this.IsAstCount = true;
         }
@@ -48,10 +48,45 @@ namespace QueryEngine
             ((AggregateBucketResult<int>)bucket1).aggResult += ((AggregateBucketResult<int>)bucket2).aggResult;
         }
 
-        public override void MergeTwoBucketsThreadSage(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
+        public override void MergeTwoBucketsThreadSafe(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
         {
             Interlocked.Add(ref ((AggregateBucketResult<int>)bucket1).aggResult, ((AggregateBucketResult<int>)bucket2).aggResult);
         }
+
+      
+        public override void Apply(in TableResults.RowProxy row, AggregateListResults list, int position)
+        {
+            if (!this.IsAstCount)
+            {
+                if (this.expr.TryEvaluate(in row, out int returnValue))
+                {
+                    var tmpList = (AggregateListResults<int>)list;
+                    if (position == tmpList.values.Count) tmpList.values.Add(1);
+                    else tmpList.values[position]++;
+                }
+            }
+            else
+            {
+                var tmpList = (AggregateListResults<int>)list;
+                tmpList.values[position]++;
+            }
+        }
+
+        public override void MergeOn(AggregateListResults list1, int into, AggregateListResults list2, int from)
+        {
+            var tmpList1 = (AggregateListResults<int>)list1;
+            var tmpList2 = (AggregateListResults<int>)list2;
+
+            if (into == tmpList1.values.Count) tmpList1.values.Add(tmpList2.values[from]);
+            else tmpList1.values[into] += tmpList2.values[from];
+        }
+
+        public void IncBy(int value, AggregateListResults list, int position)
+        {
+            var tmpList = (AggregateListResults<int>)list;
+            tmpList.values[position] += value;
+        }
+
         public override string ToString()
         {
             if (this.IsAstCount) return "Count(*)";

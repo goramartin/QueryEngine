@@ -93,7 +93,7 @@ namespace QueryEngine
                 {
                     if (node.funcName.ToLower() == "count" && ((IdentifierNode)node.next).value == "*")
                     {
-                        aggregate = Aggregate.FactoryArrayType("count", typeof(int), null);
+                        aggregate = Aggregate.Factory("count", typeof(int), null);
                         aggType = typeof(int);
                     }
                     else throw new ArgumentException($"{this.GetType()}, expected count(*).");
@@ -107,7 +107,7 @@ namespace QueryEngine
                     // After this process, the expression that will be returned is created -> aggregation reference.
                     node.next.Accept(this);
                     var tmpHolder = new ExpressionHolder(this.expr);
-                    aggregate = Aggregate.FactoryArrayType(node.funcName.ToLower(), tmpHolder.ExpressionType, tmpHolder);
+                    aggregate = Aggregate.Factory(node.funcName.ToLower(), tmpHolder.ExpressionType, tmpHolder);
                     aggType = tmpHolder.ExpressionType;
                 }
             }
