@@ -14,7 +14,9 @@ namespace QueryEngine
     internal class SingleGroupGrouper : Grouper
     {
         public SingleGroupGrouper(List<Aggregate> aggs,List<ExpressionHolder> hashes, IGroupByExecutionHelper helper) : base(aggs, hashes, helper)
-        { }
+        {
+            this.BucketStorage = false;
+        }
 
         /// <summary>
         /// Sets values to the Count(*) aggregates because there is nothing to be computed.
@@ -167,7 +169,7 @@ namespace QueryEngine
                 for (int j  = 0; j < lastJob.aggregates.Count; j++)
                 {
                     if (jobs[i].start != jobs[i].end)
-                       lastJob.aggregates[j].MergeOn(lastJob.aggResults[j], 0,  // to
+                       lastJob.aggregates[j].Merge(lastJob.aggResults[j], 0,  // to
                                                      jobs[i].aggResults[j], 0); // from
                 }
             }

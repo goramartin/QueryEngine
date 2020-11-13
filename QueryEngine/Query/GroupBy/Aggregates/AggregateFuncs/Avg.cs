@@ -36,7 +36,7 @@ namespace QueryEngine
                 Interlocked.Increment(ref tmpBucket.eltUsed);
             }
         }
-        public override void MergeTwoBuckets(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
+        public override void Merge(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
         {
             var tmpBucket1 = ((AggregateBucketAvgResult<int>)bucket1);
             var tmpBucket2 = ((AggregateBucketAvgResult<int>)bucket2);
@@ -44,7 +44,7 @@ namespace QueryEngine
             tmpBucket1.eltUsed += tmpBucket2.eltUsed;
         }
 
-        public override void MergeTwoBucketsThreadSafe(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
+        public override void MergeThreadSafe(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
         {
             var tmpBucket1 = ((AggregateBucketAvgResult<int>)bucket1);
             var tmpBucket2 = ((AggregateBucketAvgResult<int>)bucket2);
@@ -71,7 +71,7 @@ namespace QueryEngine
             }
         }
 
-        public override void MergeOn(AggregateListResults list1, int into, AggregateListResults list2, int from)
+        public override void Merge(AggregateListResults list1, int into, AggregateListResults list2, int from)
         {
             var tmpList1 = (AggregateListAvgResults<int>)list1;
             var tmpList2 = (AggregateListAvgResults<int>)list2;

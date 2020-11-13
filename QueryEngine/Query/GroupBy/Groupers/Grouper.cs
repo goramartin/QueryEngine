@@ -19,6 +19,7 @@ namespace QueryEngine
         protected List<ExpressionHolder> hashes { get; }
         protected bool InParallel { get; }
         protected int ThreadCount { get; }
+        protected bool BucketStorage { get; set; }
 
         protected Grouper(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper)
         {

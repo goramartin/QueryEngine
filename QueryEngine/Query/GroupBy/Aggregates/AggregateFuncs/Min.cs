@@ -76,7 +76,7 @@ namespace QueryEngine
             }
         }
 
-        public override void MergeTwoBuckets(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
+        public override void Merge(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
         {
             var tmpBucket1 = ((AggregateBucketResultWithSetFlag<int>)bucket1);
             var tmpBucket2 = ((AggregateBucketResultWithSetFlag<int>)bucket2);
@@ -84,7 +84,7 @@ namespace QueryEngine
             else { /* nothing */ }
         }
 
-        public override void MergeTwoBucketsThreadSafe(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
+        public override void MergeThreadSafe(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
         {
             var tmpBucket1 = ((AggregateBucketResultWithSetFlag<int>)bucket1);
             // The second is not accessed anymore, because the group in dictionary represents
@@ -113,7 +113,7 @@ namespace QueryEngine
             }
         }
 
-        public override void MergeOn(AggregateListResults list1, int into, AggregateListResults list2, int from)
+        public override void Merge(AggregateListResults list1, int into, AggregateListResults list2, int from)
         {
             var tmpList1 = (AggregateListResults<int>)list1;
             var tmpList2 = (AggregateListResults<int>)list2;
@@ -197,7 +197,7 @@ namespace QueryEngine
             }
         }
 
-        public override void MergeTwoBuckets(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
+        public override void Merge(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
         {
             var tmpBucket1 = ((AggregateBucketResultWithSetFlag<string>)bucket1);
             var tmpBucket2 = ((AggregateBucketResultWithSetFlag<string>)bucket2);
@@ -205,7 +205,7 @@ namespace QueryEngine
             else { /* nothing */ }
         }
 
-        public override void MergeTwoBucketsThreadSafe(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
+        public override void MergeThreadSafe(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
         {
             var tmpBucket1 = ((AggregateBucketResultWithSetFlag<string>)bucket1);
             // The second is not accessed anymore, because the group in dictionary represents
@@ -234,7 +234,7 @@ namespace QueryEngine
             }
         }
 
-        public override void MergeOn(AggregateListResults list1, int into, AggregateListResults list2, int from)
+        public override void Merge(AggregateListResults list1, int into, AggregateListResults list2, int from)
         {
             var tmpList1 = (AggregateListResults<string>)list1;
             var tmpList2 = (AggregateListResults<string>)list2;

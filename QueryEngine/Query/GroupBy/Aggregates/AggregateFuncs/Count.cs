@@ -43,12 +43,12 @@ namespace QueryEngine
             else Interlocked.Increment(ref ((AggregateBucketResult<int>)bucket).aggResult);
         }
 
-        public override void MergeTwoBuckets(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
+        public override void Merge(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
         {
             ((AggregateBucketResult<int>)bucket1).aggResult += ((AggregateBucketResult<int>)bucket2).aggResult;
         }
 
-        public override void MergeTwoBucketsThreadSafe(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
+        public override void MergeThreadSafe(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
         {
             Interlocked.Add(ref ((AggregateBucketResult<int>)bucket1).aggResult, ((AggregateBucketResult<int>)bucket2).aggResult);
         }
@@ -72,7 +72,7 @@ namespace QueryEngine
             }
         }
 
-        public override void MergeOn(AggregateListResults list1, int into, AggregateListResults list2, int from)
+        public override void Merge(AggregateListResults list1, int into, AggregateListResults list2, int from)
         {
             var tmpList1 = (AggregateListResults<int>)list1;
             var tmpList2 = (AggregateListResults<int>)list2;

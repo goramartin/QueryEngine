@@ -118,7 +118,7 @@ namespace QueryEngine
         /// <param name="into"> The position to merge value into. </param>
         /// <param name="list2"> A place to merge results from. </param>
         /// <param name="from"> The position to merge value from. </param>
-        public abstract void MergeOn(AggregateListResults list1, int into, AggregateListResults list2, int from);
+        public abstract void Merge(AggregateListResults list1, int into, AggregateListResults list2, int from);
 
         /// <summary>
         /// Is called only on aggregates that are bound with the bucket type results.
@@ -140,7 +140,7 @@ namespace QueryEngine
         /// </summary>
         /// <param name="bucket1"> A bucket that will contain the final merged results. </param>
         /// <param name="bucket2"> A bucket that will provide value to merge for the bucket1. </param>
-        public abstract void MergeTwoBuckets(AggregateBucketResult bucket1, AggregateBucketResult bucket2);
+        public abstract void Merge(AggregateBucketResult bucket1, AggregateBucketResult bucket2);
 
         /// <summary>
         /// Merges results of two buckets into the bucket1 with a thread safe manner.
@@ -148,7 +148,7 @@ namespace QueryEngine
         /// </summary>
         /// <param name="bucket1"> A bucket that will contain the final merged results. </param>
         /// <param name="bucket2"> A bucket that will provide value to merge for the bucket1. </param>
-        public abstract void MergeTwoBucketsThreadSafe(AggregateBucketResult bucket1, AggregateBucketResult bucket2);
+        public abstract void MergeThreadSafe(AggregateBucketResult bucket1, AggregateBucketResult bucket2);
 
     }
 

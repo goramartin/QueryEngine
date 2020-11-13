@@ -17,7 +17,9 @@ namespace QueryEngine
     internal class LocalGroupGlobalMergeWithBuckets : Grouper
     {
         public LocalGroupGlobalMergeWithBuckets(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper) : base(aggs, hashes, helper)
-        { }
+        {
+            this.BucketStorage = true;
+        }
 
         public override AggregateResults Group(ITableResults resTable)
         {
@@ -153,7 +155,7 @@ namespace QueryEngine
                 if (!Object.ReferenceEquals(buckets, item.Value))
                 {
                     for (int j = 0; j < aggregates.Count; j++)
-                        aggregates[j].MergeTwoBucketsThreadSafe(buckets[j], item.Value[j]);
+                        aggregates[j].MergeThreadSafe(buckets[j], item.Value[j]);
                 }
             }
         }
