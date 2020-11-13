@@ -119,7 +119,7 @@ namespace QueryEngine
             var tmpList2 = (AggregateListResults<int>)list2;
 
             if (into == tmpList1.values.Count) tmpList1.values.Add(tmpList2.values[from]);
-            else if(tmpList1.values[from] > tmpList2.values[from]) tmpList1.values[from] = tmpList2.values[from];
+            else if(tmpList1.values[into] > tmpList2.values[from]) tmpList1.values[into] = tmpList2.values[from];
         }
 
         public override string ToString()
@@ -240,7 +240,7 @@ namespace QueryEngine
             var tmpList2 = (AggregateListResults<string>)list2;
 
             if (into == tmpList1.values.Count) tmpList1.values.Add(tmpList2.values[from]);
-            else if (tmpList1.values[from].CompareTo(tmpList2.values[from]) > 0) tmpList1.values[from] = tmpList2.values[from];
+            else if (tmpList1.values[into].CompareTo(tmpList2.values[from]) > 0) tmpList1.values[into] = tmpList2.values[from];
         }
 
         public override string ToString()
