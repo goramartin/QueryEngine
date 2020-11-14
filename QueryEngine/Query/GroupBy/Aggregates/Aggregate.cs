@@ -84,8 +84,6 @@ namespace QueryEngine
         {
             return Factory(agg.GetFuncName(), agg.GetAggregateReturnType(), agg.expressionHolder);
         }
-
-
         public override bool Equals(object obj)
         {
             if (obj == null) return false;
@@ -100,6 +98,7 @@ namespace QueryEngine
         }
         public abstract Type GetAggregateReturnType();
         public abstract string GetFuncName();
+
 
         /// <summary>
         /// Is called only on aggregates that are bound with the array type results.
@@ -123,9 +122,6 @@ namespace QueryEngine
         /// <param name="bucket"> A position to apply the computed value into. </param>
         public abstract void ApplyThreadSafe(in TableResults.RowProxy row, AggregateBucketResult bucket);
 
-        
-        
-        
         /// <summary>
         /// Is called during merging in LocalGroupLocalMerge grouping.
         /// It merges aggregates values from two different result holders and merges them into the

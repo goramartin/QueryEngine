@@ -32,7 +32,7 @@ namespace QueryEngine
             if (this.expr.TryEvaluate(in row, out int returnValue))
             {
                 var tmpBucket = ((AggregateBucketResultWithSetFlag<int>)bucket);
-                if (tmpBucket.IsSet)
+                if (tmpBucket.isSet)
                 {
                     if (tmpBucket.aggResult > returnValue) tmpBucket.aggResult = returnValue;
                     else { /* nothing */ }
@@ -40,7 +40,7 @@ namespace QueryEngine
                 else
                 {
                     tmpBucket.aggResult = returnValue;
-                    tmpBucket.IsSet = true;
+                    tmpBucket.isSet = true;
                 }
             }
         }
@@ -53,7 +53,7 @@ namespace QueryEngine
                 bool wasSet = false;
                 while (!wasSet)
                 {
-                    if (tmpBucket.IsSet)
+                    if (tmpBucket.isSet)
                     {
                         // Compare-exchange mechanism.
                         int initialValue, smallerValue;
@@ -70,12 +70,12 @@ namespace QueryEngine
                         // Note that this branch happens only when initing the first value.
                         lock (this)
                         {   // Check if other thread inited the first value while waiting.
-                            if (!tmpBucket.IsSet)
+                            if (!tmpBucket.isSet)
                             {
                                 // The sets must be in this order, because after setting IsSet flag
                                 // there must be placed the value, otherwise thread could access empty bucket.
                                 tmpBucket.aggResult = returnValue;
-                                tmpBucket.IsSet = true;
+                                tmpBucket.isSet = true;
                                 wasSet = true;
                             }
                             else { /* next cycle it will go in the other branch of if(IsSet) */}
@@ -117,8 +117,8 @@ namespace QueryEngine
             if (this.expr.TryEvaluate(in row, out int returnValue))
             {
                 var tmpList = (AggregateListResults<int>)list;
-                if (position == tmpList.values.Count) tmpList.values.Add(returnValue);
-                else if (tmpList.values[position] > returnValue) tmpList.values[position] = returnValue;
+                if (position == tmpList.aggResults.Count) tmpList.aggResults.Add(returnValue);
+                else if (tmpList.aggResults[position] > returnValue) tmpList.aggResults[position] = returnValue;
             }
         }
 
@@ -127,8 +127,8 @@ namespace QueryEngine
             var tmpList1 = (AggregateListResults<int>)list1;
             var tmpList2 = (AggregateListResults<int>)list2;
 
-            if (into == tmpList1.values.Count) tmpList1.values.Add(tmpList2.values[from]);
-            else if(tmpList1.values[into] > tmpList2.values[from]) tmpList1.values[into] = tmpList2.values[from];
+            if (into == tmpList1.aggResults.Count) tmpList1.aggResults.Add(tmpList2.aggResults[from]);
+            else if(tmpList1.aggResults[into] > tmpList2.aggResults[from]) tmpList1.aggResults[into] = tmpList2.aggResults[from];
         }
 
         public override void MergeThreadSafe(AggregateBucketResult bucket, AggregateListResults list, int position)
@@ -139,7 +139,7 @@ namespace QueryEngine
             do
             {
                 initialValue = tmpBucket.aggResult;
-                if (initialValue.CompareTo(tmpList.values[position]) > 0) smallerValue = tmpList.values[position];
+                if (initialValue.CompareTo(tmpList.aggResults[position]) > 0) smallerValue = tmpList.aggResults[position];
                 else smallerValue = initialValue;
             }
             while (initialValue != Interlocked.CompareExchange(ref tmpBucket.aggResult, smallerValue, initialValue));
@@ -149,7 +149,7 @@ namespace QueryEngine
         {
             var tmpBucket = ((AggregateBucketResult<int>)bucket);
             var tmpList = ((AggregateListResults<int>)list);
-            if (tmpBucket.aggResult > tmpList.values[position]) tmpBucket.aggResult = tmpList.values[position];
+            if (tmpBucket.aggResult > tmpList.aggResults[position]) tmpBucket.aggResult = tmpList.aggResults[position];
         }
     }
 
@@ -174,7 +174,7 @@ namespace QueryEngine
             if (this.expr.TryEvaluate(in row, out string returnValue))
             {
                 var tmpBucket = ((AggregateBucketResultWithSetFlag<string>)bucket);
-                if (tmpBucket.IsSet)
+                if (tmpBucket.isSet)
                 {
                     if (tmpBucket.aggResult.CompareTo(returnValue) > 0) tmpBucket.aggResult = returnValue;
                     else { /* nothing */ }
@@ -182,7 +182,7 @@ namespace QueryEngine
                 else
                 {
                     tmpBucket.aggResult = returnValue;
-                    tmpBucket.IsSet = true;
+                    tmpBucket.isSet = true;
                 }
             }
         }
@@ -195,7 +195,7 @@ namespace QueryEngine
                 bool wasSet = false;
                 while (!wasSet)
                 {
-                    if (tmpBucket.IsSet)
+                    if (tmpBucket.isSet)
                     {
                         // Compare exchange mechanism.
                         string initialValue, smallerValue;
@@ -212,12 +212,12 @@ namespace QueryEngine
                         // Note that this branch happens only when initing the first value.
                         lock (this)
                         {   // Check if other thread inited the first value while waiting.
-                            if (!tmpBucket.IsSet)
+                            if (!tmpBucket.isSet)
                             {
                                 // The sets must be in this order, because after setting IsSet flag
                                 // there must be placed the value, otherwise thread could access empty bucket.
                                 tmpBucket.aggResult = returnValue;
-                                tmpBucket.IsSet = true;
+                                tmpBucket.isSet = true;
                                 wasSet = true;
                             }
                             else { /* next cycle it will go in the other branch of if(IsSet) */}
@@ -259,8 +259,8 @@ namespace QueryEngine
             if (this.expr.TryEvaluate(in row, out string returnValue))
             {
                 var tmpList = (AggregateListResults<string>)list;
-                if (position == tmpList.values.Count) tmpList.values.Add(returnValue);
-                else if (tmpList.values[position].CompareTo(returnValue) > 0) tmpList.values[position] = returnValue;
+                if (position == tmpList.aggResults.Count) tmpList.aggResults.Add(returnValue);
+                else if (tmpList.aggResults[position].CompareTo(returnValue) > 0) tmpList.aggResults[position] = returnValue;
             }
         }
 
@@ -269,8 +269,8 @@ namespace QueryEngine
             var tmpList1 = (AggregateListResults<string>)list1;
             var tmpList2 = (AggregateListResults<string>)list2;
 
-            if (into == tmpList1.values.Count) tmpList1.values.Add(tmpList2.values[from]);
-            else if (tmpList1.values[into].CompareTo(tmpList2.values[from]) > 0) tmpList1.values[into] = tmpList2.values[from];
+            if (into == tmpList1.aggResults.Count) tmpList1.aggResults.Add(tmpList2.aggResults[from]);
+            else if (tmpList1.aggResults[into].CompareTo(tmpList2.aggResults[from]) > 0) tmpList1.aggResults[into] = tmpList2.aggResults[from];
         }
 
         public override void MergeThreadSafe(AggregateBucketResult bucket, AggregateListResults list, int position)
@@ -281,7 +281,7 @@ namespace QueryEngine
             do
             {
                 initialValue = tmpBucket.aggResult;
-                if (initialValue.CompareTo(tmpList.values[position]) > 0) smallerValue = tmpList.values[position];
+                if (initialValue.CompareTo(tmpList.aggResults[position]) > 0) smallerValue = tmpList.aggResults[position];
                 else smallerValue = initialValue;
             }
             while (initialValue != Interlocked.CompareExchange(ref tmpBucket.aggResult, smallerValue, initialValue));
@@ -291,7 +291,7 @@ namespace QueryEngine
         {
             var tmpBucket = ((AggregateBucketResult<string>)bucket);
             var tmpList = ((AggregateListResults<string>)list);
-            if (tmpBucket.aggResult.CompareTo(tmpList.values[position]) > 0) tmpBucket.aggResult = tmpList.values[position];
+            if (tmpBucket.aggResult.CompareTo(tmpList.aggResults[position]) > 0) tmpBucket.aggResult = tmpList.aggResults[position];
 
         }
     }

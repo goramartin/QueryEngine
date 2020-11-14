@@ -18,12 +18,13 @@ namespace QueryEngine
     /// 
     /// Is used by LocalGroupLocalMerge.
     /// </summary>
-    internal class RowEqualityComparerNoHash : IEqualityComparer<GroupDictKey>
+    internal class RowEqualityComparerGroupKey : IEqualityComparer<GroupDictKey>
     {
         public ITableResults Results { get; }
         public List<ExpressionEqualityComparer> Comparers { get; }
-
-        public RowEqualityComparerNoHash(ITableResults results, List<ExpressionEqualityComparer> comparers)
+        public bool CacheOn { get; private set; }
+        
+        public RowEqualityComparerGroupKey(ITableResults results, List<ExpressionEqualityComparer> comparers)
         {
             this.Results = results;
             this.Comparers = comparers;
@@ -46,13 +47,27 @@ namespace QueryEngine
         /// Clone the entire equality comparer.
         /// It clones also the comparers because they contain cache.
         /// </summary>
-        public RowEqualityComparerNoHash Clone()
+        public RowEqualityComparerGroupKey Clone()
         {
             var tmp = new List<ExpressionEqualityComparer>();
             for (int i = 0; i < this.Comparers.Count; i++)
                 tmp.Add(this.Comparers[i].Clone());
 
-            return new RowEqualityComparerNoHash(this.Results, tmp);
+            return new RowEqualityComparerGroupKey(this.Results, tmp);
+        }
+
+        public void SetCache(RowHasher hasher)
+        {
+            this.CacheOn = true;
+            for (int i = 0; i < this.Comparers.Count; i++)
+                this.Comparers[i].SetCache(hasher.Hashers[i]);
+        }
+
+        public void UnsetCache()
+        {
+            this.CacheOn = false ;
+            for (int i = 0; i < this.Comparers.Count; i++)
+                this.Comparers[i].SetCache(null);
         }
     }
 }

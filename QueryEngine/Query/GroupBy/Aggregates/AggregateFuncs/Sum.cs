@@ -53,8 +53,8 @@ namespace QueryEngine
                 if (this.expr.TryEvaluate(in row, out int returnValue))
                 {
                     var tmpList = (AggregateListResults<int>)list;
-                    if (position == tmpList.values.Count) tmpList.values.Add(returnValue);
-                    else tmpList.values[position] += returnValue;
+                    if (position == tmpList.aggResults.Count) tmpList.aggResults.Add(returnValue);
+                    else tmpList.aggResults[position] += returnValue;
                 }
         }
 
@@ -63,18 +63,18 @@ namespace QueryEngine
             var tmpList1 = (AggregateListResults<int>)list1;
             var tmpList2 = (AggregateListResults<int>)list2;
 
-            if (into == tmpList1.values.Count) tmpList1.values.Add(tmpList2.values[from]);
-            else tmpList1.values[into] += tmpList2.values[from];
+            if (into == tmpList1.aggResults.Count) tmpList1.aggResults.Add(tmpList2.aggResults[from]);
+            else tmpList1.aggResults[into] += tmpList2.aggResults[from];
         }
 
         public override void MergeThreadSafe(AggregateBucketResult bucket, AggregateListResults list, int position)
         {
-            Interlocked.Add(ref ((AggregateBucketResult<int>)bucket).aggResult,((AggregateListResults<int>)list).values[position]);
+            Interlocked.Add(ref ((AggregateBucketResult<int>)bucket).aggResult,((AggregateListResults<int>)list).aggResults[position]);
         }
 
         public override void Merge(AggregateBucketResult bucket, AggregateListResults list, int position)
         {
-            ((AggregateBucketResult<int>)bucket).aggResult += ((AggregateListResults<int>)list).values[position];
+            ((AggregateBucketResult<int>)bucket).aggResult += ((AggregateListResults<int>)list).aggResults[position];
         }
     }
 }

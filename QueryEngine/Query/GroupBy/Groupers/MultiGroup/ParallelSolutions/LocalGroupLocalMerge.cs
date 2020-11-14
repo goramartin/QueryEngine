@@ -9,7 +9,7 @@ namespace QueryEngine
 {
     /// <summary>
     /// The class represents multi group grouping algorithm.
-    /// The class uses aggregations with array like storage.
+    /// The class uses aggregations with array like storage or buckets.
     /// Each thread receives an equality comparer, hasher, aggregates and range of vertices.
     /// The threads then work independently on each other. When the threads finish, the results are merged.
     /// The results are merged in a form of a binary tree (similar to a merge sort).
@@ -22,36 +22,32 @@ namespace QueryEngine
         public override AggregateResults Group(ITableResults resTable)
         {
             // Create hashers and equality comparers.
-            // The hashers receive also the equality comparer as cache.
             var equalityComparers = new List<ExpressionEqualityComparer>();
             var hashers = new List<ExpressionHasher>();
             for (int i = 0; i < hashes.Count; i++)
             {
                 equalityComparers.Add(ExpressionEqualityComparer.Factory(hashes[i], hashes[i].ExpressionType));
-                hashers.Add(ExpressionHasher.Factory(hashes[i], hashes[i].ExpressionType, equalityComparers[i]));
+                hashers.Add(ExpressionHasher.Factory(hashes[i], hashes[i].ExpressionType));
             }
 
             if (this.InParallel && ((resTable.NumberOfMatchedElements / this.ThreadCount) > 1)) return ParallelGroupBy(resTable, equalityComparers, hashers);
             else return SingleThreadGroupBy(resTable, equalityComparers, hashers);
         }
 
-
-        /// <summary>
-        /// Note that the received hashers and equality comparers have already set their internal cache to each other.
-        /// </summary>
         private AggregateResults SingleThreadGroupBy(ITableResults resTable, List<ExpressionEqualityComparer> equalityComparers, List<ExpressionHasher> hashers)
         {
+            var tmpComparer = new RowEqualityComparerGroupKey(resTable, equalityComparers);
+            var tmpHasher = new RowHasher(hashers);
+            tmpComparer.SetCache(tmpHasher);
+            tmpHasher.SetCache(tmpComparer.Comparers);
             object tmpJob;
-            if (!this.BucketStorage) tmpJob = new GroupByJobLists(new RowHasher(hashers), new RowEqualityComparerNoHash(resTable, equalityComparers), this.aggregates, resTable, 0, resTable.NumberOfMatchedElements);
-            else tmpJob = new GroupByJobBuckets(new RowHasher(hashers), new RowEqualityComparerNoHash(resTable, equalityComparers), this.aggregates, resTable, 0, resTable.NumberOfMatchedElements);
+            if (!this.BucketStorage) tmpJob = new GroupByJobLists(tmpHasher, tmpComparer, this.aggregates, resTable, 0, resTable.NumberOfMatchedElements);
+            else tmpJob = new GroupByJobBuckets(tmpHasher, tmpComparer, this.aggregates, resTable, 0, resTable.NumberOfMatchedElements);
             SingleThreadGroupByWork(tmpJob, this.BucketStorage);
             
             return null;
         }
 
-        /// <summary>
-        /// Note that the received hashers and equality comparers have already set their internal cache to each other.
-        /// </summary>
         private AggregateResults ParallelGroupBy(ITableResults resTable, List<ExpressionEqualityComparer> equalityComparers, List<ExpressionHasher> hashers)
         {
             GroupByJob[] jobs = CreateJobs(resTable, this.aggregates, equalityComparers, hashers);
@@ -65,8 +61,7 @@ namespace QueryEngine
         /// Note that the last job in the array has the end set to the end of the result table.
         /// The addition must always be > 0.
         /// Each job will receive a range from result table, hasher, comparer and aggregates.
-        /// Note that they are all copies, because they contain a private stete (hasher contains reference to the equality comparers to enable caching when computing the hash, aggregates
-        /// contain references to storage arrays to avoid casting in a tight loop).
+        /// Note that they are all copies, because they contain a private stete (hasher contains reference to the equality comparers to enable caching when computing the hash.
         /// The comparers and hashers build in the constructor of this class are given to the last job, just like the aggregates passed to the construtor.
         /// </summary>
         private GroupByJob[] CreateJobs(ITableResults results, List<Aggregate> aggs, List<ExpressionEqualityComparer> equalityComparers, List<ExpressionHasher> hashers)
@@ -77,14 +72,20 @@ namespace QueryEngine
             if (addition == 0)
                 throw new ArgumentException($"{this.GetType()}, a range for a thread cannot be 0.");
              
-            var lastComp = new RowEqualityComparerNoHash(results, equalityComparers);
+            // Set their internal cache.
+            var lastComp = new RowEqualityComparerGroupKey(results, equalityComparers);
             var lastHasher = new RowHasher(hashers);
+            lastComp.SetCache(lastHasher);
+            lastHasher.SetCache(lastComp.Comparers);
 
             for (int i = 0; i < jobs.Length - 1; i++)
             {
-                var tmpComp = lastComp.Clone();
-                if (!this.BucketStorage) jobs[i] = new GroupByJobLists(lastHasher.Clone(tmpComp.Comparers), tmpComp, aggs, results, current, current + addition);
-                else jobs[i] = new GroupByJobBuckets(lastHasher.Clone(tmpComp.Comparers), tmpComp, aggs, results, current, current + addition);
+                var tmpComp = lastComp.Clone(); 
+                var tmpHash = lastHasher.Clone();
+                tmpComp.SetCache(tmpHash); 
+                tmpHash.SetCache(tmpComp.Comparers);
+                if (!this.BucketStorage) jobs[i] = new GroupByJobLists(tmpHash, tmpComp, aggs, results, current, current + addition);
+                else jobs[i] = new GroupByJobBuckets(tmpHash, tmpComp, aggs, results, current, current + addition);
                 
                 current += addition;
             }
@@ -309,7 +310,7 @@ namespace QueryEngine
             public int end;
             public bool bucketStorage;
 
-            protected GroupByJob(RowHasher hasher, RowEqualityComparerNoHash comparer, List<Aggregate> aggregates, ITableResults results, int start, int end, bool bucketStorage)
+            protected GroupByJob(RowHasher hasher, RowEqualityComparerGroupKey comparer, List<Aggregate> aggregates, ITableResults results, int start, int end, bool bucketStorage)
             {
                 this.hasher = hasher;
                 this.aggregates = aggregates;
@@ -324,7 +325,7 @@ namespace QueryEngine
         {
             public Dictionary<GroupDictKey, AggregateBucketResult[]> groups;
 
-            public GroupByJobBuckets(RowHasher hasher, RowEqualityComparerNoHash comparer, List<Aggregate> aggregates, ITableResults results, int start, int end): base(hasher, comparer, aggregates, results, start, end, true)
+            public GroupByJobBuckets(RowHasher hasher, RowEqualityComparerGroupKey comparer, List<Aggregate> aggregates, ITableResults results, int start, int end): base(hasher, comparer, aggregates, results, start, end, true)
             {
                 this.groups = new Dictionary<GroupDictKey, AggregateBucketResult[]>();
             }
@@ -334,7 +335,7 @@ namespace QueryEngine
         {
             public Dictionary<GroupDictKey, int> groups;
             public List<AggregateListResults> aggResults;
-            public GroupByJobLists(RowHasher hasher, RowEqualityComparerNoHash comparer, List<Aggregate> aggregates, ITableResults results, int start, int end) : base(hasher, comparer, aggregates, results, start, end, false)
+            public GroupByJobLists(RowHasher hasher, RowEqualityComparerGroupKey comparer, List<Aggregate> aggregates, ITableResults results, int start, int end) : base(hasher, comparer, aggregates, results, start, end, false)
             {
                 this.groups = new Dictionary<GroupDictKey, int>();
                 this.aggResults = AggregateListResults.CreateArrayResults(aggregates);

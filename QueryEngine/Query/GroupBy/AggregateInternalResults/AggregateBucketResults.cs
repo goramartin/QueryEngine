@@ -10,6 +10,7 @@ namespace QueryEngine
     /// Class represents a result holder for a group aggregated values during grouping.
     /// For every new group a new array filled with bucket result classes is created during grouping.
     /// Each bucket class encompases a result of the aggregation. 
+    /// These storages will be used in parallel enviroment. 
     /// </summary>
     internal abstract class AggregateBucketResult
     {
@@ -56,7 +57,7 @@ namespace QueryEngine
     /// <typeparam name="T"> A return type of the aggregation function. </typeparam>
     internal class AggregateBucketResultWithSetFlag<T> : AggregateBucketResult<T>
     {
-        public bool IsSet = false;
+        public bool isSet = false;
     }
 
 }

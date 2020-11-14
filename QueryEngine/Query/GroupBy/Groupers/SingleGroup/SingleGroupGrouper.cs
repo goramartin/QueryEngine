@@ -13,10 +13,8 @@ namespace QueryEngine
     /// </summary>
     internal class SingleGroupGrouper : Grouper
     {
-        public SingleGroupGrouper(List<Aggregate> aggs,List<ExpressionHolder> hashes, IGroupByExecutionHelper helper) : base(aggs, hashes, helper)
-        {
-            this.BucketStorage = false;
-        }
+        public SingleGroupGrouper(List<Aggregate> aggs,List<ExpressionHolder> hashes, IGroupByExecutionHelper helper) : base(aggs, hashes, helper, false)
+        {}
 
         /// <summary>
         /// Sets values to the Count(*) aggregates because there is nothing to be computed.

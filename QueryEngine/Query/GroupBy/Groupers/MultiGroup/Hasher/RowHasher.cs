@@ -28,11 +28,11 @@ namespace QueryEngine
     /// </summary>
     internal class RowHasher : IRowHasher
     {
-        protected List<ExpressionHasher> hashers;
+        public List<ExpressionHasher> Hashers { get; private set; }
 
         public RowHasher(List<ExpressionHasher> hashers)
         {
-            this.hashers = hashers;
+            this.Hashers = hashers;
         }
 
         public int Hash(in TableResults.RowProxy row)
@@ -40,35 +40,34 @@ namespace QueryEngine
             unchecked
             {
                 int hash = 5381;
-                for (int i = 0; i < this.hashers.Count; i++)
-                    hash = (((hash << 5) + hash) ^ this.hashers[i].Hash(in row));
+                for (int i = 0; i < this.Hashers.Count; i++)
+                    hash = (((hash << 5) + hash) ^ this.Hashers[i].Hash(in row));
                 return hash;
             }
         }
 
         /// <summary>
         /// Creates a shallow copy of the row hasher.
-        /// Note that the cache.size and the hashers.size are always the same.
         /// </summary>
-        public RowHasher Clone(List<ExpressionEqualityComparer> cache)
+        public RowHasher Clone()
         {
             var tmp = new List<ExpressionHasher>();
-            for (int i = 0; i < cache.Count; i++)
-                tmp.Add(this.hashers[i].Clone(cache[i]));
+            for (int i = 0; i < this.Hashers.Count; i++)
+                tmp.Add(this.Hashers[i].Clone());
 
             return new RowHasher(tmp);
         }
 
         public void SetCache(List<ExpressionEqualityComparer> caches)
         {
-            for (int i = 0; i < this.hashers.Count; i++)
-                this.hashers[i].SetCache(caches[i]);
+            for (int i = 0; i < this.Hashers.Count; i++)
+                this.Hashers[i].SetCache(caches[i]);
         }
 
         public void UnsetCache()
         {
-            for (int i = 0; i < this.hashers.Count; i++)
-                this.hashers[i].SetCache(null);
+            for (int i = 0; i < this.Hashers.Count; i++)
+                this.Hashers[i].SetCache(null);
         }
     }
 }

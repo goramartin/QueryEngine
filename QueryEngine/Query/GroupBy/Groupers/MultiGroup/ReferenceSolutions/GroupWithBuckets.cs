@@ -26,13 +26,13 @@ namespace QueryEngine
             for (int i = 0; i < hashes.Count; i++)
             {
                 equalityComparers.Add(ExpressionEqualityComparer.Factory(hashes[i], hashes[i].ExpressionType));
-                hashers.Add(ExpressionHasher.Factory(hashes[i], hashes[i].ExpressionType, null));
+                hashers.Add(ExpressionHasher.Factory(hashes[i], hashes[i].ExpressionType));
             }
 
-            return this.SingleThreadGroupBy(new RowEqualityComparerWithHash(resTable, equalityComparers, new RowHasher(hashers), true), resTable);
+            return this.SingleThreadGroupBy(new RowEqualityComparerInt(resTable, equalityComparers, new RowHasher(hashers), true), resTable);
         }
 
-        private AggregateResults SingleThreadGroupBy(RowEqualityComparerWithHash equalityComparer, ITableResults results)
+        private AggregateResults SingleThreadGroupBy(RowEqualityComparerInt equalityComparer, ITableResults results)
         {
             #region DECL
             AggregateBucketResult[] buckets = null; 

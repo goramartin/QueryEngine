@@ -26,10 +26,10 @@ namespace QueryEngine
             for (int i = 0; i < hashes.Count; i++)
             {
                 equalityComparers.Add(ExpressionEqualityComparer.Factory(hashes[i], hashes[i].ExpressionType));
-                hashers.Add(ExpressionHasher.Factory(hashes[i], hashes[i].ExpressionType, null));
+                hashers.Add(ExpressionHasher.Factory(hashes[i], hashes[i].ExpressionType));
             }
 
-           return this.SingleThreadGroupBy(new RowEqualityComparerWithHash(resTable, equalityComparers, new RowHasher(hashers), true),resTable);
+           return this.SingleThreadGroupBy(new RowEqualityComparerInt(resTable, equalityComparers, new RowHasher(hashers), true), resTable);
         }
 
         /// <summary>
@@ -38,7 +38,7 @@ namespace QueryEngine
         /// <param name="equalityComparer"> Equality comparer where T is int and computes internaly the hash for each row from the result table.</param>
         /// <param name="results"> A result table from the matching clause.</param>
         /// <returns> Aggregate results. </returns>
-        private AggregateResults SingleThreadGroupBy(RowEqualityComparerWithHash equalityComparer, ITableResults results)
+        private AggregateResults SingleThreadGroupBy(RowEqualityComparerInt equalityComparer, ITableResults results)
         {
             #region DECL
             var aggResults = AggregateListResults.CreateArrayResults(this.aggregates);

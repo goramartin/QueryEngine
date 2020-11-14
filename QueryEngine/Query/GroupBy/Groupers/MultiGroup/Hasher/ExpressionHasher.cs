@@ -28,12 +28,12 @@ namespace QueryEngine
 
         public abstract int Hash(in TableResults.RowProxy row);
 
-        public static ExpressionHasher Factory(ExpressionHolder expressionHolder, Type type, ExpressionEqualityComparer cache)
+        public static ExpressionHasher Factory(ExpressionHolder expressionHolder, Type type)
         {
             if (type == typeof(int)) 
-                return new ExpressionIntegerHasher(expressionHolder, cache);
+                return new ExpressionHasher<int>(expressionHolder);
             else if (type == typeof(string)) 
-                return new ExpressionStringHasher(expressionHolder, cache);
+                return new ExpressionHasher<string>(expressionHolder);
             else throw new ArgumentException($"Expression hasher factory, trying to create hasher with unknown type = {type}.");
         }
 
@@ -41,30 +41,28 @@ namespace QueryEngine
         /// Clones the instance.
         /// Expects that the cache is different than the containing one in (this).
         /// </summary>
-        public abstract ExpressionHasher Clone(ExpressionEqualityComparer cache);
-
+        public abstract ExpressionHasher Clone();
         public abstract void SetCache(ExpressionEqualityComparer cache);
     }
 
-    internal class ExpressionIntegerHasher : ExpressionHasher
+    internal class ExpressionHasher<T> : ExpressionHasher
     {
-        protected ExpressionReturnValue<int> expr;
-        protected ExpressionIntegerEqualityComparer cache;
+        protected ExpressionReturnValue<T> expr;
+        protected ExpressionEqualityComparer<T> cache;
 
-        public ExpressionIntegerHasher(ExpressionHolder expressionHolder, ExpressionEqualityComparer cache) : base(expressionHolder)
+        public ExpressionHasher(ExpressionHolder expressionHolder) : base(expressionHolder)
         {
-            this.expr = (ExpressionReturnValue<int>)expressionHolder.Expr;
-            this.cache = (ExpressionIntegerEqualityComparer)cache;
-
+            this.expr = (ExpressionReturnValue<T>)expressionHolder.Expr;
         }
-        
+
         public override int Hash(in TableResults.RowProxy row)
         {
             if (this.cache == null)
             {
-                if (this.expr.TryEvaluate(in row, out int retValue)) return retValue.GetHashCode();
+                if (this.expr.TryEvaluate(in row, out T retValue)) return retValue.GetHashCode();
                 else return 0;
-            } else
+            }
+            else
             {
                 this.cache.successLastY = this.expr.TryEvaluate(in row, out this.cache.resultLastY);
                 this.cache.rowlastY = row.index;
@@ -73,55 +71,15 @@ namespace QueryEngine
             }
         }
 
-        public override ExpressionHasher Clone(ExpressionEqualityComparer cache)
+        public override ExpressionHasher Clone()
         {
-            return new ExpressionIntegerHasher(this.expressionHolder, cache);
+            return new ExpressionHasher<T>(this.expressionHolder);
         }
 
         public override void SetCache(ExpressionEqualityComparer cache)
         {
-            this.cache = (ExpressionIntegerEqualityComparer)cache;
+            if (cache == null) this.cache = null;
+            else this.cache = (ExpressionEqualityComparer<T>)cache;
         }
     }
-
-    internal class ExpressionStringHasher : ExpressionHasher
-    {
-        protected ExpressionReturnValue<string> expr;
-        protected ExpressionStringEqualityComparer cache;
-
-        public ExpressionStringHasher(ExpressionHolder expressionHolder, ExpressionEqualityComparer cache) : base(expressionHolder)
-        {
-            this.expr = (ExpressionReturnValue<string>)expressionHolder.Expr;
-            this.cache = (ExpressionStringEqualityComparer)cache;
-        }
-
-
-        public override int Hash(in TableResults.RowProxy row)
-        {
-            if (this.cache == null)
-            {
-                if (this.expr.TryEvaluate(in row, out string retValue)) return retValue.GetHashCode();
-                else return 0;
-            } else
-            {
-                this.cache.successLastY = this.expr.TryEvaluate(in row, out this.cache.resultLastY);
-                this.cache.rowlastY = row.index;
-                if (this.cache.successLastY) return this.cache.resultLastY.GetHashCode();
-                else return 0;
-            }
-        }
-
-        public override ExpressionHasher Clone(ExpressionEqualityComparer cache)
-        {
-            return new ExpressionStringHasher(this.expressionHolder, cache);
-        }
-
-        public override void SetCache(ExpressionEqualityComparer cache)
-        {
-            this.cache = (ExpressionStringEqualityComparer)cache;
-
-        }
-
-    }
-
 }

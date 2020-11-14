@@ -13,6 +13,9 @@ namespace QueryEngine
     /// value for each individual group (index represents a group and its aggregate value).
     /// This approach can save a lot of memory because it does not have to allocate additional classes for every
     /// new group.
+    /// These storages will not be used in the parallel enviroment. (Only in the local sense.)
+    /// They are used only in the local group local merge algorithm, because there are no atomic operations
+    /// on lists. Thus instead of lists,
     /// </summary>
     internal abstract class AggregateListResults
     {
@@ -37,7 +40,7 @@ namespace QueryEngine
     /// <typeparam name="T"> A return type of the aggregation function. </typeparam>
     internal class AggregateListResults<T> : AggregateListResults
     {
-        public List<T> values = new List<T>();
+        public List<T> aggResults = new List<T>();
     }
 
     /// <summary>

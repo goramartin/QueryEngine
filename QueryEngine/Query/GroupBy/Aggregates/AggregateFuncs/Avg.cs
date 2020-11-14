@@ -67,14 +67,14 @@ namespace QueryEngine
             {
                 var tmpList = (AggregateListAvgResults<int>)list;
 
-                if (position == tmpList.values.Count)
+                if (position == tmpList.aggResults.Count)
                 {
-                    tmpList.values.Add(returnValue);
+                    tmpList.aggResults.Add(returnValue);
                     tmpList.eltUsed.Add(1);
                 }
                 else
                 {
-                    tmpList.values[position] += returnValue;
+                    tmpList.aggResults[position] += returnValue;
                     tmpList.eltUsed[position]++;
                 }
             }
@@ -85,14 +85,14 @@ namespace QueryEngine
             var tmpList1 = (AggregateListAvgResults<int>)list1;
             var tmpList2 = (AggregateListAvgResults<int>)list2;
 
-            if (into == tmpList1.values.Count)
+            if (into == tmpList1.aggResults.Count)
             {
-                tmpList1.values.Add(tmpList2.values[from]);
+                tmpList1.aggResults.Add(tmpList2.aggResults[from]);
                 tmpList1.eltUsed.Add(tmpList2.eltUsed[from]);
             }
             else
             {
-                tmpList1.values[into] += tmpList2.values[from];
+                tmpList1.aggResults[into] += tmpList2.aggResults[from];
                 tmpList1.eltUsed[into] += tmpList2.eltUsed[from];
             }
 
@@ -103,7 +103,7 @@ namespace QueryEngine
             var tmpBucket = ((AggregateBucketAvgResult<int>)bucket);
             var tmpList = ((AggregateListAvgResults<int>)list);
         
-            Interlocked.Add(ref tmpBucket.aggResult, tmpList.values[position]);
+            Interlocked.Add(ref tmpBucket.aggResult, tmpList.aggResults[position]);
             Interlocked.Add(ref tmpBucket.eltUsed, tmpList.eltUsed[position]);
         }
 
@@ -111,7 +111,7 @@ namespace QueryEngine
         {
             var tmpBucket = ((AggregateBucketAvgResult<int>)bucket);
             var tmpList = ((AggregateListAvgResults<int>)list);
-            tmpBucket.aggResult += tmpList.values[position];
+            tmpBucket.aggResult += tmpList.aggResults[position];
             tmpBucket.eltUsed += tmpList.eltUsed[position];
         }
     }

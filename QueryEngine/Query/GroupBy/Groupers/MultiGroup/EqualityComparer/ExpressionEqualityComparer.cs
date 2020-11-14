@@ -21,8 +21,9 @@ namespace QueryEngine
     /// </summary>
     internal abstract class ExpressionEqualityComparer
     {
-        protected readonly ExpressionHolder expressionHolder;
-        protected readonly List<int> usedVars;
+        protected ExpressionHolder expressionHolder;
+        protected List<int> usedVars;
+        protected ExpressionHasher boundHasher;
         public int rowlastY = -1;
         public bool successLastY = false;
 
@@ -69,24 +70,24 @@ namespace QueryEngine
 
             return true;
         }
-
         public abstract ExpressionEqualityComparer Clone();
+        public abstract void SetCache(ExpressionHasher cache);
     }
 
-    internal class ExpressionIntegerEqualityComparer : ExpressionEqualityComparer
+    internal abstract class ExpressionEqualityComparer<T> : ExpressionEqualityComparer
     {
-        // To avoid casting every time Holder.TryGetValue()
-        ExpressionReturnValue<int> expr;
-        public int resultLastY = default;
-
-        public ExpressionIntegerEqualityComparer(ExpressionHolder expressionHolder) : base(expressionHolder)
+        ExpressionReturnValue<T> expr;
+        public T resultLastY = default;
+        public ExpressionEqualityComparer(ExpressionHolder expressionHolder) : base(expressionHolder)
         {
-            this.expr = (ExpressionReturnValue<int>)expressionHolder.Expr;
+            this.expr = (ExpressionReturnValue<T>)expressionHolder.Expr;
         }
 
         /// <summary>
         /// Tries to evaluate containing expression with given rows.
         /// Caching of the last used X row.
+        /// If the results are cached from hasher, use the cached results,
+        /// otherwise compute as normal.
         /// </summary>
         /// <param name="x"> First row. </param>
         /// <param name="y"> Second row. </param>
@@ -96,56 +97,64 @@ namespace QueryEngine
             // Check if used variables in expression are same
             if (AreIdenticalVars(x, y)) return true;
 
-            var xSuccess = this.expr.TryEvaluate(y, out int xValue);
+            if (this.boundHasher == null) return this.EqualsNotCached(in x, in y);
+            else return this.EqualsCached(in x, in y);
+        }
+
+        private bool EqualsCached(in TableResults.RowProxy x, in TableResults.RowProxy y)
+        {
+            var xSuccess = this.expr.TryEvaluate(x, out T xValue);
             if (this.rowlastY != y.index)
             {
-                this.successLastY = this.expr.TryEvaluate(x, out this.resultLastY);
+                this.successLastY = this.expr.TryEvaluate(y, out this.resultLastY);
                 rowlastY = y.index;
             }
 
             if (!this.successLastY && !xSuccess) return true;
-            else return this.resultLastY == xValue;
+            else return Compare(xValue, resultLastY);
+        }
+
+        private bool EqualsNotCached(in TableResults.RowProxy x, in TableResults.RowProxy y)
+        {
+            var xSuccess = this.expr.TryEvaluate(in x, out T xValue);
+            var ySuccess = this.expr.TryEvaluate(in y, out T yValue);
+
+            if (xSuccess && !ySuccess) return true;
+            else return Compare(xValue, yValue);
+        }
+
+        protected abstract bool Compare(T x, T y);
+
+        public override void SetCache(ExpressionHasher cache)
+        {
+            this.boundHasher = cache;
+        }
+    }
+
+    internal class ExpressionIntegerEqualityComparer : ExpressionEqualityComparer<int>
+    {
+        public ExpressionIntegerEqualityComparer(ExpressionHolder expressionHolder) : base(expressionHolder)
+        {}
+
+        protected override bool Compare(int x, int y)
+        {
+            return x == y;
         }
 
         public override ExpressionEqualityComparer Clone()
         {
             return new ExpressionIntegerEqualityComparer(this.expressionHolder);
         }
-
     }
 
-    internal class ExpressionStringEqualityComparer : ExpressionEqualityComparer
+    internal class ExpressionStringEqualityComparer : ExpressionEqualityComparer<string>
     {
-        // To avoid casting every time Holder.TryGetValue()
-        ExpressionReturnValue<string> expr;
-        public string resultLastY = null;
-
         public ExpressionStringEqualityComparer(ExpressionHolder expressionHolder) : base(expressionHolder)
+        { }
+
+        protected override bool Compare(string x, string y)
         {
-            this.expr = (ExpressionReturnValue<string>)expressionHolder.Expr;
-        }
-
-        /// <summary>
-        /// Tries to evaluate containing expression with given rows.
-        /// Caching of the last used X row.
-        /// </summary>
-        /// <param name="x"> First row. </param>
-        /// <param name="y"> Second row. </param>
-        /// <returns>  True if the expressions are equal otherwise false. </returns>
-        public override bool Equals(in TableResults.RowProxy x, in TableResults.RowProxy y)
-        {
-            // Check if used variables in expression are same
-            if (AreIdenticalVars(x, y)) return true;
-
-            var xSuccess = this.expr.TryEvaluate(y, out string xValue);
-            if (this.rowlastY != y.index)
-            {
-                this.successLastY = this.expr.TryEvaluate(x, out this.resultLastY);
-                rowlastY = y.index;
-            }
-
-            if (!this.successLastY && !xSuccess) return true;
-            else return this.resultLastY == xValue;
+            return x == y;
         }
 
         public override ExpressionEqualityComparer Clone()

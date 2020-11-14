@@ -16,10 +16,8 @@ namespace QueryEngine
     /// </summary>
     internal class LocalGroupGlobalMergeWithBuckets : Grouper
     {
-        public LocalGroupGlobalMergeWithBuckets(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper) : base(aggs, hashes, helper)
-        {
-            this.BucketStorage = true;
-        }
+        public LocalGroupGlobalMergeWithBuckets(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper) : base(aggs, hashes, helper, true)
+        {}
 
         public override AggregateResults Group(ITableResults resTable)
         {
@@ -31,7 +29,7 @@ namespace QueryEngine
             {   
                 // We also set the cache of hasher to the new comparer.
                 equalityComparers.Add(ExpressionEqualityComparer.Factory(hashes[i], hashes[i].ExpressionType));
-                hashers.Add(ExpressionHasher.Factory(hashes[i], hashes[i].ExpressionType, equalityComparers[i]));
+                hashers.Add(ExpressionHasher.Factory(hashes[i], hashes[i].ExpressionType));
             }
 
             if (this.InParallel && ((resTable.NumberOfMatchedElements / this.ThreadCount) > 1)) return ParallelGroupBy(resTable, equalityComparers, hashers);
@@ -65,7 +63,7 @@ namespace QueryEngine
         /// </summary>
         private AggregateResults SingleThreadGroupBy(ITableResults resTable, List<ExpressionEqualityComparer> equalityComparers, List<ExpressionHasher> hashers)
         {
-            var tmpComparer = new RowEqualityComparerNoHash(resTable, equalityComparers);
+            var tmpComparer = new RowEqualityComparerGroupKey(resTable, equalityComparers);
             var tmpGlobalDictionary = new ConcurrentDictionary<GroupDictKey, AggregateBucketResult[]>(tmpComparer);
             var tmpJob = new GroupByJob(new RowHasher(hashers), tmpComparer, this.aggregates, resTable, 0, resTable.NumberOfMatchedElements, tmpGlobalDictionary);
             SingleThreadGroupByWork(tmpJob);
@@ -92,8 +90,10 @@ namespace QueryEngine
             if (addition == 0)
                 throw new ArgumentException($"{this.GetType()}, a range for a thread cannot be 0.");
 
-            var lastComp = new RowEqualityComparerNoHash(results, equalityComparers);
+            var lastComp = new RowEqualityComparerGroupKey(results, equalityComparers);
             var lastHasher = new RowHasher(hashers);
+            lastComp.SetCache(lastHasher);
+            lastHasher.SetCache(lastComp.Comparers);
 
             // Global merge dictionary
             // It needs only comparator that has no comparers set as a cache to some hasher.
@@ -101,7 +101,10 @@ namespace QueryEngine
             for (int i = 0; i < jobs.Length - 1; i++)
             {
                 var tmpComp = lastComp.Clone();
-                jobs[i] = new GroupByJob(lastHasher.Clone(tmpComp.Comparers), tmpComp, aggs, results, current, current + addition, globalGroups);
+                var tmpHash = lastHasher.Clone();
+                tmpComp.SetCache(tmpHash);
+                tmpHash.SetCache(tmpComp.Comparers);
+                jobs[i] = new GroupByJob(tmpHash, tmpComp, aggs, results, current, current + addition, globalGroups);
                 current += addition;
             }
             jobs[jobs.Length - 1] = new GroupByJob(lastHasher, lastComp, aggs, results, current, results.NumberOfMatchedElements, globalGroups);
@@ -172,7 +175,7 @@ namespace QueryEngine
 
             public GroupByJob(
                 RowHasher hasher,
-                RowEqualityComparerNoHash comparer,
+                RowEqualityComparerGroupKey comparer,
                 List<Aggregate> aggregates,
                 ITableResults results,
                 int start,

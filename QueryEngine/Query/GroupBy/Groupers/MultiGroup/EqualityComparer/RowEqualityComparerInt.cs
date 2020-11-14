@@ -13,7 +13,7 @@ namespace QueryEngine
     /// is not needed futher.
     /// Is used in GlobalMerge.
     /// </summary>
-    internal class RowEqualityComparerWithHash : IEqualityComparer<int>
+    internal class RowEqualityComparerInt : IEqualityComparer<int>
     {
         public ITableResults Results { get; }
         public List<ExpressionEqualityComparer> Comparers { get; }
@@ -23,15 +23,23 @@ namespace QueryEngine
         /// Construst equality comparer.
         /// </summary>
         /// <param name="CacheOn"> The cache signals, whether the given hasher should cache results for the comparers.</param>
-        public RowEqualityComparerWithHash(ITableResults results, List<ExpressionEqualityComparer> comparers, RowHasher hasher, bool CacheOn)
+        public RowEqualityComparerInt(ITableResults results, List<ExpressionEqualityComparer> comparers, RowHasher hasher, bool CacheOn)
         {
             this.Results = results;
             this.Comparers = comparers;
             this.Hasher = hasher;
 
             // Just in case, set the cache to null.
-            if (CacheOn) this.Hasher.SetCache(this.Comparers);
-            else this.Hasher.UnsetCache();
+            if (CacheOn)
+            {
+                this.SetCache();
+                this.Hasher.SetCache(this.Comparers);
+            }
+            else
+            {
+                this.UnsetCache();
+                this.Hasher.UnsetCache();
+            }
         }
 
         public bool Equals(int x, int y)
@@ -45,6 +53,18 @@ namespace QueryEngine
         public int GetHashCode(int obj)
         {
             return this.Hasher.Hash(this.Results[obj]);
+        }
+
+        private void SetCache()
+        {
+            for (int i = 0; i < this.Comparers.Count; i++)
+                this.Comparers[i].SetCache(this.Hasher.Hashers[i]);
+        }
+
+        private void UnsetCache()
+        {
+            for (int i = 0; i < this.Comparers.Count; i++)
+                this.Comparers[i].SetCache(null);
         }
 
     }
