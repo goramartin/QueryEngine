@@ -73,7 +73,7 @@ namespace QueryEngine
                 this.next = null;
                 Grouper grouper;
                 if (this.helper.IsSetSingleGroupGroupBy) grouper = new SingleGroupGrouper(this.aggregates, null, this.helper);
-                else grouper = new GlobalGroup(this.aggregates, this.hashes, this.helper);
+                else grouper = new GlobalGroup(this.aggregates, this.hashes, this.helper, true);
                 grouper.Group(results);
             }
             else throw new NullReferenceException($"{this.GetType()}, next is set to null.");

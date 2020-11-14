@@ -42,16 +42,26 @@ namespace QueryEngine
             else if (type == typeof(string)) return new AggregateArrayResults<string>();
             else throw new ArgumentException($"Aggregate bucket results factory, cannot create a results holder with the type {type} for function {funcName}.");
         }
+
+        public abstract int ArraySize();
+        public abstract void DoubleSize(int position);
     }
 
     /// <typeparam name="T"> A return type of the aggregation function. </typeparam>
     internal class AggregateArrayResults<T> : AggregateArrayResults
     {
         public T[] aggResults = new T[InitSize];
+        public int size = InitSize;
 
-        public virtual void DoubleSize()
+        public override void DoubleSize(int position)
         {
-            Array.Resize<T>(ref this.aggResults, this.aggResults.Length * 2);
+            Array.Resize<T>(ref this.aggResults, (position + (position % 2)) * 2);
+            size = (position + (position % 2)) * 2;
+        }
+
+        public override int ArraySize()
+        {
+            return this.size;
         }
     }
 
@@ -63,10 +73,10 @@ namespace QueryEngine
     {
         public int[] eltUsed = new int[InitSize];
 
-        public override void DoubleSize()
+        public override void DoubleSize(int position)
         {
-            Array.Resize<int>(ref this.eltUsed, this.eltUsed.Length * 2);
-            base.DoubleSize();
+            Array.Resize<int>(ref this.eltUsed, (position + (position % 2)) * 2);
+            base.DoubleSize( position);
         }
     }
 
@@ -77,10 +87,10 @@ namespace QueryEngine
     internal class AggregateArrayResultsWithSetFlag<T> : AggregateArrayResults<T>
     {
         public bool[] isSet = new bool[InitSize];
-        public override void DoubleSize()
+        public override void DoubleSize(int position)
         {
-            Array.Resize<bool>(ref this.isSet, this.isSet.Length * 2);
-            base.DoubleSize();
+            Array.Resize<bool>(ref this.isSet, (position + (position % 2)) * 2);
+            base.DoubleSize(position);
         }
     }
 }

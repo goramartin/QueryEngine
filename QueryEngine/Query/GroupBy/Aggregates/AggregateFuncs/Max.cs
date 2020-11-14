@@ -41,45 +41,29 @@ namespace QueryEngine
                 }
             }
         }
-
         public override void ApplyThreadSafe(in TableResults.RowProxy row, AggregateBucketResult bucket)
         {
-           
             if (this.expr.TryEvaluate(in row, out int returnValue))
             {
                 var tmpBucket = ((AggregateBucketResultWithSetFlag<int>)bucket);
-                bool wasSet = false;
-                while (!wasSet)
-                {
-                    if (tmpBucket.isSet)
-                    {
-                        // Compare-exchange mechanism.
-                        int initialValue, greaterValue;
-                        do
-                        {
-                            initialValue = tmpBucket.aggResult;
-                            if (initialValue < returnValue) greaterValue = returnValue;
-                            else greaterValue = initialValue;
-                        }
-                        while (initialValue != Interlocked.CompareExchange(ref tmpBucket.aggResult, greaterValue, initialValue));
-                        wasSet = true;
-                    }
-                    else
-                    {
-                        // Note that this branch happens only when initing the first value.
-                        lock (this)
-                        {   // Check if other thread inited the first value while waiting.
-                            if (!tmpBucket.isSet)
-                            {
-                                // The sets must be in this order, because after setting IsSet flag
-                                // there must be placed the value, otherwise thread could access empty bucket.
-                                tmpBucket.aggResult = returnValue;
-                                tmpBucket.isSet = true;
-                                wasSet = true;
-                            } else { /* next cycle it will go in the other branch of if(IsSet) */}
-                        }
-                    }
-                }
+                ApplyThreadSafeInternal(ref tmpBucket.aggResult, ref tmpBucket.isSet, returnValue);
+            }
+        }
+        public override void Apply(in TableResults.RowProxy row, AggregateListResults list, int position)
+        {
+            if (this.expr.TryEvaluate(in row, out int returnValue))
+            {
+                var tmpList = (AggregateListResults<int>)list;
+                if (position == tmpList.aggResults.Count) tmpList.aggResults.Add(returnValue);
+                else if (tmpList.aggResults[position] < returnValue) tmpList.aggResults[position] = returnValue;
+            }
+        }
+        public override void ApplyThreadSafe(in TableResults.RowProxy row, AggregateArrayResults array, int position)
+        {
+            if (this.expr.TryEvaluate(in row, out int returnValue))
+            {
+                var tmpArray = ((AggregateArrayResultsWithSetFlag<int>)array);
+                ApplyThreadSafeInternal(ref tmpArray.aggResults[position], ref tmpArray.isSet[position], returnValue);
             }
         }
 
@@ -90,7 +74,6 @@ namespace QueryEngine
             if (tmpBucket1.aggResult < tmpBucket2.aggResult) tmpBucket1.aggResult = tmpBucket2.aggResult;
             else { /* nothing */ }
         }
-
         public override void MergeThreadSafe(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
         {
             var tmpBucket1 = ((AggregateBucketResultWithSetFlag<int>)bucket1);
@@ -108,17 +91,6 @@ namespace QueryEngine
             }
             while (initialValue != Interlocked.CompareExchange(ref tmpBucket1.aggResult, greaterValue, initialValue));
         }
-
-        public override void Apply(in TableResults.RowProxy row, AggregateListResults list, int position)
-        {
-            if (this.expr.TryEvaluate(in row, out int returnValue))
-            {
-                var tmpList = (AggregateListResults<int>)list;
-                if (position == tmpList.aggResults.Count) tmpList.aggResults.Add(returnValue);
-                else if (tmpList.aggResults[position] < returnValue) tmpList.aggResults[position] = returnValue;
-            }
-        }
-
         public override void Merge(AggregateListResults list1, int into, AggregateListResults list2, int from)
         {
             var tmpList1 = (AggregateListResults<int>)list1;
@@ -127,7 +99,6 @@ namespace QueryEngine
             if (into == tmpList1.aggResults.Count) tmpList1.aggResults.Add(tmpList2.aggResults[from]);
             else if (tmpList1.aggResults[into] < tmpList2.aggResults[from]) tmpList1.aggResults[into] = tmpList2.aggResults[from];
         }
-
         public override void MergeThreadSafe(AggregateBucketResult bucket, AggregateListResults list, int position)
         {
             var tmpBucket = ((AggregateBucketResult<int>)bucket);
@@ -141,12 +112,48 @@ namespace QueryEngine
             }
             while (initialValue != Interlocked.CompareExchange(ref tmpBucket.aggResult, greaterValue, initialValue));
         }
-
         public override void Merge(AggregateBucketResult bucket, AggregateListResults list, int position)
         {
             var tmpBucket = ((AggregateBucketResult<int>)bucket);
             var tmpList = ((AggregateListResults<int>)list);
             if (tmpBucket.aggResult < tmpList.aggResults[position]) tmpBucket.aggResult = tmpList.aggResults[position];
+        }
+
+        private void ApplyThreadSafeInternal(ref int value, ref bool isSet, int applied)
+        {
+            bool wasSet = false;
+            while (!wasSet)
+            {
+                if (isSet)
+                {
+                    // Compare-exchange mechanism.
+                    int initialValue, greaterValue;
+                    do
+                    {
+                        initialValue = value;
+                        if (initialValue < applied) greaterValue = applied;
+                        else greaterValue = initialValue;
+                    }
+                    while (initialValue != Interlocked.CompareExchange(ref value, greaterValue, initialValue));
+                    wasSet = true;
+                }
+                else
+                {
+                    // Note that this branch happens only when initing the first value.
+                    lock (this)
+                    {   // Check if other thread inited the first value while waiting.
+                        if (!isSet)
+                        {
+                            // The sets must be in this order, because after setting IsSet flag
+                            // there must be placed the value, otherwise thread could access empty bucket.
+                            value = applied;
+                            isSet = true;
+                            wasSet = true;
+                        }
+                        else { /* next cycle it will go in the other branch of if(IsSet) */}
+                    }
+                }
+            }
         }
     }
 
@@ -181,45 +188,29 @@ namespace QueryEngine
                 }
             }
         }
-
         public override void ApplyThreadSafe(in TableResults.RowProxy row, AggregateBucketResult bucket)
         {
             if (this.expr.TryEvaluate(in row, out string returnValue))
             {
                 var tmpBucket = ((AggregateBucketResultWithSetFlag<string>)bucket);
-                bool wasSet = false;
-                while (!wasSet)
-                {
-                    if (tmpBucket.isSet)
-                    {
-                        // Compare-echange mechanism.
-                        string initialValue, greaterValue;
-                        do
-                        {
-                            initialValue = tmpBucket.aggResult;
-                            if (initialValue.CompareTo(returnValue) < 0) greaterValue = returnValue;
-                            else greaterValue = initialValue;
-                        }
-                        while (initialValue != Interlocked.CompareExchange(ref tmpBucket.aggResult, greaterValue, initialValue));
-                        wasSet = true;
-                    }
-                    else
-                    {
-                        // Note that this branch happens only when initing the first value.
-                        lock (this)
-                        {   // Check if other thread inited the first value while waiting.
-                            if (!tmpBucket.isSet)
-                            {
-                                // The sets must be in this order, because after setting IsSet flag
-                                // there must be placed the value, otherwise thread could access empty bucket.
-                                tmpBucket.aggResult = returnValue;
-                                tmpBucket.isSet = true;
-                                wasSet = true;
-                            }
-                            else { /* next cycle it will go in the other branch of if(IsSet) */}
-                        }
-                    }
-                }
+                ApplyThreadSafeInternal(ref tmpBucket.aggResult, ref tmpBucket.isSet, returnValue);
+            }
+        }
+        public override void Apply(in TableResults.RowProxy row, AggregateListResults list, int position)
+        {
+            if (this.expr.TryEvaluate(in row, out string returnValue))
+            {
+                var tmpList = (AggregateListResults<string>)list;
+                if (position == tmpList.aggResults.Count) tmpList.aggResults.Add(returnValue);
+                else if (tmpList.aggResults[position].CompareTo(returnValue) < 0) tmpList.aggResults[position] = returnValue;
+            }
+        }
+        public override void ApplyThreadSafe(in TableResults.RowProxy row, AggregateArrayResults array, int position)
+        {
+            if (this.expr.TryEvaluate(in row, out string returnValue))
+            {
+                var tmpArray = ((AggregateArrayResultsWithSetFlag<string>)array);
+                ApplyThreadSafeInternal(ref tmpArray.aggResults[position], ref tmpArray.isSet[position], returnValue);
             }
         }
 
@@ -230,7 +221,6 @@ namespace QueryEngine
             if (tmpBucket1.aggResult.CompareTo(tmpBucket2.aggResult) < 0) tmpBucket1.aggResult = tmpBucket2.aggResult;
             else { /* nothing */ }
         }
-
         public override void MergeThreadSafe(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
         {
             var tmpBucket1 = ((AggregateBucketResultWithSetFlag<string>)bucket1);
@@ -249,18 +239,6 @@ namespace QueryEngine
             while (initialValue != Interlocked.CompareExchange(ref tmpBucket1.aggResult, greaterValue, initialValue));
 
         }
-
-
-        public override void Apply(in TableResults.RowProxy row, AggregateListResults list, int position)
-        {
-            if (this.expr.TryEvaluate(in row, out string returnValue))
-            {
-                var tmpList = (AggregateListResults<string>)list;
-                if (position == tmpList.aggResults.Count) tmpList.aggResults.Add(returnValue);
-                else if (tmpList.aggResults[position].CompareTo(returnValue) < 0) tmpList.aggResults[position] = returnValue;
-            }
-        }
-
         public override void Merge(AggregateListResults list1, int into, AggregateListResults list2, int from)
         {
             var tmpList1 = (AggregateListResults<string>)list1;
@@ -269,7 +247,6 @@ namespace QueryEngine
             if (into == tmpList1.aggResults.Count) tmpList1.aggResults.Add(tmpList2.aggResults[from]);
             else if (tmpList1.aggResults[into].CompareTo(tmpList2.aggResults[from]) < 0) tmpList1.aggResults[into] = tmpList2.aggResults[from];
         }
-
         public override void MergeThreadSafe(AggregateBucketResult bucket, AggregateListResults list, int position)
         {
             var tmpBucket = ((AggregateBucketAvgResult<string>)bucket);
@@ -284,13 +261,49 @@ namespace QueryEngine
             }
             while (initialValue != Interlocked.CompareExchange(ref tmpBucket.aggResult, greaterValue, initialValue));
         }
-
         public override void Merge(AggregateBucketResult bucket, AggregateListResults list, int position)
         {
             var tmpBucket = ((AggregateBucketResult<string>)bucket);
             var tmpList = ((AggregateListResults<string>)list);
             if (tmpBucket.aggResult.CompareTo(tmpList.aggResults[position]) < 0) tmpBucket.aggResult = tmpList.aggResults[position];
             
+        }
+
+        private void ApplyThreadSafeInternal(ref string value, ref bool isSet, string applied)
+        {
+            bool wasSet = false;
+            while (!wasSet)
+            {
+                if (isSet)
+                {
+                    // Compare-exchange mechanism.
+                    string initialValue, greaterValue;
+                    do
+                    {
+                        initialValue = value;
+                        if (initialValue.CompareTo(applied) < 0) greaterValue = applied;
+                        else greaterValue = initialValue;
+                    }
+                    while (initialValue != Interlocked.CompareExchange(ref value, greaterValue, initialValue));
+                    wasSet = true;
+                }
+                else
+                {
+                    // Note that this branch happens only when initing the first value.
+                    lock (this)
+                    {   // Check if other thread inited the first value while waiting.
+                        if (!isSet)
+                        {
+                            // The sets must be in this order, because after setting IsSet flag
+                            // there must be placed the value, otherwise thread could access empty bucket.
+                            value = applied;
+                            isSet = true;
+                            wasSet = true;
+                        }
+                        else { /* next cycle it will go in the other branch of if(IsSet) */}
+                    }
+                }
+            }
         }
     }
 }

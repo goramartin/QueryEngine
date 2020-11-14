@@ -98,16 +98,9 @@ namespace QueryEngine
         }
         public abstract Type GetAggregateReturnType();
         public abstract string GetFuncName();
-
-
-        /// <summary>
-        /// Is called only on aggregates that are bound with the array type results.
-        /// It computes the desired value from the containing expression with the given row and applies it to the aggregate.
-        /// </summary>
-        /// <param name="row"> A result table row. </param>
-        /// <param name="list"> A place to store results to. </param>
-        /// <param name="position"> A position to apply the computed value into. </param>
-        public abstract void Apply(in TableResults.RowProxy row, AggregateListResults list, int position);
+       
+        
+        #region Buckets
         /// <summary>
         /// Is called only on aggregates that are bound with the bucket type results.
         /// It computes the desired value from the containing expression with the given row and applies it to the aggregate.
@@ -121,18 +114,6 @@ namespace QueryEngine
         /// <param name="row"> A result table row. </param>
         /// <param name="bucket"> A position to apply the computed value into. </param>
         public abstract void ApplyThreadSafe(in TableResults.RowProxy row, AggregateBucketResult bucket);
-
-        /// <summary>
-        /// Is called during merging in LocalGroupLocalMerge grouping.
-        /// It merges aggregates values from two different result holders and merges them into the
-        /// first one on the "into" position.
-        /// </summary>
-        /// <param name="list1"> A place to store results to. </param>
-        /// <param name="into"> The position to merge value into. </param>
-        /// <param name="list2"> A place to merge results from. </param>
-        /// <param name="from"> The position to merge value from. </param>
-        public abstract void Merge(AggregateListResults list1, int into, AggregateListResults list2, int from);
-
         /// <summary>
         /// Merges results of two buckets into the bucket1.
         /// It assumes that the results were set before.
@@ -148,6 +129,49 @@ namespace QueryEngine
         /// <param name="bucket1"> A bucket that will contain the final merged results. </param>
         /// <param name="bucket2"> A bucket that will provide value to merge for the bucket1. </param>
         public abstract void MergeThreadSafe(AggregateBucketResult bucket1, AggregateBucketResult bucket2);
+
+
+
+        #endregion Buckets
+
+        #region Arrays
+        
+        /// <summary>
+        /// Is called only on aggregates that are bound with the array type results.
+        /// It computes the desired value from the containing expression with the given row and applies it to the aggregate.
+        /// </summary>
+        /// <param name="row"> A result table row. </param>
+        /// <param name="array"> A place to store results to. </param>
+        /// <param name="position"> A position to apply the computed value into. </param>
+        public abstract void ApplyThreadSafe(in TableResults.RowProxy row, AggregateArrayResults array, int position);
+
+        #endregion Arrays
+
+        #region Lists
+
+        /// <summary>
+        /// Is called only on aggregates that are bound with the list type results.
+        /// It computes the desired value from the containing expression with the given row and applies it to the aggregate.
+        /// </summary>
+        /// <param name="row"> A result table row. </param>
+        /// <param name="list"> A place to store results to. </param>
+        /// <param name="position"> A position to apply the computed value into. </param>
+        public abstract void Apply(in TableResults.RowProxy row, AggregateListResults list, int position);
+
+        /// <summary>
+        /// Is called during merging in LocalGroupLocalMerge grouping.
+        /// It merges aggregates values from two different result holders and merges them into the
+        /// first one on the "into" position.
+        /// </summary>
+        /// <param name="list1"> A place to store results to. </param>
+        /// <param name="into"> The position to merge value into. </param>
+        /// <param name="list2"> A place to merge results from. </param>
+        /// <param name="from"> The position to merge value from. </param>
+        public abstract void Merge(AggregateListResults list1, int into, AggregateListResults list2, int from);
+
+        #endregion Lists
+
+        #region InterCompatibility
 
         /// <summary>
         /// Merges results of a list into a bucket with a thread safe manner.
@@ -167,6 +191,7 @@ namespace QueryEngine
         /// <param name="position"> A position of a value in the list.</param>
         public abstract void Merge(AggregateBucketResult bucket, AggregateListResults list, int position);
 
+        #endregion InterCompatibility
     }
 
     /// <summary>

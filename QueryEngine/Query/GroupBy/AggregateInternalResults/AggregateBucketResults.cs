@@ -16,6 +16,7 @@ namespace QueryEngine
     {
         public static AggregateBucketResult[] CreateBucketResults(List<Aggregate> aggregates)
         {
+            if (aggregates.Count == 0) return null;
             var aggResults = new AggregateBucketResult[aggregates.Count];
             for (int i = 0; i < aggResults.Length; i++)
                 aggResults[i] = AggregateBucketResult.Factory(aggregates[i].GetAggregateReturnType(), aggregates[i].GetFuncName());

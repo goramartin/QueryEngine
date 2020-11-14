@@ -89,10 +89,10 @@ namespace QueryEngine
 
             for (int i = 0; i < jobs.Length - 1; i++)
             {
-                jobs[i] = new GroupByJobArrays(concurrentDictArrays, this.aggregates, results, current, current + addition, aggResults, positionFactory, semaphore);
+                jobs[i] = new GroupByJobArrays(concurrentDictArrays, this.aggregates, results, current, current + addition, aggResults, positionFactory, semaphore, jobs.Length);
                 current += addition;
             }
-            jobs[jobs.Length - 1] = new GroupByJobArrays(concurrentDictArrays, this.aggregates, results, current, current + addition, aggResults, positionFactory, semaphore);
+            jobs[jobs.Length - 1] = new GroupByJobArrays(concurrentDictArrays, this.aggregates, results, current, current + addition, aggResults, positionFactory, semaphore, jobs.Length);
             return jobs;
         }
 
@@ -126,7 +126,7 @@ namespace QueryEngine
                 int capture = 0;
                 Func<int, int> positionFactory = (int x) => { return Interlocked.Increment(ref capture); };
                 Semaphore semaphore = new Semaphore(0, this.ThreadCount);
-                tmpJob = new GroupByJobArrays(new ConcurrentDictionary<int, int>(equalityComparer), this.aggregates, results, 0, results.NumberOfMatchedElements, aggResults, positionFactory, semaphore);
+                tmpJob = new GroupByJobArrays(new ConcurrentDictionary<int, int>(equalityComparer), this.aggregates, results, 0, results.NumberOfMatchedElements, aggResults, positionFactory, semaphore, ThreadCount);
             }
             SingleThreadGroupByWork(tmpJob, this.BucketStorage);
             return null;
@@ -139,11 +139,14 @@ namespace QueryEngine
         }
 
         #region WithArrays
+
         /// <summary>
-        /// A main work of each thread when grouping.
-        /// For each result row, add/get a group in/from the global dictionary and compute the
-        /// corresponding aggregate values for the group.
-        /// Computation results are stored in arrays.
+        /// Thread safe grouping using arrays.
+        /// Firstly, a position is inserted into the dictionary, note that the constructor
+        /// runs outside of the synchronization, so it can happen that other thread inserted an element
+        /// in the meanwhile.
+        /// Then, if the position does exceed the array lenght, it acquires entire semaphore and doubles the arrays.
+        /// Otherwise, it acquires only one part of the semaphore, updates the aggregates on the given position and releases the semaphore's part.
         /// </summary>
         /// <param name="job"> A group by job class. </param>
         private static void SingleThreadGroupByWorkWithArrays(object job)
@@ -158,21 +161,38 @@ namespace QueryEngine
             var aggResults = tmpJob.aggResults;
             int position;
             TableResults.RowProxy row;
+            int threadCount = tmpJob.threadCount;
             #endregion DECL
 
             for (int i = tmpJob.start; i < tmpJob.end; i++)
             {
                 row = results[i];
                 position = groups.GetOrAdd(i, positionFactory);
-                
-                
-                
-                
-                //for (int j = 0; j < aggregates.Count; j++)
-                //    aggregates[j].ApplyThreadSafe(in row, buckets[j]);
+
+                if (aggregates.Count == 0) continue;
+                else
+                {
+                    if (aggResults[0].ArraySize() <= position)
+                    {
+                        lock(groups) {
+                            if (aggResults[0].ArraySize() <= position) {
+                                // Acquire entire semaphore.
+                                for (int enters = 0; enters < threadCount; enters++) semaphore.WaitOne(); 
+                                // Double the array sizes
+                                for (int j = 0; j < aggResults.Count; j++) aggResults[j].DoubleSize(position);
+                            }
+                        }
+                    }
+
+                    semaphore.WaitOne();
+
+                    for (int j = 0; j < aggregates.Count; j++)
+                        aggregates[j].ApplyThreadSafe(in row, aggResults[j], position);
+
+                    semaphore.Release();
+                }
             }
         }
-
 
         #endregion WithArrays
 
@@ -247,8 +267,9 @@ namespace QueryEngine
             public List<AggregateArrayResults> aggResults;
             public Func<int, int> positionFactory;
             public Semaphore semaphore;
+            public int threadCount;
 
-            public GroupByJobArrays(ConcurrentDictionary<int, int> groups, List<Aggregate> aggregates, ITableResults results, int start, int end, List<AggregateArrayResults> aggResults, Func<int, int> positionFactory, Semaphore semaphore) : base(aggregates, results, start, end)
+            public GroupByJobArrays(ConcurrentDictionary<int, int> groups, List<Aggregate> aggregates, ITableResults results, int start, int end, List<AggregateArrayResults> aggResults, Func<int, int> positionFactory, Semaphore semaphore, int threadCount) : base(aggregates, results, start, end)
             {
                 this.aggregates = aggregates;
                 this.results = results;
@@ -258,6 +279,7 @@ namespace QueryEngine
                 this.aggResults = aggResults;
                 this.positionFactory = positionFactory;
                 this.semaphore = semaphore;
+                this.threadCount = threadCount;
             }
         }
 
