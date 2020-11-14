@@ -23,6 +23,16 @@ namespace QueryEngine
         {
             if (expressionHolder == null) this.IsAstCount = true;
         }
+        public override string ToString()
+        {
+            if (this.IsAstCount) return "Count(*)";
+            else return "Count(" + this.expressionHolder.ToString() + ")";
+        }
+
+        public override string GetFuncName()
+        {
+            return "count";
+        }
 
         public override void Apply(in TableResults.RowProxy row, AggregateBucketResult bucket)
         {
@@ -87,16 +97,14 @@ namespace QueryEngine
             tmpList.values[position] += value;
         }
 
-        public override string ToString()
+        public override void MergeThreadSafe(AggregateBucketResult bucket, AggregateListResults list, int position)
         {
-            if (this.IsAstCount) return "Count(*)";
-            else return "Count(" + this.expressionHolder.ToString() + ")";
+            Interlocked.Add(ref ((AggregateBucketResult<int>)bucket).aggResult, ((AggregateListResults<int>)list).values[position]);
         }
 
-        public override string GetFuncName()
+        public override void Merge(AggregateBucketResult bucket, AggregateListResults list, int position)
         {
-            return "count";
+            ((AggregateBucketResult<int>)bucket).aggResult += ((AggregateListResults<int>)list).values[position];
         }
-
     }
 }

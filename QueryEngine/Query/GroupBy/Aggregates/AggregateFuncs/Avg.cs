@@ -17,6 +17,15 @@ namespace QueryEngine
         public IntAvg(ExpressionHolder expressionHolder) : base(expressionHolder)
         { }
 
+        public override string ToString()
+        {
+            return "Avg(" + this.expressionHolder.ToString() + ")";
+        }
+
+        public override string GetFuncName()
+        {
+            return "avg";
+        }
         public override void Apply(in TableResults.RowProxy row, AggregateBucketResult bucket)
         {
             if (this.expr.TryEvaluate(in row, out int returnValue))
@@ -89,15 +98,21 @@ namespace QueryEngine
 
         }
 
-
-        public override string ToString()
+        public override void MergeThreadSafe(AggregateBucketResult bucket, AggregateListResults list, int position)
         {
-            return "Avg(" + this.expressionHolder.ToString() + ")";
+            var tmpBucket = ((AggregateBucketAvgResult<int>)bucket);
+            var tmpList = ((AggregateListAvgResults<int>)list);
+        
+            Interlocked.Add(ref tmpBucket.aggResult, tmpList.values[position]);
+            Interlocked.Add(ref tmpBucket.eltUsed, tmpList.eltUsed[position]);
         }
 
-        public override string GetFuncName()
+        public override void Merge(AggregateBucketResult bucket, AggregateListResults list, int position)
         {
-            return "avg";
+            var tmpBucket = ((AggregateBucketAvgResult<int>)bucket);
+            var tmpList = ((AggregateListAvgResults<int>)list);
+            tmpBucket.aggResult += tmpList.values[position];
+            tmpBucket.eltUsed += tmpList.eltUsed[position];
         }
     }
 }

@@ -17,6 +17,15 @@ namespace QueryEngine
     {
         public IntMin(ExpressionHolder expressionHolder) : base(expressionHolder)
         { }
+        public override string ToString()
+        {
+            return "Min(" + this.expr.ToString() + ")";
+        }
+
+        public override string GetFuncName()
+        {
+            return "min";
+        }
 
         public override void Apply(in TableResults.RowProxy row, AggregateBucketResult bucket)
         {
@@ -122,6 +131,34 @@ namespace QueryEngine
             else if(tmpList1.values[into] > tmpList2.values[from]) tmpList1.values[into] = tmpList2.values[from];
         }
 
+        public override void MergeThreadSafe(AggregateBucketResult bucket, AggregateListResults list, int position)
+        {
+            var tmpBucket = ((AggregateBucketResult<int>)bucket);
+            var tmpList = ((AggregateListResults<int>)list);
+            int initialValue, smallerValue;
+            do
+            {
+                initialValue = tmpBucket.aggResult;
+                if (initialValue.CompareTo(tmpList.values[position]) > 0) smallerValue = tmpList.values[position];
+                else smallerValue = initialValue;
+            }
+            while (initialValue != Interlocked.CompareExchange(ref tmpBucket.aggResult, smallerValue, initialValue));
+        }
+
+        public override void Merge(AggregateBucketResult bucket, AggregateListResults list, int position)
+        {
+            var tmpBucket = ((AggregateBucketResult<int>)bucket);
+            var tmpList = ((AggregateListResults<int>)list);
+            if (tmpBucket.aggResult > tmpList.values[position]) tmpBucket.aggResult = tmpList.values[position];
+        }
+    }
+
+
+    internal class StrMin : Aggregate<string>
+    {
+        public StrMin(ExpressionHolder expressionHolder) : base(expressionHolder)
+        { }
+
         public override string ToString()
         {
             return "Min(" + this.expr.ToString() + ")";
@@ -131,13 +168,6 @@ namespace QueryEngine
         {
             return "min";
         }
-    }
-
-
-    internal class StrMin : Aggregate<string>
-    {
-        public StrMin(ExpressionHolder expressionHolder) : base(expressionHolder)
-        { }
 
         public override void Apply(in TableResults.RowProxy row, AggregateBucketResult bucket)
         {
@@ -243,15 +273,26 @@ namespace QueryEngine
             else if (tmpList1.values[into].CompareTo(tmpList2.values[from]) > 0) tmpList1.values[into] = tmpList2.values[from];
         }
 
-        public override string ToString()
+        public override void MergeThreadSafe(AggregateBucketResult bucket, AggregateListResults list, int position)
         {
-            return "Min(" + this.expr.ToString() + ")";
+            var tmpBucket = ((AggregateBucketResult<string>)bucket);
+            var tmpList = ((AggregateListResults<string>)list);
+            string initialValue, smallerValue;
+            do
+            {
+                initialValue = tmpBucket.aggResult;
+                if (initialValue.CompareTo(tmpList.values[position]) > 0) smallerValue = tmpList.values[position];
+                else smallerValue = initialValue;
+            }
+            while (initialValue != Interlocked.CompareExchange(ref tmpBucket.aggResult, smallerValue, initialValue));
         }
 
-        public override string GetFuncName()
+        public override void Merge(AggregateBucketResult bucket, AggregateListResults list, int position)
         {
-            return "min";
-        }
+            var tmpBucket = ((AggregateBucketResult<string>)bucket);
+            var tmpList = ((AggregateListResults<string>)list);
+            if (tmpBucket.aggResult.CompareTo(tmpList.values[position]) > 0) tmpBucket.aggResult = tmpList.values[position];
 
+        }
     }
 }

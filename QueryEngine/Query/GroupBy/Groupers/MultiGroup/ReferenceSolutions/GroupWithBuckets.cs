@@ -12,10 +12,8 @@ namespace QueryEngine
     /// </summary>
     internal class GroupWithBuckets : Grouper
     {
-        public GroupWithBuckets(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper) : base(aggs, hashes, helper)
-        {
-            this.BucketStorage = true;
-        }
+        public GroupWithBuckets(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper) : base(aggs, hashes, helper, true)
+        {}
 
         public override AggregateResults Group(ITableResults resTable)
         {

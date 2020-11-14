@@ -16,10 +16,8 @@ namespace QueryEngine
     /// </summary>
     internal class LocalGroupLocalMerge : Grouper
     {
-        public LocalGroupLocalMerge(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper, bool useBucketStorage = false) : base(aggs, hashes, helper) 
-        {
-            this.BucketStorage = useBucketStorage;
-        }
+        public LocalGroupLocalMerge(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper, bool useBucketStorage) : base(aggs, hashes, helper, useBucketStorage) 
+        { }
 
         public override AggregateResults Group(ITableResults resTable)
         {

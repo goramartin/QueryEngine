@@ -14,6 +14,15 @@ namespace QueryEngine
     {
         public IntMax(ExpressionHolder expressionHolder) : base(expressionHolder)
         { }
+        public override string ToString()
+        {
+            return "Max(" + this.expr.ToString() + ")";
+        }
+
+        public override string GetFuncName()
+        {
+            return "max";
+        }
 
         public override void Apply(in TableResults.RowProxy row, AggregateBucketResult bucket)
         {
@@ -119,6 +128,32 @@ namespace QueryEngine
             else if (tmpList1.values[into] < tmpList2.values[from]) tmpList1.values[into] = tmpList2.values[from];
         }
 
+        public override void MergeThreadSafe(AggregateBucketResult bucket, AggregateListResults list, int position)
+        {
+            var tmpBucket = ((AggregateBucketResult<int>)bucket);
+            var tmpList = ((AggregateListResults<int>)list);
+            int initialValue, greaterValue;
+            do
+            {
+                initialValue = tmpBucket.aggResult;
+                if (initialValue.CompareTo(tmpList.values[position]) < 0) greaterValue = tmpList.values[position];
+                else greaterValue = initialValue;
+            }
+            while (initialValue != Interlocked.CompareExchange(ref tmpBucket.aggResult, greaterValue, initialValue));
+        }
+
+        public override void Merge(AggregateBucketResult bucket, AggregateListResults list, int position)
+        {
+            var tmpBucket = ((AggregateBucketResult<int>)bucket);
+            var tmpList = ((AggregateListResults<int>)list);
+            if (tmpBucket.aggResult < tmpList.values[position]) tmpBucket.aggResult = tmpList.values[position];
+        }
+    }
+
+    internal class StrMax : Aggregate<string>
+    {
+        public StrMax(ExpressionHolder expressionHolder) : base(expressionHolder)
+        { }
         public override string ToString()
         {
             return "Max(" + this.expr.ToString() + ")";
@@ -128,12 +163,6 @@ namespace QueryEngine
         {
             return "max";
         }
-    }
-
-    internal class StrMax : Aggregate<string>
-    {
-        public StrMax(ExpressionHolder expressionHolder) : base(expressionHolder)
-        { }
 
         public override void Apply(in TableResults.RowProxy row, AggregateBucketResult bucket)
         {
@@ -240,14 +269,28 @@ namespace QueryEngine
             if (into == tmpList1.values.Count) tmpList1.values.Add(tmpList2.values[from]);
             else if (tmpList1.values[into].CompareTo(tmpList2.values[from]) < 0) tmpList1.values[into] = tmpList2.values[from];
         }
-        public override string ToString()
+
+        public override void MergeThreadSafe(AggregateBucketResult bucket, AggregateListResults list, int position)
         {
-            return "Max(" + this.expr.ToString() + ")";
+            var tmpBucket = ((AggregateBucketAvgResult<string>)bucket);
+            var tmpList = ((AggregateListAvgResults<string>)list);
+
+            string initialValue, greaterValue;
+            do
+            {
+                initialValue = tmpBucket.aggResult;
+                if (initialValue.CompareTo(tmpList.values[position]) < 0) greaterValue = tmpList.values[position];
+                else greaterValue = initialValue;
+            }
+            while (initialValue != Interlocked.CompareExchange(ref tmpBucket.aggResult, greaterValue, initialValue));
         }
 
-        public override string GetFuncName()
+        public override void Merge(AggregateBucketResult bucket, AggregateListResults list, int position)
         {
-            return "max";
+            var tmpBucket = ((AggregateBucketResult<string>)bucket);
+            var tmpList = ((AggregateListResults<string>)list);
+            if (tmpBucket.aggResult.CompareTo(tmpList.values[position]) < 0) tmpBucket.aggResult = tmpList.values[position];
+            
         }
     }
 }

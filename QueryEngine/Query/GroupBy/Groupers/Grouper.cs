@@ -21,12 +21,13 @@ namespace QueryEngine
         protected int ThreadCount { get; }
         protected bool BucketStorage { get; set; }
 
-        protected Grouper(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper)
+        protected Grouper(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper, bool bucketStorage)
         {
             this.ThreadCount = helper.ThreadCount;
             this.aggregates = aggs;
             this.InParallel = helper.InParallel;
             this.hashes = hashes;
+            this.BucketStorage = bucketStorage;
         }
 
         public abstract AggregateResults Group(ITableResults resTable);

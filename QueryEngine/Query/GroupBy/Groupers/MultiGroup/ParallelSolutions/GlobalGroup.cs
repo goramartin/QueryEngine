@@ -17,10 +17,8 @@ namespace QueryEngine
     /// </summary>
     internal class GlobalGroup : Grouper
     {
-        public GlobalGroup(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper) : base(aggs, hashes, helper)
-        {
-            this.BucketStorage = true;
-        }
+        public GlobalGroup(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper, bool useBucketStorage) : base(aggs, hashes, helper, useBucketStorage)
+        {}
             
         public override AggregateResults Group(ITableResults resTable)
         {

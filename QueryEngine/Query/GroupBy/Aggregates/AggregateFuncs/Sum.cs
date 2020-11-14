@@ -16,6 +16,15 @@ namespace QueryEngine
     {
         public IntSum(ExpressionHolder expressionHolder) : base(expressionHolder)
         { }
+        public override string ToString()
+        {
+            return "Sum(" + this.expressionHolder.ToString() + ")";
+        }
+
+        public override string GetFuncName()
+        {
+            return "sum";
+        }
 
         public override void Apply(in TableResults.RowProxy row, AggregateBucketResult bucket)
         {
@@ -43,7 +52,7 @@ namespace QueryEngine
         {
                 if (this.expr.TryEvaluate(in row, out int returnValue))
                 {
-                    var tmpList = (AggregateListAvgResults<int>)list;
+                    var tmpList = (AggregateListResults<int>)list;
                     if (position == tmpList.values.Count) tmpList.values.Add(returnValue);
                     else tmpList.values[position] += returnValue;
                 }
@@ -51,22 +60,21 @@ namespace QueryEngine
 
         public override void Merge(AggregateListResults list1, int into, AggregateListResults list2, int from)
         {
-            var tmpList1 = (AggregateListAvgResults<int>)list1;
-            var tmpList2 = (AggregateListAvgResults<int>)list2;
+            var tmpList1 = (AggregateListResults<int>)list1;
+            var tmpList2 = (AggregateListResults<int>)list2;
 
             if (into == tmpList1.values.Count) tmpList1.values.Add(tmpList2.values[from]);
             else tmpList1.values[into] += tmpList2.values[from];
         }
 
-        public override string ToString()
+        public override void MergeThreadSafe(AggregateBucketResult bucket, AggregateListResults list, int position)
         {
-            return "Sum(" + this.expressionHolder.ToString() + ")";
+            Interlocked.Add(ref ((AggregateBucketResult<int>)bucket).aggResult,((AggregateListResults<int>)list).values[position]);
         }
 
-        public override string GetFuncName()
+        public override void Merge(AggregateBucketResult bucket, AggregateListResults list, int position)
         {
-            return "sum";
+            ((AggregateBucketResult<int>)bucket).aggResult += ((AggregateListResults<int>)list).values[position];
         }
-
     }
 }

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 
 namespace QueryEngine
 {
@@ -11,7 +11,7 @@ namespace QueryEngine
     /// For every new group a new array filled with bucket result classes is created during grouping.
     /// Each bucket class encompases a result of the aggregation. 
     /// </summary>
-    internal class AggregateBucketResult
+    internal abstract class AggregateBucketResult
     {
         public static AggregateBucketResult[] CreateBucketResults(List<Aggregate> aggregates)
         {
@@ -31,6 +31,7 @@ namespace QueryEngine
             else if (type == typeof(string)) return new AggregateBucketResult<string>();
             else throw new ArgumentException($"Aggregate bucket results factory, cannot create a results holder with the type {type} for function {funcName}.");
         }
+
     }
 
     /// <typeparam name="T"> A return type of the aggregation function. </typeparam>
