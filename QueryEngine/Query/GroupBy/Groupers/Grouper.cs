@@ -32,5 +32,22 @@ namespace QueryEngine
 
         public abstract AggregateResults Group(ITableResults resTable);
 
+        /// <summary>
+        /// Creates a list of hashers and comparers.
+        /// Notice that the number of comparers is equal to the number of hashers.
+        /// Also, they must be of the same generic type.
+        /// </summary>
+        public virtual void CreateHashersAndComparers(out List<ExpressionEqualityComparer> comparers, out List<ExpressionHasher> hashers)
+        {
+            comparers = new List<ExpressionEqualityComparer>();
+            hashers = new List<ExpressionHasher>();
+            for (int i = 0; i < this.hashes.Count; i++)
+            {
+                comparers.Add(ExpressionEqualityComparer.Factory(this.hashes[i], this.hashes[i].ExpressionType));
+                hashers.Add(ExpressionHasher.Factory(this.hashes[i], this.hashes[i].ExpressionType));
+            }
+        }
+
+
     }
 }

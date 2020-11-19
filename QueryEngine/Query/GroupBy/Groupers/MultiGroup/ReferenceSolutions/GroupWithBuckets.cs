@@ -18,17 +18,10 @@ namespace QueryEngine
         public override AggregateResults Group(ITableResults resTable)
         {
             if (this.InParallel) throw new ArgumentException($"{this.GetType()}, cannot perform a parallel group by.");
-            
+
             // Create hashers and equality comparers.
             // The hashers receive also the equality comparer as cache.
-            var equalityComparers = new List<ExpressionEqualityComparer>();
-            var hashers = new List<ExpressionHasher>();
-            for (int i = 0; i < hashes.Count; i++)
-            {
-                equalityComparers.Add(ExpressionEqualityComparer.Factory(hashes[i], hashes[i].ExpressionType));
-                hashers.Add(ExpressionHasher.Factory(hashes[i], hashes[i].ExpressionType));
-            }
-
+            CreateHashersAndComparers(out List<ExpressionEqualityComparer> equalityComparers, out List<ExpressionHasher> hashers);
             return this.SingleThreadGroupBy(new RowEqualityComparerInt(resTable, equalityComparers, new RowHasher(hashers), true), resTable);
         }
 

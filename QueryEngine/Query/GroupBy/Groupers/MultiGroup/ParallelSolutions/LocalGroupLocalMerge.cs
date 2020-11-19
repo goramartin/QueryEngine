@@ -22,14 +22,7 @@ namespace QueryEngine
         public override AggregateResults Group(ITableResults resTable)
         {
             // Create hashers and equality comparers.
-            var equalityComparers = new List<ExpressionEqualityComparer>();
-            var hashers = new List<ExpressionHasher>();
-            for (int i = 0; i < hashes.Count; i++)
-            {
-                equalityComparers.Add(ExpressionEqualityComparer.Factory(hashes[i], hashes[i].ExpressionType));
-                hashers.Add(ExpressionHasher.Factory(hashes[i], hashes[i].ExpressionType));
-            }
-
+            CreateHashersAndComparers(out List<ExpressionEqualityComparer> equalityComparers, out List<ExpressionHasher> hashers);
             if (this.InParallel && ((resTable.NumberOfMatchedElements / this.ThreadCount) > 1)) return ParallelGroupBy(resTable, equalityComparers, hashers);
             else return SingleThreadGroupBy(resTable, equalityComparers, hashers);
         }
@@ -41,6 +34,7 @@ namespace QueryEngine
             tmpComparer.SetCache(tmpHasher);
             tmpHasher.SetCache(tmpComparer.Comparers);
             object tmpJob;
+
             if (!this.BucketStorage) tmpJob = new GroupByJobLists(tmpHasher, tmpComparer, this.aggregates, resTable, 0, resTable.NumberOfMatchedElements);
             else tmpJob = new GroupByJobBuckets(tmpHasher, tmpComparer, this.aggregates, resTable, 0, resTable.NumberOfMatchedElements);
             SingleThreadGroupByWork(tmpJob, this.BucketStorage);

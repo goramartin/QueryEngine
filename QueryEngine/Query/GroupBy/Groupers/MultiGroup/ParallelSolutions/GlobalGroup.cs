@@ -24,14 +24,7 @@ namespace QueryEngine
         {
             // Create hashers and equality comparers.
             // The hashers receive also the equality comparer as cache.
-            var equalityComparers = new List<ExpressionEqualityComparer>();
-            var hashers = new List<ExpressionHasher>();
-            for (int i = 0; i < hashes.Count; i++)
-            {
-                equalityComparers.Add(ExpressionEqualityComparer.Factory(hashes[i], hashes[i].ExpressionType));
-                hashers.Add(ExpressionHasher.Factory(hashes[i], hashes[i].ExpressionType));
-            }
-
+            CreateHashersAndComparers(out List<ExpressionEqualityComparer> equalityComparers, out List<ExpressionHasher> hashers);
             if (this.InParallel && ((resTable.NumberOfMatchedElements / this.ThreadCount) > 1)) return this.ParallelGroupBy(new RowEqualityComparerInt(resTable, equalityComparers, new RowHasher(hashers), false), resTable);
             else return SingleThreadGroupBy(new RowEqualityComparerInt(resTable, equalityComparers, new RowHasher(hashers), false), resTable);
         }
