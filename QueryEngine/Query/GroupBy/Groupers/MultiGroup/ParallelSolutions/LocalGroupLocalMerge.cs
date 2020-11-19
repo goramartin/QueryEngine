@@ -80,7 +80,6 @@ namespace QueryEngine
                 tmpHash.SetCache(tmpComp.Comparers);
                 if (!this.BucketStorage) jobs[i] = new GroupByJobLists(tmpHash, tmpComp, aggs, results, current, current + addition);
                 else jobs[i] = new GroupByJobBuckets(tmpHash, tmpComp, aggs, results, current, current + addition);
-                
                 current += addition;
             }
            

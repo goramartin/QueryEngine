@@ -10,14 +10,14 @@ namespace QueryEngine
     /// <summary>
     /// Class represents a grouping algorithm.
     /// The algorithm is composed of a local group by and a global merge (two way group by)
-    /// The algorithm uses only aggregate bucket storages.
+    /// The algorithm uses only aggregate bucket storages or a mix of lists and buckets.
     /// Firstly, each thread receives a range from the results table, hasher and comparer and computes
     /// localy its groups, afterwards, they insert the groups into a global dictionary and merge their results.
     /// </summary>
     internal class LocalGroupGlobalMergeWithBuckets : Grouper
     {
-        public LocalGroupGlobalMergeWithBuckets(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper) : base(aggs, hashes, helper, true)
-        {}
+        public LocalGroupGlobalMergeWithBuckets(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper, bool useBucketStorage) : base(aggs, hashes, helper, useBucketStorage)
+        { }
 
         public override AggregateResults Group(ITableResults resTable)
         {
@@ -39,11 +39,11 @@ namespace QueryEngine
             for (int i = 0; i < tasks.Length; i++)
             {
                 var tmp = jobs[i];
-                tasks[i] = Task.Factory.StartNew(() => SingleThreadGroupByWork(tmp));
+                tasks[i] = Task.Factory.StartNew(() => SingleThreadGroupByWork(tmp, this.BucketStorage));
             }
 
             // The main thread works with the last job in the array.
-            SingleThreadGroupByWork(jobs[jobs.Length - 1]);
+            SingleThreadGroupByWork(jobs[jobs.Length - 1], this.BucketStorage);
             Task.WaitAll(tasks);
             // No merge needed.
 
@@ -57,8 +57,14 @@ namespace QueryEngine
         {
             var tmpComparer = new RowEqualityComparerGroupKey(resTable, equalityComparers);
             var tmpGlobalDictionary = new ConcurrentDictionary<GroupDictKey, AggregateBucketResult[]>(tmpComparer);
-            var tmpJob = new GroupByJob(new RowHasher(hashers), tmpComparer, this.aggregates, resTable, 0, resTable.NumberOfMatchedElements, tmpGlobalDictionary);
-            SingleThreadGroupByWork(tmpJob);
+            GroupByJob tmpJob;
+            if (this.BucketStorage) tmpJob = new GroupByJobBuckets(new RowHasher(hashers), tmpComparer, this.aggregates, resTable, 0, resTable.NumberOfMatchedElements, tmpGlobalDictionary);
+            else
+            {
+                Func<GroupDictKey, AggregateBucketResult[]> bucketFactory = (GroupDictKey x) => { return AggregateBucketResult.CreateBucketResults(this.aggregates); };
+                tmpJob = new GroupByJobMixListsBuckets(new RowHasher(hashers), tmpComparer, this.aggregates, resTable, 0, resTable.NumberOfMatchedElements, tmpGlobalDictionary, bucketFactory);
+            }
+            SingleThreadGroupByWork(tmpJob, this.BucketStorage);
             //return tmp.aggResults;
             return null;
         }
@@ -88,6 +94,7 @@ namespace QueryEngine
 
             // Global merge dictionary
             // It needs only comparator that has no comparers set as a cache to some hasher.
+            Func<GroupDictKey, AggregateBucketResult[]> bucketFactory = (GroupDictKey x) => { return AggregateBucketResult.CreateBucketResults(this.aggregates); };
             var globalGroups = new ConcurrentDictionary<GroupDictKey, AggregateBucketResult[]>(lastComp.Clone());
             for (int i = 0; i < jobs.Length - 1; i++)
             {
@@ -95,13 +102,23 @@ namespace QueryEngine
                 var tmpHash = lastHasher.Clone();
                 tmpComp.SetCache(tmpHash);
                 tmpHash.SetCache(tmpComp.Comparers);
-                jobs[i] = new GroupByJob(tmpHash, tmpComp, aggs, results, current, current + addition, globalGroups);
+                if (this.BucketStorage) jobs[i] = new GroupByJobBuckets(tmpHash, tmpComp, aggs, results, current, current + addition, globalGroups);
+                else jobs[i] = new GroupByJobMixListsBuckets(tmpHash, tmpComp, aggs, results, current, current + addition, globalGroups, bucketFactory);
                 current += addition;
             }
-            jobs[jobs.Length - 1] = new GroupByJob(lastHasher, lastComp, aggs, results, current, results.NumberOfMatchedElements, globalGroups);
+            if (this.BucketStorage) jobs[jobs.Length - 1] = new GroupByJobBuckets(lastHasher, lastComp, aggs, results, current, results.NumberOfMatchedElements, globalGroups);
+            else jobs[jobs.Length - 1] = new GroupByJobMixListsBuckets(lastHasher, lastComp, aggs, results, current, current + addition, globalGroups, bucketFactory);
             return jobs;
         }
 
+
+        private static void SingleThreadGroupByWork(object job, bool useBucketStorage)
+        {
+            if (useBucketStorage) SingleThreadGroupByWorkMixListsBuckets(job);
+            else SingleThreadGroupByWorkMixListsBuckets(job);
+        }
+
+        #region Buckets
         /// <summary>
         /// A main work of each thread when grouping.
         /// For each result row, perform a local grouping with a simple dictionary.
@@ -110,11 +127,11 @@ namespace QueryEngine
         /// and when inserting into the global dictionary, the hash values are stored in the groupDictKey.
         /// </summary>
         /// <param name="job"> A group by job class. </param>
-        private static void SingleThreadGroupByWork(object job)
+        private static void SingleThreadGroupByWorkBuckets(object job)
         {
             // Local part 
             #region DECL
-            var tmpJob = ((GroupByJob)job);
+            var tmpJob = ((GroupByJobBuckets)job);
             var results = tmpJob.results;
             var groups = tmpJob.groups;
             var aggregates = tmpJob.aggregates;
@@ -154,35 +171,107 @@ namespace QueryEngine
             }
         }
 
-        private class GroupByJob
+        #endregion Buckets
+
+        #region MixListsBuckets
+
+        /// <summary>
+        /// A main work of each thread when grouping.
+        /// For each result row, perform a local grouping with a simple dictionary storing aggs. results in lists.
+        /// Afterwards merge the computed groups with the groups in the global dictionary and store the agg. results in buckets.
+        /// Notice that the local part is using hash cache with comparers when inserting into the dictionary
+        /// and when inserting into the global dictionary, the hash values are stored in the groupDictKey.
+        /// </summary>
+        /// <param name="job"> A group by job class. </param>
+        private static void SingleThreadGroupByWorkMixListsBuckets(object job)
+        {
+            // Local part with lists
+            #region DECL
+            var tmpJob = ((GroupByJobMixListsBuckets)job);
+            var results = tmpJob.results;
+            var groups = tmpJob.groups;
+            var aggregates = tmpJob.aggregates;
+            var hasher = tmpJob.hasher;
+            var aggResults = tmpJob.aggResults;
+            int position;
+            TableResults.RowProxy row;
+            GroupDictKey key;
+            #endregion DECL
+
+            for (int i = tmpJob.start; i < tmpJob.end; i++)
+            {
+                row = results[i];
+                key = new GroupDictKey(hasher.Hash(in row), i); // It's a struct.
+                if (!groups.TryGetValue(key, out position))
+                {
+                    position = groups.Count;
+                    groups.Add(key, position);
+                }
+                for (int j = 0; j < aggregates.Count; j++)
+                    aggregates[j].Apply(in row, aggResults[j], position);
+            }
+
+            // Global part with buckets
+            var globalGroups = tmpJob.globalGroups;
+            var bucketFactory = tmpJob.bucketFactory;
+            AggregateBucketResult[] buckets = null;
+            foreach (var item in groups)
+            {
+                buckets = globalGroups.GetOrAdd(item.Key, bucketFactory);
+                for (int j = 0; j < aggregates.Count; j++)
+                    aggregates[j].MergeThreadSafe(buckets[j], aggResults[j], item.Value);
+            }
+        }
+
+        #endregion MixListsBuckets
+
+
+        #region Jobs
+
+        private abstract class GroupByJob
         {
             public RowHasher hasher;
             public List<Aggregate> aggregates;
             public ITableResults results;
-            public Dictionary<GroupDictKey, AggregateBucketResult[]> groups;
             public int start;
             public int end;
             public ConcurrentDictionary<GroupDictKey, AggregateBucketResult[]> globalGroups;
 
-            public GroupByJob(
-                RowHasher hasher,
-                RowEqualityComparerGroupKey comparer,
-                List<Aggregate> aggregates,
-                ITableResults results,
-                int start,
-                int end,
-                ConcurrentDictionary<GroupDictKey, AggregateBucketResult[]> globalGroups
-                )
+            public GroupByJob(RowHasher hasher, RowEqualityComparerGroupKey comparer, List<Aggregate> aggregates, ITableResults results, int start, int end, ConcurrentDictionary<GroupDictKey, AggregateBucketResult[]> globalGroups)
             {
                 this.hasher = hasher;
                 this.aggregates = aggregates;
                 this.results = results;
                 this.start = start;
                 this.end = end;
-                this.groups = new Dictionary<GroupDictKey, AggregateBucketResult[]>((IEqualityComparer<GroupDictKey>)comparer);
                 this.globalGroups = globalGroups;
             }
         }
 
+        private class GroupByJobBuckets : GroupByJob
+        {
+            public Dictionary<GroupDictKey, AggregateBucketResult[]> groups;
+
+            public GroupByJobBuckets(RowHasher hasher, RowEqualityComparerGroupKey comparer, List<Aggregate> aggregates, ITableResults results, int start, int end, ConcurrentDictionary<GroupDictKey, AggregateBucketResult[]> globalGroups): base(hasher, comparer, aggregates, results, start, end, globalGroups)
+            {
+                this.groups = new Dictionary<GroupDictKey, AggregateBucketResult[]>((IEqualityComparer<GroupDictKey>)comparer);
+            }
+        }
+
+        private class GroupByJobMixListsBuckets : GroupByJob
+        {
+            public Dictionary<GroupDictKey, int> groups;
+            public List<AggregateListResults> aggResults;
+            public Func<GroupDictKey, AggregateBucketResult[]> bucketFactory;
+
+            public GroupByJobMixListsBuckets(RowHasher hasher, RowEqualityComparerGroupKey comparer, List<Aggregate> aggregates, ITableResults results, int start, int end, ConcurrentDictionary<GroupDictKey, AggregateBucketResult[]> globalGroups, Func<GroupDictKey, AggregateBucketResult[]> bucketFactory) : base(hasher, comparer, aggregates, results, start, end, globalGroups)
+            {
+                this.groups = new Dictionary<GroupDictKey, int>((IEqualityComparer<GroupDictKey>)comparer);
+                this.aggResults = AggregateListResults.CreateArrayResults(aggregates);
+                this.bucketFactory = bucketFactory;
+            }
+        }
+
+        #endregion Jobs
     }
 }

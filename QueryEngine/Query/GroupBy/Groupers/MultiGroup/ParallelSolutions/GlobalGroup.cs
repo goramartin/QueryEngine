@@ -57,7 +57,7 @@ namespace QueryEngine
         /// Note that the last job in the array has the end set to the end of the result table.
         /// The addition must always be > 0.
         /// Each job will receive a range from result table, aggregates and a global place to store groups.
-        /// Note that everything is shared. Nothing is a hard copy. The equalityComparer, the aggregates, results and the concurernt dictionary are shared
+        /// Note that everything is shared. Nothing is a hard copy. The equalityComparer, the aggregates, results and the concurernt dictionary, semaphore, are shared
         /// among all threads. They hold no state.
         /// </summary>
         private GroupByJob[] CreateJobs(RowEqualityComparerInt equalityComparer, ITableResults results)
