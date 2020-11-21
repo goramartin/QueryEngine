@@ -30,13 +30,30 @@ namespace QueryEngine
         public override void Apply(in TableResults.RowProxy row, AggregateBucketResult bucket)
         {
             if (this.expr.TryEvaluate(in row, out int returnValue))
-                ((AggregateBucketResult<int>)bucket).aggResult += returnValue;
+                AddInternal(ref ((AggregateBucketResult<int>)bucket).aggResult, returnValue);
         }
         public override void ApplyThreadSafe(in TableResults.RowProxy row, AggregateBucketResult bucket)
         {
             if (this.expr.TryEvaluate(in row, out int returnValue))
-                Interlocked.Add(ref ((AggregateBucketResult<int>)bucket).aggResult, returnValue);
+                AddThreadSafeInternal(ref ((AggregateBucketResult<int>)bucket).aggResult, returnValue);
         }
+        public override void Merge(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
+        {
+            AddInternal(ref ((AggregateBucketResult<int>)bucket1).aggResult, ((AggregateBucketResult<int>)bucket2).aggResult);
+        }
+        public override void MergeThreadSafe(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
+        {
+            AddThreadSafeInternal(ref ((AggregateBucketResult<int>)bucket1).aggResult, ((AggregateBucketResult<int>)bucket2).aggResult);
+        }
+        public override void Merge(AggregateBucketResult bucket, AggregateListResults list, int position)
+        {
+            AddInternal(ref ((AggregateBucketResult<int>)bucket).aggResult, ((AggregateListResults<int>)list).aggResults[position]);
+        }
+        public override void MergeThreadSafe(AggregateBucketResult bucket, AggregateListResults list, int position)
+        {
+            AddThreadSafeInternal(ref ((AggregateBucketResult<int>)bucket).aggResult, ((AggregateListResults<int>)list).aggResults[position]);
+        }
+
         public override void Apply(in TableResults.RowProxy row, AggregateListResults list, int position)
         {
                 if (this.expr.TryEvaluate(in row, out int returnValue))
@@ -46,20 +63,6 @@ namespace QueryEngine
                     else tmpList.aggResults[position] += returnValue;
                 }
         }
-        public override void ApplyThreadSafe(in TableResults.RowProxy row, AggregateArrayResults array, int position)
-        {
-            if (this.expr.TryEvaluate(in row, out int returnValue))
-            Interlocked.Add(ref ((AggregateArrayResults<int>)array).aggResults[position], returnValue);
-        }
-
-        public override void Merge(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
-        {
-            ((AggregateBucketResult<int>)bucket1).aggResult += ((AggregateBucketResult<int>)bucket2).aggResult;
-        }
-        public override void MergeThreadSafe(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
-        {
-            Interlocked.Add(ref ((AggregateBucketResult<int>)bucket1).aggResult, ((AggregateBucketResult<int>)bucket2).aggResult);
-        }
         public override void Merge(AggregateListResults list1, int into, AggregateListResults list2, int from)
         {
             var tmpList1 = (AggregateListResults<int>)list1;
@@ -68,13 +71,21 @@ namespace QueryEngine
             if (into == tmpList1.aggResults.Count) tmpList1.aggResults.Add(tmpList2.aggResults[from]);
             else tmpList1.aggResults[into] += tmpList2.aggResults[from];
         }
-        public override void MergeThreadSafe(AggregateBucketResult bucket, AggregateListResults list, int position)
+
+        public override void ApplyThreadSafe(in TableResults.RowProxy row, AggregateArrayResults array, int position)
         {
-            Interlocked.Add(ref ((AggregateBucketResult<int>)bucket).aggResult,((AggregateListResults<int>)list).aggResults[position]);
+            if (this.expr.TryEvaluate(in row, out int returnValue))
+                AddThreadSafeInternal(ref ((AggregateArrayResults<int>)array).aggResults[position], returnValue);
         }
-        public override void Merge(AggregateBucketResult bucket, AggregateListResults list, int position)
+
+
+        private void AddInternal(ref int placement, int value)
         {
-            ((AggregateBucketResult<int>)bucket).aggResult += ((AggregateListResults<int>)list).aggResults[position];
+            placement += value;
+        }
+        private void AddThreadSafeInternal(ref int placement, int value)
+        {
+            Interlocked.Add(ref placement, value);
         }
     }
 }

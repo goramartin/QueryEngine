@@ -84,11 +84,11 @@
     <Compile Include="Query\GroupBy\AggregateInternalResults\AggregateArrayResults.cs" />
     <Compile Include="Query\GroupBy\AggregateInternalResults\AggregateListResults.cs" />
     <Compile Include="Query\GroupBy\AggregateInternalResults\AggregateBucketResults.cs" />
+    <Compile Include="Query\GroupBy\AggregateInternalResults\MightBeInTheFuture.cs" />
     <Compile Include="Query\GroupBy\Aggregates\Aggregate.cs" />
     <Compile Include="Query\GroupBy\Aggregates\AggregateFuncs\Avg.cs" />
     <Compile Include="Query\GroupBy\Aggregates\AggregateFuncs\Count.cs" />
-    <Compile Include="Query\GroupBy\Aggregates\AggregateFuncs\Max.cs" />
-    <Compile Include="Query\GroupBy\Aggregates\AggregateFuncs\Min.cs" />
+    <Compile Include="Query\GroupBy\Aggregates\AggregateFuncs\MinMax.cs" />
     <Compile Include="Query\GroupBy\Aggregates\AggregateFuncs\Sum.cs" />
     <Compile Include="Query\GroupBy\Groupers\MultiGroup\EqualityComparer\ExpressionEqualityComparer.cs" />
     <Compile Include="Query\GroupBy\Groupers\MultiGroup\EqualityComparer\RowEqualityComparerGroupKey.cs" />
@@ -96,7 +96,7 @@
     <Compile Include="Query\GroupBy\Groupers\MultiGroup\ReferenceSolutions\GroupWithBuckets.cs" />
     <Compile Include="Query\GroupBy\Groupers\MultiGroup\Hasher\DictKeyStruct.cs" />
     <Compile Include="Query\GroupBy\Groupers\MultiGroup\Hasher\ExpressionHasher.cs" />
-    <Compile Include="Query\GroupBy\Groupers\MultiGroup\ParallelSolutions\LocalGroupGlobalMergeWithBuckets.cs" />
+    <Compile Include="Query\GroupBy\Groupers\MultiGroup\ParallelSolutions\LocalGroupGlobalMerge.cs" />
     <Compile Include="Query\GroupBy\Groupers\MultiGroup\ReferenceSolutions\GroupWithLists.cs" />
     <Compile Include="Query\QueryExpressionInfo.cs" />
     <Compile Include="Query\GroupBy\Groupers\Grouper.cs" />

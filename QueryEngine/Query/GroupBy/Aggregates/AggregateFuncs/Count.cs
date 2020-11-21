@@ -44,18 +44,43 @@ namespace QueryEngine
             if (!this.IsAstCount)
             {
                 if (this.expr.TryEvaluate(in row, out int returnValue))
-                    ((AggregateBucketResult<int>)bucket).aggResult++;
+                   IncrementInternal(ref ((AggregateBucketResult<int>)bucket).aggResult);
             }
-            else ((AggregateBucketResult<int>)bucket).aggResult++;
+            else IncrementInternal(ref ((AggregateBucketResult<int>)bucket).aggResult);
         }
         public override void ApplyThreadSafe(in TableResults.RowProxy row, AggregateBucketResult bucket)
         {
             if (!this.IsAstCount)
             {
                 if (this.expr.TryEvaluate(in row, out int returnValue))
-                    Interlocked.Increment(ref ((AggregateBucketResult<int>)bucket).aggResult);
+                    IncrementThreadSafeInternal(ref ((AggregateBucketResult<int>)bucket).aggResult);
             }
-            else Interlocked.Increment(ref ((AggregateBucketResult<int>)bucket).aggResult);
+            else IncrementThreadSafeInternal(ref ((AggregateBucketResult<int>)bucket).aggResult);
+        }
+        public override void Merge(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
+        {
+            AddInternal(ref ((AggregateBucketResult<int>)bucket1).aggResult,((AggregateBucketResult<int>)bucket2).aggResult);
+        }
+        public override void MergeThreadSafe(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
+        {
+            AddThreadSafeInternal(ref ((AggregateBucketResult<int>)bucket1).aggResult, ((AggregateBucketResult<int>)bucket2).aggResult);
+        }
+        public override void Merge(AggregateBucketResult bucket, AggregateListResults list, int position)
+        {
+            AddInternal(ref ((AggregateBucketResult<int>)bucket).aggResult, ((AggregateListResults<int>)list).aggResults[position]);
+        }
+        public override void MergeThreadSafe(AggregateBucketResult bucket, AggregateListResults list, int position)
+        {
+            AddThreadSafeInternal(ref ((AggregateBucketResult<int>)bucket).aggResult, ((AggregateListResults<int>)list).aggResults[position]);
+        }
+
+        public override void Merge(AggregateListResults list1, int into, AggregateListResults list2, int from)
+        {
+            var tmpList1 = (AggregateListResults<int>)list1;
+            var tmpList2 = (AggregateListResults<int>)list2;
+
+            if (into == tmpList1.aggResults.Count) tmpList1.aggResults.Add(tmpList2.aggResults[from]);
+            else tmpList1.aggResults[into] += tmpList2.aggResults[from];
         }
         public override void Apply(in TableResults.RowProxy row, AggregateListResults list, int position)
         {
@@ -74,42 +99,33 @@ namespace QueryEngine
                 tmpList.aggResults[position]++;
             }
         }
+
         public override void ApplyThreadSafe(in TableResults.RowProxy row, AggregateArrayResults array, int position)
         {
              if (!this.IsAstCount)
              {
                 if (this.expr.TryEvaluate(in row, out int returnValue))
-                    Interlocked.Increment(ref ((AggregateArrayResults<int>)array).aggResults[position]);
+                    IncrementThreadSafeInternal(ref ((AggregateArrayResults<int>)array).aggResults[position]);
              }
-             else Interlocked.Increment(ref ((AggregateArrayResults<int>)array).aggResults[position]);
+             else IncrementThreadSafeInternal(ref ((AggregateArrayResults<int>)array).aggResults[position]);
         }
 
 
-
-        public override void Merge(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
+        private void AddInternal(ref int placement, int value)
         {
-            ((AggregateBucketResult<int>)bucket1).aggResult += ((AggregateBucketResult<int>)bucket2).aggResult;
+            placement += value;
         }
-        public override void MergeThreadSafe(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
+        private void AddThreadSafeInternal(ref int placement, int value)
         {
-            Interlocked.Add(ref ((AggregateBucketResult<int>)bucket1).aggResult, ((AggregateBucketResult<int>)bucket2).aggResult);
+            Interlocked.Add(ref placement, value);
         }
-        public override void Merge(AggregateListResults list1, int into, AggregateListResults list2, int from)
+        private void IncrementInternal(ref int placement)
         {
-            var tmpList1 = (AggregateListResults<int>)list1;
-            var tmpList2 = (AggregateListResults<int>)list2;
-
-            if (into == tmpList1.aggResults.Count) tmpList1.aggResults.Add(tmpList2.aggResults[from]);
-            else tmpList1.aggResults[into] += tmpList2.aggResults[from];
+            placement++;
         }
-        public override void MergeThreadSafe(AggregateBucketResult bucket, AggregateListResults list, int position)
+        private void IncrementThreadSafeInternal(ref int placement)
         {
-            Interlocked.Add(ref ((AggregateBucketResult<int>)bucket).aggResult, ((AggregateListResults<int>)list).aggResults[position]);
+            Interlocked.Increment(ref placement);
         }
-        public override void Merge(AggregateBucketResult bucket, AggregateListResults list, int position)
-        {
-            ((AggregateBucketResult<int>)bucket).aggResult += ((AggregateListResults<int>)list).aggResults[position];
-        }
-
     }
 }

@@ -71,11 +71,11 @@ namespace QueryEngine
     /// </summary>
     internal class AggregateArrayAvgResults<T> : AggregateArrayResults<T>
     {
-        public int[] eltUsed = new int[InitSize];
+        public int[] eltsUsed = new int[InitSize];
 
         public override void DoubleSize(int position)
         {
-            Array.Resize<int>(ref this.eltUsed, (position + (position % 2)) * 2);
+            Array.Resize<int>(ref this.eltsUsed, (position + (position % 2)) * 2);
             base.DoubleSize( position);
         }
     }

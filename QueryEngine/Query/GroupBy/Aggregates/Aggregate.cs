@@ -130,8 +130,6 @@ namespace QueryEngine
         /// <param name="bucket2"> A bucket that will provide value to merge for the bucket1. </param>
         public abstract void MergeThreadSafe(AggregateBucketResult bucket1, AggregateBucketResult bucket2);
 
-
-
         #endregion Buckets
 
         #region Arrays

@@ -50,6 +50,6 @@ namespace QueryEngine
     /// <typeparam name="T"> A return type of the aggregation function. </typeparam>
     internal class AggregateListAvgResults<T> : AggregateListResults<T>
     {
-        public List<int> eltUsed = new List<int>();
+        public List<int> eltsUsed = new List<int>();
     }
 }

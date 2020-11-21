@@ -48,7 +48,7 @@ namespace QueryEngine
     /// <typeparam name="T"> A return type of the aggregation function. </typeparam>
     internal class AggregateBucketAvgResult<T> : AggregateBucketResult<T>
     {
-        public int eltUsed = 0;
+        public int eltsUsed = 0;
     }
     /// <summary>
     /// Mainly its purpose is to initialise first values of the bucket, for example,

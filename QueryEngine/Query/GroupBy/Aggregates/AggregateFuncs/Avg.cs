@@ -21,18 +21,18 @@ namespace QueryEngine
         {
             return "Avg(" + this.expressionHolder.ToString() + ")";
         }
-
         public override string GetFuncName()
         {
             return "avg";
         }
+       
+        
         public override void Apply(in TableResults.RowProxy row, AggregateBucketResult bucket)
         {
             if (this.expr.TryEvaluate(in row, out int returnValue))
             {
                 var tmpBucket = ((AggregateBucketAvgResult<int>)bucket);
-                tmpBucket.aggResult += returnValue;
-                tmpBucket.eltUsed++;
+                AddInternal(ref tmpBucket.aggResult, ref tmpBucket.eltsUsed, returnValue, 1);
             }
         }
         public override void ApplyThreadSafe(in TableResults.RowProxy row, AggregateBucketResult bucket)
@@ -40,10 +40,34 @@ namespace QueryEngine
             if (this.expr.TryEvaluate(in row, out int returnValue))
             {
                 var tmpBucket = ((AggregateBucketAvgResult<int>)bucket);
-                Interlocked.Add(ref tmpBucket.aggResult, returnValue);
-                Interlocked.Increment(ref tmpBucket.eltUsed);
+                AddThreadSafeInternal(ref tmpBucket.aggResult, ref tmpBucket.eltsUsed, returnValue, 1);
             }
         }
+        public override void Merge(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
+        {
+            var tmpBucket1 = ((AggregateBucketAvgResult<int>)bucket1);
+            var tmpBucket2 = ((AggregateBucketAvgResult<int>)bucket2);
+            AddInternal(ref tmpBucket1.aggResult, ref tmpBucket1.eltsUsed, tmpBucket2.aggResult, tmpBucket2.eltsUsed);
+        }
+        public override void MergeThreadSafe(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
+        {
+            var tmpBucket1 = ((AggregateBucketAvgResult<int>)bucket1);
+            var tmpBucket2 = ((AggregateBucketAvgResult<int>)bucket2);
+            AddThreadSafeInternal(ref tmpBucket1.aggResult, ref tmpBucket1.eltsUsed, tmpBucket2.aggResult, tmpBucket2.eltsUsed);
+        }
+        public override void Merge(AggregateBucketResult bucket, AggregateListResults list, int position)
+        {
+            var tmpBucket = ((AggregateBucketAvgResult<int>)bucket);
+            var tmpList = ((AggregateListAvgResults<int>)list);
+            AddInternal(ref tmpBucket.aggResult, ref tmpBucket.eltsUsed, tmpList.aggResults[position], tmpList.eltsUsed[position]);
+        }
+        public override void MergeThreadSafe(AggregateBucketResult bucket, AggregateListResults list, int position)
+        {
+            var tmpBucket = ((AggregateBucketAvgResult<int>)bucket);
+            var tmpList = ((AggregateListAvgResults<int>)list);
+            AddThreadSafeInternal(ref tmpBucket.aggResult, ref tmpBucket.eltsUsed, tmpList.aggResults[position], tmpList.eltsUsed[position]);
+        }
+
         public override void Apply(in TableResults.RowProxy row, AggregateListResults list, int position)
         {
             if (this.expr.TryEvaluate(in row, out int returnValue))
@@ -53,38 +77,14 @@ namespace QueryEngine
                 if (position == tmpList.aggResults.Count)
                 {
                     tmpList.aggResults.Add(returnValue);
-                    tmpList.eltUsed.Add(1);
+                    tmpList.eltsUsed.Add(1);
                 }
                 else
                 {
                     tmpList.aggResults[position] += returnValue;
-                    tmpList.eltUsed[position]++;
+                    tmpList.eltsUsed[position]++;
                 }
             }
-        }
-        public override void ApplyThreadSafe(in TableResults.RowProxy row, AggregateArrayResults array, int position)
-        {
-            if (this.expr.TryEvaluate(in row, out int returnValue))
-            {
-                var tmpArray = ((AggregateArrayAvgResults<int>)array);
-                Interlocked.Add(ref tmpArray.aggResults[position], returnValue);
-                Interlocked.Increment(ref tmpArray.eltUsed[position]);
-            }
-        }
-
-        public override void Merge(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
-        {
-            var tmpBucket1 = ((AggregateBucketAvgResult<int>)bucket1);
-            var tmpBucket2 = ((AggregateBucketAvgResult<int>)bucket2);
-            tmpBucket1.aggResult += tmpBucket2.aggResult;
-            tmpBucket1.eltUsed += tmpBucket2.eltUsed;
-        }
-        public override void MergeThreadSafe(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
-        {
-            var tmpBucket1 = ((AggregateBucketAvgResult<int>)bucket1);
-            var tmpBucket2 = ((AggregateBucketAvgResult<int>)bucket2);
-            Interlocked.Add(ref tmpBucket1.aggResult, tmpBucket2.aggResult);
-            Interlocked.Add(ref tmpBucket1.eltUsed, tmpBucket2.eltUsed);
         }
         public override void Merge(AggregateListResults list1, int into, AggregateListResults list2, int from)
         {
@@ -94,29 +94,34 @@ namespace QueryEngine
             if (into == tmpList1.aggResults.Count)
             {
                 tmpList1.aggResults.Add(tmpList2.aggResults[from]);
-                tmpList1.eltUsed.Add(tmpList2.eltUsed[from]);
+                tmpList1.eltsUsed.Add(tmpList2.eltsUsed[from]);
             }
             else
             {
                 tmpList1.aggResults[into] += tmpList2.aggResults[from];
-                tmpList1.eltUsed[into] += tmpList2.eltUsed[from];
+                tmpList1.eltsUsed[into] += tmpList2.eltsUsed[from];
             }
 
         }
-        public override void MergeThreadSafe(AggregateBucketResult bucket, AggregateListResults list, int position)
-        {
-            var tmpBucket = ((AggregateBucketAvgResult<int>)bucket);
-            var tmpList = ((AggregateListAvgResults<int>)list);
         
-            Interlocked.Add(ref tmpBucket.aggResult, tmpList.aggResults[position]);
-            Interlocked.Add(ref tmpBucket.eltUsed, tmpList.eltUsed[position]);
-        }
-        public override void Merge(AggregateBucketResult bucket, AggregateListResults list, int position)
+        public override void ApplyThreadSafe(in TableResults.RowProxy row, AggregateArrayResults array, int position)
         {
-            var tmpBucket = ((AggregateBucketAvgResult<int>)bucket);
-            var tmpList = ((AggregateListAvgResults<int>)list);
-            tmpBucket.aggResult += tmpList.aggResults[position];
-            tmpBucket.eltUsed += tmpList.eltUsed[position];
+            if (this.expr.TryEvaluate(in row, out int returnValue))
+            {
+                var tmpArray = ((AggregateArrayAvgResults<int>)array);
+                AddThreadSafeInternal(ref tmpArray.aggResults[position], ref tmpArray.eltsUsed[position], returnValue , 1);
+            }
+        }
+
+        private void AddInternal(ref int placement, ref int eltsUsed, int value, int eltsValue)
+        {
+            placement += value;
+            eltsUsed += eltsValue;
+        }
+        private void AddThreadSafeInternal(ref int placement, ref int eltsUsed, int value, int eltsValue)
+        {
+            Interlocked.Add(ref placement, value);
+            Interlocked.Add(ref eltsUsed, eltsValue);
         }
     }
 }
