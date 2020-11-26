@@ -66,13 +66,14 @@ namespace QueryEngine
         }
     }
 
-    internal class ExpressionIntegerComparer : ExpressionComparer
+
+    internal abstract class ExpressionComparer<T> : ExpressionComparer
     {
         // To avoid casting every time Holder.TryGetValue()
-        ExpressionReturnValue<int> expr;
-        public ExpressionIntegerComparer(ExpressionHolder expressionHolder, bool ascending) : base(expressionHolder, ascending)
+        ExpressionReturnValue<T> expr;
+        public ExpressionComparer(ExpressionHolder expressionHolder, bool ascending) : base(expressionHolder, ascending)
         {
-            this.expr = (ExpressionReturnValue<int>)expressionHolder.Expr;
+            this.expr = (ExpressionReturnValue<T>)expressionHolder.Expr;
         }
 
         /// <summary>
@@ -89,14 +90,14 @@ namespace QueryEngine
             // Check if used variables in expression are same
             if (AreIdenticalVars(x, y)) return 0;
 
-            var xSuccess = this.expr.TryEvaluate(x, out int xValue);
-            var ySuccess = this.expr.TryEvaluate(y, out int yValue);
+            var xSuccess = this.expr.TryEvaluate(x, out T xValue);
+            var ySuccess = this.expr.TryEvaluate(y, out T yValue);
 
             int retValue = 0;
             if (xSuccess && !ySuccess) retValue = -1;
             else if (!xSuccess && ySuccess) retValue = 1;
             else if (!xSuccess && !ySuccess) retValue = 0;
-            else retValue = xValue.CompareTo(yValue);
+            else retValue = this.CompareValues(xValue, yValue);
 
             if (!this.isAscending)
             {
@@ -106,49 +107,31 @@ namespace QueryEngine
             }
 
             return retValue;
+        }
+
+        protected abstract int CompareValues(T xValue, T yValue);
+    }
+
+
+    internal class ExpressionIntegerComparer : ExpressionComparer<int>
+    {
+        public ExpressionIntegerComparer(ExpressionHolder expressionHolder, bool ascending) : base(expressionHolder, ascending)
+        {  }
+
+        protected override int CompareValues(int xValue, int yValue)
+        {
+            return xValue.CompareTo(yValue);
         }
     }
 
-    internal class ExpressionStringComparer : ExpressionComparer
+    internal class ExpressionStringComparer : ExpressionComparer<string>
     {
-        // To avoid casting every time Holder.TryGetValue()
-        ExpressionReturnValue<string> expr;
         public ExpressionStringComparer(ExpressionHolder expressionHolder, bool ascending) : base(expressionHolder, ascending)
+        {}
+        protected override int CompareValues(string xValue, string yValue)
         {
-            this.expr = (ExpressionReturnValue<string>)expressionHolder.Expr;
+            return xValue.CompareTo(yValue);
         }
 
-        /// <summary>
-        /// Tries to evaluate containing expression with given rows.
-        /// Values are compared always in ascending order and switched to descending order if neccessary.
-        /// </summary>
-        /// <param name="x"> First row. </param>
-        /// <param name="y"> Second row. </param>
-        /// <returns> Less than zero x precedes y in the sort order.
-        /// Zero x occurs in the same position as y in the sort order.
-        /// Greater than zero x follows y in the sort order.</returns>
-        public override int Compare(in TableResults.RowProxy x, in TableResults.RowProxy y)
-        {
-            // Check if used variables in expression are same
-            if (AreIdenticalVars(x, y)) return 0;
-
-            var xSuccess = this.expr.TryEvaluate(x, out string xValue);
-            var ySuccess = this.expr.TryEvaluate(y, out string yValue);
-
-            int retValue = 0;
-            if (xSuccess && !ySuccess) retValue = -1;
-            else if (!xSuccess && ySuccess) retValue = 1;
-            else if (!xSuccess && !ySuccess) retValue = 0;
-            else retValue = xValue.CompareTo(yValue);
-
-            if (!this.isAscending)
-            {
-                if (retValue == -1) retValue = 1;
-                else if (retValue == 1) retValue = -1;
-                else { }
-            }
-
-            return retValue;
-        }
     }
 }
