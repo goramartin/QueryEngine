@@ -25,23 +25,13 @@ using System.Threading.Tasks;
 
 namespace QueryEngine 
 {
-
-    /// <summary>
-    /// Interface for comparing rows of a result table.
-    /// </summary>
-    internal interface IRowComparer
-    {
-        int Compare(in TableResults.RowProxy x, in TableResults.RowProxy y);
-    }
-
     /// <summary>
     /// Compares two rows.
     /// Contains list of all expression to compared with the rows.
     /// </summary>
-    internal class RowComparer : IRowComparer
+    internal class RowComparer : IExpressionComparer
     {
         private readonly List<ExpressionComparer> comparers;
-        
         
         /// <summary>
         /// Creates a row comparer.
@@ -70,6 +60,12 @@ namespace QueryEngine
                 if (result != 0) return result;
             }
             return result;
+        }
+
+        public void SetCachingResults(bool setValue)
+        {
+            for (int i = 0; i < this.comparers.Count; i++)
+                this.comparers[i].SetCachingResults(setValue);
         }
     }
 }

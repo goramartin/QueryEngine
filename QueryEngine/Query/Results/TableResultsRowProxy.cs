@@ -68,21 +68,6 @@ namespace QueryEngine
             
                 return tmpString;
             }
-
-            public static bool operator ==(RowProxy x, RowProxy y)
-            {
-                for (int i = 0; i < x.resTable.ColumnCount; i++)
-                    if (x[i].ID != y[i].ID) return false;
-
-                return true;
-            }
-
-            public static bool operator !=(RowProxy x, RowProxy y)
-            {
-                return !(x == y);
-            }
-
-
         }
     }
 }

@@ -12,11 +12,12 @@ namespace QueryEngine
     /// Each class contains an expression that will be evaluated with given rows.
     /// Then the values are compared with templated compare method.
     /// </summary>
-    internal abstract class ExpressionComparer : IRowComparer
+    internal abstract class ExpressionComparer : IExpressionComparer
     {
         protected readonly ExpressionHolder expressionHolder;
         protected readonly bool isAscending;
         protected readonly List<int> usedVars;
+        protected bool cacheResults;
         /// <summary>
         /// Constructs expression comparer.
         /// </summary>
@@ -48,7 +49,6 @@ namespace QueryEngine
             else throw new ArgumentException($"Expression comparer factory, unknown type passed to a expression comparer factory.");
         }
 
-
         /// <summary>
         /// Checks whether used variables inside expression are same.
         /// In case there are the same, the expression should give the same 
@@ -64,13 +64,21 @@ namespace QueryEngine
 
             return true;
         }
-    }
 
+        public void SetCachingResults(bool setValue)
+        {
+            this.cacheResults = setValue;
+        }
+
+    }
 
     internal abstract class ExpressionComparer<T> : ExpressionComparer
     {
-        // To avoid casting every time Holder.TryGetValue()
+        protected bool lastSuccess = false;
+        protected int lastRow = -1;
+        protected T lastXValue = default;
         ExpressionReturnValue<T> expr;
+
         public ExpressionComparer(ExpressionHolder expressionHolder, bool ascending) : base(expressionHolder, ascending)
         {
             this.expr = (ExpressionReturnValue<T>)expressionHolder.Expr;
@@ -79,6 +87,7 @@ namespace QueryEngine
         /// <summary>
         /// Tries to evaluate containing expression with given rows.
         /// Values are compared always in ascending order and switched to descending order if neccessary.
+        /// The cached campare is called only if the computation is not done in parallel.
         /// </summary>
         /// <param name="x"> First row. </param>
         /// <param name="y"> Second row. </param>
@@ -87,9 +96,36 @@ namespace QueryEngine
         /// Greater than zero x follows y in the sort order.</returns>
         public override int Compare(in TableResults.RowProxy x, in TableResults.RowProxy y)
         {
-            // Check if used variables in expression are same
-            if (AreIdenticalVars(x, y)) return 0;
+            if (this.cacheResults) return CachedCompare(in x, in y);
+            else return NonCachedCompare(in x, in y);
+        }
 
+        protected int CachedCompare(in TableResults.RowProxy x, in TableResults.RowProxy y)
+        {
+            if (x.index != this.lastRow)
+            {
+                this.lastSuccess = this.expr.TryEvaluate(x, out this.lastXValue);
+                this.lastRow = x.index;
+            }
+            var ySuccess = this.expr.TryEvaluate(y, out T yValue);
+
+            int retValue = 0;
+            if (this.lastSuccess && !ySuccess) retValue = -1;
+            else if (!this.lastSuccess && ySuccess) retValue = 1;
+            else if (!this.lastSuccess && !ySuccess) retValue = 0;
+            else retValue = this.CompareValues(this.lastXValue, yValue);
+
+            if (!this.isAscending)
+            {
+                if (retValue == -1) retValue = 1;
+                else if (retValue == 1) retValue = -1;
+                else { }
+            }
+
+            return retValue;
+        }
+        protected int NonCachedCompare(in TableResults.RowProxy x, in TableResults.RowProxy y)
+        {
             var xSuccess = this.expr.TryEvaluate(x, out T xValue);
             var ySuccess = this.expr.TryEvaluate(y, out T yValue);
 
@@ -127,7 +163,7 @@ namespace QueryEngine
     internal class ExpressionStringComparer : ExpressionComparer<string>
     {
         public ExpressionStringComparer(ExpressionHolder expressionHolder, bool ascending) : base(expressionHolder, ascending)
-        {}
+        { }
         protected override int CompareValues(string xValue, string yValue)
         {
             return xValue.CompareTo(yValue);

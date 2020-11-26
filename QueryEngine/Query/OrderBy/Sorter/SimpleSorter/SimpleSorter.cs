@@ -22,7 +22,7 @@ namespace QueryEngine
     internal abstract class SimpleSorter : Sorter
     {
         protected ITableResults dataTable;
-        protected IRowComparer rowComparer;
+        protected IExpressionComparer rowComparer;
         protected bool inParallel;
 
         protected SimpleSorter(ITableResults sortData, List<ExpressionComparer> rowComparers, bool inParallel)

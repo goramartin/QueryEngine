@@ -19,7 +19,7 @@ namespace QueryEngine
     /// The exact result is expected to be stored in the derived class.
     /// They are public so the hasher classes can set the cache when they compute the hash function (they will use the same expressions).
     /// </summary>
-    internal abstract class ExpressionEqualityComparer
+    internal abstract class ExpressionEqualityComparer : IExpressionEqualityComparer
     {
         protected ExpressionHolder expressionHolder;
         protected List<int> usedVars;
@@ -123,7 +123,7 @@ namespace QueryEngine
             else return Compare(xValue, yValue);
         }
 
-        protected abstract bool Compare(T x, T y);
+        protected abstract bool Compare(T xValue, T yValue);
 
         public override void SetCache(ExpressionHasher cache)
         {
@@ -136,9 +136,9 @@ namespace QueryEngine
         public ExpressionIntegerEqualityComparer(ExpressionHolder expressionHolder) : base(expressionHolder)
         {}
 
-        protected override bool Compare(int x, int y)
+        protected override bool Compare(int xValue, int yValue)
         {
-            return x == y;
+            return xValue == yValue;
         }
 
         public override ExpressionEqualityComparer Clone()
@@ -152,9 +152,9 @@ namespace QueryEngine
         public ExpressionStringEqualityComparer(ExpressionHolder expressionHolder) : base(expressionHolder)
         { }
 
-        protected override bool Compare(string x, string y)
+        protected override bool Compare(string xValue, string yValue)
         {
-            return x == y;
+            return xValue == yValue;
         }
 
         public override ExpressionEqualityComparer Clone()

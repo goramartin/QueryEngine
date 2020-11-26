@@ -6,11 +6,7 @@ using System.Threading.Tasks;
 
 namespace QueryEngine
 {
-    internal interface IRowHasher
-    {
-        int Hash(in TableResults.RowProxy row);
-    }
-
+   
     /// <summary>
     /// Creates a hash for a given row.
     /// For null values (missing property on an element) the returned hash is 0.
@@ -26,7 +22,7 @@ namespace QueryEngine
     /// The clone method expects, that the cache list is different than the caches inside the (this).clone().
     /// In order to benefit from the cache.
     /// </summary>
-    internal class RowHasher : IRowHasher
+    internal class RowHasher : IExpressionHasher
     {
         public List<ExpressionHasher> Hashers { get; private set; }
 

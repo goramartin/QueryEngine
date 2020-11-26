@@ -16,7 +16,7 @@ namespace QueryEngine
     /// Class serves as a medium for evaluating expressions and obtaining string representation of the computed value.
     /// From this class inherits generic class which does explicit call to a generic method for evaluation of the expression.
     /// </summary>
-    internal abstract class ExpressionToStringWrapper
+    internal abstract class ExpressionToStringWrapper: IExpressionToString
     {
         /// <summary>
         /// Expression to be evaluated.

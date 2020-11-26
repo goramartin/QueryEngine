@@ -35,6 +35,8 @@ namespace QueryEngine
         /// <param name="inParallel"> Flag is the table should be sorted in parallel. </param>
         public MultiColumnSorter(ITableResults sortData, List<ExpressionComparer> rowComparers, bool inParallel) : base(sortData, rowComparers, inParallel)
         {
+            var tmpComp = new RowComparer(rowComparers);
+            tmpComp.SetCachingResults(!inParallel);
             this.indexComparer = new IndexToRowProxyComparer(new RowComparer(rowComparers), sortData);
         }
 

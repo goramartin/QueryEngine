@@ -17,7 +17,7 @@ namespace QueryEngine
     /// If the hash is present, it evaluates the expression and stores the outcome of the expression into the inner variables
     /// of the ExpressionEqualityComparer.
     /// </summary>
-    internal abstract class ExpressionHasher : IRowHasher
+    internal abstract class ExpressionHasher : IExpressionHasher
     {
         protected ExpressionHolder expressionHolder;
 

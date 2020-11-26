@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 
 namespace QueryEngine
 {
@@ -15,12 +15,12 @@ namespace QueryEngine
     /// </summary>
     internal sealed class IndexToRowProxyComparer : IComparer<int>
     {
-        private readonly IRowComparer rowComparer;
+        private readonly RowComparer rowComparer;
         private readonly ITableResults results;
 
-        public IndexToRowProxyComparer(IRowComparer rowComparer, ITableResults results)
+        public IndexToRowProxyComparer(IExpressionComparer rowComparer, ITableResults results)
         {
-            this.rowComparer = rowComparer;
+            this.rowComparer = (RowComparer)rowComparer;
             this.results = results;
         }
 
