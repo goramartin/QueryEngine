@@ -88,7 +88,7 @@
     <Compile Include="Query\GroupBy\AggregateInternalResults\AggregateArrayResults.cs" />
     <Compile Include="Query\GroupBy\AggregateInternalResults\AggregateListResults.cs" />
     <Compile Include="Query\GroupBy\AggregateInternalResults\AggregateBucketResults.cs" />
-    <Compile Include="Query\GroupBy\AggregateInternalResults\MightBeInTheFuture.cs" />
+    <Compile Include="Query\GroupBy\AggregateInternalResults\IGetFinal.cs" />
     <Compile Include="Query\GroupBy\Aggregates\Aggregate.cs" />
     <Compile Include="Query\GroupBy\Aggregates\AggregateFuncs\Avg.cs" />
     <Compile Include="Query\GroupBy\Aggregates\AggregateFuncs\Count.cs" />

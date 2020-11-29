@@ -48,7 +48,7 @@ namespace QueryEngine
     }
 
     /// <typeparam name="T"> A return type of the aggregation function. </typeparam>
-    internal class AggregateArrayResults<T> : AggregateArrayResults
+    internal class AggregateArrayResults<T> : AggregateArrayResults, IGetFinal<T>
     {
         public T[] aggResults = new T[InitSize];
         public int size = InitSize;
@@ -62,6 +62,11 @@ namespace QueryEngine
         public override int ArraySize()
         {
             return this.size;
+        }
+
+        T IGetFinal<T>.GetFinal(int position)
+        {
+            return this.aggResults[position];
         }
     }
 
@@ -79,6 +84,15 @@ namespace QueryEngine
             base.DoubleSize( position);
         }
     }
+
+    internal class AggregateArrayAvgResults : AggregateArrayAvgResults<int>, IGetFinal<double>
+    {
+        double IGetFinal<double>.GetFinal(int position)
+        {
+            return (double)this.aggResults[position] / this.eltsUsed[position];
+        }
+    }
+
 
     /// <summary>
     /// Mainly it is used during computing average.

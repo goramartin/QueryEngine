@@ -26,7 +26,7 @@ namespace QueryEngine
 
         public static AggregateBucketResult Factory(Type type, string funcName)
         {
-            if (type == typeof(int) && funcName == "avg") return new AggregateBucketAvgResult<int>();
+            if (type == typeof(int) && funcName == "avg") return new AggregateBucketAvgIntResult();
             else if (type == typeof(int) && (funcName == "min" || funcName == "max")) return new AggregateBucketResultWithSetFlag<int>();
             else if (type == typeof(string) && (funcName == "min" || funcName == "max")) return new AggregateBucketResultWithSetFlag<string>();
             else if (type == typeof(int)) return new AggregateBucketResult<int>();
@@ -37,9 +37,14 @@ namespace QueryEngine
     }
 
     /// <typeparam name="T"> A return type of the aggregation function. </typeparam>
-    internal class AggregateBucketResult<T> : AggregateBucketResult
+    internal class AggregateBucketResult<T> : AggregateBucketResult, IGetFinal<T>
     {
         public T aggResult = default;
+
+        T IGetFinal<T>.GetFinal(int position)
+        {
+            return this.aggResult;  
+        }
     }
     /// <summary>
     /// Mainly it is used during computing average.
@@ -50,6 +55,17 @@ namespace QueryEngine
     {
         public int eltsUsed = 0;
     }
+
+    internal sealed class AggregateBucketAvgIntResult : AggregateBucketAvgResult<int>, IGetFinal<double>
+    {
+        double IGetFinal<double>.GetFinal(int position)
+        {
+            return (double)this.aggResult / this.eltsUsed;
+        }
+    }
+
+
+
     /// <summary>
     /// Mainly its purpose is to initialise first values of the bucket, for example,
     /// a min/max aggregates must be initialised first otherwise they could compare new values with the

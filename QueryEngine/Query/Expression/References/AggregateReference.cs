@@ -78,8 +78,6 @@ namespace QueryEngine
 
     }
 
-
-
     internal static class AggregateReferenceFactory 
     {
         /// <summary>
@@ -93,6 +91,7 @@ namespace QueryEngine
         {
             if (type == typeof(int)) return new AggregateReference<int>(position, aggr);
             else if (type == typeof(string)) return new AggregateReference<string>(position, aggr);
+            else if (type == typeof(double)) return new AggregateReference<double>(position, aggr);
             else throw new ArgumentException($"AggregateReferenceFactory, trying to create unsupported type = {type}.");
         }
     }

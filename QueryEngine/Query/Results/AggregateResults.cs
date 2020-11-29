@@ -6,7 +6,12 @@ using System.Threading.Tasks;
 
 namespace QueryEngine
 {
-    class AggregateResults
+    internal class AggregateResults
     {
+
     }
+
+
+
+
 }

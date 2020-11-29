@@ -69,7 +69,6 @@ namespace QueryEngine
         {
             this.cacheResults = setValue;
         }
-
     }
 
     internal abstract class ExpressionComparer<T> : ExpressionComparer
@@ -96,8 +95,10 @@ namespace QueryEngine
         /// Greater than zero x follows y in the sort order.</returns>
         public override int Compare(in TableResults.RowProxy x, in TableResults.RowProxy y)
         {
-            if (this.cacheResults) return CachedCompare(in x, in y);
-            else return NonCachedCompare(in x, in y);
+            if (this.cacheResults)
+            return CachedCompare(in x, in y);
+            else 
+            return NonCachedCompare(in x, in y);
         }
 
         protected int CachedCompare(in TableResults.RowProxy x, in TableResults.RowProxy y)
