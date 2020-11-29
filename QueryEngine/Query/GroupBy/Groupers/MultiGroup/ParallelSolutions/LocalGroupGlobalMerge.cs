@@ -14,9 +14,9 @@ namespace QueryEngine
     /// Firstly, each thread receives a range from the results table, hasher and comparer and computes
     /// localy its groups, afterwards, they insert the groups into a global dictionary and merge their results.
     /// </summary>
-    internal class LocalGroupGlobalMergeWithBuckets : Grouper
+    internal class LocalGroupGlobalMerge : Grouper
     {
-        public LocalGroupGlobalMergeWithBuckets(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper, bool useBucketStorage) : base(aggs, hashes, helper, useBucketStorage)
+        public LocalGroupGlobalMerge(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper, bool useBucketStorage) : base(aggs, hashes, helper, useBucketStorage)
         { }
 
         public override AggregateResults Group(ITableResults resTable)
@@ -107,14 +107,14 @@ namespace QueryEngine
                 current += addition;
             }
             if (this.BucketStorage) jobs[jobs.Length - 1] = new GroupByJobBuckets(lastHasher, lastComp, aggs, results, current, results.NumberOfMatchedElements, globalGroups);
-            else jobs[jobs.Length - 1] = new GroupByJobMixListsBuckets(lastHasher, lastComp, aggs, results, current, current + addition, globalGroups, bucketFactory);
+            else jobs[jobs.Length - 1] = new GroupByJobMixListsBuckets(lastHasher, lastComp, aggs, results, current, results.NumberOfMatchedElements, globalGroups, bucketFactory);
             return jobs;
         }
 
 
         private static void SingleThreadGroupByWork(object job, bool useBucketStorage)
         {
-            if (useBucketStorage) SingleThreadGroupByWorkMixListsBuckets(job);
+            if (useBucketStorage) SingleThreadGroupByWorkBuckets(job);
             else SingleThreadGroupByWorkMixListsBuckets(job);
         }
 
@@ -202,6 +202,7 @@ namespace QueryEngine
             {
                 row = results[i];
                 key = new GroupDictKey(hasher.Hash(in row), i); // It's a struct.
+                
                 if (!groups.TryGetValue(key, out position))
                 {
                     position = groups.Count;
@@ -224,7 +225,6 @@ namespace QueryEngine
         }
 
         #endregion MixListsBuckets
-
 
         #region Jobs
 

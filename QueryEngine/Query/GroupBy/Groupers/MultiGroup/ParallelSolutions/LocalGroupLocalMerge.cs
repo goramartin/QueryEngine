@@ -277,8 +277,10 @@ namespace QueryEngine
             for (int i = tmpJob.start; i < tmpJob.end; i++)
             {
                 row = results[i];
+
                 key = new GroupDictKey(hasher.Hash(in row), i); // It's a struct.
-                
+                Console.WriteLine(key.hash);
+
                 if (!groups.TryGetValue(key, out position))
                 {
                     position = groups.Count;
@@ -318,7 +320,7 @@ namespace QueryEngine
 
             public GroupByJobBuckets(RowHasher hasher, RowEqualityComparerGroupKey comparer, List<Aggregate> aggregates, ITableResults results, int start, int end): base(hasher, comparer, aggregates, results, start, end, true)
             {
-                this.groups = new Dictionary<GroupDictKey, AggregateBucketResult[]>();
+                this.groups = new Dictionary<GroupDictKey, AggregateBucketResult[]>(comparer);
             }
         }
 
@@ -328,7 +330,7 @@ namespace QueryEngine
             public List<AggregateListResults> aggResults;
             public GroupByJobLists(RowHasher hasher, RowEqualityComparerGroupKey comparer, List<Aggregate> aggregates, ITableResults results, int start, int end) : base(hasher, comparer, aggregates, results, start, end, false)
             {
-                this.groups = new Dictionary<GroupDictKey, int>();
+                this.groups = new Dictionary<GroupDictKey, int>(comparer);
                 this.aggResults = AggregateListResults.CreateArrayResults(aggregates);
             }
         }

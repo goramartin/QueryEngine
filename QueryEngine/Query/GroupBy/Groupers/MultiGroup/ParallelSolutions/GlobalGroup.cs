@@ -85,7 +85,7 @@ namespace QueryEngine
                 jobs[i] = new GroupByJobArrays(concurrentDictArrays, this.aggregates, results, current, current + addition, aggResults, positionFactory, semaphore, jobs.Length);
                 current += addition;
             }
-            jobs[jobs.Length - 1] = new GroupByJobArrays(concurrentDictArrays, this.aggregates, results, current, current + addition, aggResults, positionFactory, semaphore, jobs.Length);
+            jobs[jobs.Length - 1] = new GroupByJobArrays(concurrentDictArrays, this.aggregates, results, current, results.NumberOfMatchedElements, aggResults, positionFactory, semaphore, jobs.Length);
             return jobs;
         }
 
@@ -98,7 +98,7 @@ namespace QueryEngine
                 jobs[i] = new GroupByJobBuckets(concurrentDictBuckets, this.aggregates, results, current, current + addition, bucketFactory);
                 current += addition;
             }
-            jobs[jobs.Length - 1] = new GroupByJobBuckets(concurrentDictBuckets, this.aggregates, results, current, current + addition, bucketFactory);
+            jobs[jobs.Length - 1] = new GroupByJobBuckets(concurrentDictBuckets, this.aggregates, results, current, results.NumberOfMatchedElements, bucketFactory);
             return jobs;
         }
 
@@ -161,8 +161,6 @@ namespace QueryEngine
             {
                 row = results[i];
                 position = groups.GetOrAdd(i, positionFactory);
-
-
 
                 if (aggregates.Count == 0) continue;
                 else
