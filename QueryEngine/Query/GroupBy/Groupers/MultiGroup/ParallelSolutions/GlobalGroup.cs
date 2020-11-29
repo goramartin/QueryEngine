@@ -78,7 +78,7 @@ namespace QueryEngine
             var concurrentDictArrays = new ConcurrentDictionary<int, int>(equalityComparer);
             int capture = 0;
             Func<int, int> positionFactory = (int x) => { return Interlocked.Increment(ref capture); };
-            Semaphore semaphore = new Semaphore(0, this.ThreadCount);
+            Semaphore semaphore = new Semaphore(this.ThreadCount, this.ThreadCount);
 
             for (int i = 0; i < jobs.Length - 1; i++)
             {
@@ -118,7 +118,7 @@ namespace QueryEngine
                 var aggResults = AggregateArrayResults.CreateArrayResults(this.aggregates);
                 int capture = 0;
                 Func<int, int> positionFactory = (int x) => { return Interlocked.Increment(ref capture); };
-                Semaphore semaphore = new Semaphore(0, this.ThreadCount);
+                Semaphore semaphore = new Semaphore(this.ThreadCount, this.ThreadCount);
                 tmpJob = new GroupByJobArrays(new ConcurrentDictionary<int, int>(equalityComparer), this.aggregates, results, 0, results.NumberOfMatchedElements, aggResults, positionFactory, semaphore, ThreadCount);
             }
             SingleThreadGroupByWork(tmpJob, this.BucketStorage);
@@ -162,6 +162,8 @@ namespace QueryEngine
                 row = results[i];
                 position = groups.GetOrAdd(i, positionFactory);
 
+
+
                 if (aggregates.Count == 0) continue;
                 else
                 {
@@ -169,19 +171,22 @@ namespace QueryEngine
                     {
                         lock(groups) {
                             if (aggResults[0].ArraySize() <= position) {
-                                // Acquire entire semaphore.
-                                for (int enters = 0; enters < threadCount; enters++) semaphore.WaitOne(); 
+                                // Acquire the entire semaphore.
+                                for (int enters = 0; enters < threadCount; enters++) 
+                                    semaphore.WaitOne(); 
                                 // Double the array sizes
-                                for (int j = 0; j < aggResults.Count; j++) aggResults[j].DoubleSize(position);
+                                for (int j = 0; j < aggResults.Count; j++) 
+                                    aggResults[j].DoubleSize(position);
+
+                                // Release the entire semaphore
+                                semaphore.Release(threadCount);
                             }
                         }
                     }
 
                     semaphore.WaitOne();
-
                     for (int j = 0; j < aggregates.Count; j++)
                         aggregates[j].ApplyThreadSafe(in row, aggResults[j], position);
-
                     semaphore.Release();
                 }
             }
