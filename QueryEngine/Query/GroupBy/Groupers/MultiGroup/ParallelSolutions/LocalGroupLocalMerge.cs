@@ -277,10 +277,7 @@ namespace QueryEngine
             for (int i = tmpJob.start; i < tmpJob.end; i++)
             {
                 row = results[i];
-
                 key = new GroupDictKey(hasher.Hash(in row), i); // It's a struct.
-                Console.WriteLine(key.hash);
-
                 if (!groups.TryGetValue(key, out position))
                 {
                     position = groups.Count;

@@ -22,36 +22,41 @@ namespace QueryEngine
             // Create hashers and equality comparers.
             // The hashers receive also the equality comparer as cache.
             CreateHashersAndComparers(out List<ExpressionEqualityComparer> equalityComparers, out List<ExpressionHasher> hashers);
-            return this.SingleThreadGroupBy(new RowEqualityComparerInt(resTable, equalityComparers, new RowHasher(hashers), true), resTable);
+            return this.SingleThreadGroupBy(new RowHasher(hashers), new RowEqualityComparerGroupKey(resTable, equalityComparers), resTable);
         }
 
         /// <summary>
         /// Creates groups and computes aggregate values for each group.
         /// </summary>
-        /// <param name="equalityComparer"> Equality comparer where T is int and computes internaly the hash for each row from the result table.</param>
+        /// <param name="equalityComparer"> Equality comparer where T is group key and computes internaly the hash for each row from the result table.</param>
         /// <param name="results"> A result table from the matching clause.</param>
+        /// <param name="hasher"> Hasher of rows. </param>
         /// <returns> Aggregate results. </returns>
-        private AggregateResults SingleThreadGroupBy(RowEqualityComparerInt equalityComparer, ITableResults results)
+        private AggregateResults SingleThreadGroupBy(RowHasher hasher, RowEqualityComparerGroupKey equalityComparer, ITableResults results)
         {
             #region DECL
+            equalityComparer.SetCache(hasher);
+            hasher.SetCache(equalityComparer.Comparers);
             var aggResults = AggregateListResults.CreateArrayResults(this.aggregates);
-            var groups = new Dictionary<int, int>(equalityComparer);
+            var groups = new Dictionary<GroupDictKey, int>(equalityComparer);
             int position;
             TableResults.RowProxy row;
+            GroupDictKey key;
             #endregion DECL
 
             // Create groups and compute aggregates for each individual group.
             for (int i = 0; i < results.NumberOfMatchedElements; i++)
             {
                 row = results[i];
-                if (!groups.TryGetValue(i, out position))
+                key = new GroupDictKey(hasher.Hash(in row), i); // It's a struct.
+                if (!groups.TryGetValue(key, out position))
                 {
                     position = groups.Count;
-                    groups.Add(i, position);
+                    groups.Add(key, position);
                 }
 
-                for (int j = 0; j < this.aggregates.Count; j++)
-                   this.aggregates[j].Apply(in row, aggResults[j], position);
+                for (int j = 0; j < aggregates.Count; j++)
+                    aggregates[j].Apply(in row, aggResults[j], position);
             }
 
             // return aggResults;

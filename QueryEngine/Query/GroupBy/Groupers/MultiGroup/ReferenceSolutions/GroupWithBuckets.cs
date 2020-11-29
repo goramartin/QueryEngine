@@ -22,30 +22,33 @@ namespace QueryEngine
             // Create hashers and equality comparers.
             // The hashers receive also the equality comparer as cache.
             CreateHashersAndComparers(out List<ExpressionEqualityComparer> equalityComparers, out List<ExpressionHasher> hashers);
-            return this.SingleThreadGroupBy(new RowEqualityComparerInt(resTable, equalityComparers, new RowHasher(hashers), true), resTable);
+            return this.SingleThreadGroupBy(new RowHasher(hashers), new RowEqualityComparerGroupKey(resTable, equalityComparers), resTable);
         }
 
-        private AggregateResults SingleThreadGroupBy(RowEqualityComparerInt equalityComparer, ITableResults results)
+        private AggregateResults SingleThreadGroupBy(RowHasher hasher, RowEqualityComparerGroupKey equalityComparer, ITableResults results)
         {
             #region DECL
+            hasher.SetCache(equalityComparer.Comparers);
+            equalityComparer.SetCache(hasher);
             AggregateBucketResult[] buckets = null; 
-            var groups = new Dictionary<int, AggregateBucketResult[]>(equalityComparer);
+            var groups = new Dictionary<GroupDictKey, AggregateBucketResult[]>(equalityComparer);
             TableResults.RowProxy row;
+            GroupDictKey key;
             #endregion DECL
-            // Create groups and compute aggregates for each individual group.
+
             for (int i = 0; i < results.NumberOfMatchedElements; i++)
             {
                 row = results[i];
-                if (!groups.TryGetValue(i, out buckets))
+                key = new GroupDictKey(hasher.Hash(in row), i); // It's a struct.
+                if (!groups.TryGetValue(key, out buckets))
                 {
                     buckets = AggregateBucketResult.CreateBucketResults(this.aggregates);
-                    groups.Add(i, buckets);
+                    groups.Add(key, buckets);
                 }
 
                 for (int j = 0; j < this.aggregates.Count; j++)
                     this.aggregates[j].Apply(in row, buckets[j]);
             }
-
 
             return null;
         }
