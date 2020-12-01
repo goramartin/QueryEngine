@@ -111,11 +111,7 @@ namespace QueryEngine
         public bool IsMergeNeeded => ((this.IsSetOrderBy || this.IsSetGroupBy || this.IsSetSingleGroupGroupBy) && this.IsStoringResult);
         public bool InParallel => ThreadCount != 1;
 
-
-        public QueryExecutionHelper()
-        {
-
-        }
+        public QueryExecutionHelper() {}
 
     }
 }

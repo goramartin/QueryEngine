@@ -20,7 +20,7 @@ namespace QueryEngine
         public GlobalGroup(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper, bool useBucketStorage) : base(aggs, hashes, helper, useBucketStorage)
         { }
 
-        public override AggregateResults Group(ITableResults resTable)
+        public override GroupByResults Group(ITableResults resTable)
         {
             // Create hashers and equality comparers.
             // The hashers receive also the equality comparer as cache.
@@ -34,7 +34,7 @@ namespace QueryEngine
         /// Each thread receives a portion from the result table and tries to add/get
         /// the each row into the global dictionary and receives a group, subsequently computes aggregates for the group.
         /// </summary>
-        private AggregateResults ParallelGroupBy(RowEqualityComparerInt equalityComparer, ITableResults results)
+        private GroupByResults ParallelGroupBy(RowEqualityComparerInt equalityComparer, ITableResults results)
         {
             var jobs = CreateJobs(equalityComparer, results);
             var tasks = new Task[this.ThreadCount - 1];
@@ -105,7 +105,7 @@ namespace QueryEngine
         /// <summary>
         /// Computes single threadedly aggregates.
         /// </summary>
-        private AggregateResults SingleThreadGroupBy(RowEqualityComparerInt equalityComparer, ITableResults results)
+        private GroupByResults SingleThreadGroupBy(RowEqualityComparerInt equalityComparer, ITableResults results)
         {
             object tmpJob;
             if (this.BucketStorage)

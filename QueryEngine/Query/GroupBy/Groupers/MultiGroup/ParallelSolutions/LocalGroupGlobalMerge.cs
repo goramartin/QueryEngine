@@ -19,7 +19,7 @@ namespace QueryEngine
         public LocalGroupGlobalMerge(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper, bool useBucketStorage) : base(aggs, hashes, helper, useBucketStorage)
         { }
 
-        public override AggregateResults Group(ITableResults resTable)
+        public override GroupByResults Group(ITableResults resTable)
         {
             // Create hashers and equality comparers.
             // The hashers receive also the equality comparer as cache.
@@ -31,7 +31,7 @@ namespace QueryEngine
         /// <summary>
         /// Note that the received hashers and equality comparers have already set their internal cache to each other.
         /// </summary>
-        private AggregateResults ParallelGroupBy(ITableResults resTable, List<ExpressionEqualityComparer> equalityComparers, List<ExpressionHasher> hashers)
+        private GroupByResults ParallelGroupBy(ITableResults resTable, List<ExpressionEqualityComparer> equalityComparers, List<ExpressionHasher> hashers)
         {
             GroupByJob[] jobs = CreateJobs(resTable, this.aggregates, equalityComparers, hashers);
             var tasks = new Task[this.ThreadCount - 1];
@@ -53,7 +53,7 @@ namespace QueryEngine
         /// <summary>
         /// Note that the received hashers and equality comparers have already set their internal cache to each other.
         /// </summary>
-        private AggregateResults SingleThreadGroupBy(ITableResults resTable, List<ExpressionEqualityComparer> equalityComparers, List<ExpressionHasher> hashers)
+        private GroupByResults SingleThreadGroupBy(ITableResults resTable, List<ExpressionEqualityComparer> equalityComparers, List<ExpressionHasher> hashers)
         {
             var tmpComparer = new RowEqualityComparerGroupKey(resTable, equalityComparers);
             var tmpGlobalDictionary = new ConcurrentDictionary<GroupDictKey, AggregateBucketResult[]>(tmpComparer);

@@ -19,7 +19,7 @@ namespace QueryEngine
         public LocalGroupLocalMerge(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper, bool useBucketStorage) : base(aggs, hashes, helper, useBucketStorage) 
         { }
 
-        public override AggregateResults Group(ITableResults resTable)
+        public override GroupByResults Group(ITableResults resTable)
         {
             // Create hashers and equality comparers.
             CreateHashersAndComparers(out List<ExpressionEqualityComparer> equalityComparers, out List<ExpressionHasher> hashers);
@@ -27,7 +27,7 @@ namespace QueryEngine
             else return SingleThreadGroupBy(resTable, equalityComparers, hashers);
         }
 
-        private AggregateResults SingleThreadGroupBy(ITableResults resTable, List<ExpressionEqualityComparer> equalityComparers, List<ExpressionHasher> hashers)
+        private GroupByResults SingleThreadGroupBy(ITableResults resTable, List<ExpressionEqualityComparer> equalityComparers, List<ExpressionHasher> hashers)
         {
             var tmpComparer = new RowEqualityComparerGroupKey(resTable, equalityComparers);
             var tmpHasher = new RowHasher(hashers);
@@ -42,7 +42,7 @@ namespace QueryEngine
             return null;
         }
 
-        private AggregateResults ParallelGroupBy(ITableResults resTable, List<ExpressionEqualityComparer> equalityComparers, List<ExpressionHasher> hashers)
+        private GroupByResults ParallelGroupBy(ITableResults resTable, List<ExpressionEqualityComparer> equalityComparers, List<ExpressionHasher> hashers)
         {
             GroupByJob[] jobs = CreateJobs(resTable, this.aggregates, equalityComparers, hashers);
             ParallelGroupByWork(jobs, 0, ThreadCount, this.BucketStorage);

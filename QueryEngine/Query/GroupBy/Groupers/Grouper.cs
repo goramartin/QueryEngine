@@ -30,7 +30,7 @@ namespace QueryEngine
             this.BucketStorage = bucketStorage;
         }
 
-        public abstract AggregateResults Group(ITableResults resTable);
+        public abstract GroupByResults Group(ITableResults resTable);
 
         /// <summary>
         /// Creates a list of hashers and comparers.

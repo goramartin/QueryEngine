@@ -15,7 +15,7 @@ namespace QueryEngine
         public GroupWithLists(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper) : base(aggs, hashes, helper, false)
         {}
 
-        public override AggregateResults Group(ITableResults resTable)
+        public override GroupByResults Group(ITableResults resTable)
         {
             if (this.InParallel) throw new ArgumentException($"{this.GetType()}, cannot perform a parallel group by.");
 
@@ -32,7 +32,7 @@ namespace QueryEngine
         /// <param name="results"> A result table from the matching clause.</param>
         /// <param name="hasher"> Hasher of rows. </param>
         /// <returns> Aggregate results. </returns>
-        private AggregateResults SingleThreadGroupBy(RowHasher hasher, RowEqualityComparerGroupKey equalityComparer, ITableResults results)
+        private GroupByResults SingleThreadGroupBy(RowHasher hasher, RowEqualityComparerGroupKey equalityComparer, ITableResults results)
         {
             #region DECL
             equalityComparer.SetCache(hasher);

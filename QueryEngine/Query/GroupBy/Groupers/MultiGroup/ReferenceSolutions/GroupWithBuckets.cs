@@ -15,7 +15,7 @@ namespace QueryEngine
         public GroupWithBuckets(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper) : base(aggs, hashes, helper, true)
         {}
 
-        public override AggregateResults Group(ITableResults resTable)
+        public override GroupByResults Group(ITableResults resTable)
         {
             if (this.InParallel) throw new ArgumentException($"{this.GetType()}, cannot perform a parallel group by.");
 
@@ -25,7 +25,7 @@ namespace QueryEngine
             return this.SingleThreadGroupBy(new RowHasher(hashers), new RowEqualityComparerGroupKey(resTable, equalityComparers), resTable);
         }
 
-        private AggregateResults SingleThreadGroupBy(RowHasher hasher, RowEqualityComparerGroupKey equalityComparer, ITableResults results)
+        private GroupByResults SingleThreadGroupBy(RowHasher hasher, RowEqualityComparerGroupKey equalityComparer, ITableResults results)
         {
             #region DECL
             hasher.SetCache(equalityComparer.Comparers);

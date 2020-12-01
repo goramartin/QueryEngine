@@ -130,11 +130,11 @@
     <Compile Include="Query\QueryExecutionHelper.cs" />
     <Compile Include="Query\QueryObject.cs" />
     <Compile Include="Query\QueryVariableMap.cs" />
-    <Compile Include="Query\Results\AggregateResults.cs" />
+    <Compile Include="Query\Results\GroupByResults\GroupResults.cs" />
     <Compile Include="Query\Match\DFSearcher\MatchInternalResults.cs" />
-    <Compile Include="Query\Results\MultiTableResults.cs" />
-    <Compile Include="Query\Results\TableResults.cs" />
-    <Compile Include="Query\Results\TableResultsRowProxy.cs" />
+    <Compile Include="Query\Results\TableResults\MultiTableResults.cs" />
+    <Compile Include="Query\Results\TableResults\TableResults.cs" />
+    <Compile Include="Query\Results\TableResults\TableResultsRowProxy.cs" />
     <Compile Include="Query\Select\Formater\Formater.cs" />
     <Compile Include="Query\Select\Formater\MarkdownFormater.cs" />
     <Compile Include="Query\Select\Formater\SimpleFormater.cs" />

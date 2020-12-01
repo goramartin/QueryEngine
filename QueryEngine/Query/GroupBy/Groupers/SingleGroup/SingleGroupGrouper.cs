@@ -23,7 +23,7 @@ namespace QueryEngine
         /// Note that the we are passing direct reference to the aggregates results and aggregates. Thus it assumes
         /// that the further methods merge data only into the passed aggregate results.
         /// </summary>
-        public override AggregateResults Group(ITableResults resTable)
+        public override GroupByResults Group(ITableResults resTable)
         {
             var nonAsterixCountAggregates = new List<Aggregate>();
             var nonAsterixAggResults = new List<AggregateListResults>();
@@ -65,7 +65,7 @@ namespace QueryEngine
         /// <param name="results"> A place to store aggregation results. </param>
         /// <param name="aggs"> Aggregation functions. </param>
         /// <param name="aggResults"> The results of the merge is stored in this isntances. </param>
-        private AggregateResults ParallelGroupBy(ITableResults results, List<Aggregate> aggs, List<AggregateListResults> aggResults)
+        private GroupByResults ParallelGroupBy(ITableResults results, List<Aggregate> aggs, List<AggregateListResults> aggResults)
         {
             // -1 because the main thread works as well
             Task[] tasks = new Task[this.ThreadCount - 1];
@@ -123,7 +123,7 @@ namespace QueryEngine
         /// <param name="results"> A place to store aggregation results. </param>
         /// <param name="aggs"> Aggregation functions. </param>
         /// <param name="aggResults"> The results of the merge is stored in this isntances. </param>
-        private AggregateResults SingleThreadGroupBy(ITableResults results, List<Aggregate> aggs, List<AggregateListResults> aggResults)
+        private GroupByResults SingleThreadGroupBy(ITableResults results, List<Aggregate> aggs, List<AggregateListResults> aggResults)
         {
             var job = new GroupByJob(aggs, aggResults, 0, results.NumberOfMatchedElements, results);
             SingleThreadGroupByWork(job);

@@ -113,9 +113,7 @@ namespace QueryEngine
         {
             get
             {
-                if (rowIndex < 0 || rowIndex >= this.RowCount) 
-                    throw new ArgumentOutOfRangeException($"{this.GetType()}, row is out of range.");
-                else if (order == null) return new TableResults.RowProxy(this, rowIndex);
+                if (order == null) return new TableResults.RowProxy(this, rowIndex);
                 else return new TableResults.RowProxy(this, order[rowIndex]);
             }
         }
