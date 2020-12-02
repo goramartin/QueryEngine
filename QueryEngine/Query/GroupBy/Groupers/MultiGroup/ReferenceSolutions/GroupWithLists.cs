@@ -59,8 +59,7 @@ namespace QueryEngine
                     aggregates[j].Apply(in row, aggResults[j], position);
             }
 
-            // return aggResults;
-            return null;
+            return new GroupByResultsList(groups, aggResults, results);
         }
     }
 }

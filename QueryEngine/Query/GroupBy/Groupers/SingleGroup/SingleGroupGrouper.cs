@@ -48,8 +48,6 @@ namespace QueryEngine
             if (nonAsterixCountAggregates.Count == 0) return null; //return aggResults; 
             else if (this.InParallel) return this.ParallelGroupBy(resTable, nonAsterixCountAggregates, nonAsterixAggResults);
             else return this.SingleThreadGroupBy(resTable, nonAsterixCountAggregates, nonAsterixAggResults);
-
-            //return aggResults;
         }
 
         /// <summary>
@@ -85,7 +83,7 @@ namespace QueryEngine
             // Merge doesnt have to be in parallel because it s grouping only (#thread) values.
             MergeRows(jobs);
 
-            return null;
+            return CreateGroupByResults(jobs[jobs.Length - 1]);
         }
         /// <summary>
         /// Creates jobs for the parallel group by.
@@ -127,8 +125,7 @@ namespace QueryEngine
         {
             var job = new GroupByJob(aggs, aggResults, 0, results.NumberOfMatchedElements, results);
             SingleThreadGroupByWork(job);
-            // return aggResults
-            return null;
+            return CreateGroupByResults(job);
         }
 
         /// <summary>
@@ -173,6 +170,8 @@ namespace QueryEngine
             }
         }
         
+
+
         private class GroupByJob
         {
             public List<Aggregate> aggregates;
@@ -189,6 +188,13 @@ namespace QueryEngine
                 this.results = res;
                 this.aggResults = aggRes;
             }
+        }
+
+        private GroupByResults CreateGroupByResults(GroupByJob job)
+        {
+            var tmpDict = new Dictionary<GroupDictKey, int>();
+            tmpDict.Add(new GroupDictKey(0, 0), 0);
+            return new GroupByResultsList(tmpDict, job.aggResults, job.results);
         }
     }
 }

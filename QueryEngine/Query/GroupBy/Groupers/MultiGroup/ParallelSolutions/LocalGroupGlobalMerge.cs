@@ -47,7 +47,7 @@ namespace QueryEngine
             Task.WaitAll(tasks);
             // No merge needed.
 
-            return null;
+            return CreateGroupByResults(jobs[0]);
         }
 
         /// <summary>
@@ -65,8 +65,7 @@ namespace QueryEngine
                 tmpJob = new GroupByJobMixListsBuckets(new RowHasher(hashers), tmpComparer, this.aggregates, resTable, 0, resTable.NumberOfMatchedElements, tmpGlobalDictionary, bucketFactory);
             }
             SingleThreadGroupByWork(tmpJob, this.BucketStorage);
-            //return tmp.aggResults;
-            return null;
+            return CreateGroupByResults(tmpJob);
         }
 
         /// <summary>
@@ -110,7 +109,6 @@ namespace QueryEngine
             else jobs[jobs.Length - 1] = new GroupByJobMixListsBuckets(lastHasher, lastComp, aggs, results, current, results.NumberOfMatchedElements, globalGroups, bucketFactory);
             return jobs;
         }
-
 
         private static void SingleThreadGroupByWork(object job, bool useBucketStorage)
         {
@@ -273,5 +271,10 @@ namespace QueryEngine
         }
 
         #endregion Jobs
+
+        private GroupByResults CreateGroupByResults(GroupByJob job)
+        {
+            return new GroupByResultsBucket(null, null, job.globalGroups, job.results);
+        }
     }
 }

@@ -33,21 +33,19 @@ namespace QueryEngine
             var tmpHasher = new RowHasher(hashers);
             tmpComparer.SetCache(tmpHasher);
             tmpHasher.SetCache(tmpComparer.Comparers);
-            object tmpJob;
+            GroupByJob tmpJob;
 
             if (!this.BucketStorage) tmpJob = new GroupByJobLists(tmpHasher, tmpComparer, this.aggregates, resTable, 0, resTable.NumberOfMatchedElements);
             else tmpJob = new GroupByJobBuckets(tmpHasher, tmpComparer, this.aggregates, resTable, 0, resTable.NumberOfMatchedElements);
             SingleThreadGroupByWork(tmpJob, this.BucketStorage);
-            
-            return null;
+            return CreateGroupByResults(tmpJob);
         }
 
         private GroupByResults ParallelGroupBy(ITableResults resTable, List<ExpressionEqualityComparer> equalityComparers, List<ExpressionHasher> hashers)
         {
             GroupByJob[] jobs = CreateJobs(resTable, this.aggregates, equalityComparers, hashers);
             ParallelGroupByWork(jobs, 0, ThreadCount, this.BucketStorage);
-            //return jobs[0].aggResults;
-            return null;
+            return CreateGroupByResults(jobs[0]);
         }
 
         /// <summary>
@@ -333,6 +331,18 @@ namespace QueryEngine
         }
         #endregion Jobs
 
+        private GroupByResults CreateGroupByResults(GroupByJob job)
+        {
+            if (this.BucketStorage)
+            {
+                var tmp = (GroupByJobBuckets)job;
+                return new GroupByResultsBucket(tmp.groups, null, null, tmp.results);
+            } else
+            {
+                var tmp = (GroupByJobLists)job;
+                return new GroupByResultsList(tmp.groups, tmp.aggResults, tmp.results);
+            }
+        }
 
     }
 }

@@ -16,31 +16,32 @@ namespace QueryEngine
     /// </summary>
     internal class GroupByResultsBucket : GroupByResults, IEnumerable<GroupByResultsBucket.GroupProxyBucket>
     {
+        // To do make divided.
         protected Dictionary<GroupDictKey, AggregateBucketResult[]> groups;
         protected ConcurrentDictionary<int, AggregateBucketResult[]> groupsCon;
-        protected List<AggregateListResults> aggregateResults;
+        protected ConcurrentDictionary<GroupDictKey, AggregateBucketResult[]> groupsConGroupKey;
 
-        public GroupByResultsBucket(Dictionary<GroupDictKey, AggregateBucketResult[]> groups, ConcurrentDictionary<int, AggregateBucketResult[]> groupsCon, List<AggregateListResults> aggregateResults, ITableResults resTable) : base(groups.Count, resTable)
+        public GroupByResultsBucket(Dictionary<GroupDictKey, AggregateBucketResult[]> groups, ConcurrentDictionary<int, AggregateBucketResult[]> groupsCon, ConcurrentDictionary<GroupDictKey, AggregateBucketResult[]> groupsConGroupKey, ITableResults resTable) : base(groups.Count, resTable)
         {
             this.groups = groups;
             this.groupsCon = groupsCon;
-            this.aggregateResults = aggregateResults;
+            this.groupsConGroupKey = groupsConGroupKey;
         }
 
-        public IEnumerator<GroupByResultsBucket.GroupProxyBucket> GetEnumerator()
+        public virtual IEnumerator<GroupByResultsBucket.GroupProxyBucket> GetEnumerator()
         {
-            if (this.groups == null)
+            if (this.groups != null)
             {
                 foreach (var item in groups)
-                {
                     yield return new GroupByResultsBucket.GroupProxyBucket(this.resTable[item.Key.position], item.Value);
-                }
-            } else
+            } else if (groupsCon != null)
             {
                 foreach (var item in groupsCon)
-                {
                     yield return new GroupByResultsBucket.GroupProxyBucket(this.resTable[item.Key], item.Value);
-                }
+            } else
+            {
+                foreach (var item in groupsConGroupKey)
+                    yield return new GroupByResultsBucket.GroupProxyBucket(this.resTable[item.Key.position], item.Value);
             }
         }
 
@@ -66,4 +67,5 @@ namespace QueryEngine
             }
         }
     }
+
 }

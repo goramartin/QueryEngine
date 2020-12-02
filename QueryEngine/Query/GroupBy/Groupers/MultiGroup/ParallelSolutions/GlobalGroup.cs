@@ -49,9 +49,9 @@ namespace QueryEngine
             SingleThreadGroupByWork(jobs[jobs.Length - 1], this.BucketStorage);
             Task.WaitAll(tasks);
             // No merge needed.
-
-            return null;
+            return CreateGroupByResults(jobs[0]);
         }
+
         /// <summary>
         /// Creates jobs for the parallel group by.
         /// Note that the last job in the array has the end set to the end of the result table.
@@ -102,12 +102,9 @@ namespace QueryEngine
             return jobs;
         }
 
-        /// <summary>
-        /// Computes single threadedly aggregates.
-        /// </summary>
         private GroupByResults SingleThreadGroupBy(RowEqualityComparerInt equalityComparer, ITableResults results)
         {
-            object tmpJob;
+            GroupByJob tmpJob;
             if (this.BucketStorage)
             {
                 Func<int, AggregateBucketResult[]> bucketFactory = (int x) => { return AggregateBucketResult.CreateBucketResults(this.aggregates); };
@@ -122,7 +119,7 @@ namespace QueryEngine
                 tmpJob = new GroupByJobArrays(new ConcurrentDictionary<int, int>(equalityComparer), this.aggregates, results, 0, results.NumberOfMatchedElements, aggResults, positionFactory, semaphore, ThreadCount);
             }
             SingleThreadGroupByWork(tmpJob, this.BucketStorage);
-            return null;
+            return CreateGroupByResults(tmpJob);
         }
 
         public static void SingleThreadGroupByWork(object job, bool bucketStorage)
@@ -280,6 +277,20 @@ namespace QueryEngine
         }
 
         #endregion Jobs
+        
+        private GroupByResults CreateGroupByResults(GroupByJob job)
+        {
+            if (this.BucketStorage)
+            {
+                var tmpJob = (GroupByJobBuckets)job;
+                return new GroupByResultsBucket(null, tmpJob.groups, null, tmpJob.results);
+            }
+            else
+            {
+                var tmpJob = (GroupByJobArrays)job;
+                return new GroupByResultsArray(tmpJob.groups, tmpJob.aggResults, tmpJob.results);
+            }
+        }
     }
      
 }
