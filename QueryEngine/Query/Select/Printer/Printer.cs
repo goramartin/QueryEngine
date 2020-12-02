@@ -17,7 +17,7 @@ namespace QueryEngine
     /// <summary>
     /// Abstract class for printing results.
     /// </summary>
-    internal abstract class Printer : IDisposable
+    internal abstract class Printer : IDisposable, IRowPrinter
     {
         /// <summary>
         /// Contains valid printers.
@@ -74,6 +74,24 @@ namespace QueryEngine
                 this.formater.AddToFormat(this.rowFormat[i].GetValueAsString(elements));
         }
 
+        public void PrintRow(in GroupByResultsList.GroupProxyList group)
+        {
+            for (int i = 0; i < this.rowFormat.Count; i++)
+                this.formater.AddToFormat(this.rowFormat[i].GetValueAsString(group));
+        }
+
+        public void PrintRow(in GroupByResultsBucket.GroupProxyBucket group)
+        {
+            for (int i = 0; i < this.rowFormat.Count; i++)
+                this.formater.AddToFormat(this.rowFormat[i].GetValueAsString(group));
+        }
+
+        public void PrintRow(in GroupByResultsArray.GroupProxyArray group)
+        {
+            for (int i = 0; i < this.rowFormat.Count; i++)
+                this.formater.AddToFormat(this.rowFormat[i].GetValueAsString(group));
+        }
+
         /// <summary>
         /// Prints entire header of a table.
         /// </summary>
@@ -101,6 +119,7 @@ namespace QueryEngine
         }
 
         public abstract void Dispose();
+
     }
 
 

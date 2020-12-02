@@ -63,24 +63,58 @@ namespace QueryEngine
             {
                 this.next.Compute(out results, out groupByResults);
                 this.next = null;
-                this.Print(results);
+                this.Print(results, groupByResults);
             }
             else throw new NullReferenceException($"{this.GetType()}, next is set to null."); 
         }
 
-        /// <summary>
-        /// Prints results in given format from concstructor init.
-        /// </summary>
-        /// <param name="results"> Results from query. </param>
-        private void Print(ITableResults results)
+        private void Print(ITableResults results, GroupByResults groupByResults)
         {
             var printer = Printer.Factory(this.helper.Printer, rowFormat, this.helper.Formater, this.helper.FileName);
-
-           // printer.PrintHeader();
-          //  foreach (var item in results)
-           //     printer.PrintRow(item);
-
+            printer.PrintHeader();
+            
+            if (!this.helper.IsSetGroupBy) Print(results, printer);
+            else Print(groupByResults, printer);
+            
             printer.Dispose();
+        }
+
+        private void Print(ITableResults results, Printer printer)
+        {
+            if (results == null) throw new ArgumentNullException($"{this.GetType()}, recieved table results as null.");
+            else
+            {
+                foreach (var item in results)
+                    printer.PrintRow(item);
+            }
+        }
+
+        private void Print(GroupByResults results, Printer printer)
+        {
+            if (results == null) throw new ArgumentNullException($"{this.GetType()}, recieved group results as null.");
+            else
+            {
+                if (results.GetType() == typeof(GroupByResultsArray))
+                {
+                    var tmpResults = (GroupByResultsArray)results;
+                    foreach (var item in tmpResults)
+                        printer.PrintRow(item);
+                }
+                else if (results.GetType() == typeof(GroupByResultsBucket))
+                {
+                    var tmpResults = (GroupByResultsBucket)results;
+                    foreach (var item in tmpResults)
+                        printer.PrintRow(item);
+                }
+                else if (results.GetType() == typeof(GroupByResultsList))
+                {
+                    var tmpResults = (GroupByResultsBucket)results;
+                    foreach (var item in tmpResults)
+                        printer.PrintRow(item);
+                }
+                else throw new ArgumentException($"{this.GetType()}, received unknown group result holder. holder = {results.GetType()}.");
+               
+            }
         }
     }
 
