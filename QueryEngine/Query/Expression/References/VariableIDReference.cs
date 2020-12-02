@@ -43,6 +43,25 @@ namespace QueryEngine
             return true;
         }
 
+        public override bool TryEvaluate(in GroupByResultsList.GroupProxyList group, out int returnValue)
+        {
+            returnValue = group.groupRepresentant[this.VariableIndex].ID;
+            return true;
+        }
+
+        public override bool TryEvaluate(in GroupByResultsBucket.GroupProxyBucket group, out int returnValue)
+        {
+            returnValue = group.groupRepresentant[this.VariableIndex].ID;
+            return true;
+        }
+
+        public override bool TryEvaluate(in GroupByResultsArray.GroupProxyArray group, out int returnValue)
+        {
+            returnValue = group.groupRepresentant[this.VariableIndex].ID;
+            return true;
+        }
+
+
         public override bool Equals(object obj)
         {
             if (obj == null) return false;

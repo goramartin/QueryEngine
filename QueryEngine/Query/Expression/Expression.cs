@@ -54,19 +54,16 @@ namespace QueryEngine
     }
 
     /// <summary>
-    /// Node that specifies holder during evaluation of expression.
     /// Each expression node will implement this interface.
+    /// It provides methods for individual type of result classes.
     /// </summary>
     /// <typeparam name="T"> Type of return value.</typeparam>
     internal abstract class ExpressionReturnValue<T> : ExpressionBase
     {
-        /// <summary>
-        /// Evaluates expression node and returns value inside value parameter.
-        /// </summary>
-        /// <param name="elements"> One results of a search. </param>
-        /// <param name="value"> Value of the expression. </param>
-        /// <returns> Bool on successful evaluation otherwise fasel. On success, the value parameter
-        /// will contain value of the epression otherwise the value is undefined. </returns>
-        public abstract bool TryEvaluate(in TableResults.RowProxy elements, out T value);    
+        public abstract bool TryEvaluate(in TableResults.RowProxy elements, out T returnValue);
+        public abstract bool TryEvaluate(in GroupByResultsList.GroupProxyList group, out T returnValue);
+        public abstract bool TryEvaluate(in GroupByResultsBucket.GroupProxyBucket group, out T returnValue);
+        public abstract bool TryEvaluate(in GroupByResultsArray.GroupProxyArray group, out T returnValue);
+
     }
 }

@@ -58,6 +58,23 @@ namespace QueryEngine
         {
             throw new NotImplementedException();
         }
+        public override bool TryEvaluate(in GroupByResultsList.GroupProxyList group, out T returnValue)
+        {
+            returnValue = group.GetValue<T>(this.AggrPosition);
+            return true;
+        }
+
+        public override bool TryEvaluate(in GroupByResultsBucket.GroupProxyBucket group, out T returnValue)
+        {
+            returnValue = group.GetValue<T>(this.AggrPosition);
+            return true;
+        }
+
+        public override bool TryEvaluate(in GroupByResultsArray.GroupProxyArray group, out T returnValue)
+        {
+            returnValue = group.GetValue<T>(this.AggrPosition);
+            return true;
+        }
 
         public override bool Equals(object obj)
         {

@@ -44,19 +44,6 @@ namespace QueryEngine
             return this.Label != null ? this.Label : this.Expr.ToString();
         }
 
-        /// <summary>
-        /// Tries evaluating expression with given element row.
-        /// Notice that this always cast the expression. 
-        /// </summary>
-        /// <typeparam name="T">Return value of the expression. </typeparam>
-        /// <param name="elements">One results of the search.</param>
-        /// <param name="returnValue"> Place to store return value of the expression. </param>
-        /// <returns>True of successful evaluation otherwise false.</returns>
-        public bool TryGetExpressionValue<T>(in TableResults.RowProxy elements, out T returnValue)
-        {
-            if (((ExpressionReturnValue<T>)(this.Expr)).TryEvaluate(elements, out returnValue)) return true;
-            else return false;
-        }
 
         /// <summary>
         /// Returns type of containing expression.

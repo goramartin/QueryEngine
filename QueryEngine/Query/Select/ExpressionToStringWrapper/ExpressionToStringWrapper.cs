@@ -18,6 +18,8 @@ namespace QueryEngine
     /// </summary>
     internal abstract class ExpressionToStringWrapper: IExpressionToString
     {
+        public static string ExpressionFailStringValue = "null";
+
         /// <summary>
         /// Expression to be evaluated.
         /// </summary>
@@ -37,6 +39,9 @@ namespace QueryEngine
         /// </summary>
         /// <param name="elements"> One result of the search. </param>
         public abstract string GetValueAsString(in TableResults.RowProxy elements);
+        public abstract string GetValueAsString(in GroupByResultsList.GroupProxyList group);
+        public abstract string GetValueAsString(in GroupByResultsBucket.GroupProxyBucket group);
+        public abstract string GetValueAsString(in GroupByResultsArray.GroupProxyArray group);
 
         /// <summary>
         /// Print variable factory. Creates specialised wrapper based on a given type.
@@ -84,7 +89,28 @@ namespace QueryEngine
         {
             if (this.expr.TryEvaluate(elements, out T returnValue)) 
                 return returnValue.ToString();
-            else return "null";
+            else return ExpressionToStringWrapper.ExpressionFailStringValue;
+        }
+
+        public override string GetValueAsString(in GroupByResultsList.GroupProxyList group)
+        {
+            if (this.expr.TryEvaluate(group, out T returnValue))
+                return returnValue.ToString();
+            else return ExpressionToStringWrapper.ExpressionFailStringValue;
+        }
+
+        public override string GetValueAsString(in GroupByResultsBucket.GroupProxyBucket group)
+        {
+            if (this.expr.TryEvaluate(group, out T returnValue))
+                return returnValue.ToString();
+            else return ExpressionToStringWrapper.ExpressionFailStringValue;
+        }
+
+        public override string GetValueAsString(in GroupByResultsArray.GroupProxyArray group)
+        {
+            if (this.expr.TryEvaluate(group, out T returnValue))
+                return returnValue.ToString();
+            else return ExpressionToStringWrapper.ExpressionFailStringValue;
         }
 
         public override string ToString()

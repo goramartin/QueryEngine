@@ -46,6 +46,25 @@ namespace QueryEngine
             return element.Table.TryGetPropertyValue(element.ID, this.PropertyID, out returnValue);
         }
 
+        public override bool TryEvaluate(in GroupByResultsList.GroupProxyList group, out T returnValue)
+        {
+            Element element = group.groupRepresentant[this.VariableIndex];
+            return element.Table.TryGetPropertyValue(element.ID, this.PropertyID, out returnValue);
+        }
+
+        public override bool TryEvaluate(in GroupByResultsBucket.GroupProxyBucket group, out T returnValue)
+        {
+            Element element = group.groupRepresentant[this.VariableIndex];
+            return element.Table.TryGetPropertyValue(element.ID, this.PropertyID, out returnValue);
+        }
+
+        public override bool TryEvaluate(in GroupByResultsArray.GroupProxyArray group, out T returnValue)
+        {
+            Element element = group.groupRepresentant[this.VariableIndex];
+            return element.Table.TryGetPropertyValue(element.ID, this.PropertyID, out returnValue);
+        }
+
+
         public override bool ContainsAggregate()
         {
             return false;
@@ -62,7 +81,6 @@ namespace QueryEngine
                 else return false;
             }
         }
-
 
     }
     /// <summary>

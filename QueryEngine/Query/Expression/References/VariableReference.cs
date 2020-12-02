@@ -58,10 +58,5 @@ namespace QueryEngine
         {
             return NameHolder.Name + (NameHolder.PropName != null ? ("." + NameHolder.PropName) : "");
         }
-
     }
-  
-
-
-
 }
