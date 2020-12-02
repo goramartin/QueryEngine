@@ -65,16 +65,18 @@ namespace QueryEngine
             this.helper = executionHelper;
         }
 
-        public override void Compute(out ITableResults results)
+        public override void Compute(out ITableResults results, out GroupByResults groupByResults)
         {
             if (next != null)
             {
-                this.next.Compute(out results);
+                this.next.Compute(out results, out groupByResults);
                 this.next = null;
+                if (results == null) throw new ArgumentNullException($"{this.GetType()}, table results are set to null.");
+
                 Grouper grouper;
                 if (this.helper.IsSetSingleGroupGroupBy) grouper = new SingleGroupGrouper(this.aggregates, null, this.helper);
                 else grouper = new LocalGroupGlobalMerge(this.aggregates, this.hashes, this.helper, false);
-                grouper.Group(results);
+                groupByResults = grouper.Group(results);
             }
             else throw new NullReferenceException($"{this.GetType()}, next is set to null.");
         }

@@ -57,11 +57,11 @@ namespace QueryEngine
             this.rowFormat = visitor.GetResult();
         }
 
-        public override void Compute(out ITableResults results)
+        public override void Compute(out ITableResults results, out GroupByResults groupByResults)
         {
             if (next != null)
             {
-                this.next.Compute(out results);
+                this.next.Compute(out results, out groupByResults);
                 this.next = null;
                 this.Print(results);
             }

@@ -54,12 +54,15 @@ namespace QueryEngine
             this.comparers = comps;
         }
 
-        public override void Compute(out ITableResults results)
+        public override void Compute(out ITableResults results, out GroupByResults groupByResults)
         {
             if (this.next != null)
             {
-                this.next.Compute(out results);
+                this.next.Compute(out results, out groupByResults);
                 this.next = null;
+                if (results == null || groupByResults != null) 
+                    throw new ArgumentNullException($"{this.GetType()}, table results are set to null or groupByResults are not null.");
+
                 if (this.helper.IsStoringResult) this.Sort(results);
             }
             else throw new NullReferenceException($"{this.GetType()}, next is set to null.");

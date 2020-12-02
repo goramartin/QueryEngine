@@ -124,9 +124,10 @@ namespace QueryEngine
         {
             if (!this.Finished)
             {
-                this.query.Compute(out ITableResults res);
+                this.query.Compute(out ITableResults res, out GroupByResults groupByResults);
                 this.Finished = true;
             }
+            else throw new Exception("Trying to call a query that has finished already.");
         }
 
         /// <summary>

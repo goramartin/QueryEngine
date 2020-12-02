@@ -119,9 +119,12 @@ namespace QueryEngine
             else return new MultiTableResults(this.queryResults.GetResults(), this.queryResults.NumberOfMatchedElements);
         }
 
-        public override void Compute(out ITableResults results)
+        public override void Compute(out ITableResults results, out GroupByResults groupByResults)
         {
+            if (next != null)
+                throw new Exception($"{this.GetType()}, there was an execution block after match block.");
             results = this.Search();
+            groupByResults = null;
         }
     }
 }

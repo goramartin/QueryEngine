@@ -24,7 +24,7 @@ namespace QueryEngine
         protected QueryObject next;
 
         
-        public abstract void Compute(out ITableResults results);
+        public abstract void Compute(out ITableResults results, out GroupByResults groupByResults);
 
         /// <summary>
         /// Factory method.
