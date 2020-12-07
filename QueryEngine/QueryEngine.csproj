@@ -78,6 +78,7 @@
     <Compile Include="Query\Expression\IExpressionEqualityComparer.cs" />
     <Compile Include="Query\Expression\IExpressionHasher.cs" />
     <Compile Include="Query\Expression\IExpressionToString.cs" />
+    <Compile Include="Query\Select\Printer\IRowPrinter.cs" />
     <Compile Include="Query\Expression\References\AggregateReference.cs" />
     <Compile Include="Query\Expression\References\VariableIDReference.cs" />
     <Compile Include="Query\Expression\References\VariablePropertyReference.cs" />

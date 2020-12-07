@@ -108,7 +108,7 @@ namespace QueryEngine
                 }
                 else if (results.GetType() == typeof(GroupByResultsList))
                 {
-                    var tmpResults = (GroupByResultsBucket)results;
+                    var tmpResults = (GroupByResultsList)results;
                     foreach (var item in tmpResults)
                         printer.PrintRow(item);
                 }

@@ -100,7 +100,6 @@ namespace QueryEngine
             this.formater.FormatHeader(this.rowFormat);
         }
 
-
         /// <summary>
         /// Factory for printer class.
         /// </summary>

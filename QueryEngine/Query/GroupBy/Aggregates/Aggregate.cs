@@ -92,7 +92,7 @@ namespace QueryEngine
             {
                 var tmp = (Aggregate)obj;
                 if (this.expressionHolder == null && tmp.expressionHolder == null) return true;
-                else if (this.expressionHolder.Equals(tmp.expressionHolder)) return true;
+                else if (this.expressionHolder != null && this.expressionHolder.Equals(tmp.expressionHolder)) return true;
                 else return false;
             }
         }

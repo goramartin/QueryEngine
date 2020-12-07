@@ -36,9 +36,9 @@ namespace QueryEngine
         public void IncBy(int value, AggregateListResults list, int position)
         {
             var tmpList = (AggregateListResults<int>)list;
-            tmpList.aggResults[position] += value;
+            if (position == tmpList.aggResults.Count) tmpList.aggResults.Add(1);
+            else tmpList.aggResults[position] += value;
         }
-
         public override void Apply(in TableResults.RowProxy row, AggregateBucketResult bucket)
         {
             if (!this.IsAstCount)
@@ -73,7 +73,6 @@ namespace QueryEngine
         {
             AddThreadSafeInternal(ref ((AggregateBucketResult<int>)bucket).aggResult, ((AggregateListResults<int>)list).aggResults[position]);
         }
-
         public override void Merge(AggregateListResults list1, int into, AggregateListResults list2, int from)
         {
             var tmpList1 = (AggregateListResults<int>)list1;
@@ -96,10 +95,10 @@ namespace QueryEngine
             else
             {
                 var tmpList = (AggregateListResults<int>)list;
-                tmpList.aggResults[position]++;
+                if (position == tmpList.aggResults.Count) tmpList.aggResults.Add(1);
+                else tmpList.aggResults[position]++;
             }
         }
-
         public override void ApplyThreadSafe(in TableResults.RowProxy row, AggregateArrayResults array, int position)
         {
              if (!this.IsAstCount)
