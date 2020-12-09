@@ -70,14 +70,15 @@
     <Compile Include="DB\Table\Property\PropertyFactory.cs" />
     <Compile Include="DB\Table\Property\PropertySpecialisations.cs" />
     <Compile Include="DB\Table\Table.cs" />
-    <Compile Include="QueryParser\Parser\ParserComponents\GroupByParser.cs" />
-    <Compile Include="QueryParser\Parser\ParseTree\Visitor\GroupByVisitor.cs" />
+    <Compile Include="Parser\Parser\ParserComponents\GroupByParser.cs" />
+    <Compile Include="Parser\Parser\ParseTree\Visitor\GroupByVisitor.cs" />
     <Compile Include="Query\Expression\Expression.cs" />
     <Compile Include="Query\Expression\ExpressionHolder.cs" />
     <Compile Include="Query\Expression\IExpressionComparer.cs" />
     <Compile Include="Query\Expression\IExpressionEqualityComparer.cs" />
     <Compile Include="Query\Expression\IExpressionHasher.cs" />
     <Compile Include="Query\Expression\IExpressionToString.cs" />
+    <Compile Include="Query\Match\DFSearcher\Matcher\DFSSingleThreadPatternMatcher\DFSPatternMatcher.cs" />
     <Compile Include="Query\Select\Printer\IRowPrinter.cs" />
     <Compile Include="Query\Expression\References\AggregateReference.cs" />
     <Compile Include="Query\Expression\References\VariableIDReference.cs" />
@@ -114,8 +115,8 @@
     <Compile Include="Query\Match\DFSearcher\BaseMatch\BaseMatchesSpecialised.cs" />
     <Compile Include="Query\Match\DFSearcher\Pattern\DFSPatternInterface.cs" />
     <Compile Include="Query\Match\PatternMatcherInterface.cs" />
-    <Compile Include="Query\Match\DFSearcher\Matcher\DFSParallelPatternMatcher.cs" />
-    <Compile Include="Query\Match\DFSearcher\Matcher\DFSPatternMatcher.cs" />
+    <Compile Include="Query\Match\DFSearcher\Matcher\DFSParallelPatternMatcher\DFSParallelPatternMatcher.cs" />
+    <Compile Include="Query\Match\DFSearcher\Matcher\DFSSingleThreadPatternMatcher\DFSSingleThreadPatternMatcher.cs" />
     <Compile Include="Query\Match\DFSearcher\Pattern\DFSPattern.cs" />
     <Compile Include="Query\Match\PatternInterface.cs" />
     <Compile Include="Query\Match\MatchFactory.cs" />
@@ -147,21 +148,21 @@
     <Compile Include="Query\Select\Printer\Printer.cs" />
     <Compile Include="Query\Select\ExpressionToStringWrapper\ExpressionToStringWrapper.cs" />
     <Compile Include="Query\Select\SelectObject.cs" />
-    <Compile Include="QueryParser\ParsedPattern\ParsedPattern.cs" />
-    <Compile Include="QueryParser\ParsedPattern\ParsedPatternNodes.cs" />
-    <Compile Include="QueryParser\Parser\ParserComponents\ExpressionParser.cs" />
-    <Compile Include="QueryParser\Parser\ParserComponents\MatchParser.cs" />
-    <Compile Include="QueryParser\Parser\ParserComponents\OrderByParser.cs" />
-    <Compile Include="QueryParser\Parser\ParserComponents\Parser.cs" />
-    <Compile Include="QueryParser\Parser\ParseTree\ParseTreeNodes.cs" />
-    <Compile Include="QueryParser\Parser\ParseTree\Visitor\ExpressionVisitor.cs" />
-    <Compile Include="QueryParser\Parser\ParseTree\Visitor\MatchVisitor.cs" />
-    <Compile Include="QueryParser\Parser\ParseTree\Visitor\OrderByVisitor.cs" />
-    <Compile Include="QueryParser\Parser\ParseTree\Visitor\SelectVisitor.cs" />
-    <Compile Include="QueryParser\Parser\ParseTree\Visitor\Visitor.cs" />
-    <Compile Include="QueryParser\Parser\ParserComponents\SelectParser.cs" />
-    <Compile Include="QueryParser\Tokenizer\Token.cs" />
-    <Compile Include="QueryParser\Tokenizer\Tokenizer.cs" />
+    <Compile Include="Parser\ParsedPattern\ParsedPattern.cs" />
+    <Compile Include="Parser\ParsedPattern\ParsedPatternNodes.cs" />
+    <Compile Include="Parser\Parser\ParserComponents\ExpressionParser.cs" />
+    <Compile Include="Parser\Parser\ParserComponents\MatchParser.cs" />
+    <Compile Include="Parser\Parser\ParserComponents\OrderByParser.cs" />
+    <Compile Include="Parser\Parser\ParserComponents\Parser.cs" />
+    <Compile Include="Parser\Parser\ParseTree\ParseTreeNodes.cs" />
+    <Compile Include="Parser\Parser\ParseTree\Visitor\ExpressionVisitor.cs" />
+    <Compile Include="Parser\Parser\ParseTree\Visitor\MatchVisitor.cs" />
+    <Compile Include="Parser\Parser\ParseTree\Visitor\OrderByVisitor.cs" />
+    <Compile Include="Parser\Parser\ParseTree\Visitor\SelectVisitor.cs" />
+    <Compile Include="Parser\Parser\ParseTree\Visitor\Visitor.cs" />
+    <Compile Include="Parser\Parser\ParserComponents\SelectParser.cs" />
+    <Compile Include="Parser\Tokenizer\Token.cs" />
+    <Compile Include="Parser\Tokenizer\Tokenizer.cs" />
     <Compile Include="DumpGraph.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -188,6 +189,8 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="QueryStreamed\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -12,13 +12,8 @@ certain operation atomicaly.
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
-using System.Diagnostics;
-using System.ComponentModel.Design;
-using System.Runtime.CompilerServices;
 
 namespace QueryEngine
 {
@@ -29,7 +24,7 @@ namespace QueryEngine
     /// </summary>
     internal sealed class DFSParallelPatternMatcher : IPatternMatcher
     {
-        private ISingleThreadMatcher[] matchers;
+        private ISingleThreadPatternMatcher[] matchers;
         private Graph graph;
         private IMatchExecutionHelper executionHelper;
         private MatchResultsStorage results;
@@ -47,14 +42,14 @@ namespace QueryEngine
             if (executionHelper.ThreadCount <= 0 || executionHelper.VerticesPerThread <= 0)
                 throw new ArgumentException($"{this.GetType()}, invalid number of threads or vertices per thread.");
 
-            this.matchers = new ISingleThreadMatcher[executionHelper.ThreadCount];
+            this.matchers = new ISingleThreadPatternMatcher[executionHelper.ThreadCount];
             this.graph = graph;
             this.results = results;
             this.executionHelper = executionHelper;
 
             for (int i = 0; i < executionHelper.ThreadCount; i++)
             {
-                this.matchers[i] = (ISingleThreadMatcher)MatchFactory
+                this.matchers[i] = (ISingleThreadPatternMatcher)MatchFactory
                                    .CreateMatcher("DFSSingleThread",                  // Type of Matcher 
                                                   i == 0 ? pattern : pattern.Clone(), // Cloning of pattern (one was already created)
                                                   graph,
@@ -192,87 +187,15 @@ namespace QueryEngine
         private class JobMultiThreadSearch
         {
             public VertexDistributor distributor;
-            public ISingleThreadMatcher matcher;
+            public ISingleThreadPatternMatcher matcher;
 
-            public JobMultiThreadSearch(VertexDistributor vertexDistributor, ISingleThreadMatcher matcher)
+            public JobMultiThreadSearch(VertexDistributor vertexDistributor, ISingleThreadPatternMatcher matcher)
             {
                 this.distributor = vertexDistributor;
                 this.matcher = matcher;
             }
         }
-
-        /// <summary>
-        /// Classes serves as a distributor of vertices from graph to threads.
-        /// Each thread that calls this method will be given certain amount of vertices to process.
-        /// Working with this class is critical section where multiple threads can meet.
-        /// </summary>
-        private class VertexDistributor
-        {
-            List<Vertex> vertices;
-            /// <summary>
-            /// Number of vertices to give during vertex distribution method call.
-            /// </summary>
-            readonly int verticesPerRound;
-            /// <summary>
-            /// The index of the vertex that has not been distributed yet in the graph.
-            /// </summary>
-            int nextFreeIndex;
-
-            /// <summary>
-            /// Creates a vertex distributor.
-            /// </summary>
-            /// <param name="vertices"> All vertices from a graph. </param>
-            /// <param name="verticesPerRound"> Number of vertices to distribute to a thread on demand.</param>
-            public VertexDistributor(List<Vertex> vertices, int verticesPerRound)
-            {
-                if (vertices == null || vertices.Count == 0 || verticesPerRound <= 0)
-                    throw new ArgumentException($"{this.GetType()} creating with 0 vertices or empty rounds.");
-                else
-                {
-                    this.verticesPerRound = verticesPerRound;
-                    this.vertices = vertices;
-                }
-            }
-
-
-            /// <summary>
-            /// Method is called from within Work inside each thread.
-            /// Always returns range of graph vertices.
-            /// To omit locking, there is an atomic operation.
-            /// On call the it receives end index of the returned range.
-            /// The value is then substracted to obtain the start of the range.
-            /// Because we obtains the end index, the lock can be ommited and thread it self can decide
-            /// whether to continue in the search or not.
-            /// The search ends if the range exceeds the count of vertices in the graph.
-            /// </summary>
-            /// <returns> Starting index and ending index of a round or start/end set to -1 for no more vertices to be distribute.</returns>
-            public void DistributeVertices(ref int start, ref int end)
-            {
-                int tmpEndOfRound = Interlocked.Add(ref this.nextFreeIndex, this.verticesPerRound);
-                int tmpStartOfRound = tmpEndOfRound - this.verticesPerRound;
-
-                // First index is beyond the size of the array of vertices -> no more vertices to distribute.
-                if (tmpStartOfRound >= this.vertices.Count)
-                {
-                    start = -1;
-                    end = -1;
-
-                }  // Return all vertices to the end of the list. 
-                   // Returned range is smaller than the round size because there is not enough vertices. 
-                else if (tmpEndOfRound >= this.vertices.Count)
-                {
-                    start = tmpStartOfRound;
-                    end = this.vertices.Count;
-
-                } // Return normal size range.
-                else
-                {
-                    start = tmpStartOfRound;
-                    end = tmpEndOfRound;
-                }
-            }
-        }
-       
+      
         #endregion ParalelSearch
 
  
@@ -359,45 +282,6 @@ namespace QueryEngine
                 this.elements = elements;
                 this.columnDistributor = columnDistributor;
             }
-        }
-
-        /// <summary>
-        /// The class serves as a work distributor to running threads that merge results from the result table.
-        /// The threads call method to distribute column indeces that the threads will merge in parallel.
-        /// </summary>
-        private class ColumnDistributor
-        {
-            /// <summary>
-            /// Number of columns that have been disributed.
-            /// </summary>
-            int firstFreeColumn = 0;
-            /// <summary>
-            /// Number of columns to distribute.
-            /// </summary>
-            readonly int columnCount; 
-
-            public ColumnDistributor(int columnCount)
-            {
-                this.columnCount = columnCount;
-            }
-
-            /// <summary>
-            /// Distributes a free column index to merge.
-            /// The method uses interlock atomic operation to avoid  using lock.
-            /// It atomicaly increments the number of free column index.
-            /// Then it substract the position and ther thread can decide whether to finish
-            /// because all columns have been merged.
-            /// </summary>
-            /// <returns> Index of a column to merge or -1 on no more columns. </returns>
-            public int DistributeColumn()
-            {
-                int tmpNextFreeColumn = Interlocked.Increment(ref this.firstFreeColumn);
-                int tmpFirstFreeColumn = tmpNextFreeColumn - 1;
-
-                if (tmpFirstFreeColumn < columnCount) return tmpFirstFreeColumn;
-                else return -1;
-            }
-
         }
 
         #endregion MergeColumn

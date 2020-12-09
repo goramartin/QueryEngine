@@ -4,7 +4,6 @@ Matchers are used during matching algorithm. They search the graph for user inpp
 Returning results from the matching should be handled independently.
 */
 
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,9 +23,9 @@ namespace QueryEngine
 
     /// <summary>
     /// Single threaded matcher is used by a parallel matcher.
-    /// Represents one thread with a matcher.
+    /// Represents one thread within a matcher.
     /// </summary>
-    internal interface ISingleThreadMatcher : IPatternMatcher
+    internal interface ISingleThreadPatternMatcher : IPatternMatcher
     {
         void SetStartingVerticesIndeces(int start, int end);
         void SetStoringResults(bool storeResults);

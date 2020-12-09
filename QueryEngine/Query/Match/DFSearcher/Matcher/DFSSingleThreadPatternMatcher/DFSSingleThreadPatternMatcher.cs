@@ -1,5 +1,4 @@
-﻿
-/*! \file
+﻿/*! \file
   
 This class includes definitions of dfs search algorithms used to find pattern defined in query match expression.
   
@@ -19,7 +18,6 @@ certain operation atomicaly.
   
  */
 
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,7 +30,6 @@ using System.IO;
 
 namespace QueryEngine
 {
-
     /// <summary>
     /// This instance should be created only inside parallel dfs searcher
     /// Class represents DFS search that accepts patterns with IDFSPattern interface.
@@ -44,38 +41,37 @@ namespace QueryEngine
     /// Bear in mind, that variables of each separate conjunction disregarding its connection to the others is 
     /// dependent on the matched variables from the other conjunctions.
     /// </summary>
-    internal sealed class DFSPatternMatcher : ISingleThreadMatcher
+    internal abstract class DFSSingleThreadPatternMatcher : ISingleThreadPatternMatcher
     {
-        private Graph graph;
-        private DFSPattern pattern;
-        private Element[] matchedElements;
-        private List<Element>[] results;
-        private bool processingVertex;
-        private bool isStoringResults;
-        private int startVerticesIndex;
-        private int startVerticesEndIndex;
-        private int NumberOfMatchedElements;
+        protected Graph graph;
+        protected DFSPattern pattern;
+        protected Element[] matchedElements;
+        protected bool processingVertex;
+        protected bool isStoringResults;
+        protected int startVerticesIndex;
+        protected int startVerticesEndIndex;
+        protected int NumberOfMatchedElements;
 
         /// <summary>
         /// Starting vertices are implicitly set to entire graph.
         /// </summary>
         /// <param name="pat"> The pattern to find.</param>
         /// <param name="gr"> The graph to search. </param>
-        /// <param name="res"> The object to store found results. </param>
-        public DFSPatternMatcher(IDFSPattern pat, Graph gr, List<Element>[] res)
+        protected DFSSingleThreadPatternMatcher(IDFSPattern pat, Graph gr)
         {
-            if (gr == null || pat == null || res == null)
+            if (gr == null || pat == null)
                 throw new ArgumentException($"{this.GetType()}, passed null to a constructor.");
 
             this.graph = gr;
             this.matchedElements = new Element[pat.AllNodeCount];
             this.pattern = (DFSPattern)pat;
-            this.results = res;
             
             // Implicit range of vertices to iterate over the entire graph.
             this.startVerticesIndex = 0;
             this.startVerticesEndIndex = gr.vertices.Count;
         }
+
+#region MainWork
 
         /// <summary>
         /// Method initiates search from every conjunction.
@@ -129,7 +125,7 @@ namespace QueryEngine
         /// <param name="lastIndex"> Last index from last iteration. </param>
         /// <param name="cameFromUp"> If we came from a different conjunction. </param>
         /// <returns> Last used index. </returns>
-        public int DFSStartOfCunjunction(int lastIndex, bool cameFromUp)
+        private int DFSStartOfCunjunction(int lastIndex, bool cameFromUp)
         {
             var vertices = this.graph.vertices;
             //for (int i = lastIndex; i < vertices.Count; i++)
@@ -203,7 +199,7 @@ namespace QueryEngine
                         if (pattern.IsLastPattern())
                         {
                             // Setting null here makes it to fail on next iteration and it is forced to dfs back.
-                            StoreResult();
+                            ProccessResult();
                             nextElement = null;
                             continue;
                         }
@@ -229,8 +225,6 @@ namespace QueryEngine
             }
             return false;
         }
-
-
 
 
         /// <summary>
@@ -296,7 +290,7 @@ namespace QueryEngine
             else
             {
                 // Take the edge on the current position in result array. (Edge that was matched before, can be null if no edge was there.)
-                Element lastUsedEdgeInResult = (Edge)matchedElements[pattern.OverAllIndex];
+                Element lastUsedEdgeInResult = matchedElements[pattern.OverAllIndex];
 
                 // lastElement is null only when we are returning from the removed vertex -> we take the last used edge in the result.
                 // Else we always use the newest edge we failed on. 
@@ -311,7 +305,7 @@ namespace QueryEngine
                 // Try to find new edge from the last vertex.
                 processingVertex = true; // To jump into dfs forward.
                 Element nextElement =
-                    DoDFSForward((Vertex)matchedElements[pattern.OverAllIndex - 1], (Edge)lastElement);
+                    DoDFSForward(matchedElements[pattern.OverAllIndex - 1], (Edge)lastElement);
 
                 // If no edge was found, we want to remove also the last vertex. (because we consumed all of his edges)
                 // Returning null in this position removes the vertex in the next cycle of the main algorithm.
@@ -456,21 +450,6 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Stores matched variables into result class based on columns and thread index.
-        /// </summary>
-        private void StoreResult()
-        {
-            var scope = this.pattern.GetMatchedVariables();
-            this.NumberOfMatchedElements++;
-
-            if (this.isStoringResults)
-            {
-                for (int i = 0; i < this.results.Length; i++)
-                    this.results[i].Add(scope[i]);
-            }
-        }
-
-        /// <summary>
         /// Method sets range of vertices for the first conjunction in the pattern.
         /// </summary>
         /// <param name="start"> Starting index.</param>
@@ -486,6 +465,8 @@ namespace QueryEngine
             }
         }
 
+        public int GetNumberOfMatchedElements() => this.NumberOfMatchedElements;
+        
         /// <summary>
         /// Sets value whether the matcher should store its results or not.
         /// </summary>
@@ -495,7 +476,9 @@ namespace QueryEngine
             this.isStoringResults = storeResults;
         }
 
-        public int GetNumberOfMatchedElements() => this.NumberOfMatchedElements;
+        #endregion MainWork
 
+        protected abstract void ProccessResult();
+       
     }
 }
