@@ -35,10 +35,10 @@ namespace QueryEngine
         /// <param name="graph"> Graph to search on.</param>
         /// <param name="results"> Where to store results. </param>
         /// <param name="executionHelper"> Query execution helper. </param>
-        public DFSParallelPatternMatcher(IDFSPattern pattern, Graph graph, MatchResultsStorage results, IMatchExecutionHelper executionHelper): base(graph, executionHelper)
+        public DFSParallelPatternMatcher(DFSPattern pattern, Graph graph, MatchResultsStorage results, IMatchExecutionHelper executionHelper): base(graph, executionHelper)
         {
-            if (executionHelper.ThreadCount <= 0 || executionHelper.VerticesPerThread <= 0)
-                throw new ArgumentException($"{this.GetType()}, invalid number of threads or vertices per thread.");
+            if (pattern == null || results == null)
+                throw new ArgumentNullException($"{this.GetType()}, passed a null to a construtor.");
 
             this.matchers = new ISingleThreadPatternMatcher[executionHelper.ThreadCount];
             this.results = results;
@@ -93,7 +93,7 @@ namespace QueryEngine
             }
             this.CollectCountFromMatchers();
 
-            Console.WriteLine("Finished Search:");
+            Console.WriteLine("Finished Search Complete:");
             QueryEngine.PrintElapsedTime();
 
         }

@@ -19,8 +19,13 @@ namespace QueryEngine
         {
             if (graph == null || helper == null)
                 throw new ArgumentNullException($"{this.GetType()}, was passsed a null to a constructor.");
-            this.graph = graph;
-            this.helper = helper;
+            else if (helper.ThreadCount <= 0 || helper.VerticesPerThread <= 0)
+                throw new ArgumentException($"{this.GetType()}, invalid number of threads or vertices per thread.");
+            else
+            {
+                this.graph = graph;
+                this.helper = helper;
+            }
         }
 
         public abstract void Search();

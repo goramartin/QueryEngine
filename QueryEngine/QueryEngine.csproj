@@ -79,8 +79,9 @@
     <Compile Include="Query\Expression\IExpressionHasher.cs" />
     <Compile Include="Query\Expression\IExpressionToString.cs" />
     <Compile Include="Query\Match\DFSMatch\Matcher\DFSParallelPatternMatcher\ColumnDistributor.cs" />
+    <Compile Include="Query\Match\DFSMatch\Matcher\DFSParallelPatternMatcher\DFSParallelPatternMatcherBase.cs" />
     <Compile Include="Query\Match\DFSMatch\Matcher\DFSParallelPatternMatcher\VertexDistributor.cs" />
-    <Compile Include="Query\Match\DFSMatch\Matcher\DFSSingleThreadPatternMatcher\DFSPatternMatcher.cs" />
+    <Compile Include="Query\Match\DFSMatch\Matcher\DFSPatternMatcher\DFSPatternMatcher.cs" />
     <Compile Include="Query\Match\ISingleThreadPatternMatcher.cs" />
     <Compile Include="Query\Select\Printer\IRowPrinter.cs" />
     <Compile Include="Query\Expression\References\AggregateReference.cs" />
@@ -119,7 +120,7 @@
     <Compile Include="Query\Match\DFSMatch\Pattern\DFSPatternInterface.cs" />
     <Compile Include="Query\Match\IPatternMatcher.cs" />
     <Compile Include="Query\Match\DFSMatch\Matcher\DFSParallelPatternMatcher\DFSParallelPatternMatcher.cs" />
-    <Compile Include="Query\Match\DFSMatch\Matcher\DFSSingleThreadPatternMatcher\DFSSingleThreadPatternMatcher.cs" />
+    <Compile Include="Query\Match\DFSMatch\Matcher\DFSPatternMatcher\DFSPatternMatcherBase.cs" />
     <Compile Include="Query\Match\DFSMatch\Pattern\DFSPattern.cs" />
     <Compile Include="Query\Match\IPattern.cs" />
     <Compile Include="Query\Match\MatchFactory.cs" />
