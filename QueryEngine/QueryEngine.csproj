@@ -117,7 +117,7 @@
     <Compile Include="Query\GroupBy\Groupers\SingleGroup\SingleGroupGrouper.cs" />
     <Compile Include="Query\Match\DFSMatch\BaseMatch\BaseMatch.cs" />
     <Compile Include="Query\Match\DFSMatch\BaseMatch\BaseMatchesSpecialised.cs" />
-    <Compile Include="Query\Match\DFSMatch\Pattern\DFSPatternInterface.cs" />
+    <Compile Include="Query\Match\DFSMatch\Pattern\IDFSPattern.cs" />
     <Compile Include="Query\Match\IPatternMatcher.cs" />
     <Compile Include="Query\Match\DFSMatch\Matcher\DFSParallelPatternMatcher\DFSParallelPatternMatcher.cs" />
     <Compile Include="Query\Match\DFSMatch\Matcher\DFSPatternMatcher\DFSPatternMatcherBase.cs" />

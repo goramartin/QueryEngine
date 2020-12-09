@@ -105,7 +105,6 @@ namespace QueryEngine
                 throw new ArgumentException($"{this.GetType()}, no given variable in the query.");
         }
 
-
         public override void Compute(out ITableResults results, out GroupByResults groupByResults)
         {
             if (next != null)
