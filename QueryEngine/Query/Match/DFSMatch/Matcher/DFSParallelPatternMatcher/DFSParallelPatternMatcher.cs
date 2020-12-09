@@ -22,11 +22,9 @@ namespace QueryEngine
     /// Class contains definitions of jobs for threads and vertex distributor.
     /// If only one thread is used for matching the single thread variant is used otherwise the multithread variant is used.
     /// </summary>
-    internal sealed class DFSParallelPatternMatcher : IPatternMatcher
+    internal sealed class DFSParallelPatternMatcher : DFSParallelPatternMatcherBase
     {
         private ISingleThreadPatternMatcher[] matchers;
-        private Graph graph;
-        private IMatchExecutionHelper executionHelper;
         private MatchResultsStorage results;
 
         /// <summary>
@@ -37,15 +35,13 @@ namespace QueryEngine
         /// <param name="graph"> Graph to search on.</param>
         /// <param name="results"> Where to store results. </param>
         /// <param name="executionHelper"> Query execution helper. </param>
-        public DFSParallelPatternMatcher(IDFSPattern pattern, Graph graph, MatchResultsStorage results, IMatchExecutionHelper executionHelper)
+        public DFSParallelPatternMatcher(IDFSPattern pattern, Graph graph, MatchResultsStorage results, IMatchExecutionHelper executionHelper): base(graph, executionHelper)
         {
             if (executionHelper.ThreadCount <= 0 || executionHelper.VerticesPerThread <= 0)
                 throw new ArgumentException($"{this.GetType()}, invalid number of threads or vertices per thread.");
 
             this.matchers = new ISingleThreadPatternMatcher[executionHelper.ThreadCount];
-            this.graph = graph;
             this.results = results;
-            this.executionHelper = executionHelper;
 
             for (int i = 0; i < executionHelper.ThreadCount; i++)
             {
@@ -70,12 +66,12 @@ namespace QueryEngine
         /// At the end, the counts of matched results are collected direcly, since sometimes user can input 
         /// only count(*) and using one shared count is time consuming.
         /// </summary>
-        public void Search()
+        public override void Search()
         {
-            this.SetStoringResultsOnMatchers();
+            this.SetStoringResults(this.helper.IsStoringResult);
             QueryEngine.stopwatch.Start();
 
-            if (!this.executionHelper.InParallel) 
+            if (!this.helper.InParallel) 
             { 
                 this.matchers[0].Search();
                 this.results.IsMerged = true;
@@ -87,7 +83,7 @@ namespace QueryEngine
                 Console.WriteLine("Finished Search:");
                 QueryEngine.PrintElapsedTime();
 
-                if (this.executionHelper.IsMergeNeeded)
+                if (this.helper.IsMergeNeeded)
                 {
                     this.ParallelMergeThreadResults();
                     this.results.IsMerged = true;
@@ -105,10 +101,10 @@ namespace QueryEngine
         /// <summary>
         /// Sets current value whether to store results of matchers.
         /// </summary>
-        private void SetStoringResultsOnMatchers()
+        public override void SetStoringResults(bool storeResults)
         {
             for (int i = 0; i < this.matchers.Length; i++)
-                this.matchers[i].SetStoringResults(this.executionHelper.IsStoringResult);
+                this.matchers[i].SetStoringResults(storeResults);
         }
 
         /// <summary>
@@ -134,10 +130,10 @@ namespace QueryEngine
         /// </summary>
         private void ParallelSearch()
         {
-            var distributor = new VertexDistributor(this.graph.GetAllVertices(), this.executionHelper.VerticesPerThread);
+            var distributor = new VertexDistributor(this.graph.GetAllVertices(), this.helper.VerticesPerThread);
             
             // -1 because the last index is ment for the main app thread.
-            Task[] tasks = new Task[this.executionHelper.ThreadCount -1];
+            Task[] tasks = new Task[this.helper.ThreadCount -1];
             // Create task for each matcher except the last mather and enqueue them into thread pool.
             for (int i = 0; i < tasks.Length; i++)
             {
@@ -146,7 +142,7 @@ namespace QueryEngine
             }
 
             // The last matcher is used by the main app thread.
-            DFSParallelPatternMatcher.WorkMultiThreadSearch(new JobMultiThreadSearch(distributor, this.matchers[this.executionHelper.ThreadCount - 1]));
+            DFSParallelPatternMatcher.WorkMultiThreadSearch(new JobMultiThreadSearch(distributor, this.matchers[this.helper.ThreadCount - 1]));
             
             Task.WaitAll(tasks);
         }
@@ -237,8 +233,8 @@ namespace QueryEngine
             var columnDistributor = new ColumnDistributor(this.results.ColumnCount);
             var mergeColumnJob = new ParallelMergeColumnJob(columnDistributor, this.results);
 
-            int threadsToUse = (this.executionHelper.ThreadCount < this.results.ColumnCount ?
-                                this.executionHelper.ThreadCount : this.results.ColumnCount);
+            int threadsToUse = (this.helper.ThreadCount < this.results.ColumnCount ?
+                                this.helper.ThreadCount : this.results.ColumnCount);
             
             // -1 because the main app thread will work as well.
             Task[] tasks = new Task[threadsToUse - 1];
@@ -295,7 +291,7 @@ namespace QueryEngine
         /// </summary>
         private void MergeRows()
         {
-           DFSParallelPatternMatcher.ParallelMergeRowWork(this.results, 0, this.executionHelper.ThreadCount, 1);
+           DFSParallelPatternMatcher.ParallelMergeRowWork(this.results, 0, this.helper.ThreadCount, 1);
            if (this.results.ColumnCount != 1)
                 this.MergeColumn();
         }

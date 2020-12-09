@@ -11,7 +11,7 @@ namespace QueryEngine
     /// the same search algorithm but instead of storing results in the lists, it will forward the results
     /// from the ProcessResult to further processing.
     /// </summary>
-    internal class DFSPatternMatcher : DFSSingleThreadPatternMatcher
+    internal class DFSPatternMatcher : DFSPatternMatcherBase
     {
         private List<Element>[] results;
 

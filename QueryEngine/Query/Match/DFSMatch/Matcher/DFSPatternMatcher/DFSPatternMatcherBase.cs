@@ -41,7 +41,7 @@ namespace QueryEngine
     /// Bear in mind, that variables of each separate conjunction disregarding its connection to the others is 
     /// dependent on the matched variables from the other conjunctions.
     /// </summary>
-    internal abstract class DFSSingleThreadPatternMatcher : ISingleThreadPatternMatcher
+    internal abstract class DFSPatternMatcherBase : ISingleThreadPatternMatcher
     {
         protected Graph graph;
         protected DFSPattern pattern;
@@ -57,7 +57,7 @@ namespace QueryEngine
         /// </summary>
         /// <param name="pat"> The pattern to find.</param>
         /// <param name="gr"> The graph to search. </param>
-        protected DFSSingleThreadPatternMatcher(IDFSPattern pat, Graph gr)
+        protected DFSPatternMatcherBase(IDFSPattern pat, Graph gr)
         {
             if (gr == null || pat == null)
                 throw new ArgumentException($"{this.GetType()}, passed null to a constructor.");

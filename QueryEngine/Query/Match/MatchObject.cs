@@ -105,6 +105,15 @@ namespace QueryEngine
                 throw new ArgumentException($"{this.GetType()}, no given variable in the query.");
         }
 
+
+        public override void Compute(out ITableResults results, out GroupByResults groupByResults)
+        {
+            if (next != null)
+                throw new Exception($"{this.GetType()}, there was an execution block after match block.");
+            results = this.Search();
+            groupByResults = null;
+        }
+
         /// <summary>
         /// Starts searching of the graph and returns results of the search.
         /// </summary>
@@ -117,14 +126,6 @@ namespace QueryEngine
             if (this.queryResults.IsMerged)
                 return new TableResults(this.queryResults.GetResults(), this.queryResults.NumberOfMatchedElements);
             else return new MultiTableResults(this.queryResults.GetResults(), this.queryResults.NumberOfMatchedElements);
-        }
-
-        public override void Compute(out ITableResults results, out GroupByResults groupByResults)
-        {
-            if (next != null)
-                throw new Exception($"{this.GetType()}, there was an execution block after match block.");
-            results = this.Search();
-            groupByResults = null;
         }
     }
 }
