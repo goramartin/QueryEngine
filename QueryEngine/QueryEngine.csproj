@@ -74,6 +74,8 @@
     <Compile Include="Parser\Parser\ParseTree\Visitor\GroupByVisitor.cs" />
     <Compile Include="QueryStreamed\Match\DFSMatch\Matcher\DFSParallelPatternMatcher\DFSParallelPatternMatcherStreamed.cs" />
     <Compile Include="QueryStreamed\Match\DFSMatch\Matcher\DFSPatternMatcher\DFSPatternMatcherStreamed.cs" />
+    <Compile Include="QueryStreamed\Match\IPatternMatcherStreamed.cs" />
+    <Compile Include="QueryStreamed\Match\ISingleThreadPatternMatcherStreamed.cs" />
     <Compile Include="QueryStreamed\Match\MatchObjectStreamed.cs" />
     <Compile Include="QueryStreamed\ResultProcessor.cs" />
     <Compile Include="Query\Expression\Expression.cs" />
