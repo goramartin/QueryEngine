@@ -6,11 +6,13 @@ using System.Threading.Tasks;
 
 namespace QueryEngine
 {
-    internal class DFSParallelPatternMatcherStreamed : DFSParallelPatternMatcherBase
+    /*
+    internal class DFSPatternMatcherStreamed : DFSPatternMatcherBase
     {
-        public override void Search()
+        protected override void ProccessResult()
         {
             throw new NotImplementedException();
         }
     }
+    */
 }
