@@ -194,7 +194,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="QueryStreamed\" />
+    <Folder Include="QueryStreamed\Match\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

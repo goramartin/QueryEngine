@@ -60,12 +60,9 @@ namespace QueryEngine
         {
             if (matcher == null || type == null)
                 throw new ArgumentNullException($"MatchFactory, cannot register null type or null token.");
-
-
-            if (matcherRegistry.ContainsKey(matcher))
+            else if (matcherRegistry.ContainsKey(matcher))
                 throw new ArgumentException($"MatchFactory, matcher Type already registered. Matcher = {matcher}. ");
-
-            matcherRegistry.Add(matcher, type);
+            else matcherRegistry.Add(matcher, type);
         }
 
 
@@ -107,9 +104,7 @@ namespace QueryEngine
                 throw new ArgumentNullException($"MatchFactory, cannot access null type or null token.");
 
             if (matcherRegistry.TryGetValue(matcher, out Type matcherType))
-            {
                 return (IPatternMatcher)Activator.CreateInstance(matcherType, parameters);
-            }
             else throw new ArgumentException($"MatchFactory: Failed to load type from Matcher registry. Matcher = {matcher}.");
         }
 

@@ -35,7 +35,7 @@ namespace QueryEngine
         /// <summary>
         /// Number of threads that will be used during query execution.
         /// </summary>
-        int ThreadCount { get; set; }
+        int ThreadCount { get; }
 
         /// <summary>
         /// If more than one thread must be used return true, otherwise false.
@@ -52,7 +52,7 @@ namespace QueryEngine
         /// If more than one thread is used to search,
         /// this defines number of vertices that will be distributed to threads during matching algorithm.
         /// </summary>
-        int VerticesPerThread { get; set; }
+        int VerticesPerThread { get; }
 
         /// <summary>
         /// In cases where there are no optional pgql clauses, the matcher can omit merging of results to 
@@ -60,6 +60,20 @@ namespace QueryEngine
         /// </summary>
         /// <returns> True if other clauses were defined. </returns>
         bool IsMergeNeeded { get; }
+
+        /// <summary>
+        /// A name of used parallel pattern matcher.
+        /// </summary>
+        string  ParallelPatternMatcherName { get; }
+
+        /// <summary>
+        /// A name of used single thread pattern matcher used by the parallel pattern matcher.
+        /// </summary>
+        string  SingleThreadPatternMatcherName { get; }
+        /// <summary>
+        /// A name of used pattern.
+        /// </summary>
+        string PatternName { get; }
 
     }
 
@@ -69,17 +83,17 @@ namespace QueryEngine
         /// Type of printer for printing results.
         ///  Used inside print method for factory method of printer.
         /// </summary>
-        string Printer { get; set; }
+        string Printer { get; }
         /// <summary>
         /// Type of printing format.
         /// Used inside print method for factory method of formater.
         /// </summary>
-        string Formater { get; set; }
+        string Formater { get; }
 
         /// <summary>
         /// File name where to print results.
         /// </summary>
-        string FileName { get; set; }
+        string FileName { get; }
 
     }
 
@@ -96,22 +110,37 @@ namespace QueryEngine
     /// </summary>
     internal class QueryExecutionHelper : IMatchExecutionHelper, ISelectExecutionHelper, IOrderByExecutionHelper, IGroupByExecutionHelper
     {
-        public int ThreadCount {get; set;}
+        public QueryExecutionHelper(int threadCount, string printer, string formater, int verticesPerThread, string fileName, string ppmName, string stpmName, string patternName)
+        {
+            this.ThreadCount = threadCount;
+            this.Printer = printer;
+            this.Formater = formater;
+            this.VerticesPerThread = verticesPerThread;
+            this.FileName = fileName;
+            this.ParallelPatternMatcherName = ppmName;
+            this.SingleThreadPatternMatcherName = stpmName;
+            this.PatternName = patternName;
+        }
+
+        public int ThreadCount {get; }
         public bool IsSetOrderBy { get; set; } = false;
         public bool IsSetGroupBy { get; set; } = false;
         public bool IsSetSingleGroupGroupBy { get; set; } = false;
 
-        public int VerticesPerThread { get; set; }
+        public int VerticesPerThread { get; }
         
-        public string Printer {get; set;}
-        public string Formater {get; set;}
-        public string FileName {get; set; }
+        public string Printer {get; }
+        public string Formater {get; }
+        public string FileName {get; }
         
         public bool IsStoringResult { get; set; } = true;
         public bool IsMergeNeeded => ((this.IsSetOrderBy || this.IsSetGroupBy || this.IsSetSingleGroupGroupBy) && this.IsStoringResult);
         public bool InParallel => ThreadCount != 1;
 
-        public QueryExecutionHelper() {}
+        public string ParallelPatternMatcherName { get; }
+        public string SingleThreadPatternMatcherName { get; }
+        public string PatternName { get; }
+
 
     }
 }

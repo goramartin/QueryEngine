@@ -57,14 +57,14 @@ namespace QueryEngine
             this.CheckParsedPatternCorrectness(result);
 
             // Create  matcher and pattern based on the name of matcher and pattern
-            // Change if necessary //just for testing 
-            this.Pattern = MatchFactory.CreatePattern("DFSParallel", "SIMPLE", variableMap, result);
+            // Change if necessary 
+            this.Pattern = MatchFactory.CreatePattern(helper.ParallelPatternMatcherName, helper.PatternName, variableMap, result);
             
             // Now we have got enough information about results. 
             // After creating pattern the variable map is filled and we know extend of the results.
             this.queryResults = new MatchResultsStorage(variableMap.GetCount(), executionHelper.ThreadCount);
 
-            this.Matcher = MatchFactory.CreateMatcher("DFSParallel", Pattern, graph, this.queryResults, executionHelper);
+            this.Matcher = MatchFactory.CreateMatcher(helper.ParallelPatternMatcherName, Pattern, graph, this.queryResults, executionHelper);
         }
 
         /// <summary>

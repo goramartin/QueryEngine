@@ -6,8 +6,10 @@ This paralel version only uses single threaded versions of the dfs search algori
 The one single threaded matcher should not be used alone because it was made to be used by the parallel.
 The parallel algorithm is lock-free algorithm, saving results have been made lock free thanks to 
 storing result into their own place inside query result structure (thread index).
-And division of work is done lock free thanks to interlocked class that allows to perform 
-certain operation atomicaly.
+Also, division of work is done lock free thanks to interlocked class that allows to devide workload of the threads
+with the help of VertexDistributor and ColumnDistributor.
+
+This version of the matcher uses a class MatchResultsStorage for storing the results. For more info visit a file named MatchInternalResults.cs. 
  */
 
 using System;
@@ -19,12 +21,12 @@ namespace QueryEngine
 {
     /// <summary>
     /// Serves as a paraller searcher. Contains threads and matchers.
-    /// Class contains definitions of jobs for threads and vertex distributor.
+    /// Class contains definitions of jobs for threads.
     /// If only one thread is used for matching the single thread variant is used otherwise the multithread variant is used.
+    /// If the parallel version is used, the results are merged into one table. at the end of the search.
     /// </summary>
     internal sealed class DFSParallelPatternMatcher : DFSParallelPatternMatcherBase
     {
-        private ISingleThreadPatternMatcher[] matchers;
         private MatchResultsStorage results;
 
         /// <summary>
@@ -40,13 +42,11 @@ namespace QueryEngine
             if (pattern == null || results == null)
                 throw new ArgumentNullException($"{this.GetType()}, passed a null to a construtor.");
 
-            this.matchers = new ISingleThreadPatternMatcher[executionHelper.ThreadCount];
             this.results = results;
-
             for (int i = 0; i < executionHelper.ThreadCount; i++)
             {
                 this.matchers[i] = (ISingleThreadPatternMatcher)MatchFactory
-                                   .CreateMatcher("DFSSingleThread",                  // Type of Matcher 
+                                   .CreateMatcher(this.helper.SingleThreadPatternMatcherName,                  // Type of Matcher 
                                                   i == 0 ? pattern : pattern.Clone(), // Cloning of pattern (one was already created)
                                                   graph,
                                                   results.GetThreadResults(i));
@@ -96,15 +96,6 @@ namespace QueryEngine
             Console.WriteLine("Finished Search Complete:");
             QueryEngine.PrintElapsedTime();
 
-        }
-
-        /// <summary>
-        /// Sets current value whether to store results of matchers.
-        /// </summary>
-        public override void SetStoringResults(bool storeResults)
-        {
-            for (int i = 0; i < this.matchers.Length; i++)
-                this.matchers[i].SetStoringResults(storeResults);
         }
 
         /// <summary>

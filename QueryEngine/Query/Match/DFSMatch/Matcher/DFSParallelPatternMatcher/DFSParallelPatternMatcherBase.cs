@@ -14,6 +14,7 @@ namespace QueryEngine
     {
         protected Graph graph;
         protected IMatchExecutionHelper helper;
+        protected ISingleThreadPatternMatcher[] matchers;
 
         protected DFSParallelPatternMatcherBase(Graph graph, IMatchExecutionHelper helper)
         {
@@ -25,10 +26,19 @@ namespace QueryEngine
             {
                 this.graph = graph;
                 this.helper = helper;
+                this.matchers = new ISingleThreadPatternMatcher[helper.ThreadCount];
             }
         }
 
         public abstract void Search();
-        public abstract void SetStoringResults(bool storeResults);
+        
+        /// <summary>
+        /// Sets current value whether to store results of matchers.
+        /// </summary>
+        public void SetStoringResults(bool storeResults)
+        {
+            for (int i = 0; i < this.matchers.Length; i++)
+                this.matchers[i].SetStoringResults(storeResults);
+        }
     }
 }

@@ -64,13 +64,8 @@ namespace QueryEngine
         private Query(List<Token> tokens, Graph graph, int threadCount, string printer, string formater, int verticesPerThread, string fileName)
         {
             this.graph = graph;
-            this.variableMap = new VariableMap();
-            this.qEhelper = new QueryExecutionHelper();
-            this.qEhelper.ThreadCount = threadCount;
-            this.qEhelper.Printer = printer;
-            this.qEhelper.Formater = formater;
-            this.qEhelper.VerticesPerThread = verticesPerThread;
-            this.qEhelper.FileName = fileName;
+            this.variableMap = new VariableMap(); 
+            this.qEhelper = new QueryExecutionHelper(threadCount, printer, formater, verticesPerThread, fileName, "DFSParallel", "DFSSingleThread", "SIMPLE");
 
             // Parse input query.
             var parsedClauses = Parser.Parse(tokens);
@@ -80,7 +75,6 @@ namespace QueryEngine
                 throw new ArgumentException($"{this.GetType()}, query cannot contain both order by and group by");
             QueryObject groupBy = null;
             QueryObject orderBy = null;
-            
             
             // MATCH is always leaf.
             QueryObject match = QueryObject.Factory
