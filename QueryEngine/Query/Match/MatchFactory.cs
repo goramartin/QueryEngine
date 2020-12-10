@@ -47,8 +47,12 @@ namespace QueryEngine
         {
             RegisterMatcher("DFSSingleThread", typeof(DFSPatternMatcher));
             RegisterMatcher("DFSParallel", typeof(DFSParallelPatternMatcher));
+            RegisterMatcher("DFSSingleThreadStreamed", typeof(DFSPatternMatcherStreamed));
+            RegisterMatcher("DFSParallelStreamed", typeof(DFSParallelPatternMatcherStreamed));
             RegisterPatternToMatcher("DFSSingleThread", "SIMPLE", typeof(DFSPattern));
             RegisterPatternToMatcher("DFSParallel", "SIMPLE", typeof(DFSPattern));
+            RegisterPatternToMatcher("DFSSingleThreadStreamed", "SIMPLE", typeof(DFSPattern));
+            RegisterPatternToMatcher("DFSParallelStreamed", "SIMPLE", typeof(DFSPattern));
         }
 
         /// <summary>

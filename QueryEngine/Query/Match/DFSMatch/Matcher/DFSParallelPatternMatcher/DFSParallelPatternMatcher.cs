@@ -28,6 +28,7 @@ namespace QueryEngine
     internal sealed class DFSParallelPatternMatcher : DFSParallelPatternMatcherBase
     {
         private MatchResultsStorage results;
+        private ISingleThreadPatternMatcher[] matchers;
 
         /// <summary>
         /// Creates a parallel matchers.
@@ -41,15 +42,16 @@ namespace QueryEngine
         {
             if (pattern == null || results == null)
                 throw new ArgumentNullException($"{this.GetType()}, passed a null to a construtor.");
-
+            
+            this.matchers = new ISingleThreadPatternMatcher[this.helper.ThreadCount];
             this.results = results;
-            for (int i = 0; i < executionHelper.ThreadCount; i++)
+            for (int i = 0; i < this.helper.ThreadCount; i++)
             {
                 this.matchers[i] = (ISingleThreadPatternMatcher)MatchFactory
                                    .CreateMatcher(this.helper.SingleThreadPatternMatcherName,                  // Type of Matcher 
                                                   i == 0 ? pattern : pattern.Clone(), // Cloning of pattern (one was already created)
                                                   graph,
-                                                  results.GetThreadResults(i));
+                                                  results.GetThreadResults(i)); // Result storage
             }
         }
 
@@ -98,6 +100,12 @@ namespace QueryEngine
 
         }
 
+        public override void SetStoringResults(bool storeResults)
+        {
+            for (int i = 0; i < this.matchers.Length; i++)
+                this.matchers[i].SetStoringResults(storeResults);
+        }
+
         /// <summary>
         /// Collects result count from each mather.
         /// This is done separately because sometimes the results are not stored in the result structure
@@ -129,11 +137,11 @@ namespace QueryEngine
             for (int i = 0; i < tasks.Length; i++)
             {
                 var tmp = new JobMultiThreadSearch(distributor, this.matchers[i]);
-                tasks[i] = Task.Factory.StartNew(() => DFSParallelPatternMatcher.WorkMultiThreadSearch(tmp));
+                tasks[i] = Task.Factory.StartNew(() => WorkMultiThreadSearch(tmp));
             }
 
             // The last matcher is used by the main app thread.
-            DFSParallelPatternMatcher.WorkMultiThreadSearch(new JobMultiThreadSearch(distributor, this.matchers[this.helper.ThreadCount - 1]));
+            WorkMultiThreadSearch(new JobMultiThreadSearch(distributor, this.matchers[this.helper.ThreadCount - 1]));
             
             Task.WaitAll(tasks);
         }
@@ -168,7 +176,6 @@ namespace QueryEngine
 
         /// <summary>
         /// A Class serves as a parameter to paramethrisised method passed to a thread.
-        /// Contains vertex distributor and matcher.
         /// Used when multiple threads can be used to search graph.
         /// </summary>
         private class JobMultiThreadSearch
@@ -184,7 +191,6 @@ namespace QueryEngine
         }
       
         #endregion ParalelSearch
-
  
         #region ParalelMerge
 

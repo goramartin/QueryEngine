@@ -1,24 +1,4 @@
-﻿/*! \file
-  
-This class includes definitions of dfs search algorithms used to find pattern defined in query match expression.
-  
-Algorithm is given a pattern to find and the algorithm iterates over elements of the graph and 
-communicates with given pattern.
-Chains of the pattern can form a connected chains (that is that some chains can be directly connected via
-certain vairables). The connected chains from a conjunction and the search algorithm uses the connection to
-avoid unneccessary iteration over graph elements. 
-More about the algorithm can be found at the method definitions.
-  
-So far, there have been two types of dfs matches. One single threaded and one parallel. 
-The one single threaded should not be used alone because it was made to be used by the parallel.
-The parallel algorithm is lock-free algorithm, saving results have been made lock free thanks to 
-storing result into their own place inside query result structure (thread index).
-And division of work is done lock free thanks to interlocked class that allows to perform 
-certain operation atomicaly.
-  
- */
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -33,13 +13,9 @@ namespace QueryEngine
     /// <summary>
     /// This instance should be created only inside parallel dfs searcher
     /// Class represents DFS search that accepts patterns with IDFSPattern interface.
-    /// The search is separated into conjuctions from pattern. That is to say, each conjuction has got
+    /// The search is separated into conjuctions from the pattern. That is to say, each conjuction has got
     /// one starting pattern chain, from that chain we connect subsequent chains based on matched variables from this chain.
-    /// Simply each conjunction represents chains that can be connected by certain variables.
-    /// 
-    /// Algorithm tries to start search from every vertex on each conjunction.
-    /// Bear in mind, that variables of each separate conjunction disregarding its connection to the others is 
-    /// dependent on the matched variables from the other conjunctions.
+    /// Simply each conjunction represents chains that can be connected by certain variables that were matched before hand.
     /// </summary>
     internal abstract class DFSPatternMatcherBase : ISingleThreadPatternMatcher
     {
@@ -88,7 +64,7 @@ namespace QueryEngine
 
             while (true)
             {
-                // -1 meaning that next conjunction search will start from the beginning of vertex list. 
+                // -1 meaning that next conjunction search will start from the beginning of the vertex list. 
                 if (lastUsedIndex == -1) lastUsedIndex = DFSStartOfCunjunction(0, false);
                 // Else it uses last used index in that conjunction.
                 else lastUsedIndex = DFSStartOfCunjunction(lastUsedIndex, true);

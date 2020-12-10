@@ -7,9 +7,7 @@ using System.Threading.Tasks;
 namespace QueryEngine
 {
     /// <summary>
-    /// The reason the class was split is that the streamed version of the matcher will use 
-    /// the same search algorithm but instead of storing results in the lists, it will forward the results
-    /// from the ProcessResult to further processing.
+    /// This version of the matcher stores results directly into the Lists provided by the MatchResults class.
     /// </summary>
     internal class DFSPatternMatcher : DFSPatternMatcherBase
     {
