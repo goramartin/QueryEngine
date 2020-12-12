@@ -23,22 +23,7 @@ namespace QueryEngine
         {
             // Create hashers and equality comparers.
             CreateHashersAndComparers(out List<ExpressionEqualityComparer> equalityComparers, out List<ExpressionHasher> hashers);
-            if (this.InParallel && ((resTable.NumberOfMatchedElements / this.ThreadCount) > 1)) return ParallelGroupBy(resTable, equalityComparers, hashers);
-            else return SingleThreadGroupBy(resTable, equalityComparers, hashers);
-        }
-
-        private GroupByResults SingleThreadGroupBy(ITableResults resTable, List<ExpressionEqualityComparer> equalityComparers, List<ExpressionHasher> hashers)
-        {
-            var tmpComparer = new RowEqualityComparerGroupKey(resTable, equalityComparers);
-            var tmpHasher = new RowHasher(hashers);
-            tmpComparer.SetCache(tmpHasher);
-            tmpHasher.SetCache(tmpComparer.Comparers);
-            GroupByJob tmpJob;
-
-            if (!this.BucketStorage) tmpJob = new GroupByJobLists(tmpHasher, tmpComparer, this.aggregates, resTable, 0, resTable.NumberOfMatchedElements);
-            else tmpJob = new GroupByJobBuckets(tmpHasher, tmpComparer, this.aggregates, resTable, 0, resTable.NumberOfMatchedElements);
-            SingleThreadGroupByWork(tmpJob, this.BucketStorage);
-            return CreateGroupByResults(tmpJob);
+            return ParallelGroupBy(resTable, equalityComparers, hashers);
         }
 
         private GroupByResults ParallelGroupBy(ITableResults resTable, List<ExpressionEqualityComparer> equalityComparers, List<ExpressionHasher> hashers)
@@ -138,13 +123,11 @@ namespace QueryEngine
                 }
             }
         }
-       
         private static void SingleThreadMergeWork(object job1, object job2, bool bucketStorage)
         {
             if (bucketStorage) SingleThreadMergeWorkWithBuckets(job1, job2);
             else SingleThreadMergeWorkWithLists(job1, job2);
         }
-        
         private static void SingleThreadGroupByWork(object job, bool bucketStorage) 
         {
             if (bucketStorage) SingleThreadGroupByWorkWithBuckets(job);

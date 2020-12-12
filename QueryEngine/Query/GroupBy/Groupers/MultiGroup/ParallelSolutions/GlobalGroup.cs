@@ -25,8 +25,7 @@ namespace QueryEngine
             // Create hashers and equality comparers.
             // The hashers receive also the equality comparer as cache.
             CreateHashersAndComparers(out List<ExpressionEqualityComparer> equalityComparers, out List<ExpressionHasher> hashers);
-            if (this.InParallel && ((resTable.NumberOfMatchedElements / this.ThreadCount) > 1)) return this.ParallelGroupBy(new RowEqualityComparerInt(resTable, equalityComparers, new RowHasher(hashers), false), resTable);
-            else return SingleThreadGroupBy(new RowEqualityComparerInt(resTable, equalityComparers, new RowHasher(hashers), false), resTable);
+            return this.ParallelGroupBy(new RowEqualityComparerInt(resTable, equalityComparers, new RowHasher(hashers), false), resTable);
         }
 
         /// <summary>
@@ -100,26 +99,6 @@ namespace QueryEngine
             }
             jobs[jobs.Length - 1] = new GroupByJobBuckets(concurrentDictBuckets, this.aggregates, results, current, results.NumberOfMatchedElements, bucketFactory);
             return jobs;
-        }
-
-        private GroupByResults SingleThreadGroupBy(RowEqualityComparerInt equalityComparer, ITableResults results)
-        {
-            GroupByJob tmpJob;
-            if (this.BucketStorage)
-            {
-                Func<int, AggregateBucketResult[]> bucketFactory = (int x) => { return AggregateBucketResult.CreateBucketResults(this.aggregates); };
-                tmpJob = new GroupByJobBuckets(new ConcurrentDictionary<int, AggregateBucketResult[]>(equalityComparer), this.aggregates, results, 0, results.NumberOfMatchedElements, bucketFactory);
-            }
-            else
-            {
-                var aggResults = AggregateArrayResults.CreateArrayResults(this.aggregates);
-                int capture = 0;
-                Func<int, int> positionFactory = (int x) => { return Interlocked.Increment(ref capture); };
-                Semaphore semaphore = new Semaphore(this.ThreadCount, this.ThreadCount);
-                tmpJob = new GroupByJobArrays(new ConcurrentDictionary<int, int>(equalityComparer), this.aggregates, results, 0, results.NumberOfMatchedElements, aggResults, positionFactory, semaphore, ThreadCount);
-            }
-            SingleThreadGroupByWork(tmpJob, this.BucketStorage);
-            return CreateGroupByResults(tmpJob);
         }
 
         public static void SingleThreadGroupByWork(object job, bool bucketStorage)

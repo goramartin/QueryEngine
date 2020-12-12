@@ -45,32 +45,31 @@ namespace QueryEngine
             }
 
             // Note that the result will reside in the aggResults variable after the computation is finished.
-            if (nonAsterixCountAggregates.Count == 0) return null; //return aggResults; 
-            else if (this.InParallel) return this.ParallelGroupBy(resTable, nonAsterixCountAggregates, nonAsterixAggResults);
+            if (nonAsterixCountAggregates.Count == 0) return null; //return aggResults;
+            // If work can be split equaly use parallel sol. (Split equaly means that each thread will receive at least one portion of the result table.)
+            else if (this.InParallel && (resTable.NumberOfMatchedElements / this.ThreadCount > 0)) return this.ParallelGroupBy(resTable, nonAsterixCountAggregates, nonAsterixAggResults);
             else return this.SingleThreadGroupBy(resTable, nonAsterixCountAggregates, nonAsterixAggResults);
         }
 
         /// <summary>
         /// Computes groups in parallel. 
         /// Each thread gets a fair share of results from the result table.
-        /// Jobs receive a clones of aggregates passed into the function.
         /// The passed list of aggregates resides on the last position in the jobs array.
         /// When the tasks are finished the results are merged single threaded onto the 
         /// last position in the jobs array.
         /// That means, that the results when the function returns are stored in the passed parameter
         /// of aggregates.
         /// </summary>
-        /// <param name="results"> A place to store aggregation results. </param>
+        /// <param name="results"> A result table from match clause. </param>
         /// <param name="aggs"> Aggregation functions. </param>
         /// <param name="aggResults"> The results of the merge is stored in this isntances. </param>
         private GroupByResults ParallelGroupBy(ITableResults results, List<Aggregate> aggs, List<AggregateListResults> aggResults)
         {
             // -1 because the main thread works as well
             Task[] tasks = new Task[this.ThreadCount - 1];
-            GroupByJob[] jobs = new GroupByJob[this.ThreadCount];
 
             // Create jobs
-            jobs = CreateJobs(results, aggs, aggResults);
+            var jobs = CreateJobs(results, aggs, aggResults);
             for (int i = 0; i < tasks.Length; i++)
             {
                 var tmp = jobs[i];
@@ -88,8 +87,6 @@ namespace QueryEngine
         /// <summary>
         /// Creates jobs for the parallel group by.
         /// Note that the last job in the array has the start/end set to the end of result table.
-        /// If the addition == 0, the last job receives the entire result table. In terms of other values,
-        /// each thread is given at least one result row.
         /// 
         /// Note that the passed aggregates results, are the ones that the rest will be merged into.
         /// They are expected to be at the last index of the jobs => they must have at least one result assigned.
@@ -101,6 +98,7 @@ namespace QueryEngine
         {
             GroupByJob[] jobs = new GroupByJob[this.ThreadCount];
             int current = 0;
+            // No that this is never <= 0 because it was checked when picking the impl.
             int addition = results.NumberOfMatchedElements / this.ThreadCount;
 
             for (int i = 0; i < jobs.Length - 1; i++)
@@ -109,8 +107,6 @@ namespace QueryEngine
                 current += addition;
             }
 
-            // Create the last job, this fixes the problem if addition is 0, in that case, it doesnt matter
-            // that the work will be done by one thread entirely because the res table is way to small to begin with.
             jobs[jobs.Length - 1] = new GroupByJob(aggs, aggResults, current, results.NumberOfMatchedElements, results);
             return jobs;
         }

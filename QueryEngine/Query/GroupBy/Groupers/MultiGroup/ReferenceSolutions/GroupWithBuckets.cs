@@ -17,7 +17,7 @@ namespace QueryEngine
 
         public override GroupByResults Group(ITableResults resTable)
         {
-            if (this.InParallel) throw new ArgumentException($"{this.GetType()}, cannot perform a parallel group by.");
+            //if (this.InParallel) throw new ArgumentException($"{this.GetType()}, cannot perform a parallel group by.");
 
             // Create hashers and equality comparers.
             // The hashers receive also the equality comparer as cache.

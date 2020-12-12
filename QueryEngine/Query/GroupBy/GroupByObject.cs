@@ -74,8 +74,15 @@ namespace QueryEngine
                 if (results == null) throw new ArgumentNullException($"{this.GetType()}, table results are set to null.");
 
                 Grouper grouper;
-                if (this.helper.IsSetSingleGroupGroupBy) grouper = new SingleGroupGrouper(this.aggregates, null, this.helper);
-                else grouper = new GroupWithLists(this.aggregates, this.hashes, this.helper);
+
+                if (this.helper.IsSetSingleGroupGroupBy)
+                {
+                    grouper = new SingleGroupGrouper(this.aggregates, null, this.helper);
+                }
+                else
+                {
+                    grouper = new GroupWithLists(this.aggregates, this.hashes, this.helper);
+                }
                 groupByResults = grouper.Group(results);
             }
             else throw new NullReferenceException($"{this.GetType()}, next is set to null.");

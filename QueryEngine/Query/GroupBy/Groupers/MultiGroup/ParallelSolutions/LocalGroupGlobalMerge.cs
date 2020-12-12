@@ -51,24 +51,6 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Note that the received hashers and equality comparers have already set their internal cache to each other.
-        /// </summary>
-        private GroupByResults SingleThreadGroupBy(ITableResults resTable, List<ExpressionEqualityComparer> equalityComparers, List<ExpressionHasher> hashers)
-        {
-            var tmpComparer = new RowEqualityComparerGroupKey(resTable, equalityComparers);
-            var tmpGlobalDictionary = new ConcurrentDictionary<GroupDictKey, AggregateBucketResult[]>(tmpComparer);
-            GroupByJob tmpJob;
-            if (this.BucketStorage) tmpJob = new GroupByJobBuckets(new RowHasher(hashers), tmpComparer, this.aggregates, resTable, 0, resTable.NumberOfMatchedElements, tmpGlobalDictionary);
-            else
-            {
-                Func<GroupDictKey, AggregateBucketResult[]> bucketFactory = (GroupDictKey x) => { return AggregateBucketResult.CreateBucketResults(this.aggregates); };
-                tmpJob = new GroupByJobMixListsBuckets(new RowHasher(hashers), tmpComparer, this.aggregates, resTable, 0, resTable.NumberOfMatchedElements, tmpGlobalDictionary, bucketFactory);
-            }
-            SingleThreadGroupByWork(tmpJob, this.BucketStorage);
-            return CreateGroupByResults(tmpJob);
-        }
-
-        /// <summary>
         /// Creates jobs for the parallel group by.
         /// Note that the last job in the array has the end set to the end of the result table.
         /// The addition must always be > 0.
