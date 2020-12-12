@@ -101,7 +101,10 @@ namespace QueryEngine
     { }
 
     internal interface IGroupByExecutionHelper : IBaseExecutionHelper 
-    { }
+    { 
+        string GrouperAlias { get; }
+        bool BucketStorage { get; }
+    }
 
     /// <summary>
     /// A execution helper that is used inside query. 
@@ -110,7 +113,7 @@ namespace QueryEngine
     /// </summary>
     internal class QueryExecutionHelper : IMatchExecutionHelper, ISelectExecutionHelper, IOrderByExecutionHelper, IGroupByExecutionHelper
     {
-        public QueryExecutionHelper(int threadCount, string printer, string formater, int verticesPerThread, string fileName, string ppmName, string stpmName, string patternName)
+        public QueryExecutionHelper(int threadCount, string printer, string formater, int verticesPerThread, string fileName, string ppmName, string stpmName, string patternName, string grouperName, bool useBuckets)
         {
             this.ThreadCount = threadCount;
             this.Printer = printer;
@@ -120,6 +123,8 @@ namespace QueryEngine
             this.ParallelPatternMatcherName = ppmName;
             this.SingleThreadPatternMatcherName = stpmName;
             this.PatternName = patternName;
+            this.GrouperAlias = grouperName;
+            this.BucketStorage = useBuckets;
         }
 
         public int ThreadCount {get; }
@@ -141,6 +146,8 @@ namespace QueryEngine
         public string SingleThreadPatternMatcherName { get; }
         public string PatternName { get; }
 
+        public string GrouperAlias { get; }
+        public bool BucketStorage { get; }
 
     }
 }

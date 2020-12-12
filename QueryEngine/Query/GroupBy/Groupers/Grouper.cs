@@ -37,7 +37,7 @@ namespace QueryEngine
         /// Notice that the number of comparers is equal to the number of hashers.
         /// Also, they must be of the same generic type.
         /// </summary>
-        public virtual void CreateHashersAndComparers(out List<ExpressionEqualityComparer> comparers, out List<ExpressionHasher> hashers)
+        protected virtual void CreateHashersAndComparers(out List<ExpressionEqualityComparer> comparers, out List<ExpressionHasher> hashers)
         {
             comparers = new List<ExpressionEqualityComparer>();
             hashers = new List<ExpressionHasher>();
@@ -48,6 +48,20 @@ namespace QueryEngine
             }
         }
 
+        public static Grouper Factory(string grouperAlias, List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper, bool bucketStorage)
+        {
+            if (grouperAlias == "ref" && bucketStorage) return new GroupWithBuckets(aggs, hashes, helper);
+            else if (grouperAlias == "ref" && !bucketStorage) return new GroupWithLists(aggs, hashes, helper);
+            else if (grouperAlias == "global") return new GlobalGroup(aggs, hashes, helper, bucketStorage);
+            else if (grouperAlias == "local") return new LocalGroupLocalMerge(aggs, hashes, helper, bucketStorage);
+            else if (grouperAlias == "twoway") return new LocalGroupGlobalMerge(aggs, hashes, helper, bucketStorage);
+            else throw new ArgumentException("Grouper, trying to create an unknown grouper.");
+        }
+
+        public static Grouper Factory( List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper)
+        {
+            return Factory(helper.GrouperAlias, aggs, helper, helper, helper.BucketStorage);
+        }
 
     }
 }

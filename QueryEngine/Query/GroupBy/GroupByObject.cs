@@ -73,17 +73,24 @@ namespace QueryEngine
                 this.next = null;
                 if (results == null) throw new ArgumentNullException($"{this.GetType()}, table results are set to null.");
 
-                Grouper grouper;
-
-                if (this.helper.IsSetSingleGroupGroupBy)
-                {
-                    grouper = new SingleGroupGrouper(this.aggregates, null, this.helper);
-                }
+                // If there are no results, return empty storage.
+                if (results.NumberOfMatchedElements == 0)
+                    groupByResults = new GroupByResultsList(new Dictionary<GroupDictKey, int>(), null, results);
                 else
                 {
-                    grouper = new GroupWithLists(this.aggregates, this.hashes, this.helper);
+                    Grouper grouper;
+                    if (this.helper.IsSetSingleGroupGroupBy)
+                        grouper = new SingleGroupGrouper(this.aggregates, null, this.helper);
+                    else
+                    {
+                        // Use reference single thread solutions because the result table cannot be split equaly among thread .
+                        // This also means that the result table is quite small.
+                        if (results.NumberOfMatchedElements / helper.ThreadCount == 0)
+                            grouper = Grouper.Factory("ref", this.aggregates, this.hashes, this.helper, this.helper.BucketStorage);
+                        else grouper = Grouper.Factory(this.aggregates, this.hashes, this.helper);
+                    }
+                    groupByResults = grouper.Group(results);
                 }
-                groupByResults = grouper.Group(results);
             }
             else throw new NullReferenceException($"{this.GetType()}, next is set to null.");
         }
