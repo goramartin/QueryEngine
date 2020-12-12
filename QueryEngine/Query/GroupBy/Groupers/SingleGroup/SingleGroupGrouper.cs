@@ -45,7 +45,7 @@ namespace QueryEngine
             }
 
             // Note that the result will reside in the aggResults variable after the computation is finished.
-            if (nonAsterixCountAggregates.Count == 0) return null; //return aggResults;
+            if (nonAsterixCountAggregates.Count == 0) /* Empty stmt. */; 
             // If work can be split equaly use parallel sol. (Split equaly means that each thread will receive at least one portion of the result table.)
             else if (this.InParallel && (resTable.NumberOfMatchedElements / this.ThreadCount > 0)) this.ParallelGroupBy(resTable, nonAsterixCountAggregates, nonAsterixAggResults.ToArray());
             else this.SingleThreadGroupBy(resTable, nonAsterixCountAggregates, nonAsterixAggResults.ToArray());
