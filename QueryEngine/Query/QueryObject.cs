@@ -23,7 +23,6 @@ namespace QueryEngine
         /// </summary>
         protected QueryObject next;
 
-        
         public abstract void Compute(out ITableResults results, out GroupByResults groupByResults);
 
         /// <summary>
@@ -39,6 +38,7 @@ namespace QueryEngine
         {
             if (type == typeof(SelectObject)) return new SelectObject(graph, map, helper, (SelectNode)parseTree, exprInfo);
             else if (type == typeof(MatchObject)) return new MatchObject(graph, map, helper, (MatchNode)parseTree, exprInfo);
+            else if (type == typeof(MatchObjectStreamed)) return new MatchObjectStreamed(graph, map, helper, (MatchNode)parseTree, exprInfo);
             else if (type == typeof(OrderByObject)) return new OrderByObject(graph, map, helper, (OrderByNode)parseTree, exprInfo);
             else if (type == typeof(GroupByObject) && graph == null && map == null && parseTree == null) return new GroupByObject(helper, exprInfo);
             else if (type == typeof(GroupByObject)) return new GroupByObject(graph, map, helper, (GroupByNode)parseTree, exprInfo);
