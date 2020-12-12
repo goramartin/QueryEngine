@@ -36,7 +36,6 @@ namespace QueryEngine
     /// Represents a pgql query.
     /// It tokenizes, parses and constructs simple execution chain.
     /// Provides api to execute the query.
-    /// More information is at the head of the file.
     /// </summary>
     sealed class Query
     {
@@ -51,8 +50,7 @@ namespace QueryEngine
         public bool Finished { get; private set; }
 
         /// <summary>
-        /// Builds a query from input.
-        /// Called by static create method.
+        /// Builds a query from an input.
         /// </summary>
         /// <param name="tokens"> An input query. </param>
         /// <param name="graph"> A graph to compute the query on. </param>
@@ -72,7 +70,7 @@ namespace QueryEngine
 
             // Create execution chain. // 
             if (parsedClauses.ContainsKey("groupby") && parsedClauses.ContainsKey("orderby"))
-                throw new ArgumentException($"{this.GetType()}, query cannot contain both order by and group by");
+                throw new ArgumentException($"{this.GetType()}, the query cannot contain both order by and group by");
             QueryObject groupBy = null;
             QueryObject orderBy = null;
             
@@ -112,8 +110,40 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Computes a query.
+        /// Builds a streamed version of a query from an input.
+        /// Called by static create method.
         /// </summary>
+        /// <param name="tokens"> An input query. </param>
+        /// <param name="graph"> A graph to compute the query on. </param>
+        /// <param name="threadCount"> Maximum number of threads available to use. </param>
+        /// <param name="printer"> A printer to use. </param>
+        /// <param name="formater"> A formater to use by printer. </param>
+        /// <param name="verticesPerThread"> A number of vertices distributed to threads during parallel computation of the query.</param>
+        /// <param name="fileName"> A file to store results into. </param>
+        private Query(List<Token> tokens, Graph graph, int threadCount, string printer, string formater, int verticesPerThread, string fileName, bool isStreamed)
+        {
+            this.graph = graph;
+            this.variableMap = new VariableMap();
+            this.qEhelper = new QueryExecutionHelper(threadCount, printer, formater, verticesPerThread, fileName, "DFSParallel", "DFSSingleThread", "SIMPLE", "ref", false);
+
+            // Parse input query.
+            var parsedClauses = Parser.Parse(tokens);
+
+            // Create execution chain. // 
+            if (!parsedClauses.ContainsKey("orderby"))
+                throw new ArgumentException($"{this.GetType()}, the streamed version of the query must contain order by.");
+            QueryObject groupBy = null;
+            QueryObject orderBy = null;
+
+            // MATCH is always leaf.
+            MatchObjectStreamed match = (MatchObjectStreamed)QueryObject.Factory
+                 (typeof(MatchObjectStreamed), graph, qEhelper, variableMap, parsedClauses["match"], null);
+        }
+
+
+
+
+
         public void Compute()
         {
             if (!this.Finished)
@@ -121,7 +151,7 @@ namespace QueryEngine
                 this.query.Compute(out ITableResults res, out GroupByResults groupByResults);
                 this.Finished = true;
             }
-            else throw new Exception("Trying to call a query that has finished already.");
+            else throw new Exception($"{this.GetType()}, trying to call a query that has finished already.");
         }
 
         /// <summary>
@@ -150,8 +180,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Builds a query from input.
-        /// Calls private constructor.
+        /// Builds a query from an input string.
         /// </summary>
         /// <param name="inputQuery"> An input query. </param>
         /// <param name="graph"> A graph to compute the query on. </param>
@@ -165,10 +194,8 @@ namespace QueryEngine
             CheckArgs(inputQuery, graph, threadCount, printer, formater, verticesPerThread, fileName);
             return new Query(Tokenizer.Tokenize(inputQuery), graph, threadCount, printer, formater, verticesPerThread, fileName);
         }
-
         /// <summary>
-        /// Builds a query from input.
-        /// Calls private constructor.
+        /// Builds a query from an input stream.
         /// </summary>
         /// <param name="inputQuery"> An input query. </param>
         /// <param name="graph"> A graph to compute the query on. </param>
@@ -181,6 +208,38 @@ namespace QueryEngine
         {
             CheckArgs(inputQuery, graph, threadCount, printer, formater, verticesPerThread, fileName);
             return new Query(Tokenizer.Tokenize(inputQuery), graph, threadCount, printer, formater, verticesPerThread, fileName);
+        }
+
+
+        /// <summary>
+        /// Builds a streamed version of a query from an input string.
+        /// </summary>
+        /// <param name="inputQuery"> An input query. </param>
+        /// <param name="graph"> A graph to compute the query on. </param>
+        /// <param name="threadCount"> Maximum number of threads available to use. </param>
+        /// <param name="printer"> A printer to use. </param>
+        /// <param name="formater"> A formater to use by printer. </param>
+        /// <param name="verticesPerThread"> A number of vertices distributed to threads during parallel computation of the query.</param>
+        /// <param name="fileName"> A file to store results into. </param>
+        public static Query CreateStreamed(string inputQuery, Graph graph, int threadCount, string printer, string formater, int verticesPerThread, string fileName)
+        {
+            CheckArgs(inputQuery, graph, threadCount, printer, formater, verticesPerThread, fileName);
+            return new Query(Tokenizer.Tokenize(inputQuery), graph, threadCount, printer, formater, verticesPerThread, fileName, true);
+        }
+        /// <summary>
+        /// Builds a streamed version of a query from an input stream.
+        /// </summary>
+        /// <param name="inputQuery"> An input query. </param>
+        /// <param name="graph"> A graph to compute the query on. </param>
+        /// <param name="threadCount"> Maximum number of threads available to use. </param>
+        /// <param name="printer"> A printer to use. </param>
+        /// <param name="formater"> A formater to use by printer. </param>
+        /// <param name="verticesPerThread"> A number of vertices distributed to threads during parallel computation of the query.</param>
+        /// <param name="fileName"> A file to store results into. </param>
+        public static Query CreateStreamed(TextReader inputQuery, Graph graph, int threadCount, string printer, string formater, int verticesPerThread, string fileName)
+        {
+            CheckArgs(inputQuery, graph, threadCount, printer, formater, verticesPerThread, fileName);
+            return new Query(Tokenizer.Tokenize(inputQuery), graph, threadCount, printer, formater, verticesPerThread, fileName, true);
         }
 
         /// <summary>
