@@ -33,11 +33,10 @@ namespace QueryEngine
         {
             return "count";
         }
-        public void IncBy(int value, AggregateListResults list, int position)
+        public void IncBy(int value, AggregateBucketResult bucket)
         {
-            var tmpList = (AggregateListResults<int>)list;
-            if (position == tmpList.aggResults.Count) tmpList.aggResults.Add(1);
-            else tmpList.aggResults[position] += value;
+            var tmpBucket = (AggregateBucketResult<int>)bucket;
+            tmpBucket.aggResult += value;
         }
         public override void Apply(in TableResults.RowProxy row, AggregateBucketResult bucket)
         {
