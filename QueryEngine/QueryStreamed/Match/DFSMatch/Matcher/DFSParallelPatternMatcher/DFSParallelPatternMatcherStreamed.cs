@@ -17,6 +17,9 @@ namespace QueryEngine
     internal class DFSParallelPatternMatcherStreamed : DFSParallelPatternMatcherBase, IPatternMatcherStreamed
     {
         private ISingleThreadPatternMatcherStreamed[] matchers;
+        /// <summary>
+        /// Is set in the method PassResultProcessor.
+        /// </summary>
         private ResultProcessor resultProcessor;
 
         /// <summary>
@@ -59,6 +62,7 @@ namespace QueryEngine
 
         public void PassResultProcessor(ResultProcessor resultProcessor)
         {
+            this.resultProcessor = resultProcessor;
             for (int i = 0; i < this.matchers.Length; i++)
                 this.matchers[i].PassResultProcessor(resultProcessor);
         }

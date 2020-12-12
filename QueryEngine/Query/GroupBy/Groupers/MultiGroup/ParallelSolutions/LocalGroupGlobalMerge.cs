@@ -24,8 +24,7 @@ namespace QueryEngine
             // Create hashers and equality comparers.
             // The hashers receive also the equality comparer as cache.
             CreateHashersAndComparers(out List<ExpressionEqualityComparer> equalityComparers, out List<ExpressionHasher> hashers);
-            if (this.InParallel && ((resTable.NumberOfMatchedElements / this.ThreadCount) > 1)) return ParallelGroupBy(resTable, equalityComparers, hashers);
-            else return SingleThreadGroupBy(resTable, equalityComparers, hashers);
+            return ParallelGroupBy(resTable, equalityComparers, hashers);
         }
 
         /// <summary>

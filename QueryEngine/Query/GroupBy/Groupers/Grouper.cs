@@ -60,7 +60,7 @@ namespace QueryEngine
 
         public static Grouper Factory( List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper)
         {
-            return Factory(helper.GrouperAlias, aggs, helper, helper, helper.BucketStorage);
+            return Factory(helper.GrouperAlias, aggs, hashes, helper, helper.BucketStorage);
         }
 
     }
