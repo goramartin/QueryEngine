@@ -18,5 +18,16 @@ namespace QueryEngine
             this.InParallel = helper.InParallel;
             this.ThreadCount = helper.ThreadCount;
         }
+
+        protected virtual void CreateHashersAndComparers(out List<ExpressionEqualityComparer> comparers, out List<ExpressionHasher> hashers)
+        {
+            comparers = new List<ExpressionEqualityComparer>();
+            hashers = new List<ExpressionHasher>();
+            for (int i = 0; i < this.hashes.Count; i++)
+            {
+                comparers.Add(ExpressionEqualityComparer.Factory(this.hashes[i], this.hashes[i].ExpressionType));
+                hashers.Add(ExpressionHasher.Factory(this.hashes[i], this.hashes[i].ExpressionType));
+            }
+        }
     }
 }

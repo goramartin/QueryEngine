@@ -20,7 +20,7 @@ namespace QueryEngine
     /// </summary>
     internal class RowEqualityComparerGroupKey : IEqualityComparer<GroupDictKey>
     {
-        public ITableResults Results { get; }
+        public ITableResults Results { get; set; }
         public List<ExpressionEqualityComparer> Comparers { get; }
         public bool CacheOn { get; private set; }
         

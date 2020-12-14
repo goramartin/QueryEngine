@@ -72,6 +72,7 @@ namespace QueryEngine
 
         /// <summary>
         /// The row that enables to add a temporary row and access it throught appropriate RowProxy struct.
+        /// Note that it should not be used if there is order set.
         /// </summary>
         public Element[] temporaryRow { get; set; } = null;
 
@@ -147,8 +148,8 @@ namespace QueryEngine
         {
             get
             {
-                if (order == null) return new TableResults.RowProxy(this, rowIndex);
-                else return new TableResults.RowProxy(this, order[rowIndex]);
+                if (this.order == null) return new TableResults.RowProxy(this, rowIndex);
+                else return new TableResults.RowProxy(this, this.order[rowIndex]);
             }
         }
 
