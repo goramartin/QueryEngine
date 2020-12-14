@@ -66,6 +66,10 @@ namespace QueryEngine
         /// </summary>
         public int NumberOfMatchedElements { get; private set; }
 
+        /// <summary>
+        /// Empty constructor for passing into group by results for streamed grouping.
+        /// </summary>
+        public TableResults() { }
 
         /// <summary>
         /// Gets results from a merged matcher results.
