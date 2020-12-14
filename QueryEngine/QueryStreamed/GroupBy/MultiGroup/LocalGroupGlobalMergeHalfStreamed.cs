@@ -7,7 +7,15 @@ using System.Threading;
 
 namespace QueryEngine 
 {
-
+    /// <summary>
+    /// Class represents a half streamed grouping if group by is set in the input query.
+    /// The computation works as follows:
+    /// Each matcher computes its groups localy and stores results of the matcher only if they 
+    /// represent a representant of a group. If not, only aggregates are computed with the result.
+    /// When matcher finishes, it merges its local results into a global groups.
+    /// Notice that the keys of the global dictionary contain row proxies, this enables
+    /// to obtain a keys that stem from different tables.
+    /// </summary>
     internal class LocalGroupGlobalMergeResultProcessorHalfStreamed : GroupResultProcessor
     {
         private MatcherJob[] matcherJobs;
@@ -33,8 +41,6 @@ namespace QueryEngine
             this.bucketFactory = (GroupDictKeyFull x) => { return AggregateBucketResult.CreateBucketResults(this.aggregates); };
             var globalGroups = new ConcurrentDictionary<GroupDictKeyFull, AggregateBucketResult[]>(new RowEqualityComparerGroupDickKeyFull(firstComp.Clone().Comparers)); // to do add the shit
         }
-
-
 
         public override void Process(int matcherID, Element[] result)
         {
