@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 namespace QueryEngine 
 {
     /// <summary>
-    /// Represents a result processor where there are used aggregate function in the query intput 
+    /// Represents a result processor where there are used aggregate functions in the query intput 
     /// but no group by is set.
     /// In that case result of the matchers doesnt have to be stored at all.
     /// The aggregate results will be stored for each matcher in it is separate slot.
-    /// And when the matcher finishes the field finalResults will be set with it is results.
+    /// And when the matcher finishes it is result will be merged onto the field finalResults.
     /// Thus, when all thread finished the final results will be stored in this field.
     /// </summary>
     internal class SingleGroupResultProcessorHalfStreamed : GroupResultProcessor
@@ -41,7 +41,11 @@ namespace QueryEngine
                 if (!this.aggregates[i].IsAstCount) this.ContainsNonAstrix = true;
         }
 
-
+        /// <summary>
+        /// If the given result is not null, the aggregates for the calling matcher are computed.
+        /// If the given result is null, the aggregates are merged onto the field finalResults.
+        /// The result == null means that the mather finished it is search.
+        /// </summary>
         public override void Process(int matcherID, Element[] result)
         {
             var tmpRes = this.matcherResults[matcherID];
@@ -51,14 +55,18 @@ namespace QueryEngine
                 if (this.ContainsNonAstrix)
                 {
                     for (int i = 0; i < this.aggregates.Count; i++)
+                    {
                         if (!this.aggregates[i].IsAstCount) this.aggregates[i].Apply(result, tmpRes[i]);
                         else continue;
+                    }
                 }
             } else
             {
                 for (int i = 0; i < this.aggregates.Count; i++)
+                {
                     if (!this.aggregates[i].IsAstCount) this.aggregates[i].MergeThreadSafe(this.finalResults[i], tmpRes[i]);
                     else ((Count)this.aggregates[i]).IncByThreadSafe(this.numberOfMatchedElements[matcherID], finalResults[i]);
+                }
             }
         }
 
