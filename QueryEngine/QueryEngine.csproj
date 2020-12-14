@@ -73,6 +73,9 @@
     <Compile Include="Parser\Parser\ParserComponents\GroupByParser.cs" />
     <Compile Include="Parser\Parser\ParseTree\Visitor\GroupByVisitor.cs" />
     <Compile Include="QueryStreamed\GroupBy\GroupResultProcessor.cs" />
+    <Compile Include="QueryStreamed\GroupBy\MultiGroup\Comparers\GroupDictKeyFull.cs" />
+    <Compile Include="QueryStreamed\GroupBy\MultiGroup\Comparers\RowEqualityComparerGroupDickKeyFull.cs" />
+    <Compile Include="QueryStreamed\GroupBy\MultiGroup\LocalGroupGlobalMergeHalfStreamed.cs" />
     <Compile Include="QueryStreamed\GroupBy\SingleGroup\SingleGroupResultProcessorHalfStreamed.cs" />
     <Compile Include="QueryStreamed\GroupBy\SingleGroup\SingleGroupResultProcessorStreamed.cs" />
     <Compile Include="QueryStreamed\Match\DFSMatch\Matcher\DFSParallelPatternMatcher\DFSParallelPatternMatcherStreamed.cs" />
@@ -114,7 +117,7 @@
     <Compile Include="Query\GroupBy\Groupers\MultiGroup\EqualityComparer\RowEqualityComparerGroupKey.cs" />
     <Compile Include="Query\GroupBy\Groupers\MultiGroup\ParallelSolutions\GlobalGroup.cs" />
     <Compile Include="Query\GroupBy\Groupers\MultiGroup\ReferenceSolutions\GroupWithBuckets.cs" />
-    <Compile Include="Query\GroupBy\Groupers\MultiGroup\Hasher\DictKeyStruct.cs" />
+    <Compile Include="Query\GroupBy\Groupers\MultiGroup\EqualityComparer\DictKeyStruct.cs" />
     <Compile Include="Query\GroupBy\Groupers\MultiGroup\Hasher\ExpressionHasher.cs" />
     <Compile Include="Query\GroupBy\Groupers\MultiGroup\ParallelSolutions\LocalGroupGlobalMerge.cs" />
     <Compile Include="Query\GroupBy\Groupers\MultiGroup\ReferenceSolutions\GroupWithLists.cs" />
@@ -203,8 +206,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="QueryStreamed\GroupBy\MultiGroup\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
