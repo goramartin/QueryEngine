@@ -10,7 +10,9 @@ That means, every column contains only the same variables (even types if they ar
 One result of the search can be look as an array of those elements, where the number of elements in the 
 array is the number of columns. The specific row can be access with an index or an enumeration, on these actions,
 the RowProxy struct is returned, henceforward, it enables the user access row's columns.
-  
+
+The class also enables to store a temporary row that can be access via the row proxy even thought it might not be
+directly stored in the Lists of the actual table.
  */
 
 using System;
@@ -32,6 +34,8 @@ namespace QueryEngine
         int NumberOfMatchedElements { get; }
         int ColumnCount { get; }
         int RowCount { get; }
+        Element[] temporaryRow { get; set; }
+        void StoreTemporaryRow();
         TableResults.RowProxy this[int rowIndex] { get; }
         void AddOrder(int[] order);
     }
@@ -65,6 +69,11 @@ namespace QueryEngine
         /// Number of elements that actually were matched, if the query needs only count and not results explicitly.
         /// </summary>
         public int NumberOfMatchedElements { get; private set; }
+
+        /// <summary>
+        /// The row that enables to add a temporary row and access it throught appropriate RowProxy struct.
+        /// </summary>
+        public Element[] temporaryRow { get; set; } = null;
 
         /// <summary>
         /// Empty constructor for passing into group by results for streamed grouping.
@@ -108,6 +117,27 @@ namespace QueryEngine
         }
 
         /// <summary>
+        /// Creates an empty instance with the specified number of columns.
+        /// </summary>
+        /// <param name="columnCount"> A number of columns.</param>
+        public TableResults(int columnCount)
+        {
+            this.resTable = new List<Element>[columnCount];
+            for (int i = 0; i < columnCount; i++)
+                this.resTable[i] = new List<Element>();
+        }
+
+
+        /// <summary>
+        /// Store temporary row in the table.
+        /// </summary>
+        public void StoreTemporaryRow()
+        {
+            for (int i = 0; i < this.temporaryRow.Length; i++)
+                this.resTable[i].Add(this.temporaryRow[i]);
+        }
+
+        /// <summary>
         /// Accesses table of results.
         /// </summary>
         /// <param name="rowIndex"> Row of a table. </param>
@@ -129,10 +159,7 @@ namespace QueryEngine
         public IEnumerator<TableResults.RowProxy> GetEnumerator()
         {
             for (int i = 0; i < this.RowCount; i++)
-            {
-                if (this.order == null) yield return new TableResults.RowProxy(this, i);
-                else yield return new TableResults.RowProxy(this, order[i]);
-            }
+                yield return this[i];
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -148,6 +175,8 @@ namespace QueryEngine
         {
             this.order = order;
         }
+
+
 
     }
 

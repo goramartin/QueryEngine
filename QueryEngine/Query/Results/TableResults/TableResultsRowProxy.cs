@@ -40,6 +40,8 @@ namespace QueryEngine
 
             /// <summary>
             /// Accesses one column of the row.
+            /// If the index points to beyond the table lists, then
+            /// it assumes that the row is stored in the temporary field.
             /// </summary>
             /// <param name="column"> Index of a column. </param>
             /// <returns> Element in the given column.</returns>
@@ -47,13 +49,14 @@ namespace QueryEngine
             {
                 get
                 {
-                    return resTable.resTable[column][this.index];
+                    if (this.index == this.resTable.RowCount) return this.resTable.temporaryRow[column];
+                    else return this.resTable.resTable[column][this.index];
                 }
             }
 
             public int GetColumnCount()
             {
-                return this.resTable.resTable.Length;
+                return this.resTable.ColumnCount;
             }
 
 
