@@ -67,14 +67,18 @@ namespace QueryEngine
                     aggregates[j].Apply(in row, tmpJob.aggResults[j], position);
             } else
             {
-                foreach (var item in tmpJob.groups)
-                {
-                    var keyFull = new GroupDictKeyFull(item.Key.hash, tmpJob.results[item.Key.position]);
-                    var buckets = this.globalGroups.GetOrAdd(keyFull, bucketFactory);
-                    for (int j = 0; j < aggregates.Count; j++)
-                        aggregates[j].MergeThreadSafe(buckets[j], tmpJob.aggResults[j], item.Value);
+                // If it runs in single thread. No need to merge the results.
+                if (this.matcherJobs.Length > 1) 
+                { 
+                    foreach (var item in tmpJob.groups)
+                    {
+                        var keyFull = new GroupDictKeyFull(item.Key.hash, tmpJob.results[item.Key.position]);
+                        var buckets = this.globalGroups.GetOrAdd(keyFull, bucketFactory);
+                        for (int j = 0; j < aggregates.Count; j++)
+                            aggregates[j].MergeThreadSafe(buckets[j], tmpJob.aggResults[j], item.Value);
+                    }
+                    this.matcherJobs[matcherID] = null;
                 }
-                this.matcherJobs[matcherID] = null;
             }
         }
 
