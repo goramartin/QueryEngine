@@ -46,6 +46,12 @@ namespace QueryEngine
             return element.Table.TryGetPropertyValue(element.ID, this.PropertyID, out returnValue);
         }
 
+        public override bool TryEvaluate(in Element[] elements, out T returnValue)
+        {
+            Element element = elements[this.VariableIndex];
+            return element.Table.TryGetPropertyValue(element.ID, this.PropertyID, out returnValue);
+        }
+
         public override bool TryEvaluate(in GroupByResultsList.GroupProxyList group, out T returnValue)
         {
             Element element = group.groupRepresentant[this.VariableIndex];

@@ -38,6 +38,11 @@ namespace QueryEngine
             var tmpBucket = (AggregateBucketResult<int>)bucket;
             tmpBucket.aggResult += value;
         }
+        public void IncByThreadSafe(int value, AggregateBucketResult bucket)
+        {
+            var tmpBucket = (AggregateBucketResult<int>)bucket;
+            Interlocked.Add(ref tmpBucket.aggResult, value);
+        }
         public override void Apply(in TableResults.RowProxy row, AggregateBucketResult bucket)
         {
             if (!this.IsAstCount)
@@ -56,6 +61,25 @@ namespace QueryEngine
             }
             else IncrementThreadSafeInternal(ref ((AggregateBucketResult<int>)bucket).aggResult);
         }
+        public override void Apply(in Element[] row, AggregateBucketResult bucket)
+        {
+            if (!this.IsAstCount)
+            {
+                if (this.expr.TryEvaluate(in row, out int returnValue))
+                    IncrementInternal(ref ((AggregateBucketResult<int>)bucket).aggResult);
+            }
+            else IncrementInternal(ref ((AggregateBucketResult<int>)bucket).aggResult);
+        }
+        public override void ApplyThreadSafe(in Element[] row, AggregateBucketResult bucket)
+        {
+            if (!this.IsAstCount)
+            {
+                if (this.expr.TryEvaluate(in row, out int returnValue))
+                    IncrementThreadSafeInternal(ref ((AggregateBucketResult<int>)bucket).aggResult);
+            }
+            else IncrementThreadSafeInternal(ref ((AggregateBucketResult<int>)bucket).aggResult);
+        }
+
         public override void Merge(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
         {
             AddInternal(ref ((AggregateBucketResult<int>)bucket1).aggResult,((AggregateBucketResult<int>)bucket2).aggResult);
@@ -107,7 +131,6 @@ namespace QueryEngine
              }
              else IncrementThreadSafeInternal(ref ((AggregateArrayResults<int>)array).aggResults[position]);
         }
-
 
         private void AddInternal(ref int placement, int value)
         {

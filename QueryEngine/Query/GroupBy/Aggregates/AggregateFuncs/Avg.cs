@@ -26,7 +26,7 @@ namespace QueryEngine
             return "avg";
         }
        
-        
+        // Buckets
         public override void Apply(in TableResults.RowProxy row, AggregateBucketResult bucket)
         {
             if (this.expr.TryEvaluate(in row, out int returnValue))
@@ -43,6 +43,23 @@ namespace QueryEngine
                 AddThreadSafeInternal(ref tmpBucket.aggResult, ref tmpBucket.eltsUsed, returnValue, 1);
             }
         }
+        public override void Apply(in Element[] row, AggregateBucketResult bucket)
+        {
+            if (this.expr.TryEvaluate(in row, out int returnValue))
+            {
+                var tmpBucket = ((AggregateBucketAvgResult<int>)bucket);
+                AddInternal(ref tmpBucket.aggResult, ref tmpBucket.eltsUsed, returnValue, 1);
+            }
+        }
+        public override void ApplyThreadSafe(in Element[] row, AggregateBucketResult bucket)
+        {
+            if (this.expr.TryEvaluate(in row, out int returnValue))
+            {
+                var tmpBucket = ((AggregateBucketAvgResult<int>)bucket);
+                AddThreadSafeInternal(ref tmpBucket.aggResult, ref tmpBucket.eltsUsed, returnValue, 1);
+            }
+        }
+
         public override void Merge(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
         {
             var tmpBucket1 = ((AggregateBucketAvgResult<int>)bucket1);
@@ -68,6 +85,7 @@ namespace QueryEngine
             AddThreadSafeInternal(ref tmpBucket.aggResult, ref tmpBucket.eltsUsed, tmpList.aggResults[position], tmpList.eltsUsed[position]);
         }
 
+        // Lists
         public override void Apply(in TableResults.RowProxy row, AggregateListResults list, int position)
         {
             if (this.expr.TryEvaluate(in row, out int returnValue))
@@ -104,6 +122,7 @@ namespace QueryEngine
 
         }
         
+        // Arrays
         public override void ApplyThreadSafe(in TableResults.RowProxy row, AggregateArrayResults array, int position)
         {
             if (this.expr.TryEvaluate(in row, out int returnValue))

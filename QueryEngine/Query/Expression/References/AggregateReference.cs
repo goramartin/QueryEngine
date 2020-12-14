@@ -58,6 +58,12 @@ namespace QueryEngine
         {
             throw new NotImplementedException();
         }
+
+        public override bool TryEvaluate(in Element[] elements, out T value)
+        {
+            throw new NotImplementedException();
+        }
+
         public override bool TryEvaluate(in GroupByResultsList.GroupProxyList group, out T returnValue)
         {
             returnValue = group.GetValue<T>(this.AggrPosition);

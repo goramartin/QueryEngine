@@ -43,6 +43,12 @@ namespace QueryEngine
             return true;
         }
 
+        public override bool TryEvaluate(in Element[] elements, out int returnValue)
+        {
+            returnValue = elements[this.VariableIndex].ID;
+            return true;
+        }
+
         public override bool TryEvaluate(in GroupByResultsList.GroupProxyList group, out int returnValue)
         {
             returnValue = group.groupRepresentant[this.VariableIndex].ID;

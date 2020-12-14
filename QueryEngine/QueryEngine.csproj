@@ -72,6 +72,9 @@
     <Compile Include="DB\Table\Table.cs" />
     <Compile Include="Parser\Parser\ParserComponents\GroupByParser.cs" />
     <Compile Include="Parser\Parser\ParseTree\Visitor\GroupByVisitor.cs" />
+    <Compile Include="QueryStreamed\GroupBy\GroupResultProcessor.cs" />
+    <Compile Include="QueryStreamed\GroupBy\SingleGroup\SingleGroupResultProcessorHalfStreamed.cs" />
+    <Compile Include="QueryStreamed\GroupBy\SingleGroup\SingleGroupResultProcessorStreamed.cs" />
     <Compile Include="QueryStreamed\Match\DFSMatch\Matcher\DFSParallelPatternMatcher\DFSParallelPatternMatcherStreamed.cs" />
     <Compile Include="QueryStreamed\Match\DFSMatch\Matcher\DFSPatternMatcher\DFSPatternMatcherStreamed.cs" />
     <Compile Include="QueryStreamed\Match\IPatternMatcherStreamed.cs" />
@@ -88,6 +91,7 @@
     <Compile Include="Query\Match\DFSMatch\Matcher\DFSParallelPatternMatcher\DFSParallelPatternMatcherBase.cs" />
     <Compile Include="Query\Match\DFSMatch\Matcher\DFSParallelPatternMatcher\VertexDistributor.cs" />
     <Compile Include="Query\Match\DFSMatch\Matcher\DFSPatternMatcher\DFSPatternMatcher.cs" />
+    <Compile Include="Query\Match\MatchObjectBase.cs" />
     <Compile Include="Query\Match\ISingleThreadPatternMatcher.cs" />
     <Compile Include="Query\Select\Printer\IRowPrinter.cs" />
     <Compile Include="Query\Expression\References\AggregateReference.cs" />
@@ -199,6 +203,8 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="QueryStreamed\GroupBy\MultiGroup\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -46,6 +46,33 @@ namespace QueryEngine
                 ApplyThreadSafeInternal(ref tmpBucket.aggResult, ref tmpBucket.isSet, returnValue, tmpBucket);
             }
         }
+        public override void Apply(in Element[] row, AggregateBucketResult bucket)
+        {
+            if (this.expr.TryEvaluate(in row, out T returnValue))
+            {
+                var tmpBucket = ((AggregateBucketResultWithSetFlag<T>)bucket);
+                if (tmpBucket.isSet)
+                {
+                    if (Compare(tmpBucket.aggResult, returnValue)) tmpBucket.aggResult = returnValue;
+                    else { /* tmpBucket.aggResult > returnValue */ }
+                }
+                else
+                {
+                    tmpBucket.aggResult = returnValue;
+                    tmpBucket.isSet = true;
+                }
+            }
+        }
+        public override void ApplyThreadSafe(in Element[] row, AggregateBucketResult bucket)
+        {
+            if (this.expr.TryEvaluate(in row, out T returnValue))
+            {
+                var tmpBucket = ((AggregateBucketResultWithSetFlag<T>)bucket);
+                ApplyThreadSafeInternal(ref tmpBucket.aggResult, ref tmpBucket.isSet, returnValue, tmpBucket);
+            }
+        }
+
+
         public override void Merge(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
         {
             var tmpBucket1 = ((AggregateBucketResultWithSetFlag<T>)bucket1);

@@ -120,6 +120,7 @@ namespace QueryEngine
         /// <param name="formater"> A formater to use by printer. </param>
         /// <param name="verticesPerThread"> A number of vertices distributed to threads during parallel computation of the query.</param>
         /// <param name="fileName"> A file to store results into. </param>
+        /// <param name="isStreamed"> A flag to distinguish a normal construtor.</param>
         private Query(List<Token> tokens, Graph graph, int threadCount, string printer, string formater, int verticesPerThread, string fileName, bool isStreamed)
         {
             this.graph = graph;

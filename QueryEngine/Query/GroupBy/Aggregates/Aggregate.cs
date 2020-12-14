@@ -108,12 +108,14 @@ namespace QueryEngine
         /// <param name="row"> A result table row. </param>
         /// <param name="bucket"> A position to apply the computed value into. </param>
         public abstract void Apply(in TableResults.RowProxy row, AggregateBucketResult bucket);
+        public abstract void Apply(in Element[] row, AggregateBucketResult bucket);
         /// <summary>
         /// A thread safe version of the simple apply method.
         /// </summary>
         /// <param name="row"> A result table row. </param>
         /// <param name="bucket"> A position to apply the computed value into. </param>
         public abstract void ApplyThreadSafe(in TableResults.RowProxy row, AggregateBucketResult bucket);
+        public abstract void ApplyThreadSafe(in Element[] row, AggregateBucketResult bucket);
         /// <summary>
         /// Merges results of two buckets into the bucket1.
         /// It assumes that the results were set before.
