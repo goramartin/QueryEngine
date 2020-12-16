@@ -84,7 +84,8 @@ namespace QueryEngine
 
         public override void RetrieveResults(out ITableResults resTable, out GroupByResults groupByResults)
         {
-            throw new NotImplementedException();
+            resTable = null;
+            groupByResults = new ConDictGroupDictKeyFullBucket(this.globalGroups, null);
         }
 
 
