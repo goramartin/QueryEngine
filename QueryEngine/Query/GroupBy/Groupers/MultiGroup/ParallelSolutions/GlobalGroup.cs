@@ -90,14 +90,13 @@ namespace QueryEngine
 
         private GroupByJob[] CreateJobsBuckets(GroupByJob[] jobs, RowEqualityComparerInt equalityComparer, ITableResults results, int current, int addition)
         {
-            Func<int, AggregateBucketResult[]> bucketFactory = (int x) => { return AggregateBucketResult.CreateBucketResults(this.aggregates); };
             var concurrentDictBuckets = new ConcurrentDictionary<int, AggregateBucketResult[]>(equalityComparer);
             for (int i = 0; i < jobs.Length - 1; i++)
             {
-                jobs[i] = new GroupByJobBuckets(concurrentDictBuckets, this.aggregates, results, current, current + addition, bucketFactory);
+                jobs[i] = new GroupByJobBuckets(concurrentDictBuckets, this.aggregates, results, current, current + addition);
                 current += addition;
             }
-            jobs[jobs.Length - 1] = new GroupByJobBuckets(concurrentDictBuckets, this.aggregates, results, current, results.NumberOfMatchedElements, bucketFactory);
+            jobs[jobs.Length - 1] = new GroupByJobBuckets(concurrentDictBuckets, this.aggregates, results, current, results.NumberOfMatchedElements);
             return jobs;
         }
 
@@ -185,14 +184,17 @@ namespace QueryEngine
             var groups = tmpJob.groups;
             var aggregates = tmpJob.aggregates;
             AggregateBucketResult[] buckets = null;
+            AggregateBucketResult[] spareBuckets = AggregateBucketResult.CreateBucketResults(aggregates);
             TableResults.RowProxy row;
-            var bucketFactory = tmpJob.bucketFactory;
             #endregion DECL
 
             for (int i = tmpJob.start; i < tmpJob.end; i++)
             {
                 row = results[i];
-                buckets = groups.GetOrAdd(i, bucketFactory);
+                buckets = groups.GetOrAdd(i, spareBuckets);
+                // If the spare part was inserted, create a brand-new in advance.
+                if (object.ReferenceEquals(spareBuckets, buckets))
+                    spareBuckets = AggregateBucketResult.CreateBucketResults(aggregates);
                 for (int j = 0; j < aggregates.Count; j++)
                     aggregates[j].ApplyThreadSafe(in row, buckets[j]);
             }
@@ -220,16 +222,14 @@ namespace QueryEngine
         private class GroupByJobBuckets : GroupByJob
         {
             public ConcurrentDictionary<int, AggregateBucketResult[]> groups;
-            public Func<int, AggregateBucketResult[]> bucketFactory;
 
-            public GroupByJobBuckets(ConcurrentDictionary<int, AggregateBucketResult[]> groups, List<Aggregate> aggregates, ITableResults results, int start, int end, Func<int, AggregateBucketResult[]> bucketFactory) : base(aggregates, results, start, end)
+            public GroupByJobBuckets(ConcurrentDictionary<int, AggregateBucketResult[]> groups, List<Aggregate> aggregates, ITableResults results, int start, int end) : base(aggregates, results, start, end)
             {
                 this.aggregates = aggregates;
                 this.results = results;
                 this.start = start;
                 this.end = end;
                 this.groups = groups;
-                this.bucketFactory = bucketFactory;
             }
         }
 

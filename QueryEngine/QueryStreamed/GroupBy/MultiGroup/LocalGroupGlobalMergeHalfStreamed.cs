@@ -20,7 +20,6 @@ namespace QueryEngine
     {
         private MatcherJob[] matcherJobs;
         private ConcurrentDictionary<GroupDictKeyFull, AggregateBucketResult[]> globalGroups;
-        private Func<GroupDictKeyFull, AggregateBucketResult[]> bucketFactory;
 
         public LocalGroupGlobalMergeResultProcessorHalfStreamed(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper, int columnCount) : base(aggs, hashes, helper, columnCount)
         {
@@ -31,14 +30,13 @@ namespace QueryEngine
             var firstHasher = new RowHasher(hashers);
             firstComp.SetCache(firstHasher);
             firstHasher.SetCache(firstComp.Comparers);
-            this.matcherJobs[0] = new MatcherJob(this.ColumnCount, firstComp, firstHasher);
+            this.matcherJobs[0] = new MatcherJob(this.ColumnCount, firstComp, firstHasher, AggregateBucketResult.CreateBucketResults(this.aggregates));
 
             for (int i = 1; i < ThreadCount; i++)
             {
                 this.CloneHasherAndComparer(firstComp, firstHasher, out RowEqualityComparerGroupKey newComp, out RowHasher newHasher);
-                matcherJobs[i] = new MatcherJob(this.ColumnCount, newComp, newHasher);
+                matcherJobs[i] = new MatcherJob(this.ColumnCount, newComp, newHasher, AggregateBucketResult.CreateBucketResults(this.aggregates));
             }
-            this.bucketFactory = (GroupDictKeyFull x) => { return AggregateBucketResult.CreateBucketResults(this.aggregates); };
             var globalGroups = new ConcurrentDictionary<GroupDictKeyFull, AggregateBucketResult[]>(new RowEqualityComparerGroupDickKeyFull(firstComp.Clone().Comparers)); // to do add the shit
         }
 
@@ -63,8 +61,8 @@ namespace QueryEngine
                     tmpJob.results.StoreTemporaryRow();
                     tmpJob.results.temporaryRow = null;
                 }
-                for (int j = 0; j < aggregates.Count; j++)
-                    aggregates[j].Apply(in row, tmpJob.aggResults[j], position);
+                for (int j = 0; j < this.aggregates.Count; j++)
+                    this.aggregates[j].Apply(in row, tmpJob.aggResults[j], position);
             } else
             {
                 // If it runs in single thread. No need to merge the results.
@@ -73,9 +71,11 @@ namespace QueryEngine
                     foreach (var item in tmpJob.groups)
                     {
                         var keyFull = new GroupDictKeyFull(item.Key.hash, tmpJob.results[item.Key.position]);
-                        var buckets = this.globalGroups.GetOrAdd(keyFull, bucketFactory);
-                        for (int j = 0; j < aggregates.Count; j++)
-                            aggregates[j].MergeThreadSafe(buckets[j], tmpJob.aggResults[j], item.Value);
+                        var buckets = this.globalGroups.GetOrAdd(keyFull, tmpJob.spareBuckets);
+                        if (object.ReferenceEquals(tmpJob.spareBuckets, buckets))
+                            tmpJob.spareBuckets = AggregateBucketResult.CreateBucketResults(this.aggregates);
+                        for (int j = 0; j < this.aggregates.Count; j++)
+                            this.aggregates[j].MergeThreadSafe(buckets[j], tmpJob.aggResults[j], item.Value);
                     }
                     this.matcherJobs[matcherID] = null;
                 }
@@ -96,13 +96,15 @@ namespace QueryEngine
             public Dictionary<GroupDictKey, int> groups;
             public List<AggregateListResults> aggResults;
             public RowHasher hasher;
+            public AggregateBucketResult[] spareBuckets;
 
-            public MatcherJob(int columnCount, RowEqualityComparerGroupKey comparer, RowHasher hasher)
+            public MatcherJob(int columnCount, RowEqualityComparerGroupKey comparer, RowHasher hasher, AggregateBucketResult[] spareBuckets)
             {
                 this.results = new TableResults(columnCount);
                 comparer.Results = this.results;
                 this.groups = new Dictionary<GroupDictKey, int>(comparer);
                 this.hasher = hasher;
+                this.spareBuckets = spareBuckets;
             }
         }
         private void CloneHasherAndComparer(RowEqualityComparerGroupKey comparer, RowHasher hasher, out RowEqualityComparerGroupKey retComparer, out RowHasher retHasher)
