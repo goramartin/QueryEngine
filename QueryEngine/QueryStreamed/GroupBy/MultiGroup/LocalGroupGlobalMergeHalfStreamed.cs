@@ -85,7 +85,8 @@ namespace QueryEngine
         public override void RetrieveResults(out ITableResults resTable, out GroupByResults groupByResults)
         {
             resTable = null;
-            groupByResults = new ConDictGroupDictKeyFullBucket(this.globalGroups, null);
+            if (this.matcherJobs.Length > 1) groupByResults = new ConDictGroupDictKeyFullBucket(this.globalGroups, null);
+            else groupByResults = new GroupByResultsList(this.matcherJobs[0].groups, this.matcherJobs[0].aggResults, this.matcherJobs[0].results);
         }
 
 
