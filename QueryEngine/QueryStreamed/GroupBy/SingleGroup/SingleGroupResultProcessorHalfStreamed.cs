@@ -29,7 +29,7 @@ namespace QueryEngine
         private AggregateBucketResult[] finalResults;
         private bool ContainsNonAstrix;
 
-        public SingleGroupResultProcessorHalfStreamed(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper): base(aggs, hashes, helper)
+        public SingleGroupResultProcessorHalfStreamed(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper, int columnCount): base(aggs, hashes, helper, columnCount)
         {
             this.matcherResults = new AggregateBucketResult[helper.ThreadCount][];
             this.numberOfMatchedElements = new int[helper.ThreadCount];
@@ -75,7 +75,7 @@ namespace QueryEngine
             var tmpDict = new Dictionary<GroupDictKey, AggregateBucketResult[]>();
             tmpDict.Add(new GroupDictKey(0, 0), this.finalResults);
             resTable = null;
-            groupByResults = new GroupByResultsBucket(tmpDict, null, null, new TableResults());
+            groupByResults = new DictGroupDictKeyBucket(tmpDict, new TableResults());
         }
     }
 }

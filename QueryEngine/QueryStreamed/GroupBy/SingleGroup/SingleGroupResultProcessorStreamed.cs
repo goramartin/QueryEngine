@@ -22,7 +22,7 @@ namespace QueryEngine
         private int matchersFinished;
         private bool ContainsNonAsterix;
 
-        public SingleGroupResultProcessorStreamed(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper) : base(aggs, hashes, helper)
+        public SingleGroupResultProcessorStreamed(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper, int columnCount) : base(aggs, hashes, helper, columnCount)
         {
             this.finalResults = AggregateBucketResult.CreateBucketResults(this.aggregates);
             for (int i = 0; i < this.aggregates.Count; i++)
@@ -63,7 +63,7 @@ namespace QueryEngine
             var tmpDict = new Dictionary<GroupDictKey, AggregateBucketResult[]>();
             tmpDict.Add(new GroupDictKey(0, 0), this.finalResults);
             resTable = null;
-            groupByResults = new GroupByResultsBucket(tmpDict, null, null, new TableResults());
+            groupByResults = new DictGroupDictKeyBucket(tmpDict, new TableResults());
         }
     }
 }

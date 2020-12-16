@@ -22,7 +22,7 @@ namespace QueryEngine
         private ConcurrentDictionary<GroupDictKeyFull, AggregateBucketResult[]> globalGroups;
         private Func<GroupDictKeyFull, AggregateBucketResult[]> bucketFactory;
 
-        public LocalGroupGlobalMergeResultProcessorHalfStreamed(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper): base(aggs, hashes, helper)
+        public LocalGroupGlobalMergeResultProcessorHalfStreamed(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper, int columnCount) : base(aggs, hashes, helper, columnCount)
         {
             this.matcherJobs = new MatcherJob[helper.ThreadCount];
             // Create initial job, comps and hashers
@@ -31,12 +31,12 @@ namespace QueryEngine
             var firstHasher = new RowHasher(hashers);
             firstComp.SetCache(firstHasher);
             firstHasher.SetCache(firstComp.Comparers);
-            this.matcherJobs[0] = new MatcherJob(helper.ColumnCount, firstComp, firstHasher);
+            this.matcherJobs[0] = new MatcherJob(this.ColumnCount, firstComp, firstHasher);
 
             for (int i = 1; i < ThreadCount; i++)
             {
                 this.CloneHasherAndComparer(firstComp, firstHasher, out RowEqualityComparerGroupKey newComp, out RowHasher newHasher);
-                matcherJobs[i] = new MatcherJob(helper.ColumnCount, newComp, newHasher);
+                matcherJobs[i] = new MatcherJob(this.ColumnCount, newComp, newHasher);
             }
             this.bucketFactory = (GroupDictKeyFull x) => { return AggregateBucketResult.CreateBucketResults(this.aggregates); };
             var globalGroups = new ConcurrentDictionary<GroupDictKeyFull, AggregateBucketResult[]>(new RowEqualityComparerGroupDickKeyFull(firstComp.Clone().Comparers)); // to do add the shit

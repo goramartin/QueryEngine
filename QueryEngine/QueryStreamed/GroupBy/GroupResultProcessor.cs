@@ -11,12 +11,17 @@ namespace QueryEngine
         protected List<ExpressionHolder> hashes { get; }
         protected bool InParallel { get; }
         protected int ThreadCount { get; }
-        protected GroupResultProcessor(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper)
+        /// <summary>
+        /// Represents a number of variables defined in the match clause of the query.
+        /// </summary>
+        protected int ColumnCount { get; }
+        protected GroupResultProcessor(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper, int columnCount)
         {
             this.aggregates = aggs;
             this.hashes = hashes;
             this.InParallel = helper.InParallel;
             this.ThreadCount = helper.ThreadCount;
+            this.ColumnCount = columnCount;
         }
 
         protected virtual void CreateHashersAndComparers(out List<ExpressionEqualityComparer> comparers, out List<ExpressionHasher> hashers)
