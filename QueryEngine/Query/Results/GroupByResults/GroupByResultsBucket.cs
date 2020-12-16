@@ -14,37 +14,13 @@ namespace QueryEngine
     /// It contains a proxy class that is used for iteration of the groups.
     /// It enables to access aggregated values through a generic method.
     /// </summary>
-    internal class GroupByResultsBucket : GroupByResults, IEnumerable<GroupByResultsBucket.GroupProxyBucket>
+    internal abstract class GroupByResultsBucket : GroupByResults, IEnumerable<GroupByResultsBucket.GroupProxyBucket>
     {
         // To do make divided.
-        protected Dictionary<GroupDictKey, AggregateBucketResult[]> groups;
-        protected ConcurrentDictionary<int, AggregateBucketResult[]> groupsCon;
-        protected ConcurrentDictionary<GroupDictKey, AggregateBucketResult[]> groupsConGroupKey;
+        public GroupByResultsBucket(int count, ITableResults resTable) : base(count, resTable)
+        {}
 
-        public GroupByResultsBucket(Dictionary<GroupDictKey, AggregateBucketResult[]> groups, ConcurrentDictionary<int, AggregateBucketResult[]> groupsCon, ConcurrentDictionary<GroupDictKey, AggregateBucketResult[]> groupsConGroupKey, ITableResults resTable) : base(groups.Count, resTable)
-        {
-            this.groups = groups;
-            this.groupsCon = groupsCon;
-            this.groupsConGroupKey = groupsConGroupKey;
-        }
-
-        public virtual IEnumerator<GroupByResultsBucket.GroupProxyBucket> GetEnumerator()
-        {
-            if (this.groups != null)
-            {
-                foreach (var item in groups)
-                    yield return new GroupByResultsBucket.GroupProxyBucket(this.resTable[item.Key.position], item.Value);
-            } else if (groupsCon != null)
-            {
-                foreach (var item in groupsCon)
-                    yield return new GroupByResultsBucket.GroupProxyBucket(this.resTable[item.Key], item.Value);
-            } else
-            {
-                foreach (var item in groupsConGroupKey)
-                    yield return new GroupByResultsBucket.GroupProxyBucket(this.resTable[item.Key.position], item.Value);
-            }
-        }
-
+        public abstract IEnumerator<GroupByResultsBucket.GroupProxyBucket> GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator()
         {
             return this.GetEnumerator();
@@ -65,6 +41,69 @@ namespace QueryEngine
             {
                 return ((IGetFinal<T>)this.aggregatesResults[aggregatePos]).GetFinal(0);
             }
+        }
+    }
+
+
+    internal class DictGroupDictKeyBucket: GroupByResultsBucket
+    {
+        protected Dictionary<GroupDictKey, AggregateBucketResult[]> groups;
+        public DictGroupDictKeyBucket(Dictionary<GroupDictKey, AggregateBucketResult[]> groups, ITableResults resTable) : base(groups.Count, resTable)
+        {
+            this.groups = groups;
+        }
+
+        public override IEnumerator<GroupProxyBucket> GetEnumerator()
+        {
+            foreach (var item in groups)
+                yield return new GroupByResultsBucket.GroupProxyBucket(this.resTable[item.Key.position], item.Value);
+        }
+    }
+
+    internal class ConDictGroupByResultsBucket : GroupByResultsBucket
+    {
+        protected ConcurrentDictionary<GroupDictKey, AggregateBucketResult[]> groups;
+        public ConDictGroupByResultsBucket(ConcurrentDictionary<GroupDictKey, AggregateBucketResult[]> groups, ITableResults resTable) : base(groups.Count, resTable)
+        {
+            this.groups = groups;
+        }
+
+        public override IEnumerator<GroupProxyBucket> GetEnumerator()
+        {
+            foreach (var item in groups)
+                yield return new GroupByResultsBucket.GroupProxyBucket(this.resTable[item.Key.position], item.Value);
+        }
+    }
+
+    internal class ConDictIntBucket  : GroupByResultsBucket
+    {
+        protected ConcurrentDictionary<int, AggregateBucketResult[]> groups;
+        public ConDictIntBucket(ConcurrentDictionary<int, AggregateBucketResult[]> groups, ITableResults resTable) : base(groups.Count, resTable)
+        {
+            this.groups = groups;
+        }
+
+        public override IEnumerator<GroupProxyBucket> GetEnumerator()
+        {
+            foreach (var item in groups)
+                yield return new GroupByResultsBucket.GroupProxyBucket(this.resTable[item.Key], item.Value);
+        }
+    }
+
+    internal class ConDictGroupDictKeyFullBucket : GroupByResultsBucket
+    {
+        protected ConcurrentDictionary<GroupDictKeyFull, AggregateBucketResult[]> groups;
+
+
+        public ConDictGroupDictKeyFullBucket(ConcurrentDictionary<GroupDictKeyFull, AggregateBucketResult[]> groups, ITableResults resTable) : base(groups.Count, resTable)
+        {
+            this.groups = groups;
+        }
+
+        public override IEnumerator<GroupProxyBucket> GetEnumerator()
+        {
+            foreach (var item in groups)
+                yield return new GroupByResultsBucket.GroupProxyBucket(item.Key.row, item.Value);
         }
     }
 

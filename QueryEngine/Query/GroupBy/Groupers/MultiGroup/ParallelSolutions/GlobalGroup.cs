@@ -262,7 +262,7 @@ namespace QueryEngine
             if (this.BucketStorage)
             {
                 var tmpJob = (GroupByJobBuckets)job;
-                return new GroupByResultsBucket(null, tmpJob.groups, null, tmpJob.results);
+                return new ConDictIntBucket(tmpJob.groups, tmpJob.results);
             }
             else
             {

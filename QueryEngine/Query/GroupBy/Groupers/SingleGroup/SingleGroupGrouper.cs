@@ -186,7 +186,7 @@ namespace QueryEngine
         {
             var tmpDict = new Dictionary<GroupDictKey, AggregateBucketResult[]>();
             tmpDict.Add(new GroupDictKey(0, 0), bucket);
-            return new GroupByResultsBucket(tmpDict, null, null, results);
+            return new DictGroupDictKeyBucket(tmpDict, results);
         }
     }
 }

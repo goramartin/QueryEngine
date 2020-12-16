@@ -255,7 +255,7 @@ namespace QueryEngine
 
         private GroupByResults CreateGroupByResults(GroupByJob job)
         {
-            return new GroupByResultsBucket(null, null, job.globalGroups, job.results);
+            return new ConDictGroupByResultsBucket(job.globalGroups, job.results);
         }
     }
 }

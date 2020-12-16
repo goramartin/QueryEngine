@@ -319,7 +319,7 @@ namespace QueryEngine
             if (this.BucketStorage)
             {
                 var tmp = (GroupByJobBuckets)job;
-                return new GroupByResultsBucket(tmp.groups, null, null, tmp.results);
+                return new DictGroupDictKeyBucket(tmp.groups, tmp.results);
             } else
             {
                 var tmp = (GroupByJobLists)job;

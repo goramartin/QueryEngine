@@ -50,7 +50,7 @@ namespace QueryEngine
                     this.aggregates[j].Apply(in row, buckets[j]);
             }
 
-            return new GroupByResultsBucket(groups, null, null, results);
+            return new DictGroupDictKeyBucket(groups, results);
         }
     }
 }
