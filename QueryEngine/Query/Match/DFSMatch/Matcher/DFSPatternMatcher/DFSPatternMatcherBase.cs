@@ -349,7 +349,7 @@ namespace QueryEngine
         {
             Edge nextEdge;
             // If no edge has been used -> pick in edge /or/ it hasnt finished iteration over in edges 
-            if (lastUsedEdge == null || lastUsedEdge.GetElementType() == typeof(InEdge))
+            if (lastUsedEdge == null || lastUsedEdge.GetType() == typeof(InEdge))
             {
                 nextEdge = FindInEdge(vertex, lastUsedEdge);
                 if (nextEdge == null) lastUsedEdge = null;

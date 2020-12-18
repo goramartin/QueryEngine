@@ -72,6 +72,7 @@
     <Compile Include="DB\Table\Table.cs" />
     <Compile Include="Parser\Parser\ParserComponents\GroupByParser.cs" />
     <Compile Include="Parser\Parser\ParseTree\Visitor\GroupByVisitor.cs" />
+    <Compile Include="QueryStreamed\GroupBy\AggregateInternalResults\AggregateBucketResultStreamed.cs" />
     <Compile Include="QueryStreamed\GroupBy\GroupResultProcessor.cs" />
     <Compile Include="QueryStreamed\GroupBy\MultiGroup\Comparers\GroupDictKeyFull.cs" />
     <Compile Include="QueryStreamed\GroupBy\MultiGroup\Comparers\RowEqualityComparerGroupDickKeyFull.cs" />

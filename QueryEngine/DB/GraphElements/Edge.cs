@@ -25,7 +25,6 @@ namespace QueryEngine
     /// </summary>
     internal abstract class Edge : Element
     {
-
         /// <summary>
         /// A vertex the edge points towards.
         /// </summary>
@@ -47,12 +46,6 @@ namespace QueryEngine
         public InEdge() : base()
         {
         }
-
-        public override Type GetElementType()
-        {
-            return typeof(InEdge);
-        }
-
     }
 
     /// <summary>
@@ -61,10 +54,5 @@ namespace QueryEngine
     internal sealed class OutEdge : Edge
     {
         public OutEdge() : base() { }
-
-        public override Type GetElementType()
-        {
-            return typeof(OutEdge);
-        }
     }
 }

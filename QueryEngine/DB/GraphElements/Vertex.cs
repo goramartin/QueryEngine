@@ -78,10 +78,5 @@ namespace QueryEngine
             start = this.InEdgesStartPosition;
             end = this.InEdgesEndPosition;
         }
-
-        public override Type GetElementType()
-        {
-            return typeof(Vertex);
-        }
     }
 }

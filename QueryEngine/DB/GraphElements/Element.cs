@@ -39,13 +39,5 @@ namespace QueryEngine
         {
             return this.ID;
         }
-
-        /// <summary>
-        /// This method returns type of a graph element.
-        /// It is used instead of the reflection method which is a bit slower.
-        /// </summary>
-        /// <returns></returns>
-        public abstract Type GetElementType();
-
     }
 }
