@@ -27,27 +27,27 @@ namespace QueryEngine
     /// <summary>
     /// Class that implements basic DFS pattern.
     /// Creates it self from parsed pattern.
-    /// Pattern is represented by the lists of base match nodes.
+    /// Pattern is represented by the 2d-array of base match nodes.
     /// Also it remembers the state of the matched variables and state
     /// which nodes and chains should be matched.
     /// The matched variables are stored in the scope.
     /// </summary>
     internal sealed class DFSPattern : IDFSPattern
     {
-        private List<List<DFSBaseMatch>> patterns;
+        private DFSBaseMatch[][] patterns;
         public int CurrentPatternIndex { get; private set; }
         public int CurrentMatchNodeIndex { get; private set; }
         public int OverAllIndex { get; private set; }
-        public int PatternCount { get => this.patterns.Count; }
-        public int CurrentPatternCount { get => this.patterns[this.CurrentPatternIndex].Count; }
+        public int PatternCount { get => this.patterns.Length; }
+        public int CurrentPatternCount { get => this.patterns[this.CurrentPatternIndex].Length; }
         public int AllNodeCount 
         { 
             get
             {
                 int Count = 0;
-                for (int i = 0; i < this.patterns.Count; i++)
+                for (int i = 0; i < this.patterns.Length; i++)
                 {
-                    Count += this.patterns[i].Count;
+                    Count += this.patterns[i].Length;
                 }
                 return Count;
             }
@@ -65,9 +65,9 @@ namespace QueryEngine
         /// </summary>
         /// <param name="dFSBaseMatches"> Pattern to match during search. </param>
         /// <param name="variableCount"> Number of variables for the scope. </param>
-        private DFSPattern(List<List<DFSBaseMatch>> dFSBaseMatches, int variableCount)
+        private DFSPattern(DFSBaseMatch[][] dFSBaseMatches, int variableCount)
         {
-            if (dFSBaseMatches == null || dFSBaseMatches.Count == 0) 
+            if (dFSBaseMatches == null || dFSBaseMatches.Length == 0) 
                 throw new ArgumentException($"{this.GetType()} passed null or empty matches.");
 
             this.patterns = dFSBaseMatches;
@@ -83,15 +83,14 @@ namespace QueryEngine
         /// then spliting is done if neccessary in order to ensure that match algorithm can match only forward, then 
         /// proper match nodes are created with a match node factory.
         /// </summary>
-        /// <param name="map"></param>
-        /// <param name="parsedPatterns"></param>
         public DFSPattern(VariableMap map, List<ParsedPattern> parsedPatterns)
         {
             if (parsedPatterns == null || parsedPatterns.Count == 0) 
                 throw new ArgumentException($"{this.GetType()} passed null or empty parsed pattern.");
 
-            this.patterns = new List<List<DFSBaseMatch>>();
-            this.CreatePattern(parsedPatterns, map);
+            var tmpPattern = new List<List<DFSBaseMatch>>();
+            this.CreatePattern(tmpPattern, parsedPatterns, map);
+            this.CreatePatternArray(tmpPattern);
 
             this.scope = new Element[map.GetCount()];
             this.scope.Populate(null);
@@ -102,6 +101,23 @@ namespace QueryEngine
         }
 
         #region PatternCreation
+
+        /// <summary>
+        /// Turns lists of parsed patterns into 2d array.
+        /// </summary>
+        private void CreatePatternArray(List<List<DFSBaseMatch>> patternList)
+        {
+            // Init the array containing chains.
+            this.patterns = new DFSBaseMatch[patternList.Count][];
+            // Make space for each chain and copy its result into it.
+            for (int i = 0; i < patternList.Count; i++)
+            {
+                this.patterns[i] = new DFSBaseMatch[patternList[i].Count];
+                for (int j = 0; j < patternList[i].Count; j++)
+                    this.patterns[i][j] = patternList[i][j];
+            }
+        }
+
         /// <summary>
         /// Creates pattern from Parsed Pattern passed from match visitor, also actualises a map for variables.
         /// Given pattern is ordered so that each connected pattern go after one another and form a connected components. 
@@ -112,7 +128,7 @@ namespace QueryEngine
         /// </summary>
         /// <param name="parsedPatterns"> Pattern created by Match Visitor </param>
         /// <param name="variableMap"> Query map of variables (empty) </param>
-        private void CreatePattern(List<ParsedPattern> parsedPatterns, VariableMap variableMap)
+        private void CreatePattern(List<List<DFSBaseMatch>> final, List<ParsedPattern> parsedPatterns, VariableMap variableMap)
         {
             var orderedPatterns = OrderParsedPatterns(parsedPatterns);
 
@@ -127,15 +143,15 @@ namespace QueryEngine
                 // Add both parts into the real pattern
                 if (firstPart != null)
                 {
-                    this.patterns.Add(CreateChain(firstPart.pattern, variableMap));
+                    final.Add(CreateChain(firstPart.pattern, variableMap));
                 }
                 // Always add the second part even if the has not been splitted.
-                this.patterns.Add(CreateChain(orderedPatterns[i].pattern, variableMap));
+                final.Add(CreateChain(orderedPatterns[i].pattern, variableMap));
             }
 
             // Check that each subpattern has at least one element.
-            for (int i = 0; i < this.patterns.Count; i++)
-                if (this.patterns[i].Count == 0) 
+            for (int i = 0; i < final.Count; i++)
+                if (final[i].Count == 0) 
                     throw new ArgumentException($"{this.GetType()} one of the patterns is empty.");
 
         }
@@ -247,6 +263,7 @@ namespace QueryEngine
 
         #endregion PatternCreation
 
+
         #region PatternInterface
 
         /// <summary>
@@ -339,12 +356,12 @@ namespace QueryEngine
 
         public bool IsLastNodeInCurrentPattern()
         {
-            return (this.patterns[this.CurrentPatternIndex].Count - 1) == this.CurrentMatchNodeIndex ? true : false;
+            return (this.patterns[this.CurrentPatternIndex].Length - 1) == this.CurrentMatchNodeIndex ? true : false;
         }
 
         public bool IsLastPattern()
         {
-            return this.CurrentPatternIndex == (this.patterns.Count - 1) ? true : false;
+            return this.CurrentPatternIndex == (this.patterns.Length - 1) ? true : false;
         }
 
        /// <summary>
