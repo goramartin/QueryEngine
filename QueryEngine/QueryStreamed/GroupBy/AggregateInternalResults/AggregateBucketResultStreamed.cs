@@ -13,6 +13,7 @@ namespace QueryEngine
     /// </summary>
     internal class AggregateBucketResultStreamed<T> : AggregateBucketResult<T>
     {
+        public bool isSet = false;
         public override int GetHashCode()
         {
             return this.aggResult.GetHashCode();
