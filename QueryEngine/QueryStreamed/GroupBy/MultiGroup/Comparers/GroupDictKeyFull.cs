@@ -11,7 +11,7 @@ namespace QueryEngine
     /// The only difference between the class GroupDictKey is that it contains the full information about the
     /// row and not just a position indicator.
     /// </summary>
-    internal class GroupDictKeyFull
+    internal readonly struct GroupDictKeyFull
     {
         public readonly int hash;
         public readonly TableResults.RowProxy row;

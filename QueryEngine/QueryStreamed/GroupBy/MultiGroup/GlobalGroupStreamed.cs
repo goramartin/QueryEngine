@@ -26,11 +26,11 @@ namespace QueryEngine
         {
             if (result == null) return;
             else if (this.InParallel) ProcessParallel(matcherID, result);
-            else ProcessSingleThread(matcherID, result);
+            else ProcessSingleThread(result);
         }
 
 
-        private void ProcessSingleThread(int matcherID, Element[] result)
+        private void ProcessSingleThread(Element[] result)
         {
 
 

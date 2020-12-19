@@ -111,6 +111,8 @@ namespace QueryEngine
             }
 
             if (!this.successLastY && !xSuccess) return true;
+            else if (!this.successLastY && xSuccess) return false;
+            else if (this.successLastY && !xSuccess) return false;
             else return Compare(xValue, resultLastY);
         }
 
@@ -119,7 +121,9 @@ namespace QueryEngine
             var xSuccess = this.expr.TryEvaluate(in x, out T xValue);
             var ySuccess = this.expr.TryEvaluate(in y, out T yValue);
 
-            if (xSuccess && !ySuccess) return true;
+            if (!ySuccess && !xSuccess) return true;
+            else if (!ySuccess && xSuccess) return false;
+            else if (ySuccess && !xSuccess) return false;
             else return Compare(xValue, yValue);
         }
 
