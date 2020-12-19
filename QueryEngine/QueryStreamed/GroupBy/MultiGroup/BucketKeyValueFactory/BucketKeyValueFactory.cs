@@ -10,25 +10,18 @@ namespace QueryEngine
     {
         public AggregateBucketResult[] lastBucketsKeyValue;
         public bool lastWasInserted = true;
-        private List<Aggregate> aggregates;
-        private List<BucketKeyFactory> factories;
+        private Aggregate[] aggregates;
+        private BucketKeyFactory[] factories;
         private int keysCount;
 
-
-        public BucketsKeyValueFactory(List<Aggregate> aggregates, List<ExpressionHolder> hashes)
+        public BucketsKeyValueFactory(Aggregate[] aggregates, ExpressionHolder[] hashes)
         {
             this.aggregates = aggregates;
-            this.keysCount = hashes.Count;
-            this.factories = new List<BucketKeyFactory>();
-           //for (int i = 0; i < length; i++)
-           // {
-
-//            }
-
-
-
-
-
+            this.keysCount = hashes.Length;
+            this.factories = new BucketKeyFactory[hashes.Length];
+            this.keysCount = hashes.Length;
+            for (int i = 0; i < hashes.Length; i++)
+                this.factories[i] = BucketKeyFactory.Factory(hashes[i]);
         }
 
 
@@ -42,9 +35,9 @@ namespace QueryEngine
         {
             if (this.lastWasInserted)
             {
-                this.lastBucketsKeyValue = new AggregateBucketResult[this.keysCount + this.aggregates.Count];
+                this.lastBucketsKeyValue = new AggregateBucketResult[this.keysCount + this.aggregates.Length];
                 // Init the aggregation funcs. storages
-                for (int i = this.keysCount; i < this.keysCount + this.aggregates.Count; i++)
+                for (int i = this.keysCount; i < this.keysCount + this.aggregates.Length; i++)
                     this.lastBucketsKeyValue[i] = AggregateBucketResult.Factory(this.aggregates[i].GetAggregateReturnType(), this.aggregates[i].GetFuncName());
             }
 
