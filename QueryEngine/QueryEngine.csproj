@@ -78,6 +78,7 @@
     <Compile Include="QueryStreamed\GroupBy\MultiGroup\Comparers\RowEqualityComparerAggregateBucketResult.cs" />
     <Compile Include="QueryStreamed\GroupBy\MultiGroup\Comparers\RowEqualityComparerGroupDickKeyFull.cs" />
     <Compile Include="QueryStreamed\GroupBy\MultiGroup\GlobalGroupStreamed.cs" />
+    <Compile Include="QueryStreamed\GroupBy\MultiGroup\BucketKeyValueFactory\BucketKeyValueFactory.cs" />
     <Compile Include="QueryStreamed\GroupBy\MultiGroup\LocalGroupGlobalMergeHalfStreamed.cs" />
     <Compile Include="QueryStreamed\GroupBy\SingleGroup\SingleGroupHalfStreamed.cs" />
     <Compile Include="QueryStreamed\GroupBy\SingleGroup\SingleGroupStreamed.cs" />
@@ -120,7 +121,7 @@
     <Compile Include="Query\GroupBy\Groupers\MultiGroup\EqualityComparer\RowEqualityComparerGroupKey.cs" />
     <Compile Include="Query\GroupBy\Groupers\MultiGroup\ParallelSolutions\GlobalGroup.cs" />
     <Compile Include="Query\GroupBy\Groupers\MultiGroup\ReferenceSolutions\GroupWithBuckets.cs" />
-    <Compile Include="Query\GroupBy\Groupers\MultiGroup\EqualityComparer\DictKeyStruct.cs" />
+    <Compile Include="Query\GroupBy\Groupers\MultiGroup\EqualityComparer\GroupDictKey.cs" />
     <Compile Include="Query\GroupBy\Groupers\MultiGroup\Hasher\ExpressionHasher.cs" />
     <Compile Include="Query\GroupBy\Groupers\MultiGroup\ParallelSolutions\LocalGroupGlobalMerge.cs" />
     <Compile Include="Query\GroupBy\Groupers\MultiGroup\ReferenceSolutions\GroupWithLists.cs" />

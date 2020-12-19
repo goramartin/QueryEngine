@@ -11,7 +11,7 @@ namespace QueryEngine
     {
         ConcurrentDictionary<AggregateBucketResult[], AggregateBucketResult[]> globalGroups;
 
-        public GlobalGroupStreamed(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper, int columnCount) : base(aggs, hashes, helper, columnCount)
+        public GlobalGroupStreamed(Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper helper, int columnCount) : base(aggs, hashes, helper, columnCount)
         {
             
             // to do

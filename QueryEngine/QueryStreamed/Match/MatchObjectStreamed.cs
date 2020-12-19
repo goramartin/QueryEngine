@@ -9,7 +9,7 @@ namespace QueryEngine
     internal class MatchObjectStreamed : MatchObjectBase
     {
         private IPatternMatcherStreamed matcher;
-        private ResultProcessor resultProcessor;
+        private ResultProcessor resultProcessor = null;
 
         /// <summary>
         /// Creates Streamed Match object.
@@ -48,8 +48,13 @@ namespace QueryEngine
 
         public void PassResultProcessor(ResultProcessor resultProcessor)
         {
-            if (resultProcessor == null) throw new ArgumentNullException($"{this.GetType()}, result processor cannot be null.");
-            this.matcher.PassResultProcessor(resultProcessor);
+            if (resultProcessor == null)
+                throw new ArgumentNullException($"{this.GetType()}, result processor cannot be null.");
+            else
+            {
+                this.resultProcessor = resultProcessor;
+                this.matcher.PassResultProcessor(resultProcessor);
+            }
         }
     }
 }

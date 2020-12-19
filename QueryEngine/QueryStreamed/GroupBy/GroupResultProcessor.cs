@@ -7,15 +7,15 @@ namespace QueryEngine
     /// </summary>
     internal abstract class GroupResultProcessor : ResultProcessor
     {
-        protected List<Aggregate> aggregates { get; }
-        protected List<ExpressionHolder> hashes { get; }
+        protected Aggregate[] aggregates { get; }
+        protected ExpressionHolder[] hashes { get; }
         protected bool InParallel { get; }
         protected int ThreadCount { get; }
         /// <summary>
         /// Represents a number of variables defined in the match clause of the query.
         /// </summary>
         protected int ColumnCount { get; }
-        protected GroupResultProcessor(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper, int columnCount)
+        protected GroupResultProcessor(Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper helper, int columnCount)
         {
             this.aggregates = aggs;
             this.hashes = hashes;
@@ -24,14 +24,14 @@ namespace QueryEngine
             this.ColumnCount = columnCount;
         }
 
-        protected virtual void CreateHashersAndComparers(out List<ExpressionEqualityComparer> comparers, out List<ExpressionHasher> hashers)
+        protected virtual void CreateHashersAndComparers(out ExpressionEqualityComparer[] comparers, out ExpressionHasher[] hashers)
         {
-            comparers = new List<ExpressionEqualityComparer>();
-            hashers = new List<ExpressionHasher>();
-            for (int i = 0; i < this.hashes.Count; i++)
+            comparers = new ExpressionEqualityComparer[this.hashes.Length];
+            hashers = new ExpressionHasher[this.hashes.Length];
+            for (int i = 0; i < this.hashes.Length; i++)
             {
-                comparers.Add(ExpressionEqualityComparer.Factory(this.hashes[i], this.hashes[i].ExpressionType));
-                hashers.Add(ExpressionHasher.Factory(this.hashes[i], this.hashes[i].ExpressionType));
+                comparers[i] = (ExpressionEqualityComparer.Factory(this.hashes[i], this.hashes[i].ExpressionType));
+                hashers[i] = (ExpressionHasher.Factory(this.hashes[i], this.hashes[i].ExpressionType));
             }
         }
     }

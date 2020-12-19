@@ -309,7 +309,7 @@ namespace QueryEngine
             public GroupByJobLists(RowHasher hasher, RowEqualityComparerGroupKey comparer, Aggregate[] aggregates, ITableResults results, int start, int end) : base(hasher, comparer, aggregates, results, start, end, false)
             {
                 this.groups = new Dictionary<GroupDictKey, int>(comparer);
-                this.aggResults = AggregateListResults.CreateArrayResults(aggregates);
+                this.aggResults = AggregateListResults.CreateListResults(aggregates);
             }
         }
         #endregion Jobs

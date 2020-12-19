@@ -20,10 +20,10 @@ namespace QueryEngine
             this.aggregates = aggregates;
             this.keysCount = hashes.Count;
             this.factories = new List<BucketKeyFactory>();
-            for (int i = 0; i < length; i++)
-            {
+           //for (int i = 0; i < length; i++)
+           // {
 
-            }
+//            }
 
 
 
@@ -64,7 +64,7 @@ namespace QueryEngine
                 var exprType = holder.GetExpressionType();
                 if (exprType == typeof(int)) return new BucketKeyFactory<int>(holder);
                 else if (exprType == typeof(string)) return new BucketKeyFactory<string>(holder);
-                else throw new ArgumentException($"Bucket key factory, unknown type of bucket factory. Type = {exprType}.")
+                else throw new ArgumentException($"Bucket key factory, unknown type of bucket factory. Type = {exprType}.");
             }
         }
 

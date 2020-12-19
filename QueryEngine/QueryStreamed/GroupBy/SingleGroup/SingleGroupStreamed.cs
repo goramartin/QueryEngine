@@ -22,10 +22,10 @@ namespace QueryEngine
         private int matchersFinished;
         private bool ContainsNonAsterix;
 
-        public SingleGroupResultProcessorStreamed(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper, int columnCount) : base(aggs, hashes, helper, columnCount)
+        public SingleGroupResultProcessorStreamed(Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper helper, int columnCount) : base(aggs, hashes, helper, columnCount)
         {
             this.finalResults = AggregateBucketResult.CreateBucketResults(this.aggregates);
-            for (int i = 0; i < this.aggregates.Count; i++)
+            for (int i = 0; i < this.aggregates.Length; i++)
                 if (!this.aggregates[i].IsAstCount) this.ContainsNonAsterix = true;
         }
 
@@ -41,7 +41,7 @@ namespace QueryEngine
                 Interlocked.Increment(ref this.numberOfMatchedElements);
                 if (this.ContainsNonAsterix)
                 {
-                    for (int i = 0; i < this.aggregates.Count; i++)
+                    for (int i = 0; i < this.aggregates.Length; i++)
                         if (!this.aggregates[i].IsAstCount) this.aggregates[i].ApplyThreadSafe(result, finalResults[i]);
                         else continue;
                 }
@@ -52,7 +52,7 @@ namespace QueryEngine
                 // The last finished matcher stores the number of matched elements.
                 if (tmp == this.ThreadCount)
                 {
-                    for (int i = 0; i < this.aggregates.Count; i++)
+                    for (int i = 0; i < this.aggregates.Length; i++)
                         if (this.aggregates[i].IsAstCount) ((Count)this.aggregates[i]).IncBy(this.numberOfMatchedElements, this.finalResults[i]);
                 }
             }

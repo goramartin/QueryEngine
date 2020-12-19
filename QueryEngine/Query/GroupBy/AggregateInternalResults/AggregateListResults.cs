@@ -19,7 +19,7 @@ namespace QueryEngine
     /// </summary>
     internal abstract class AggregateListResults
     {
-        public static AggregateListResults[] CreateArrayResults(Aggregate[] aggregates)
+        public static AggregateListResults[] CreateListResults(Aggregate[] aggregates)
         {
             AggregateListResults[] aggResults = new AggregateListResults[aggregates.Length];
             for (int i = 0; i < aggregates.Length; i++)

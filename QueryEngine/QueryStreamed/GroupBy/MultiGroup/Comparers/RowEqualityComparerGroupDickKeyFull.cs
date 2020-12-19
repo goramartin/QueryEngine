@@ -8,16 +8,16 @@ namespace QueryEngine
 {
     class RowEqualityComparerGroupDickKeyFull : IEqualityComparer<GroupDictKeyFull>
     {
-        public List<ExpressionEqualityComparer> Comparers { get; }
+        public ExpressionEqualityComparer[] Comparers { get; }
 
-        public RowEqualityComparerGroupDickKeyFull(List<ExpressionEqualityComparer> comparers)
+        public RowEqualityComparerGroupDickKeyFull(ExpressionEqualityComparer[] comparers)
         {
             this.Comparers = comparers;
         }
 
         public bool Equals(GroupDictKeyFull x, GroupDictKeyFull y)
         {
-            for (int i = 0; i < this.Comparers.Count; i++)
+            for (int i = 0; i < this.Comparers.Length; i++)
                 if (!this.Comparers[i].Equals(x.row, y.row)) return false;
 
             return true;

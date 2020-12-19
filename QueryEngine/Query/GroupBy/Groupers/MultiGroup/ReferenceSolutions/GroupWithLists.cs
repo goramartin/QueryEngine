@@ -37,7 +37,7 @@ namespace QueryEngine
             #region DECL
             equalityComparer.SetCache(hasher);
             hasher.SetCache(equalityComparer.Comparers);
-            var aggResults = AggregateListResults.CreateArrayResults(this.aggregates);
+            var aggResults = AggregateListResults.CreateListResults(this.aggregates);
             var groups = new Dictionary<GroupDictKey, int>(equalityComparer);
             int position;
             TableResults.RowProxy row;

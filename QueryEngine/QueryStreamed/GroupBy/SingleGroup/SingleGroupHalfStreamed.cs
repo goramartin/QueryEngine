@@ -29,7 +29,7 @@ namespace QueryEngine
         private AggregateBucketResult[] finalResults;
         private bool ContainsNonAstrix;
 
-        public SingleGroupResultProcessorHalfStreamed(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper, int columnCount): base(aggs, hashes, helper, columnCount)
+        public SingleGroupResultProcessorHalfStreamed(Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper helper, int columnCount): base(aggs, hashes, helper, columnCount)
         {
             this.matcherResults = new AggregateBucketResult[helper.ThreadCount][];
             this.numberOfMatchedElements = new int[helper.ThreadCount];
@@ -37,7 +37,7 @@ namespace QueryEngine
 
             for (int i = 0; i < this.matcherResults.Length; i++)
                 this.matcherResults[i] = AggregateBucketResult.CreateBucketResults(this.aggregates);
-            for (int i = 0; i < this.aggregates.Count; i++)
+            for (int i = 0; i < this.aggregates.Length; i++)
                 if (!this.aggregates[i].IsAstCount) this.ContainsNonAstrix = true;
         }
 
@@ -54,7 +54,7 @@ namespace QueryEngine
                 this.numberOfMatchedElements[matcherID]++;
                 if (this.ContainsNonAstrix)
                 {
-                    for (int i = 0; i < this.aggregates.Count; i++)
+                    for (int i = 0; i < this.aggregates.Length; i++)
                     {
                         if (!this.aggregates[i].IsAstCount) this.aggregates[i].Apply(result, tmpRes[i]);
                         else continue;
@@ -62,7 +62,7 @@ namespace QueryEngine
                 }
             } else
             {
-                for (int i = 0; i < this.aggregates.Count; i++)
+                for (int i = 0; i < this.aggregates.Length; i++)
                 {
                     if (!this.aggregates[i].IsAstCount) this.aggregates[i].MergeThreadSafe(this.finalResults[i], tmpRes[i]);
                     else ((Count)this.aggregates[i]).IncByThreadSafe(this.numberOfMatchedElements[matcherID], finalResults[i]);

@@ -80,7 +80,7 @@ namespace QueryEngine
                 {
                     Grouper grouper;
                     if (this.helper.IsSetSingleGroupGroupBy)
-                        grouper = new SingleGroupGrouper(this.aggregates, null, this.helper);
+                        grouper = new SingleGroupGrouper(this.aggregates.ToArray(), null, this.helper);
                     else
                     {
                         // Use reference single thread solutions because the result table cannot be split equaly among thread .

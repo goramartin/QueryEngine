@@ -246,7 +246,7 @@ namespace QueryEngine
             public GroupByJobMixListsBuckets(RowHasher hasher, RowEqualityComparerGroupKey comparer, Aggregate[] aggregates, ITableResults results, int start, int end, ConcurrentDictionary<GroupDictKey, AggregateBucketResult[]> globalGroups) : base(hasher, comparer, aggregates, results, start, end, globalGroups)
             {
                 this.groups = new Dictionary<GroupDictKey, int>((IEqualityComparer<GroupDictKey>)comparer);
-                this.aggResults = AggregateListResults.CreateArrayResults(aggregates);
+                this.aggResults = AggregateListResults.CreateListResults(aggregates);
             }
         }
 

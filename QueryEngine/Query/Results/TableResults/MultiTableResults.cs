@@ -67,6 +67,8 @@ namespace QueryEngine
             }
         }
 
+        public Element[] temporaryRow { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
 
         /// <summary>
         /// Gets results from a non merged matcher results.
@@ -107,6 +109,11 @@ namespace QueryEngine
         IEnumerator IEnumerable.GetEnumerator()
         {
             return this.GetEnumerator();
+        }
+
+        public void StoreTemporaryRow()
+        {
+            throw new NotImplementedException();
         }
     }
 }
