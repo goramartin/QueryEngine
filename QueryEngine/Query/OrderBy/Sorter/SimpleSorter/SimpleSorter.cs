@@ -22,14 +22,12 @@ namespace QueryEngine
     internal abstract class SimpleSorter : Sorter
     {
         protected ITableResults dataTable;
-        protected IExpressionComparer rowComparer;
         protected bool inParallel;
 
-        protected SimpleSorter(ITableResults sortData, List<ExpressionComparer> rowComparers, bool inParallel)
+        protected SimpleSorter(ITableResults sortData, bool inParallel)
         {
             this.inParallel = inParallel;
             this.dataTable = sortData;
-            this.rowComparer = new RowComparer(rowComparers);
         }
 
         protected void ArraySort<T>(T[] arr, IComparer<T> comparer)

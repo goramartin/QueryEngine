@@ -28,7 +28,7 @@ namespace QueryEngine
     /// </summary>
     internal sealed class OrderByObject : QueryObject
     {
-        private List<ExpressionComparer> comparers;
+        private ExpressionComparer[] comparers;
         private IOrderByExecutionHelper helper;
 
         /// <summary>
@@ -51,7 +51,7 @@ namespace QueryEngine
             var comps = orderByVisitor.GetResult();
 
             executionHelper.IsSetOrderBy = true;
-            this.comparers = comps;
+            this.comparers = comps.ToArray();
         }
 
         public override void Compute(out ITableResults results, out GroupByResults groupByResults)

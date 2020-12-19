@@ -54,12 +54,12 @@ namespace QueryEngine
             return typeof(T);
         }
 
-        public override bool TryEvaluate(in TableResults.RowProxy elements, out T value)
+        public override bool TryEvaluate(in TableResults.RowProxy elements, out T returnValue)
         {
             throw new NotImplementedException();
         }
 
-        public override bool TryEvaluate(in Element[] elements, out T value)
+        public override bool TryEvaluate(in Element[] elements, out T returnValue)
         {
             throw new NotImplementedException();
         }

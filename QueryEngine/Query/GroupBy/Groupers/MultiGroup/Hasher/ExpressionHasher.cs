@@ -59,14 +59,14 @@ namespace QueryEngine
         {
             if (this.cache == null)
             {
-                if (this.expr.TryEvaluate(in row, out T retValue)) return retValue.GetHashCode();
+                if (this.expr.TryEvaluate(in row, out T returnValue)) return returnValue.GetHashCode();
                 else return 0;
             }
             else
             {
-                this.cache.successLastY = this.expr.TryEvaluate(in row, out this.cache.resultLastY);
-                this.cache.rowlastY = row.index;
-                if (this.cache.successLastY) return this.cache.resultLastY.GetHashCode();
+                this.cache.lastYSuccess = this.expr.TryEvaluate(in row, out this.cache.lastYValue);
+                this.cache.lastYRow = row.index;
+                if (this.cache.lastYSuccess) return this.cache.lastYValue.GetHashCode();
                 else return 0;
             }
         }

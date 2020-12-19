@@ -33,7 +33,7 @@ namespace QueryEngine
         /// <param name="sortData"> Result table to sort. </param>
         /// <param name="rowComparers"> Comparers for comparing rows in the table. </param>
         /// <param name="inParallel"> Flag is the table should be sorted in parallel. </param>
-        public MultiColumnSorter(ITableResults sortData, List<ExpressionComparer> rowComparers, bool inParallel) : base(sortData, rowComparers, inParallel)
+        public MultiColumnSorter(ITableResults sortData, ExpressionComparer[] rowComparers, bool inParallel) : base(sortData, inParallel)
         {
             var tmpComp = new RowComparer(rowComparers);
             tmpComp.SetCachingResults(!inParallel);

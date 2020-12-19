@@ -31,13 +31,13 @@ namespace QueryEngine
     /// </summary>
     internal class RowComparer : IExpressionComparer
     {
-        private readonly List<ExpressionComparer> comparers;
+        private readonly ExpressionComparer[] comparers;
         
         /// <summary>
         /// Creates a row comparer.
         /// </summary>
         /// <param name="rowProxyComparers"> Expected a list of expression comparers.</param>
-        public RowComparer(List<ExpressionComparer> rowProxyComparers)
+        public RowComparer(ExpressionComparer[] rowProxyComparers)
         {
             this.comparers = rowProxyComparers;
         }
@@ -54,7 +54,7 @@ namespace QueryEngine
         public int Compare(in TableResults.RowProxy x, in TableResults.RowProxy y)
         {
             int result = 0;
-            for (int i = 0; i < this.comparers.Count; i++)
+            for (int i = 0; i < this.comparers.Length; i++)
             {
                 result = this.comparers[i].Compare(x, y);
                 if (result != 0) return result;
@@ -64,7 +64,7 @@ namespace QueryEngine
 
         public void SetCachingResults(bool setValue)
         {
-            for (int i = 0; i < this.comparers.Count; i++)
+            for (int i = 0; i < this.comparers.Length; i++)
                 this.comparers[i].SetCachingResults(setValue);
         }
     }

@@ -16,7 +16,7 @@ namespace QueryEngine
     {
         protected readonly ExpressionHolder expressionHolder;
         protected readonly bool isAscending;
-        protected readonly List<int> usedVars;
+        protected readonly int[] usedVars;
         protected bool cacheResults;
         /// <summary>
         /// Constructs expression comparer.
@@ -27,7 +27,7 @@ namespace QueryEngine
         {
             this.expressionHolder = expressionHolder;
             this.isAscending = ascending;
-            this.usedVars = expressionHolder.CollectUsedVars(new List<int>());
+            this.usedVars = expressionHolder.CollectUsedVars(new List<int>()).ToArray();
         }
 
         public abstract int Compare(in TableResults.RowProxy x, in TableResults.RowProxy y);
@@ -59,7 +59,7 @@ namespace QueryEngine
         /// <returns> True if all used variables are the same. </returns>
         protected bool AreIdenticalVars(in TableResults.RowProxy x, in TableResults.RowProxy y)
         {
-            for (int i = 0; i < usedVars.Count; i++)
+            for (int i = 0; i < this.usedVars.Length; i++)
                 if (x[i].ID != y[i].ID) return false;
 
             return true;
