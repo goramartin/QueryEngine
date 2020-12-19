@@ -73,8 +73,8 @@ namespace QueryEngine
 
     internal abstract class ExpressionComparer<T> : ExpressionComparer
     {
-        protected bool lastSuccess = false;
-        protected int lastRow = -1;
+        protected bool lastXSuccess = false;
+        protected int lastXRow = -1;
         protected T lastXValue = default;
         ExpressionReturnValue<T> expr;
 
@@ -95,41 +95,30 @@ namespace QueryEngine
         /// Greater than zero x follows y in the sort order.</returns>
         public override int Compare(in TableResults.RowProxy x, in TableResults.RowProxy y)
         {
-            if (this.cacheResults)
-            return CachedCompare(in x, in y);
-            else 
-            return NonCachedCompare(in x, in y);
+            if (AreIdenticalVars(x, y)) return 0;
+
+            if (this.cacheResults) return CachedCompare(in x, in y);
+            else return NonCachedCompare(in x, in y);
         }
 
-        protected int CachedCompare(in TableResults.RowProxy x, in TableResults.RowProxy y)
+        private int CachedCompare(in TableResults.RowProxy x, in TableResults.RowProxy y)
         {
-            if (x.index != this.lastRow)
+            if (x.index != this.lastXRow)
             {
-                this.lastSuccess = this.expr.TryEvaluate(x, out this.lastXValue);
-                this.lastRow = x.index;
+                this.lastXSuccess = this.expr.TryEvaluate(x, out this.lastXValue);
+                this.lastXRow = x.index;
             }
             var ySuccess = this.expr.TryEvaluate(y, out T yValue);
-
-            int retValue = 0;
-            if (this.lastSuccess && !ySuccess) retValue = -1;
-            else if (!this.lastSuccess && ySuccess) retValue = 1;
-            else if (!this.lastSuccess && !ySuccess) retValue = 0;
-            else retValue = this.CompareValues(this.lastXValue, yValue);
-
-            if (!this.isAscending)
-            {
-                if (retValue == -1) retValue = 1;
-                else if (retValue == 1) retValue = -1;
-                else { }
-            }
-
-            return retValue;
+            return this.Compare(this.lastXSuccess, ySuccess, this.lastXValue, yValue);
         }
-        protected int NonCachedCompare(in TableResults.RowProxy x, in TableResults.RowProxy y)
+        private int NonCachedCompare(in TableResults.RowProxy x, in TableResults.RowProxy y)
         {
             var xSuccess = this.expr.TryEvaluate(x, out T xValue);
             var ySuccess = this.expr.TryEvaluate(y, out T yValue);
-
+            return this.Compare(xSuccess, ySuccess, xValue, yValue);
+        }
+        private int Compare(bool xSuccess, bool ySuccess, T xValue, T yValue)
+        {
             int retValue = 0;
             if (xSuccess && !ySuccess) retValue = -1;
             else if (!xSuccess && ySuccess) retValue = 1;

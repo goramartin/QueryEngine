@@ -24,8 +24,8 @@ namespace QueryEngine
         protected ExpressionHolder expressionHolder;
         protected List<int> usedVars;
         protected ExpressionHasher boundHasher;
-        public int rowlastY = -1;
-        public bool successLastY = false;
+        public int lastYRow = -1;
+        public bool lastYSuccess = false;
 
         /// <summary>
         /// Constructs expression equality comparer.
@@ -77,7 +77,7 @@ namespace QueryEngine
     internal abstract class ExpressionEqualityComparer<T> : ExpressionEqualityComparer
     {
         ExpressionReturnValue<T> expr;
-        public T resultLastY = default;
+        public T lastYValue = default;
         public ExpressionEqualityComparer(ExpressionHolder expressionHolder) : base(expressionHolder)
         {
             this.expr = (ExpressionReturnValue<T>)expressionHolder.Expr;
@@ -104,30 +104,30 @@ namespace QueryEngine
         private bool EqualsCached(in TableResults.RowProxy x, in TableResults.RowProxy y)
         {
             var xSuccess = this.expr.TryEvaluate(x, out T xValue);
-            if (this.rowlastY != y.index)
+            if (this.lastYRow != y.index)
             {
-                this.successLastY = this.expr.TryEvaluate(y, out this.resultLastY);
-                rowlastY = y.index;
+                this.lastYSuccess = this.expr.TryEvaluate(y, out this.lastYValue);
+                this.lastYRow = y.index;
             }
-
-            if (!this.successLastY && !xSuccess) return true;
-            else if (!this.successLastY && xSuccess) return false;
-            else if (this.successLastY && !xSuccess) return false;
-            else return Compare(xValue, resultLastY);
+            return Equals(xSuccess, this.lastYSuccess, xValue, this.lastYValue);
         }
 
         private bool EqualsNotCached(in TableResults.RowProxy x, in TableResults.RowProxy y)
         {
             var xSuccess = this.expr.TryEvaluate(in x, out T xValue);
             var ySuccess = this.expr.TryEvaluate(in y, out T yValue);
+            return Equals(xSuccess, ySuccess, xValue, yValue);
+        }
 
+        private bool Equals(bool xSuccess, bool ySuccess, T xValue, T yValue)
+        {
             if (!ySuccess && !xSuccess) return true;
             else if (!ySuccess && xSuccess) return false;
             else if (ySuccess && !xSuccess) return false;
-            else return Compare(xValue, yValue);
+            else return EqualsValues(xValue, yValue);
         }
 
-        protected abstract bool Compare(T xValue, T yValue);
+        protected abstract bool EqualsValues(T xValue, T yValue);
 
         public override void SetCache(ExpressionHasher cache)
         {
@@ -140,7 +140,7 @@ namespace QueryEngine
         public ExpressionIntegerEqualityComparer(ExpressionHolder expressionHolder) : base(expressionHolder)
         {}
 
-        protected override bool Compare(int xValue, int yValue)
+        protected override bool EqualsValues(int xValue, int yValue)
         {
             return xValue == yValue;
         }
@@ -156,7 +156,7 @@ namespace QueryEngine
         public ExpressionStringEqualityComparer(ExpressionHolder expressionHolder) : base(expressionHolder)
         { }
 
-        protected override bool Compare(string xValue, string yValue)
+        protected override bool EqualsValues(string xValue, string yValue)
         {
             return xValue == yValue;
         }
