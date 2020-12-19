@@ -63,7 +63,7 @@ namespace QueryEngine
         {
             this.graph = graph;
             this.variableMap = new VariableMap(); 
-            this.qEhelper = new QueryExecutionHelper(threadCount, printer, formater, verticesPerThread, fileName, "DFSParallel", "DFSSingleThread", "SIMPLE", "ref", false);
+            this.qEhelper = new QueryExecutionHelper(threadCount, printer, formater, verticesPerThread, fileName, "DFSParallel", "DFSSingleThread", "SIMPLE", "global", false);
 
             // Parse input query.
             var parsedClauses = Parser.Parse(tokens);
@@ -123,6 +123,8 @@ namespace QueryEngine
         /// <param name="isStreamed"> A flag to distinguish a normal construtor.</param>
         private Query(List<Token> tokens, Graph graph, int threadCount, string printer, string formater, int verticesPerThread, string fileName, bool isStreamed)
         {
+
+            throw new NotImplementedException();
             this.graph = graph;
             this.variableMap = new VariableMap();
             this.qEhelper = new QueryExecutionHelper(threadCount, printer, formater, verticesPerThread, fileName, "DFSParallelStreamed", "DFSSingleThreadStreamed", "SIMPLE", "ref", false);

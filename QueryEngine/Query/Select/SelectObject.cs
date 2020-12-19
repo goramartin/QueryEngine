@@ -100,7 +100,7 @@ namespace QueryEngine
                     foreach (var item in tmpResults)
                         printer.PrintRow(item);
                 }
-                else if (results.GetType() == typeof(GroupByResultsBucket))
+                else if (results is GroupByResultsBucket)
                 {
                     var tmpResults = (GroupByResultsBucket)results;
                     foreach (var item in tmpResults)
