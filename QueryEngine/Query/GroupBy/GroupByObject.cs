@@ -86,8 +86,8 @@ namespace QueryEngine
                         // Use reference single thread solutions because the result table cannot be split equaly among thread .
                         // This also means that the result table is quite small.
                         if (results.NumberOfMatchedElements / helper.ThreadCount == 0)
-                            grouper = Grouper.Factory("ref", this.aggregates, this.hashes, this.helper, this.helper.BucketStorage);
-                        else grouper = Grouper.Factory(this.aggregates, this.hashes, this.helper);
+                            grouper = Grouper.Factory("ref", this.aggregates.ToArray(), this.hashes.ToArray(), this.helper, this.helper.BucketStorage);
+                        else grouper = Grouper.Factory(this.aggregates.ToArray(), this.hashes.ToArray(), this.helper);
                     }
                     groupByResults = grouper.Group(results);
                 }

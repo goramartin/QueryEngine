@@ -17,14 +17,14 @@ namespace QueryEngine
     /// </summary>
     internal class GlobalGroup : Grouper
     {
-        public GlobalGroup(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper, bool useBucketStorage) : base(aggs, hashes, helper, useBucketStorage)
+        public GlobalGroup(Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper helper, bool useBucketStorage) : base(aggs, hashes, helper, useBucketStorage)
         { }
 
         public override GroupByResults Group(ITableResults resTable)
         {
             // Create hashers and equality comparers.
             // The hashers receive also the equality comparer as cache.
-            CreateHashersAndComparers(out List<ExpressionEqualityComparer> equalityComparers, out List<ExpressionHasher> hashers);
+            CreateHashersAndComparers(out ExpressionEqualityComparer[] equalityComparers, out ExpressionHasher[] hashers);
             return this.ParallelGroupBy(new RowEqualityComparerInt(resTable, equalityComparers, new RowHasher(hashers), false), resTable);
         }
 
@@ -137,7 +137,7 @@ namespace QueryEngine
                 row = results[i];
                 position = groups.GetOrAdd(i, positionFactory);
 
-                if (aggregates.Count == 0) continue;
+                if (aggregates.Length == 0) continue;
                 else
                 {
                     if (aggResults[0].ArraySize() <= position)
@@ -148,7 +148,7 @@ namespace QueryEngine
                                 for (int enters = 0; enters < threadCount; enters++) 
                                     semaphore.WaitOne(); 
                                 // Double the array sizes
-                                for (int j = 0; j < aggResults.Count; j++) 
+                                for (int j = 0; j < aggResults.Length; j++) 
                                     aggResults[j].DoubleSize(position);
 
                                 // Release the entire semaphore
@@ -158,7 +158,7 @@ namespace QueryEngine
                     }
 
                     semaphore.WaitOne();
-                    for (int j = 0; j < aggregates.Count; j++)
+                    for (int j = 0; j < aggregates.Length; j++)
                         aggregates[j].ApplyThreadSafe(in row, aggResults[j], position);
                     semaphore.Release();
                 }
@@ -195,7 +195,7 @@ namespace QueryEngine
                 // If the spare part was inserted, create a brand-new in advance.
                 if (object.ReferenceEquals(spareBuckets, buckets))
                     spareBuckets = AggregateBucketResult.CreateBucketResults(aggregates);
-                for (int j = 0; j < aggregates.Count; j++)
+                for (int j = 0; j < aggregates.Length; j++)
                     aggregates[j].ApplyThreadSafe(in row, buckets[j]);
             }
         }
@@ -206,11 +206,11 @@ namespace QueryEngine
 
         private abstract class GroupByJob
         {
-            public List<Aggregate> aggregates;
+            public Aggregate[] aggregates;
             public ITableResults results;
             public int start;
             public int end;
-            public GroupByJob(List<Aggregate> aggregates, ITableResults results, int start, int end)
+            public GroupByJob(Aggregate[] aggregates, ITableResults results, int start, int end)
             {
                 this.aggregates = aggregates;
                 this.results = results;
@@ -223,7 +223,7 @@ namespace QueryEngine
         {
             public ConcurrentDictionary<int, AggregateBucketResult[]> groups;
 
-            public GroupByJobBuckets(ConcurrentDictionary<int, AggregateBucketResult[]> groups, List<Aggregate> aggregates, ITableResults results, int start, int end) : base(aggregates, results, start, end)
+            public GroupByJobBuckets(ConcurrentDictionary<int, AggregateBucketResult[]> groups, Aggregate[] aggregates, ITableResults results, int start, int end) : base(aggregates, results, start, end)
             {
                 this.aggregates = aggregates;
                 this.results = results;
@@ -236,12 +236,12 @@ namespace QueryEngine
         private class GroupByJobArrays : GroupByJob
         {
             public ConcurrentDictionary<int, int> groups;
-            public List<AggregateArrayResults> aggResults;
+            public AggregateArrayResults[] aggResults;
             public Func<int, int> positionFactory;
             public Semaphore semaphore;
             public int threadCount;
 
-            public GroupByJobArrays(ConcurrentDictionary<int, int> groups, List<Aggregate> aggregates, ITableResults results, int start, int end, List<AggregateArrayResults> aggResults, Func<int, int> positionFactory, Semaphore semaphore, int threadCount) : base(aggregates, results, start, end)
+            public GroupByJobArrays(ConcurrentDictionary<int, int> groups, Aggregate[] aggregates, ITableResults results, int start, int end, AggregateArrayResults[] aggResults, Func<int, int> positionFactory, Semaphore semaphore, int threadCount) : base(aggregates, results, start, end)
             {
                 this.aggregates = aggregates;
                 this.results = results;

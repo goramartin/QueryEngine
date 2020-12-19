@@ -50,7 +50,7 @@ namespace QueryEngine
         public override void RetrieveResults(out ITableResults resTable, out GroupByResults groupByResults)
         {
             resTable = new TableResults();
-
+            groupByResults = null;
             // to do
         }
 

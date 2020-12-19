@@ -22,7 +22,7 @@ namespace QueryEngine
     internal abstract class ExpressionEqualityComparer : IExpressionEqualityComparer
     {
         protected ExpressionHolder expressionHolder;
-        protected List<int> usedVars;
+        protected int[] usedVars;
         protected ExpressionHasher boundHasher;
         public int lastYRow = -1;
         public bool lastYSuccess = false;
@@ -34,7 +34,7 @@ namespace QueryEngine
         protected ExpressionEqualityComparer(ExpressionHolder expressionHolder)
         {
             this.expressionHolder = expressionHolder;
-            this.usedVars = expressionHolder.CollectUsedVars(new List<int>());
+            this.usedVars = expressionHolder.CollectUsedVars(new List<int>()).ToArray();
         }
 
         public abstract bool Equals(in TableResults.RowProxy x, in TableResults.RowProxy y);
@@ -65,7 +65,7 @@ namespace QueryEngine
         /// <returns> True if all used variables are the same. </returns>
         protected bool AreIdenticalVars(in TableResults.RowProxy x, in TableResults.RowProxy y)
         {
-            for (int i = 0; i < usedVars.Count; i++)
+            for (int i = 0; i < usedVars.Length; i++)
                 if (x[i].ID != y[i].ID) return false;
 
             return true;

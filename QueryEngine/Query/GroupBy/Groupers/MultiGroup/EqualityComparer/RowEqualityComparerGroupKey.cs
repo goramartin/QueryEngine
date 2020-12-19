@@ -21,10 +21,10 @@ namespace QueryEngine
     internal class RowEqualityComparerGroupKey : IEqualityComparer<GroupDictKey>
     {
         public ITableResults Results { get; set; }
-        public List<ExpressionEqualityComparer> Comparers { get; }
+        public ExpressionEqualityComparer[] Comparers { get; }
         public bool CacheOn { get; private set; }
         
-        public RowEqualityComparerGroupKey(ITableResults results, List<ExpressionEqualityComparer> comparers)
+        public RowEqualityComparerGroupKey(ITableResults results, ExpressionEqualityComparer[] comparers)
         {
             this.Results = results;
             this.Comparers = comparers;
@@ -32,7 +32,7 @@ namespace QueryEngine
 
         public bool Equals(GroupDictKey x, GroupDictKey y)
         {
-            for (int i = 0; i < this.Comparers.Count; i++)
+            for (int i = 0; i < this.Comparers.Length; i++)
                 if (!this.Comparers[i].Equals(Results[x.position], Results[y.position])) return false;
 
             return true;
@@ -49,9 +49,9 @@ namespace QueryEngine
         /// </summary>
         public RowEqualityComparerGroupKey Clone()
         {
-            var tmp = new List<ExpressionEqualityComparer>();
-            for (int i = 0; i < this.Comparers.Count; i++)
-                tmp.Add(this.Comparers[i].Clone());
+            var tmp = new ExpressionEqualityComparer[this.Comparers.Length];
+            for (int i = 0; i < this.Comparers.Length; i++)
+                tmp[i] = (this.Comparers[i].Clone());
 
             return new RowEqualityComparerGroupKey(this.Results, tmp);
         }
@@ -59,14 +59,14 @@ namespace QueryEngine
         public void SetCache(RowHasher hasher)
         {
             this.CacheOn = true;
-            for (int i = 0; i < this.Comparers.Count; i++)
+            for (int i = 0; i < this.Comparers.Length; i++)
                 this.Comparers[i].SetCache(hasher.Hashers[i]);
         }
 
         public void UnsetCache()
         {
             this.CacheOn = false ;
-            for (int i = 0; i < this.Comparers.Count; i++)
+            for (int i = 0; i < this.Comparers.Length; i++)
                 this.Comparers[i].SetCache(null);
         }
     }

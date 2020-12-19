@@ -16,14 +16,14 @@ namespace QueryEngine
     internal class RowEqualityComparerInt : IEqualityComparer<int>
     {
         public ITableResults Results { get; }
-        public List<ExpressionEqualityComparer> Comparers { get; }
+        public ExpressionEqualityComparer[] Comparers { get; }
         public RowHasher Hasher { get; }
 
         /// <summary>
         /// Construst equality comparer.
         /// </summary>
         /// <param name="CacheOn"> The cache signals, whether the given hasher should cache results for the comparers.</param>
-        public RowEqualityComparerInt(ITableResults results, List<ExpressionEqualityComparer> comparers, RowHasher hasher, bool CacheOn)
+        public RowEqualityComparerInt(ITableResults results, ExpressionEqualityComparer[] comparers, RowHasher hasher, bool CacheOn)
         {
             this.Results = results;
             this.Comparers = comparers;
@@ -44,7 +44,7 @@ namespace QueryEngine
 
         public bool Equals(int x, int y)
         {
-            for (int i = 0; i < this.Comparers.Count; i++)
+            for (int i = 0; i < this.Comparers.Length; i++)
                 if (!this.Comparers[i].Equals(Results[x], Results[y])) return false;
 
             return true;
@@ -57,13 +57,13 @@ namespace QueryEngine
 
         private void SetCache()
         {
-            for (int i = 0; i < this.Comparers.Count; i++)
+            for (int i = 0; i < this.Comparers.Length; i++)
                 this.Comparers[i].SetCache(this.Hasher.Hashers[i]);
         }
 
         private void UnsetCache()
         {
-            for (int i = 0; i < this.Comparers.Count; i++)
+            for (int i = 0; i < this.Comparers.Length; i++)
                 this.Comparers[i].SetCache(null);
         }
 

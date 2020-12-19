@@ -24,11 +24,11 @@ namespace QueryEngine
         // Always must be a > 0 and multiple of 2.
         public static int InitSize { get; private set; } = 512;
 
-        public static List<AggregateArrayResults> CreateArrayResults(List<Aggregate> aggregates)
+        public static AggregateArrayResults[] CreateArrayResults(Aggregate[] aggregates)
         {
-            List<AggregateArrayResults> aggResults = new List<AggregateArrayResults>();
-            for (int i = 0; i < aggregates.Count; i++)
-                aggResults.Add(AggregateArrayResults.Factory(aggregates[i].GetAggregateReturnType(), aggregates[i].GetFuncName()));
+            AggregateArrayResults[] aggResults = new AggregateArrayResults[aggregates.Length];
+            for (int i = 0; i < aggregates.Length; i++)
+                aggResults[i] = (AggregateArrayResults.Factory(aggregates[i].GetAggregateReturnType(), aggregates[i].GetFuncName()));
 
             return aggResults;
         }

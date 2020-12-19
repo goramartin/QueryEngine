@@ -24,9 +24,9 @@ namespace QueryEngine
     /// </summary>
     internal class RowHasher : IExpressionHasher
     {
-        public List<ExpressionHasher> Hashers { get; private set; }
+        public ExpressionHasher[] Hashers { get; private set; }
 
-        public RowHasher(List<ExpressionHasher> hashers)
+        public RowHasher(ExpressionHasher[] hashers)
         {
             this.Hashers = hashers;
         }
@@ -36,7 +36,7 @@ namespace QueryEngine
             unchecked
             {
                 int hash = 5381;
-                for (int i = 0; i < this.Hashers.Count; i++)
+                for (int i = 0; i < this.Hashers.Length; i++)
                     hash = (((hash << 5) + hash) ^ this.Hashers[i].Hash(in row));
                 return hash;
             }
@@ -47,22 +47,22 @@ namespace QueryEngine
         /// </summary>
         public RowHasher Clone()
         {
-            var tmp = new List<ExpressionHasher>();
-            for (int i = 0; i < this.Hashers.Count; i++)
-                tmp.Add(this.Hashers[i].Clone());
+            var tmp = new ExpressionHasher[this.Hashers.Length];
+            for (int i = 0; i < this.Hashers.Length; i++)
+                tmp[i] = (this.Hashers[i].Clone());
 
             return new RowHasher(tmp);
         }
 
-        public void SetCache(List<ExpressionEqualityComparer> caches)
+        public void SetCache(ExpressionEqualityComparer[] caches)
         {
-            for (int i = 0; i < this.Hashers.Count; i++)
+            for (int i = 0; i < this.Hashers.Length; i++)
                 this.Hashers[i].SetCache(caches[i]);
         }
 
         public void UnsetCache()
         {
-            for (int i = 0; i < this.Hashers.Count; i++)
+            for (int i = 0; i < this.Hashers.Length; i++)
                 this.Hashers[i].SetCache(null);
         }
     }

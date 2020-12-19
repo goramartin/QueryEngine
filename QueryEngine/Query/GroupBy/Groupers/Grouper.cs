@@ -15,13 +15,13 @@ namespace QueryEngine
     /// </summary>
     internal abstract class Grouper
     {
-        protected List<Aggregate> aggregates { get; }
-        protected List<ExpressionHolder> hashes { get; }
+        protected Aggregate[] aggregates { get; }
+        protected ExpressionHolder[] hashes { get; }
         protected bool InParallel { get; }
         protected int ThreadCount { get; }
         protected bool BucketStorage { get; set; }
 
-        protected Grouper(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper, bool bucketStorage)
+        protected Grouper(Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper helper, bool bucketStorage)
         {
             this.ThreadCount = helper.ThreadCount;
             this.aggregates = aggs;
@@ -37,18 +37,18 @@ namespace QueryEngine
         /// Notice that the number of comparers is equal to the number of hashers.
         /// Also, they must be of the same generic type.
         /// </summary>
-        protected virtual void CreateHashersAndComparers(out List<ExpressionEqualityComparer> comparers, out List<ExpressionHasher> hashers)
+        protected virtual void CreateHashersAndComparers(out ExpressionEqualityComparer[] comparers, out ExpressionHasher[] hashers)
         {
-            comparers = new List<ExpressionEqualityComparer>();
-            hashers = new List<ExpressionHasher>();
-            for (int i = 0; i < this.hashes.Count; i++)
+            comparers = new ExpressionEqualityComparer[this.hashes.Length];
+            hashers = new ExpressionHasher[this.hashes.Length];
+            for (int i = 0; i < this.hashes.Length; i++)
             {
-                comparers.Add(ExpressionEqualityComparer.Factory(this.hashes[i], this.hashes[i].ExpressionType));
-                hashers.Add(ExpressionHasher.Factory(this.hashes[i], this.hashes[i].ExpressionType));
+                comparers[i] = (ExpressionEqualityComparer.Factory(this.hashes[i], this.hashes[i].ExpressionType));
+                hashers[i] = (ExpressionHasher.Factory(this.hashes[i], this.hashes[i].ExpressionType));
             }
         }
 
-        public static Grouper Factory(string grouperAlias, List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper, bool bucketStorage)
+        public static Grouper Factory(string grouperAlias, Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper helper, bool bucketStorage)
         {
             if (grouperAlias == "ref" && bucketStorage) return new GroupWithBuckets(aggs, hashes, helper);
             else if (grouperAlias == "ref" && !bucketStorage) return new GroupWithLists(aggs, hashes, helper);
@@ -58,7 +58,7 @@ namespace QueryEngine
             else throw new ArgumentException("Grouper, trying to create an unknown grouper.");
         }
 
-        public static Grouper Factory( List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper)
+        public static Grouper Factory(Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper helper)
         {
             return Factory(helper.GrouperAlias, aggs, hashes, helper, helper.BucketStorage);
         }

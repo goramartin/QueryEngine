@@ -16,21 +16,21 @@ namespace QueryEngine
     /// </summary>
     internal class LocalGroupGlobalMerge : Grouper
     {
-        public LocalGroupGlobalMerge(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper, bool useBucketStorage) : base(aggs, hashes, helper, useBucketStorage)
+        public LocalGroupGlobalMerge(Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper helper, bool useBucketStorage) : base(aggs, hashes, helper, useBucketStorage)
         { }
 
         public override GroupByResults Group(ITableResults resTable)
         {
             // Create hashers and equality comparers.
             // The hashers receive also the equality comparer as cache.
-            CreateHashersAndComparers(out List<ExpressionEqualityComparer> equalityComparers, out List<ExpressionHasher> hashers);
+            CreateHashersAndComparers(out ExpressionEqualityComparer[] equalityComparers, out ExpressionHasher[] hashers);
             return ParallelGroupBy(resTable, equalityComparers, hashers);
         }
 
         /// <summary>
         /// Note that the received hashers and equality comparers have already set their internal cache to each other.
         /// </summary>
-        private GroupByResults ParallelGroupBy(ITableResults resTable, List<ExpressionEqualityComparer> equalityComparers, List<ExpressionHasher> hashers)
+        private GroupByResults ParallelGroupBy(ITableResults resTable, ExpressionEqualityComparer[] equalityComparers, ExpressionHasher[] hashers)
         {
             GroupByJob[] jobs = CreateJobs(resTable, this.aggregates, equalityComparers, hashers);
             var tasks = new Task[this.ThreadCount - 1];
@@ -59,7 +59,7 @@ namespace QueryEngine
         /// The comparers and hashers build in the constructor of this class are given to the last job, just like the aggregates passed to the construtor.
         /// The global dictionary recieves a comparer that has no internal comparers set to some hasher.
         /// </summary>
-        private GroupByJob[] CreateJobs(ITableResults results, List<Aggregate> aggs, List<ExpressionEqualityComparer> equalityComparers, List<ExpressionHasher> hashers)
+        private GroupByJob[] CreateJobs(ITableResults results, Aggregate[] aggs, ExpressionEqualityComparer[] equalityComparers, ExpressionHasher[] hashers)
         {
             GroupByJob[] jobs = new GroupByJob[this.ThreadCount];
             int current = 0;
@@ -128,7 +128,7 @@ namespace QueryEngine
                     buckets = AggregateBucketResult.CreateBucketResults(aggregates);
                     groups.Add(key, buckets);
                 }
-                for (int j = 0; j < aggregates.Count; j++)
+                for (int j = 0; j < aggregates.Length; j++)
                     aggregates[j].Apply(in row, buckets[j]);
             }
 
@@ -143,7 +143,7 @@ namespace QueryEngine
                 // If it did not, merge its results with the returned one.
                 if (!Object.ReferenceEquals(buckets, item.Value))
                 {
-                    for (int j = 0; j < aggregates.Count; j++)
+                    for (int j = 0; j < aggregates.Length; j++)
                         aggregates[j].MergeThreadSafe(buckets[j], item.Value[j]);
                 }
             }
@@ -186,7 +186,7 @@ namespace QueryEngine
                     position = groups.Count;
                     groups.Add(key, position);
                 }
-                for (int j = 0; j < aggregates.Count; j++)
+                for (int j = 0; j < aggregates.Length; j++)
                     aggregates[j].Apply(in row, aggResults[j], position);
             }
 
@@ -199,7 +199,7 @@ namespace QueryEngine
                 buckets = globalGroups.GetOrAdd(item.Key, spareBuckets);
                 if (object.ReferenceEquals(spareBuckets, buckets))
                     spareBuckets = AggregateBucketResult.CreateBucketResults(aggregates);
-                for (int j = 0; j < aggregates.Count; j++)
+                for (int j = 0; j < aggregates.Length; j++)
                     aggregates[j].MergeThreadSafe(buckets[j], aggResults[j], item.Value);
             }
         }
@@ -211,13 +211,13 @@ namespace QueryEngine
         private abstract class GroupByJob
         {
             public RowHasher hasher;
-            public List<Aggregate> aggregates;
+            public Aggregate[] aggregates;
             public ITableResults results;
             public int start;
             public int end;
             public ConcurrentDictionary<GroupDictKey, AggregateBucketResult[]> globalGroups;
 
-            public GroupByJob(RowHasher hasher, RowEqualityComparerGroupKey comparer, List<Aggregate> aggregates, ITableResults results, int start, int end, ConcurrentDictionary<GroupDictKey, AggregateBucketResult[]> globalGroups)
+            public GroupByJob(RowHasher hasher, RowEqualityComparerGroupKey comparer, Aggregate[] aggregates, ITableResults results, int start, int end, ConcurrentDictionary<GroupDictKey, AggregateBucketResult[]> globalGroups)
             {
                 this.hasher = hasher;
                 this.aggregates = aggregates;
@@ -232,7 +232,7 @@ namespace QueryEngine
         {
             public Dictionary<GroupDictKey, AggregateBucketResult[]> groups;
 
-            public GroupByJobBuckets(RowHasher hasher, RowEqualityComparerGroupKey comparer, List<Aggregate> aggregates, ITableResults results, int start, int end, ConcurrentDictionary<GroupDictKey, AggregateBucketResult[]> globalGroups): base(hasher, comparer, aggregates, results, start, end, globalGroups)
+            public GroupByJobBuckets(RowHasher hasher, RowEqualityComparerGroupKey comparer, Aggregate[] aggregates, ITableResults results, int start, int end, ConcurrentDictionary<GroupDictKey, AggregateBucketResult[]> globalGroups): base(hasher, comparer, aggregates, results, start, end, globalGroups)
             {
                 this.groups = new Dictionary<GroupDictKey, AggregateBucketResult[]>((IEqualityComparer<GroupDictKey>)comparer);
             }
@@ -241,9 +241,9 @@ namespace QueryEngine
         private class GroupByJobMixListsBuckets : GroupByJob
         {
             public Dictionary<GroupDictKey, int> groups;
-            public List<AggregateListResults> aggResults;
+            public AggregateListResults[] aggResults;
 
-            public GroupByJobMixListsBuckets(RowHasher hasher, RowEqualityComparerGroupKey comparer, List<Aggregate> aggregates, ITableResults results, int start, int end, ConcurrentDictionary<GroupDictKey, AggregateBucketResult[]> globalGroups) : base(hasher, comparer, aggregates, results, start, end, globalGroups)
+            public GroupByJobMixListsBuckets(RowHasher hasher, RowEqualityComparerGroupKey comparer, Aggregate[] aggregates, ITableResults results, int start, int end, ConcurrentDictionary<GroupDictKey, AggregateBucketResult[]> globalGroups) : base(hasher, comparer, aggregates, results, start, end, globalGroups)
             {
                 this.groups = new Dictionary<GroupDictKey, int>((IEqualityComparer<GroupDictKey>)comparer);
                 this.aggResults = AggregateListResults.CreateArrayResults(aggregates);

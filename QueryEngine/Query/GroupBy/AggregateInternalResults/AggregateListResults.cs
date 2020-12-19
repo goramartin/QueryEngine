@@ -19,11 +19,11 @@ namespace QueryEngine
     /// </summary>
     internal abstract class AggregateListResults
     {
-        public static List<AggregateListResults> CreateArrayResults(List<Aggregate> aggregates)
+        public static AggregateListResults[] CreateArrayResults(Aggregate[] aggregates)
         {
-            List<AggregateListResults> aggResults = new List<AggregateListResults>();
-            for (int i = 0; i < aggregates.Count; i++)
-                aggResults.Add(AggregateListResults.Factory(aggregates[i].GetAggregateReturnType(), aggregates[i].GetFuncName()));
+            AggregateListResults[] aggResults = new AggregateListResults[aggregates.Length];
+            for (int i = 0; i < aggregates.Length; i++)
+                aggResults[i] = (AggregateListResults.Factory(aggregates[i].GetAggregateReturnType(), aggregates[i].GetFuncName()));
 
             return aggResults;
         }

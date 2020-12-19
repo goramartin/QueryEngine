@@ -18,9 +18,9 @@ namespace QueryEngine
     internal class GroupByResultsArray : GroupByResults, IEnumerable<GroupByResultsArray.GroupProxyArray>
     {
         protected ConcurrentDictionary<int, int> groups;
-        protected List<AggregateArrayResults> aggregateResults;
+        protected AggregateArrayResults[] aggregateResults;
 
-        public GroupByResultsArray(ConcurrentDictionary<int, int> groups, List<AggregateArrayResults> aggregateResults, ITableResults resTable) : base(groups.Count, resTable)
+        public GroupByResultsArray(ConcurrentDictionary<int, int> groups, AggregateArrayResults[] aggregateResults, ITableResults resTable) : base(groups.Count, resTable)
         {
             this.groups = groups;
             this.aggregateResults = aggregateResults;
@@ -46,9 +46,9 @@ namespace QueryEngine
             /// An position of "this" group's aggregate results in the List storage. 
             /// </summary>
             public readonly int index;
-            private readonly List<AggregateArrayResults> aggregatesResults;
+            private readonly AggregateArrayResults[] aggregatesResults;
 
-            public GroupProxyArray(TableResults.RowProxy groupRepresentant, int index, List<AggregateArrayResults> aggregatesResults)
+            public GroupProxyArray(TableResults.RowProxy groupRepresentant, int index, AggregateArrayResults[] aggregatesResults)
             {
                 this.groupRepresentant = groupRepresentant;
                 this.index = index;

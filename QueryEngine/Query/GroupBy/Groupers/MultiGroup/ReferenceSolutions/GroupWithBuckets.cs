@@ -12,7 +12,7 @@ namespace QueryEngine
     /// </summary>
     internal class GroupWithBuckets : Grouper
     {
-        public GroupWithBuckets(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper) : base(aggs, hashes, helper, true)
+        public GroupWithBuckets(Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper helper) : base(aggs, hashes, helper, true)
         {}
 
         public override GroupByResults Group(ITableResults resTable)
@@ -21,7 +21,7 @@ namespace QueryEngine
 
             // Create hashers and equality comparers.
             // The hashers receive also the equality comparer as cache.
-            CreateHashersAndComparers(out List<ExpressionEqualityComparer> equalityComparers, out List<ExpressionHasher> hashers);
+            CreateHashersAndComparers(out ExpressionEqualityComparer[] equalityComparers, out ExpressionHasher[] hashers);
             return this.SingleThreadGroupBy(new RowHasher(hashers), new RowEqualityComparerGroupKey(resTable, equalityComparers), resTable);
         }
 
@@ -46,7 +46,7 @@ namespace QueryEngine
                     groups.Add(key, buckets);
                 }
 
-                for (int j = 0; j < this.aggregates.Count; j++)
+                for (int j = 0; j < this.aggregates.Length; j++)
                     this.aggregates[j].Apply(in row, buckets[j]);
             }
 

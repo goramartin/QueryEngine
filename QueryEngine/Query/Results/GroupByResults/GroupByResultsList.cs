@@ -17,9 +17,9 @@ namespace QueryEngine
     internal class GroupByResultsList : GroupByResults, IEnumerable<GroupByResultsList.GroupProxyList>
     {
         protected Dictionary<GroupDictKey, int> groups;
-        protected List<AggregateListResults> aggregateResults;
+        protected AggregateListResults[] aggregateResults;
 
-        public GroupByResultsList(Dictionary<GroupDictKey, int> groups, List<AggregateListResults> aggregateResults, ITableResults resTable) : base(groups.Count, resTable)
+        public GroupByResultsList(Dictionary<GroupDictKey, int> groups, AggregateListResults[] aggregateResults, ITableResults resTable) : base(groups.Count, resTable)
         {
             this.groups = groups;
             this.aggregateResults = aggregateResults;
@@ -45,9 +45,9 @@ namespace QueryEngine
             /// An position of "this" group's aggregate results in the List storage. 
             /// </summary>
             public readonly int index;
-            private readonly List<AggregateListResults> aggregatesResults;
+            private readonly AggregateListResults[] aggregatesResults;
 
-            public GroupProxyList(TableResults.RowProxy groupRepresentant, int index, List<AggregateListResults> aggregatesResults)
+            public GroupProxyList(TableResults.RowProxy groupRepresentant, int index, AggregateListResults[] aggregatesResults)
             {
                 this.groupRepresentant = groupRepresentant;
                 this.index = index;

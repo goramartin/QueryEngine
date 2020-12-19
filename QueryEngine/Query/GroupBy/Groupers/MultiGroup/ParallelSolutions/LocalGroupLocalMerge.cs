@@ -16,17 +16,17 @@ namespace QueryEngine
     /// </summary>
     internal class LocalGroupLocalMerge : Grouper
     {
-        public LocalGroupLocalMerge(List<Aggregate> aggs, List<ExpressionHolder> hashes, IGroupByExecutionHelper helper, bool useBucketStorage) : base(aggs, hashes, helper, useBucketStorage) 
+        public LocalGroupLocalMerge(Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper helper, bool useBucketStorage) : base(aggs, hashes, helper, useBucketStorage) 
         { }
 
         public override GroupByResults Group(ITableResults resTable)
         {
             // Create hashers and equality comparers.
-            CreateHashersAndComparers(out List<ExpressionEqualityComparer> equalityComparers, out List<ExpressionHasher> hashers);
+            CreateHashersAndComparers(out ExpressionEqualityComparer[] equalityComparers, out ExpressionHasher[] hashers);
             return ParallelGroupBy(resTable, equalityComparers, hashers);
         }
 
-        private GroupByResults ParallelGroupBy(ITableResults resTable, List<ExpressionEqualityComparer> equalityComparers, List<ExpressionHasher> hashers)
+        private GroupByResults ParallelGroupBy(ITableResults resTable, ExpressionEqualityComparer[] equalityComparers, ExpressionHasher[] hashers)
         {
             GroupByJob[] jobs = CreateJobs(resTable, this.aggregates, equalityComparers, hashers);
             ParallelGroupByWork(jobs, 0, ThreadCount, this.BucketStorage);
@@ -41,7 +41,7 @@ namespace QueryEngine
         /// Note that they are all copies, because they contain a private stete (hasher contains reference to the equality comparers to enable caching when computing the hash.
         /// The comparers and hashers build in the constructor of this class are given to the last job, just like the aggregates passed to the construtor.
         /// </summary>
-        private GroupByJob[] CreateJobs(ITableResults results, List<Aggregate> aggs, List<ExpressionEqualityComparer> equalityComparers, List<ExpressionHasher> hashers)
+        private GroupByJob[] CreateJobs(ITableResults results, Aggregate[] aggs, ExpressionEqualityComparer[] equalityComparers, ExpressionHasher[] hashers)
         {
             GroupByJob[] jobs = new GroupByJob[this.ThreadCount];
             int current = 0;
@@ -160,7 +160,7 @@ namespace QueryEngine
                     continue; 
                 }
                 // It merges the results only if the group was already in the dictionary.
-                for (int i = 0; i < aggregates.Count; i++)
+                for (int i = 0; i < aggregates.Length; i++)
                     aggregates[i].Merge(buckets[i], item.Value[i]);
             }
         }
@@ -196,7 +196,7 @@ namespace QueryEngine
                     groups.Add(key, buckets);
                 }
 
-                for (int j = 0; j < aggregates.Count; j++)
+                for (int j = 0; j < aggregates.Length; j++)
                     aggregates[j].Apply(in row, buckets[j]);
             }
         }
@@ -229,7 +229,7 @@ namespace QueryEngine
                     position = groups1.Count;
                     groups1.Add(item.Key, position);
                 }
-                for (int i = 0; i < aggs1.Count; i++)
+                for (int i = 0; i < aggs1.Length; i++)
                     aggs1[i].Merge(aggsResults1[i], position, aggsResults2[i], item.Value);
             }
         }
@@ -265,7 +265,7 @@ namespace QueryEngine
                     groups.Add(key, position);
                 }
 
-                for (int j = 0; j < aggregates.Count; j++)
+                for (int j = 0; j < aggregates.Length; j++)
                     aggregates[j].Apply(in row, aggResults[j], position);
             }
         }
@@ -275,13 +275,13 @@ namespace QueryEngine
         private class GroupByJob
         {
             public RowHasher hasher;
-            public List<Aggregate> aggregates;
+            public Aggregate[] aggregates;
             public ITableResults results;
             public int start;
             public int end;
             public bool bucketStorage;
 
-            protected GroupByJob(RowHasher hasher, RowEqualityComparerGroupKey comparer, List<Aggregate> aggregates, ITableResults results, int start, int end, bool bucketStorage)
+            protected GroupByJob(RowHasher hasher, RowEqualityComparerGroupKey comparer, Aggregate[] aggregates, ITableResults results, int start, int end, bool bucketStorage)
             {
                 this.hasher = hasher;
                 this.aggregates = aggregates;
@@ -296,7 +296,7 @@ namespace QueryEngine
         {
             public Dictionary<GroupDictKey, AggregateBucketResult[]> groups;
 
-            public GroupByJobBuckets(RowHasher hasher, RowEqualityComparerGroupKey comparer, List<Aggregate> aggregates, ITableResults results, int start, int end): base(hasher, comparer, aggregates, results, start, end, true)
+            public GroupByJobBuckets(RowHasher hasher, RowEqualityComparerGroupKey comparer, Aggregate[] aggregates, ITableResults results, int start, int end): base(hasher, comparer, aggregates, results, start, end, true)
             {
                 this.groups = new Dictionary<GroupDictKey, AggregateBucketResult[]>(comparer);
             }
@@ -305,8 +305,8 @@ namespace QueryEngine
         private class GroupByJobLists: GroupByJob
         {
             public Dictionary<GroupDictKey, int> groups;
-            public List<AggregateListResults> aggResults;
-            public GroupByJobLists(RowHasher hasher, RowEqualityComparerGroupKey comparer, List<Aggregate> aggregates, ITableResults results, int start, int end) : base(hasher, comparer, aggregates, results, start, end, false)
+            public AggregateListResults[] aggResults;
+            public GroupByJobLists(RowHasher hasher, RowEqualityComparerGroupKey comparer, Aggregate[] aggregates, ITableResults results, int start, int end) : base(hasher, comparer, aggregates, results, start, end, false)
             {
                 this.groups = new Dictionary<GroupDictKey, int>(comparer);
                 this.aggResults = AggregateListResults.CreateArrayResults(aggregates);

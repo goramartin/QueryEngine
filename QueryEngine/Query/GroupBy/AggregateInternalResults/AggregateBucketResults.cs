@@ -14,10 +14,10 @@ namespace QueryEngine
     /// </summary>
     internal abstract class AggregateBucketResult
     {
-        public static AggregateBucketResult[] CreateBucketResults(List<Aggregate> aggregates)
+        public static AggregateBucketResult[] CreateBucketResults(Aggregate[] aggregates)
         {
-            if (aggregates.Count == 0) return null;
-            var aggResults = new AggregateBucketResult[aggregates.Count];
+            if (aggregates.Length == 0) return null;
+            var aggResults = new AggregateBucketResult[aggregates.Length];
             for (int i = 0; i < aggResults.Length; i++)
                 aggResults[i] = AggregateBucketResult.Factory(aggregates[i].GetAggregateReturnType(), aggregates[i].GetFuncName());
 
@@ -46,7 +46,7 @@ namespace QueryEngine
                 return AggregateBucketResult.CompareInt(x, y);
             else if ((type == typeof(string)))
                 return AggregateBucketResult.CompareString(x, y);
-            else throw new ArgumentException($"Aggregate bucket result compare, unkown type to compare. Type = {typeof(T).ToString()}.");
+            else throw new ArgumentException($"Aggregate bucket result compare, unkown type to compare. Type = {type}.");
         }
 
         private static bool CompareInt(AggregateBucketResult x, AggregateBucketResult y)

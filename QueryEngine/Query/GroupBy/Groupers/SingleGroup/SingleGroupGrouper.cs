@@ -13,7 +13,7 @@ namespace QueryEngine
     /// </summary>
     internal class SingleGroupGrouper : Grouper
     {
-        public SingleGroupGrouper(List<Aggregate> aggs,List<ExpressionHolder> hashes, IGroupByExecutionHelper helper) : base(aggs, hashes, helper, false)
+        public SingleGroupGrouper(Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper helper) : base(aggs, hashes, helper, false)
         {}
 
         /// <summary>
@@ -29,7 +29,7 @@ namespace QueryEngine
             var nonAsterixAggResults = new List<AggregateBucketResult>();
             var aggResults = AggregateBucketResult.CreateBucketResults(this.aggregates);
 
-            for (int i = 0; i < this.aggregates.Count; i++)
+            for (int i = 0; i < this.aggregates.Length; i++)
             {
                 if (this.aggregates[i].IsAstCount)
                 {
@@ -65,7 +65,7 @@ namespace QueryEngine
         /// <param name="results"> A result table from match clause. </param>
         /// <param name="aggs"> Aggregation functions. </param>
         /// <param name="aggResults"> The results of the merge is stored in this isntances. </param>
-        private void ParallelGroupBy(ITableResults results, List<Aggregate> aggs, AggregateBucketResult[] aggResults)
+        private void ParallelGroupBy(ITableResults results, Aggregate[] aggs, AggregateBucketResult[] aggResults)
         {
             // -1 because the main thread works as well
             Task[] tasks = new Task[this.ThreadCount - 1];
@@ -84,6 +84,7 @@ namespace QueryEngine
             // Merge doesnt have to be in parallel because it s grouping only (#thread) values.
             MergeRows(jobs);
         }
+
         /// <summary>
         /// Creates jobs for the parallel group by.
         /// Note that the last job in the array has the start/end set to the end of result table.
@@ -94,7 +95,7 @@ namespace QueryEngine
         /// <param name="results"> A place to store aggregation results. </param>
         /// <param name="aggs"> Aggregation functions. </param>
         /// <param name="aggResults"> The results of the merge is stored in this isntances. It is placed into the last job. </param>
-        private GroupByJob[] CreateJobs(ITableResults results, List<Aggregate> aggs, AggregateBucketResult[] aggResults)
+        private GroupByJob[] CreateJobs(ITableResults results, Aggregate[] aggs, AggregateBucketResult[] aggResults)
         {
             GroupByJob[] jobs = new GroupByJob[this.ThreadCount];
             int current = 0;
@@ -117,7 +118,7 @@ namespace QueryEngine
         /// <param name="results"> A place to store aggregation results. </param>
         /// <param name="aggs"> Aggregation functions. </param>
         /// <param name="aggResults"> The results of the merge is stored in this isntances. </param>
-        private void SingleThreadGroupBy(ITableResults results, List<Aggregate> aggs, AggregateBucketResult[] aggResults)
+        private void SingleThreadGroupBy(ITableResults results, Aggregate[] aggs, AggregateBucketResult[] aggResults)
         {
             var job = new GroupByJob(aggs, aggResults, 0, results.NumberOfMatchedElements, results);
             SingleThreadGroupByWork(job);
@@ -141,7 +142,7 @@ namespace QueryEngine
             for (int i = groupByJob.start; i < groupByJob.end; i++)
             {
                 var tmpRow = results[i];
-                for (int j = 0; j < aggregates.Count; j++)
+                for (int j = 0; j < aggregates.Length; j++)
                     aggregates[j].Apply(in tmpRow, aggResults[j]);
             }
         }
@@ -155,7 +156,7 @@ namespace QueryEngine
             var lastJob = jobs[jobs.Length - 1];
             for (int i = 0; i < jobs.Length-1; i++)
             {
-                for (int j  = 0; j < lastJob.aggregates.Count; j++)
+                for (int j  = 0; j < lastJob.aggregates.Length; j++)
                 {
                     if (jobs[i].start != jobs[i].end)
                        lastJob.aggregates[j].Merge(lastJob.aggResults[j],  // to
@@ -166,13 +167,13 @@ namespace QueryEngine
         
         private class GroupByJob
         {
-            public List<Aggregate> aggregates;
+            public Aggregate[] aggregates;
             public AggregateBucketResult[] aggResults;
             public int start;
             public int end;
             public ITableResults results;
 
-            public GroupByJob(List<Aggregate> aggs, AggregateBucketResult[] aggRes, int start, int end, ITableResults res)
+            public GroupByJob(Aggregate[] aggs, AggregateBucketResult[] aggRes, int start, int end, ITableResults res)
             {
                 this.aggregates = aggs;
                 this.start = start;
