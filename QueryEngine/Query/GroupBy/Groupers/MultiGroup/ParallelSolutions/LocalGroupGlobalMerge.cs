@@ -141,7 +141,7 @@ namespace QueryEngine
                 // Note that the returned value can be the same as given in arguments. 
                 // That means that it inserted the given group.
                 // If it did not, merge its results with the returned one.
-                if (!Object.ReferenceEquals(buckets, item.Value))
+                if (!object.ReferenceEquals(buckets, item.Value))
                 {
                     for (int j = 0; j < aggregates.Length; j++)
                         aggregates[j].MergeThreadSafe(buckets[j], item.Value[j]);

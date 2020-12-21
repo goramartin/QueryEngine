@@ -44,7 +44,6 @@ namespace QueryEngine
         }
     }
 
-
     internal class DictGroupDictKeyBucket: GroupByResultsBucket
     {
         protected Dictionary<GroupDictKey, AggregateBucketResult[]> groups;
@@ -106,5 +105,4 @@ namespace QueryEngine
                 yield return new GroupByResultsBucket.GroupProxyBucket(item.Key.row, item.Value);
         }
     }
-
 }

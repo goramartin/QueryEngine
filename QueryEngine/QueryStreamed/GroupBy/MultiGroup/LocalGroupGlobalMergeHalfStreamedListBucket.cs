@@ -9,6 +9,8 @@ namespace QueryEngine
 {
     /// <summary>
     /// Class represents a half streamed grouping if group by is set in the input query.
+    /// The aggregate func. results are firstly stored in lists and then are put into buckets 
+    /// when they are merged into the global dictionary.
     /// The computation works as follows:
     /// Each matcher computes its groups localy and stores results of the matcher only if they 
     /// represent a representant of a group. If not, only aggregates are computed with the result.
@@ -18,12 +20,12 @@ namespace QueryEngine
     /// Notice that if it runs in single thread, the mergins does not happen. Thus we can use this class
     /// as a reference solution for the half streamed version using lists as a result storage.
     /// </summary>
-    internal class LocalGroupGlobalMergeHalfStreamed : GroupResultProcessor
+    internal class LocalGroupGlobalMergeHalfStreamedListBucket : GroupResultProcessor
     {
         private Job[] matcherJobs;
         private ConcurrentDictionary<GroupDictKeyFull, AggregateBucketResult[]> globalGroups;
 
-        public LocalGroupGlobalMergeHalfStreamed(Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper helper, int columnCount) : base(aggs, hashes, helper, columnCount)
+        public LocalGroupGlobalMergeHalfStreamedListBucket(Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper helper, int columnCount) : base(aggs, hashes, helper, columnCount)
         {
             this.matcherJobs = new Job[helper.ThreadCount];
            
