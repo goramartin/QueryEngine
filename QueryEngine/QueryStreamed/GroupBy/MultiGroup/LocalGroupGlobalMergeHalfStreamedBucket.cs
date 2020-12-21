@@ -79,7 +79,7 @@ namespace QueryEngine
                     foreach (var item in tmpJob.groups)
                     {
                         var keyFull = new GroupDictKeyFull(item.Key.hash, tmpJob.results[item.Key.position]);
-                        var buckets = this.globalGroups.GetOrAdd(keyFull, tmpJob.spareBuckets);
+                        var buckets = this.globalGroups.GetOrAdd(keyFull, item.Value);
                         if (!object.ReferenceEquals(buckets, item.Value))
                         {
                             for (int j = 0; j < aggregates.Length; j++)
@@ -103,7 +103,6 @@ namespace QueryEngine
             public TableResults results;
             public Dictionary<GroupDictKey, AggregateBucketResult[]> groups;
             public RowHasher hasher;
-            public AggregateBucketResult[] spareBuckets;
 
             public Job(Aggregate[] aggregates, int columnCount, RowEqualityComparerGroupKey comparer, RowHasher hasher)
             {

@@ -79,7 +79,8 @@
     <Compile Include="QueryStreamed\GroupBy\MultiGroup\Comparers\RowEqualityComparerGroupDickKeyFull.cs" />
     <Compile Include="QueryStreamed\GroupBy\MultiGroup\GlobalGroupStreamed.cs" />
     <Compile Include="QueryStreamed\GroupBy\MultiGroup\BucketKeyValueFactory\BucketKeyValueFactory.cs" />
-    <Compile Include="QueryStreamed\GroupBy\MultiGroup\LocalGroupGlobalMergeHalfStreamed.cs" />
+    <Compile Include="QueryStreamed\GroupBy\MultiGroup\LocalGroupGlobalMergeHalfStreamedBucket.cs" />
+    <Compile Include="QueryStreamed\GroupBy\MultiGroup\LocalGroupGlobalMergeHalfStreamedListBucket.cs" />
     <Compile Include="QueryStreamed\GroupBy\SingleGroup\SingleGroupHalfStreamed.cs" />
     <Compile Include="QueryStreamed\GroupBy\SingleGroup\SingleGroupStreamed.cs" />
     <Compile Include="QueryStreamed\Match\DFSMatch\Matcher\DFSParallelPatternMatcher\DFSParallelPatternMatcherStreamed.cs" />
