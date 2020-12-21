@@ -15,13 +15,15 @@ namespace QueryEngine
     /// When matcher finishes, it merges its local results into a global groups.
     /// Notice that the keys of the global dictionary contain row proxies, this enables
     /// to obtain a keys that stem from different tables.
+    /// Notice that if it runs in single thread, the mergins does not happen. Thus we can use this class
+    /// as a reference solution for the half streamed version using lists as a result storage.
     /// </summary>
-    internal class LocalGroupGlobalMergeResultProcessorHalfStreamed : GroupResultProcessor
+    internal class LocalGroupGlobalMergeHalfStreamed : GroupResultProcessor
     {
         private Job[] matcherJobs;
         private ConcurrentDictionary<GroupDictKeyFull, AggregateBucketResult[]> globalGroups;
 
-        public LocalGroupGlobalMergeResultProcessorHalfStreamed(Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper helper, int columnCount) : base(aggs, hashes, helper, columnCount)
+        public LocalGroupGlobalMergeHalfStreamed(Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper helper, int columnCount) : base(aggs, hashes, helper, columnCount)
         {
             this.matcherJobs = new Job[helper.ThreadCount];
            
@@ -39,7 +41,7 @@ namespace QueryEngine
                 matcherJobs[i] = new Job(this.aggregates, this.ColumnCount, newComp, newHasher, AggregateBucketResult.CreateBucketResults(this.aggregates));
             }
 
-            this.globalGroups = new ConcurrentDictionary<GroupDictKeyFull, AggregateBucketResult[]>(new RowEqualityComparerGroupDickKeyFull(firstComp.Clone().Comparers)); // to do add the shit
+            this.globalGroups = new ConcurrentDictionary<GroupDictKeyFull, AggregateBucketResult[]>(new RowEqualityComparerGroupDickKeyFull(firstComp.Clone().Comparers));
         }
 
         public override void Process(int matcherID, Element[] result)
@@ -49,14 +51,14 @@ namespace QueryEngine
             {
                 // Create a temporary row.
                 tmpJob.results.temporaryRow = result;
-                int position = tmpJob.results.RowCount;
-                TableResults.RowProxy row = tmpJob.results[position];
-                var key = new GroupDictKey(tmpJob.hasher.Hash(in row), position); // It's a struct.
+                int rowPosition = tmpJob.results.RowCount;
+                TableResults.RowProxy row = tmpJob.results[rowPosition];
+                var key = new GroupDictKey(tmpJob.hasher.Hash(in row), rowPosition); // It's a struct.
 
-                if (!tmpJob.groups.TryGetValue(key, out position))
+                if (!tmpJob.groups.TryGetValue(key, out int resPosition))
                 {
-                    position = tmpJob.groups.Count;
-                    tmpJob.groups.Add(key, position);
+                    resPosition = tmpJob.groups.Count;
+                    tmpJob.groups.Add(key, resPosition);
                     // Store the temporary row in the table. This causes copying of the row to the actual lists of table.
                     // While the position of the stored row proxy remains the same, next time someone tries to access it,
                     // it returns the elements from the actual table and not the temporary row.
@@ -64,7 +66,7 @@ namespace QueryEngine
                     tmpJob.results.temporaryRow = null;
                 }
                 for (int j = 0; j < this.aggregates.Length; j++)
-                    this.aggregates[j].Apply(in row, tmpJob.aggResults[j], position);
+                    this.aggregates[j].Apply(in row, tmpJob.aggResults[j], resPosition);
             } else
             {
                 // If it runs in single thread. No need to merge the results.
