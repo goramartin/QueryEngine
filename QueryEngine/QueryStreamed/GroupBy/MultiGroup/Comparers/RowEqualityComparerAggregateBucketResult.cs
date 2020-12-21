@@ -23,10 +23,13 @@ namespace QueryEngine
         /// Constructs comparer.
         /// </summary>
         /// <param name="keyCount">A number of keys used to hash the passed array.</param>
-        public RowEqualityComparerAggregateBucketResult(int keyCount, Type[] keyTypes)
+        /// <param name="exprs"> Expressions that define types of the keys.</param>
+        public RowEqualityComparerAggregateBucketResult(int keyCount, ExpressionHolder[] exprs)
         {
             this.keyCount = keyCount;
-            this.keyTypes = keyTypes;
+            this.keyTypes = new Type[exprs.Length];
+            for (int i = 0; i < exprs.Length; i++)
+                this.keyTypes[i] = exprs[i].GetExpressionType();
         }
 
         /// <summary>
@@ -38,7 +41,7 @@ namespace QueryEngine
         public bool Equals(AggregateBucketResult[] x, AggregateBucketResult[] y)
         {
             for (int i = 0; i < this.keyCount; i++)
-                if (!AggregateBucketResult.Compare(keyTypes[i], x[i], y[i])) return false;
+                if (!AggregateBucketResultStreamedComparers.Compare(keyTypes[i], x[i], y[i])) return false;
 
             return true;
         }

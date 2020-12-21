@@ -8,8 +8,8 @@ namespace QueryEngine
 {
     internal class BucketsKeyValueFactory
     {
-        public AggregateBucketResult[] lastBucketsKeyValue;
         public bool lastWasInserted = true;
+        private AggregateBucketResult[] lastBucketsKeyValue;
         private Aggregate[] aggregates;
         private BucketKeyFactory[] factories;
         private int keysCount;

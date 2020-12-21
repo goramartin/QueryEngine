@@ -18,12 +18,12 @@ namespace QueryEngine
     /// </summary>
     internal class LocalGroupGlobalMergeResultProcessorHalfStreamed : GroupResultProcessor
     {
-        private MatcherJob[] matcherJobs;
+        private Job[] matcherJobs;
         private ConcurrentDictionary<GroupDictKeyFull, AggregateBucketResult[]> globalGroups;
 
         public LocalGroupGlobalMergeResultProcessorHalfStreamed(Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper helper, int columnCount) : base(aggs, hashes, helper, columnCount)
         {
-            this.matcherJobs = new MatcherJob[helper.ThreadCount];
+            this.matcherJobs = new Job[helper.ThreadCount];
            
             // Create initial job, comps and hashers
             this.CreateHashersAndComparers(out ExpressionEqualityComparer[] equalityComparers, out ExpressionHasher[] hashers);
@@ -32,11 +32,11 @@ namespace QueryEngine
             firstComp.SetCache(firstHasher);
             firstHasher.SetCache(firstComp.Comparers);
             
-            this.matcherJobs[0] = new MatcherJob(this.aggregates, this.ColumnCount, firstComp, firstHasher, AggregateBucketResult.CreateBucketResults(this.aggregates));
+            this.matcherJobs[0] = new Job(this.aggregates, this.ColumnCount, firstComp, firstHasher, AggregateBucketResult.CreateBucketResults(this.aggregates));
             for (int i = 1; i < ThreadCount; i++)
             {
                 this.CloneHasherAndComparer(firstComp, firstHasher, out RowEqualityComparerGroupKey newComp, out RowHasher newHasher);
-                matcherJobs[i] = new MatcherJob(this.aggregates, this.ColumnCount, newComp, newHasher, AggregateBucketResult.CreateBucketResults(this.aggregates));
+                matcherJobs[i] = new Job(this.aggregates, this.ColumnCount, newComp, newHasher, AggregateBucketResult.CreateBucketResults(this.aggregates));
             }
 
             this.globalGroups = new ConcurrentDictionary<GroupDictKeyFull, AggregateBucketResult[]>(new RowEqualityComparerGroupDickKeyFull(firstComp.Clone().Comparers)); // to do add the shit
@@ -91,7 +91,7 @@ namespace QueryEngine
             else groupByResults = new GroupByResultsList(this.matcherJobs[0].groups, this.matcherJobs[0].aggResults, this.matcherJobs[0].results);
         }
 
-        private class MatcherJob
+        private class Job
         {
             public TableResults results;
             public Dictionary<GroupDictKey, int> groups;
@@ -99,7 +99,7 @@ namespace QueryEngine
             public RowHasher hasher;
             public AggregateBucketResult[] spareBuckets;
 
-            public MatcherJob(Aggregate[] aggregates, int columnCount, RowEqualityComparerGroupKey comparer, RowHasher hasher, AggregateBucketResult[] spareBuckets)
+            public Job(Aggregate[] aggregates, int columnCount, RowEqualityComparerGroupKey comparer, RowHasher hasher, AggregateBucketResult[] spareBuckets)
             {
                 this.results = new TableResults(columnCount);
                 comparer.Results = this.results;

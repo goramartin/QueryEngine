@@ -33,30 +33,6 @@ namespace QueryEngine
             else if (type == typeof(string)) return new AggregateBucketResult<string>();
             else throw new ArgumentException($"Aggregate bucket result factory, cannot create a results holder with the type {type} for function {funcName}.");
         }
-
-        /// <summary>
-        /// A methods that is used only in the context of fully streamed version of group by.
-        /// The keys put in the concurrent dictionary will be of the base type AggregateBucketResult<T> since
-        /// the keys and agg value will be stored in the same array to save a bit of memory.
-        /// Note that the values must always be set beforehand.
-        /// </summary>
-        public static bool Compare(Type type, AggregateBucketResult x, AggregateBucketResult y)
-        {
-            if (type == typeof(int))
-                return AggregateBucketResult.CompareInt(x, y);
-            else if ((type == typeof(string)))
-                return AggregateBucketResult.CompareString(x, y);
-            else throw new ArgumentException($"Aggregate bucket result compare, unkown type to compare. Type = {type}.");
-        }
-
-        private static bool CompareInt(AggregateBucketResult x, AggregateBucketResult y)
-        {
-                return ((AggregateBucketResult<int>)x).aggResult == ((AggregateBucketResult<int>)y).aggResult;
-        }
-        private static bool CompareString(AggregateBucketResult x, AggregateBucketResult y)
-        {
-            return ((AggregateBucketResult<string>)x).aggResult == ((AggregateBucketResult<string>)y).aggResult;
-        }
     }
 
     /// <typeparam name="T"> A return type of the aggregation function. </typeparam>
