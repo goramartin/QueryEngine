@@ -80,9 +80,7 @@ namespace QueryEngine
             if (node.asLabel != null)
                 label = ((IdentifierNode)(node.asLabel)).value;
 
-            int exprID = this.exprInfo.AddExpression(new ExpressionHolder(expr, label));
-            var tmpExprHolder = this.exprInfo.Exprs[exprID];
-            tmpExprHolder.SetExprID(exprID);
+            var tmpExprHolder = this.exprInfo.Exprs[this.exprInfo.AddExpression(new ExpressionHolder(expr, label))];
             this.result.Add(ExpressionToStringWrapper.Factory(tmpExprHolder, tmpExprHolder.ExpressionType));
         }
 

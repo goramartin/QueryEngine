@@ -60,29 +60,29 @@ namespace QueryEngine
         /// This function is very simplified becuase expressions contain only one block.
         /// Thus, it must be reimplemented in the future.
         /// </summary>
-        /// <param name="holder"> An expression. </param>
+        /// <param name="expressionHolder"> An expression. </param>
         /// <returns> A position of the added expression.  </returns>
-        public int AddExpression(ExpressionHolder holder)
+        public int AddExpression(ExpressionHolder expressionHolder)
         {
             // Only expressions from group by clause and aggregates can be used.
             if (this.IsSetGroupBy)
             {
                 // Aggregates in expressions can be referenced freely
-                if (!holder.ContainsAggregate())
+                if (!expressionHolder.ContainsAggregate())
                 {
                     // There can be referenced only expressions from group by.
-                    if (this.GroupByhashExprs.IndexOf(holder) == -1) 
+                    if (this.GroupByhashExprs.IndexOf(expressionHolder) == -1) 
                         throw new ArgumentException($"{this.GetType()}, expression in the query can contain only references from group by clause.");
-                    else return this.Exprs.IndexOf(holder);
+                    else return this.Exprs.IndexOf(expressionHolder);
                     // The check is not done, because the aggregate reference is create at the same time as the corresponding aggregate.
-                } else return AddExpr(holder);
+                } else return AddExpr(expressionHolder);
             } 
             else
             {
                 // No group by is set.
-                if ((holder.ContainsAggregate() && ContainsSimpleExpr()) || (!holder.ContainsAggregate() && this.Aggregates.Count > 0))
+                if ((expressionHolder.ContainsAggregate() && ContainsSimpleExpr()) || (!expressionHolder.ContainsAggregate() && this.Aggregates.Count > 0))
                     throw new ArgumentException($"{this.GetType()}, there was references an aggregate and a simple expression while group by is not set.");
-                else return AddExpr(holder);
+                else return AddExpr(expressionHolder);
             }
         }
 
@@ -106,18 +106,21 @@ namespace QueryEngine
         /// Adds hash expression for group by.
         /// Cannot contain aggregations.
         /// Each hash can be added only once.
+        /// Note that this method is called only when the group by keys are created.
+        /// Thus, hashes and expr have the same count.
         /// </summary>
-        /// <param name="holder"> An expression to hash with. </param>
-        public int AddGroupByHash(ExpressionHolder holder)
+        /// <param name="expressionHolder"> An expression to hash with. </param>
+        public int AddGroupByHash(ExpressionHolder expressionHolder)
         {
-            if (holder.ContainsAggregate())
+            if (expressionHolder.ContainsAggregate())
                 throw new ArgumentException($"{this.GetType()}, group by clause cannot contain aggregates.");
-            else if (this.GroupByhashExprs.Contains(holder))
-                throw new ArgumentException($"{this.GetType()}, group by clause cannot contain the same aggregate multiple times.");
+            else if (this.GroupByhashExprs.Contains(expressionHolder))
+                throw new ArgumentException($"{this.GetType()}, group by clause cannot contain the same key multiple times.");
             else 
             { 
-                this.GroupByhashExprs.Add(holder);
-                this.Exprs.Add(holder);
+                this.GroupByhashExprs.Add(expressionHolder);
+                this.Exprs.Add(expressionHolder);
+                expressionHolder.SetExprPosition(this.Exprs.Count - 1);
                 return this.Exprs.Count - 1;
             }
         }
@@ -139,16 +142,16 @@ namespace QueryEngine
         /// </summary>
         /// <param name="holder"> An expression to add. </param>
         /// <returns> A position of the added expression. </returns>
-        private int AddExpr(ExpressionHolder holder)
+        private int AddExpr(ExpressionHolder expressionHolder)
         {
             int position = -1;
-            if ((position = this.Exprs.IndexOf(holder)) != -1) return position;
+            if ((position = this.Exprs.IndexOf(expressionHolder)) != -1) return position;
             else
             {
-                this.Exprs.Add(holder);
+                this.Exprs.Add(expressionHolder);
+                expressionHolder.SetExprPosition(this.Exprs.Count - 1);
                 return this.Exprs.Count - 1;
             }
         }
-
     }
 }

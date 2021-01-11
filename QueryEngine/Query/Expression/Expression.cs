@@ -32,10 +32,9 @@ namespace QueryEngine
     internal abstract class ExpressionBase
     {
         /// <summary>
-        /// Represents an id of an expression.
         /// It is equal to its position in the QueryExpressionInfo list.
         /// </summary>
-        protected int ExprID { get; set; }
+        protected int ExprPosition { get; set; }
 
         protected ExpressionBase()
         {}
@@ -59,9 +58,9 @@ namespace QueryEngine
         /// </summary>
         public abstract bool ContainsAggregate();
 
-        public virtual void SetExprID(int exprID)
+        public virtual void SetExprPosition(int exprPos)
         {
-            this.ExprID = exprID;
+            this.ExprPosition = exprPos;
         }
     }
 

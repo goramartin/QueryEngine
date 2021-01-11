@@ -82,10 +82,10 @@ namespace QueryEngine
             }
         }
 
-        public override void SetExprID(int exprID)
+        public override void SetExprPosition(int exprPos)
         {
-            this.ExprID = exprID;
-            this.Expr.SetExprID(exprID);
+            this.ExprPosition = exprPos;
+            this.Expr.SetExprPosition(exprPos);
         }
     }
 }
