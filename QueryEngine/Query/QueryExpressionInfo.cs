@@ -55,7 +55,7 @@ namespace QueryEngine
         /// This function should check, whether the expressions in other clauses are as same as the grouping exp.
         /// Because, only the same expressions can be referenced throughout the query + aggregates.
         /// 
-        /// If no group by is set. And aggregation is referenced, then only aggregations can be referenced in the entire query.
+        /// If no group by is set and aggregation is referenced, then only aggregations can be referenced in the entire query.
         ///
         /// This function is very simplified becuase expressions contain only one block.
         /// Thus, it must be reimplemented in the future.
@@ -71,8 +71,10 @@ namespace QueryEngine
                 if (!holder.ContainsAggregate())
                 {
                     // There can be referenced only expressions from group by.
-                    if (this.GroupByhashExprs.IndexOf(holder) == -1) throw new ArgumentException($"{this.GetType()}, expression in the query can contain only references from group by clause.");
+                    if (this.GroupByhashExprs.IndexOf(holder) == -1) 
+                        throw new ArgumentException($"{this.GetType()}, expression in the query can contain only references from group by clause.");
                     else return this.Exprs.IndexOf(holder);
+                    // The check is not done, because the aggregate reference is create at the same time as the corresponding aggregate.
                 } else return AddExpr(holder);
             } 
             else
@@ -86,10 +88,9 @@ namespace QueryEngine
 
         /// <summary>
         /// Adds an aggregate to common aggregate functions.
-        /// And returns position where it was added or the position of the aggregate that has been already addeds.
-        /// If it already contains the aggregate, it returns the position of the containing one.
         /// </summary>
         /// <param name="aggregate">An aggregate function. </param>
+        /// <returns> Returns position where it was added or the position of the aggregate that has been already added.</returns>
         public int AddAggregate(Aggregate aggregate)
         {
             int position = -1;
