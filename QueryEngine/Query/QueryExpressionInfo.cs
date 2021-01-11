@@ -33,15 +33,15 @@ namespace QueryEngine
         /// <summary>
         /// Expressions used by group by to group results.
         /// </summary>
-        public List<ExpressionHolder> groupByhashExprs { get; } = new List<ExpressionHolder>();
+        public List<ExpressionHolder> GroupByhashExprs { get; } = new List<ExpressionHolder>();
         /// <summary>
         /// Used aggregate functions for a group by.
         /// </summary>
-        public List<Aggregate> aggregates { get; } = new List<Aggregate>();
+        public List<Aggregate> Aggregates { get; } = new List<Aggregate>();
         /// <summary>
         /// Every other expression used inside query.
         /// </summary>
-        public List<ExpressionHolder> exprs { get; } = new List<ExpressionHolder>();
+        public List<ExpressionHolder> Exprs { get; } = new List<ExpressionHolder>();
         public bool IsSetGroupBy { get; set; } = false;
     
         public QueryExpressionInfo(bool isSetGroupBy)

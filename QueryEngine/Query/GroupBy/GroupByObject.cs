@@ -50,7 +50,7 @@ namespace QueryEngine
             groupbyVisitor.Visit(groupByNode);
             this.hashes = groupbyVisitor.GetResult();
 
-            this.aggregates = exprInfo.aggregates;
+            this.aggregates = exprInfo.Aggregates;
             this.helper.IsSetGroupBy = true;
         }
 
@@ -61,7 +61,7 @@ namespace QueryEngine
         /// <param name="exprInfo"> A query expression information. </param>
         public GroupByObject(IGroupByExecutionHelper executionHelper, QueryExpressionInfo exprInfo)
         {
-            this.aggregates = exprInfo.aggregates;
+            this.aggregates = exprInfo.Aggregates;
             this.helper = executionHelper;
         }
 

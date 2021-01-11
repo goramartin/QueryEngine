@@ -169,11 +169,11 @@ namespace QueryEngine
             if (!this.qEhelper.IsSetGroupBy)
             {
                 // There are only aggregates
-                if (this.exprInfo.aggregates.Count > 0)
+                if (this.exprInfo.Aggregates.Count > 0)
                 {
                     bool foundNonAst = false;
-                    for (int i = 0; i < this.exprInfo.aggregates.Count; i++)
-                        if (!this.exprInfo.aggregates[i].IsAstCount) foundNonAst = true;
+                    for (int i = 0; i < this.exprInfo.Aggregates.Count; i++)
+                        if (!this.exprInfo.Aggregates[i].IsAstCount) foundNonAst = true;
                     
                     // If there are only count(*) the results are not needed.
                     if (!foundNonAst ) this.qEhelper.IsStoringResult = false;
