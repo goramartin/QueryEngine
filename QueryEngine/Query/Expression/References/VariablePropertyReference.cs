@@ -70,6 +70,11 @@ namespace QueryEngine
             return element.Table.TryGetPropertyValue(element.ID, this.PropertyID, out returnValue);
         }
 
+        public override bool TryEvaluate(in AggregateBucketResult[] group, out T returnValue)
+        {
+            returnValue = AggregateBucketResultStreamedGetValue.GetFinalValue<T>(group[this.ExprPosition]);
+            return true;
+        }
 
         public override bool ContainsAggregate()
         {

@@ -92,6 +92,12 @@ namespace QueryEngine
             return true;
         }
 
+        public override bool TryEvaluate(in AggregateBucketResult[] group, out T returnValue)
+        {
+            returnValue = AggregateBucketResultStreamedGetValue.GetFinalValue<T>(group[this.KeyCount + this.AggrPosition]);
+            return true;
+        }
+
         public override bool Equals(object obj)
         {
             if (obj == null) return false;

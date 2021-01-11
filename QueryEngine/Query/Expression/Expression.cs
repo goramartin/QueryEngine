@@ -76,5 +76,6 @@ namespace QueryEngine
         public abstract bool TryEvaluate(in GroupByResultsList.GroupProxyList group, out T returnValue);
         public abstract bool TryEvaluate(in GroupByResultsBucket.GroupProxyBucket group, out T returnValue);
         public abstract bool TryEvaluate(in GroupByResultsArray.GroupProxyArray group, out T returnValue);
+        public abstract bool TryEvaluate(in AggregateBucketResult[] group, out T returnValue);
     }
 }

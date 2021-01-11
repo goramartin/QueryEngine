@@ -42,6 +42,7 @@ namespace QueryEngine
         public abstract string GetValueAsString(in GroupByResultsList.GroupProxyList group);
         public abstract string GetValueAsString(in GroupByResultsBucket.GroupProxyBucket group);
         public abstract string GetValueAsString(in GroupByResultsArray.GroupProxyArray group);
+        public abstract string GetValueAsString(in AggregateBucketResult[] group);
 
         /// <summary>
         /// Print variable factory. Creates specialised wrapper based on a given type.
@@ -107,6 +108,13 @@ namespace QueryEngine
         }
 
         public override string GetValueAsString(in GroupByResultsArray.GroupProxyArray group)
+        {
+            if (this.expr.TryEvaluate(group, out T returnValue))
+                return returnValue.ToString();
+            else return ExpressionToStringWrapper.ExpressionFailStringValue;
+        }
+
+        public override string GetValueAsString(in AggregateBucketResult[] group)
         {
             if (this.expr.TryEvaluate(group, out T returnValue))
                 return returnValue.ToString();

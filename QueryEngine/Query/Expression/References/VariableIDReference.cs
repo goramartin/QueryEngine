@@ -68,6 +68,11 @@ namespace QueryEngine
             return true;
         }
 
+        public override bool TryEvaluate(in AggregateBucketResult[] group, out int returnValue)
+        {
+            returnValue = AggregateBucketResultStreamedGetValue.GetFinalValue<int>(group[this.ExprPosition]);
+            return true;
+        }
 
         public override bool Equals(object obj)
         {

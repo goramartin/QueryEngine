@@ -111,6 +111,11 @@ namespace QueryEngine
                     var tmpResults = (GroupByResultsList)results;
                     foreach (var item in tmpResults)
                         printer.PrintRow(item);
+                } else if (results.GetType() == typeof(GroupByResultsStreamedBucket))
+                {
+                    var tmpResults = (GroupByResultsStreamedBucket)results;
+                    foreach (var item in tmpResults)
+                        printer.PrintRow(item);
                 }
                 else throw new ArgumentException($"{this.GetType()}, received unknown group result holder. holder = {results.GetType()}.");
                

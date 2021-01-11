@@ -12,5 +12,6 @@ namespace QueryEngine
         void PrintRow(in GroupByResultsList.GroupProxyList group);
         void PrintRow(in GroupByResultsBucket.GroupProxyBucket group);
         void PrintRow(in GroupByResultsArray.GroupProxyArray group);
+        void PrintRow(in AggregateBucketResult[] group);
     }
 }

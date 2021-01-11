@@ -92,6 +92,12 @@ namespace QueryEngine
                 this.formater.AddToFormat(this.rowFormat[i].GetValueAsString(group));
         }
 
+        public void PrintRow(in AggregateBucketResult[] group)
+        {
+            for (int i = 0; i < this.rowFormat.Count; i++)
+                this.formater.AddToFormat(this.rowFormat[i].GetValueAsString(group));
+        }
+
         /// <summary>
         /// Prints entire header of a table.
         /// </summary>

@@ -20,6 +20,14 @@ namespace QueryEngine
         }
     }
 
+    internal static class AggregateBucketResultStreamedGetValue
+    {
+        public static T GetFinalValue<T>(AggregateBucketResult bucket)
+        {
+            return ((IGetFinal<T>)bucket).GetFinal(0);
+        }
+    }
+
     internal static class AggregateBucketResultStreamedComparers
     {
         /// <summary>
