@@ -71,14 +71,14 @@ namespace QueryEngine
                 if (!holder.ContainsAggregate())
                 {
                     // There can be referenced only expressions from group by.
-                    if (this.groupByhashExprs.IndexOf(holder) == -1) throw new ArgumentException($"{this.GetType()}, expression in the query can contain only references from group by clause.");
-                    else return this.exprs.IndexOf(holder);
+                    if (this.GroupByhashExprs.IndexOf(holder) == -1) throw new ArgumentException($"{this.GetType()}, expression in the query can contain only references from group by clause.");
+                    else return this.Exprs.IndexOf(holder);
                 } else return AddExpr(holder);
             } 
             else
             {
                 // No group by is set.
-                if ((holder.ContainsAggregate() && ContainsSimpleExpr()) || (!holder.ContainsAggregate() && this.aggregates.Count > 0))
+                if ((holder.ContainsAggregate() && ContainsSimpleExpr()) || (!holder.ContainsAggregate() && this.Aggregates.Count > 0))
                     throw new ArgumentException($"{this.GetType()}, there was references an aggregate and a simple expression while group by is not set.");
                 else return AddExpr(holder);
             }
@@ -93,11 +93,11 @@ namespace QueryEngine
         public int AddAggregate(Aggregate aggregate)
         {
             int position = -1;
-            if ((position = this.aggregates.IndexOf(aggregate)) != -1) return position;
+            if ((position = this.Aggregates.IndexOf(aggregate)) != -1) return position;
             else
             {
-                this.aggregates.Add(aggregate);
-                return this.aggregates.Count - 1;
+                this.Aggregates.Add(aggregate);
+                return this.Aggregates.Count - 1;
             }
         }
 
@@ -111,12 +111,12 @@ namespace QueryEngine
         {
             if (holder.ContainsAggregate())
                 throw new ArgumentException($"{this.GetType()}, group by clause cannot contain aggregates.");
-            else if (this.groupByhashExprs.Contains(holder))
+            else if (this.GroupByhashExprs.Contains(holder))
                 throw new ArgumentException($"{this.GetType()}, group by clause cannot contain the same aggregate multiple times.");
             else 
             { 
-                this.groupByhashExprs.Add(holder);
-                this.exprs.Add(holder);
+                this.GroupByhashExprs.Add(holder);
+                this.Exprs.Add(holder);
             }
         }
 
@@ -126,8 +126,8 @@ namespace QueryEngine
         /// <returns> True if contains simple exp, otherwise false. </returns>
         private bool ContainsSimpleExpr()
         {
-            for (int i = 0; i < this.exprs.Count; i++)
-                if (!this.exprs[i].ContainsAggregate()) return true;
+            for (int i = 0; i < this.Exprs.Count; i++)
+                if (!this.Exprs[i].ContainsAggregate()) return true;
             return false;
         }
 
@@ -140,11 +140,11 @@ namespace QueryEngine
         private int AddExpr(ExpressionHolder holder)
         {
             int position = -1;
-            if ((position = this.exprs.IndexOf(holder)) != -1) return position;
+            if ((position = this.Exprs.IndexOf(holder)) != -1) return position;
             else
             {
-                this.exprs.Add(holder);
-                return this.exprs.Count - 1;
+                this.Exprs.Add(holder);
+                return this.Exprs.Count - 1;
             }
         }
 
