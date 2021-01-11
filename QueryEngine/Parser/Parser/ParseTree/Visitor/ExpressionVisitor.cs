@@ -114,8 +114,8 @@ namespace QueryEngine
 
             // Rewrite the expression used for aggregation argument to aggregation reference.
             int aggPos = this.exprInfo.AddAggregate(aggregate);
-            if (node.funcName.ToLower() == "avg") this.expr = AggregateReferenceFactory.Create(typeof(double), aggPos, this.exprInfo.Aggregates[aggPos]);
-            else this.expr = AggregateReferenceFactory.Create(aggType, aggPos, this.exprInfo.Aggregates[aggPos]);
+            if (node.funcName.ToLower() == "avg") this.expr = AggregateReferenceFactory.Create(typeof(double), aggPos, this.exprInfo.GroupByhashExprs.Count, this.exprInfo.Aggregates[aggPos]);
+            else this.expr = AggregateReferenceFactory.Create(aggType, aggPos, this.exprInfo.GroupByhashExprs.Count, this.exprInfo.Aggregates[aggPos]);
         }
 
         #region NotImpl

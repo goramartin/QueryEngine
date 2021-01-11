@@ -40,10 +40,12 @@ namespace QueryEngine
         /// </summary>
         /// <param name="aggPos"> An aggregation position.</param>
         /// <param name="agg"> An actual aggregation. </param>
-        public AggregateReference(int aggPos, Aggregate agg)
+        /// <param name="keyCount"> A key count. </param>
+        public AggregateReference(int aggPos, int keyCount, Aggregate agg)
         {
             this.AggrPosition = aggPos;
             this.Aggr = agg;
+            this.KeyCount = keyCount;
         }
 
 
@@ -116,13 +118,14 @@ namespace QueryEngine
         /// </summary>
         /// <param name="type"> Type of aggregation. </param>
         /// <param name="position"> Position of the aggregation in terms of entire query. </param>
+        /// <param name="keyCount"> A key count. </param>
         /// <param name="aggr"> Aggregation to be referenced. The purpose is solely for overriding ToString method. </param>
         /// <returns> Expression node that references aggregation. </returns>
-        public static ExpressionBase Create(Type type, int position, Aggregate aggr)
+        public static ExpressionBase Create(Type type, int position, int keyCount, Aggregate aggr)
         {
-            if (type == typeof(int)) return new AggregateReference<int>(position, aggr);
-            else if (type == typeof(string)) return new AggregateReference<string>(position, aggr);
-            else if (type == typeof(double)) return new AggregateReference<double>(position, aggr);
+            if (type == typeof(int)) return new AggregateReference<int>(position, keyCount, aggr);
+            else if (type == typeof(string)) return new AggregateReference<string>(position, keyCount, aggr);
+            else if (type == typeof(double)) return new AggregateReference<double>(position, keyCount, aggr);
             else throw new ArgumentException($"AggregateReferenceFactory, trying to create unsupported type = {type}.");
         }
     }
