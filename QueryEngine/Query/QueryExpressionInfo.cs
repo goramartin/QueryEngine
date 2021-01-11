@@ -108,7 +108,7 @@ namespace QueryEngine
         /// Each hash can be added only once.
         /// </summary>
         /// <param name="holder"> An expression to hash with. </param>
-        public void AddGroupByHash(ExpressionHolder holder)
+        public int AddGroupByHash(ExpressionHolder holder)
         {
             if (holder.ContainsAggregate())
                 throw new ArgumentException($"{this.GetType()}, group by clause cannot contain aggregates.");
@@ -118,6 +118,7 @@ namespace QueryEngine
             { 
                 this.GroupByhashExprs.Add(holder);
                 this.Exprs.Add(holder);
+                return this.Exprs.Count - 1;
             }
         }
 

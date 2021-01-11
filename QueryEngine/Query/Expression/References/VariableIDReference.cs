@@ -16,7 +16,8 @@ namespace QueryEngine
         /// </summary>
         /// <param name="nHolder">Holder of string representation of the name.</param>
         /// <param name="varIndex"> Index in a result during evaluation.</param>
-        public VariableIDReference(VariableReferenceNameHolder nHolder, int varIndex) : base(nHolder, varIndex) { }
+        public VariableIDReference(VariableReferenceNameHolder nHolder, int varIndex) : base(nHolder, varIndex) 
+        { }
 
         public override bool ContainsAggregate()
         {

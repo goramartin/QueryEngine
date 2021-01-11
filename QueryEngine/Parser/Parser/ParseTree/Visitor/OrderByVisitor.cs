@@ -79,7 +79,9 @@ namespace QueryEngine
                 label = ((IdentifierNode)(node.asLabel)).value;
 
             this.expressionHolder = new ExpressionHolder(expr, label);
-            this.expressionHolder = this.exprInfo.Exprs[this.exprInfo.AddExpression(this.expressionHolder)];
+            int exprID = this.exprInfo.AddExpression(this.expressionHolder);
+            this.expressionHolder = this.exprInfo.Exprs[exprID];
+            this.expressionHolder.SetExprID(exprID);
         }
 
         #region NotImpl

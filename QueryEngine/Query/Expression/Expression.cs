@@ -32,11 +32,19 @@ namespace QueryEngine
     internal abstract class ExpressionBase
     {
         /// <summary>
+        /// Represents an id of an expression.
+        /// It is equal to its position in the QueryExpressionInfo list.
+        /// </summary>
+        protected int ExprID { get; set; }
+
+        protected ExpressionBase()
+        {}
+        
+        /// <summary>
         /// Gets expression type.
         /// </summary>
         /// <returns> Type of expression. </returns>
         public abstract Type GetExpressionType();
-
 
         /// <summary>
         /// Returns a list of used variable references in the expression node.
@@ -51,6 +59,10 @@ namespace QueryEngine
         /// </summary>
         public abstract bool ContainsAggregate();
 
+        public virtual void SetExprID(int exprID)
+        {
+            this.ExprID = exprID;
+        }
     }
 
     /// <summary>
@@ -65,8 +77,5 @@ namespace QueryEngine
         public abstract bool TryEvaluate(in GroupByResultsList.GroupProxyList group, out T returnValue);
         public abstract bool TryEvaluate(in GroupByResultsBucket.GroupProxyBucket group, out T returnValue);
         public abstract bool TryEvaluate(in GroupByResultsArray.GroupProxyArray group, out T returnValue);
-
-
-
     }
 }

@@ -36,7 +36,7 @@ namespace QueryEngine
         /// </summary>
         /// <param name="nHolder"> Holder of string representation of the name. </param>
         /// <param name="varIndex"> Index of an element in a result during evaluation.</param>
-        protected VariableReference(VariableReferenceNameHolder nHolder, int varIndex) 
+        protected VariableReference(VariableReferenceNameHolder nHolder, int varIndex)
         {
             this.NameHolder = nHolder;
             this.VariableIndex = varIndex;
