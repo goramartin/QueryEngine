@@ -72,8 +72,7 @@ namespace QueryEngine
 
         public override bool TryEvaluate(in AggregateBucketResult[] group, out T returnValue)
         {
-            returnValue = AggregateBucketResultStreamedGetValue.GetFinalValue<T>(group[this.ExprPosition]);
-            return true;
+            return ((AggregateBucketResultStreamed<T>)group[this.ExprPosition]).GetValue(out returnValue);
         }
 
         public override bool ContainsAggregate()

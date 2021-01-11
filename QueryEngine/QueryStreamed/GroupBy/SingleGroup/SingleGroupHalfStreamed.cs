@@ -24,7 +24,6 @@ namespace QueryEngine
         private int[] numberOfMatchedElements;
         /// <summary>
         /// When matcher finishes, the results are merged onto this property.
-        /// The property will be set by the first matcher that finishes.
         /// </summary>
         private AggregateBucketResult[] finalResults;
         private bool ContainsNonAstrix;

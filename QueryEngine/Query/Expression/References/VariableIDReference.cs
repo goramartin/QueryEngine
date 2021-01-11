@@ -70,8 +70,7 @@ namespace QueryEngine
 
         public override bool TryEvaluate(in AggregateBucketResult[] group, out int returnValue)
         {
-            returnValue = AggregateBucketResultStreamedGetValue.GetFinalValue<int>(group[this.ExprPosition]);
-            return true;
+            return ((AggregateBucketResultStreamed<int>)group[this.ExprPosition]).GetValue(out returnValue);
         }
 
         public override bool Equals(object obj)
