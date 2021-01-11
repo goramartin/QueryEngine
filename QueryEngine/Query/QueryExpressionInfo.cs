@@ -35,6 +35,10 @@ namespace QueryEngine
         /// </summary>
         public List<ExpressionHolder> GroupByhashExprs { get; } = new List<ExpressionHolder>();
         /// <summary>
+        /// Expressions used by order by to sort results.
+        /// </summary>
+        public List<ExpressionHolder> OrderByComparerExprs { get; } = new List<ExpressionHolder>();
+        /// <summary>
         /// Used aggregate functions for a group by.
         /// </summary>
         public List<Aggregate> Aggregates { get; } = new List<Aggregate>();
@@ -75,14 +79,14 @@ namespace QueryEngine
                         throw new ArgumentException($"{this.GetType()}, expression in the query can contain only references from group by clause.");
                     else return this.Exprs.IndexOf(expressionHolder);
                     // The check is not done, because the aggregate reference is create at the same time as the corresponding aggregate.
-                } else return AddExpr(expressionHolder);
+                } else return InsertExpr(expressionHolder);
             } 
             else
             {
                 // No group by is set.
                 if ((expressionHolder.ContainsAggregate() && ContainsSimpleExpr()) || (!expressionHolder.ContainsAggregate() && this.Aggregates.Count > 0))
                     throw new ArgumentException($"{this.GetType()}, there was references an aggregate and a simple expression while group by is not set.");
-                else return AddExpr(expressionHolder);
+                else return InsertExpr(expressionHolder);
             }
         }
 
@@ -119,9 +123,23 @@ namespace QueryEngine
             else 
             { 
                 this.GroupByhashExprs.Add(expressionHolder);
-                this.Exprs.Add(expressionHolder);
-                expressionHolder.SetExprPosition(this.Exprs.Count - 1);
-                return this.Exprs.Count - 1;
+                return InsertExpr(expressionHolder);
+            }
+        }
+
+        /// <summary>
+        /// Adds comparer expression for order by.
+        /// Cannot contain multiple occurrences of the same comparer expression.
+        /// </summary>
+        /// <param name="expressionHolder"> An expression to sort with. </param>
+        public int AddOrderByComp(ExpressionHolder expressionHolder)
+        {
+            if (this.OrderByComparerExprs.Contains(expressionHolder))
+                throw new ArgumentException($"{this.GetType()}, order by clause cannot contain the same comparer expression multiple times.");
+            else
+            {
+                this.OrderByComparerExprs.Add(expressionHolder);
+                return InsertExpr(expressionHolder);
             }
         }
 
@@ -137,12 +155,11 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Tried to add expression. If it contains the expression, return its position.
-        /// Otherwise add the expression and return its new position.
+        /// Tried to insert an expression to the general expr. list.
         /// </summary>
-        /// <param name="holder"> An expression to add. </param>
-        /// <returns> A position of the added expression. </returns>
-        private int AddExpr(ExpressionHolder expressionHolder)
+        /// <param name="holder"> An expression to add to the general expr. list. </param>
+        /// <returns> If it contains the expression, return its position. Otherwise add the expression and return its new position. </returns>
+        private int InsertExpr(ExpressionHolder expressionHolder)
         {
             int position = -1;
             if ((position = this.Exprs.IndexOf(expressionHolder)) != -1) return position;
