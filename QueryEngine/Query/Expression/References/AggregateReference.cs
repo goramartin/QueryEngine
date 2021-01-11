@@ -21,6 +21,14 @@ namespace QueryEngine
         /// The aggregate position are unique.
         /// </summary>
         protected int AggrPosition { get; }
+        
+        /// <summary>
+        /// A number of keys used to group the results.
+        /// This is used only in the streamed version of the group by.
+        /// Because the specific aggregate values are stored after the key values.
+        /// </summary>
+        protected int KeyCount { get; }
+
         /// <summary>
         /// Reference to an aggregate, its purpose is only to properly override ToString().
         /// Otherwise must not be used.
