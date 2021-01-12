@@ -89,7 +89,7 @@ namespace QueryEngine
 
             // SELECT is the last one to process the resuls.
             this.query = QueryObject.Factory
-                (typeof(SelectObject), graph, qEhelper, variableMap, parsedClauses["select"], exprInfo) ;
+                (typeof(SelectObject), graph, qEhelper, variableMap, parsedClauses["select"], exprInfo);
 
             // Check if the results are in a single group.
             this.SetSingleGroupFlags();
@@ -123,8 +123,6 @@ namespace QueryEngine
         /// <param name="isStreamed"> A flag to distinguish a normal construtor.</param>
         private Query(List<Token> tokens, Graph graph, int threadCount, string printer, string formater, int verticesPerThread, string fileName, bool isStreamed)
         {
-
-            throw new NotImplementedException();
             this.graph = graph;
             this.variableMap = new VariableMap();
             this.qEhelper = new QueryExecutionHelper(threadCount, printer, formater, verticesPerThread, fileName, "DFSParallelStreamed", "DFSSingleThreadStreamed", "SIMPLE", "ref", false);
@@ -133,20 +131,32 @@ namespace QueryEngine
             var parsedClauses = Parser.Parse(tokens);
 
             // Create execution chain. // 
-            if (!parsedClauses.ContainsKey("orderby"))
-                throw new ArgumentException($"{this.GetType()}, the streamed version of the query must contain order by.");
-            QueryObject groupBy = null;
-            QueryObject orderBy = null;
+            if (parsedClauses.ContainsKey("orderby") && parsedClauses.ContainsKey("groupby"))
+                throw new ArgumentException($"{this.GetType()}, the streamed version of the query cannot contain group by and order by at the same time.");
 
             // MATCH is always leaf.
             MatchObjectStreamed match = (MatchObjectStreamed)QueryObject.Factory
                  (typeof(MatchObjectStreamed), graph, qEhelper, variableMap, parsedClauses["match"], null);
 
+            ///
+            // to do process grou pby clause  and obtain the aggregates and hashes, the all necessary info is in the expr info 
+            // 
+            ///
 
 
+            // SELECT is the last one to process the resuls.
+            this.query = QueryObject.Factory
+                (typeof(SelectObject), graph, qEhelper, variableMap, parsedClauses["select"], exprInfo);
+            SetSingleGroupFlags();
+
+            // Check if the query is aggregation and not a simply query.
+            if ((this.exprInfo.Aggregates.Count == 0 && this.qEhelper.IsSetSingleGroupGroupBy) || (!this.qEhelper.IsSetSingleGroupGroupBy && !parsedClauses.ContainsKey("groupby")))
+                throw new ArgumentException($"{this.GetType()}, no grouping was specified. The streamed version allows to compute only aggregations.");
+
+            // to do create processor
 
 
-
+            query.AddToEnd(match);
         }
 
 
