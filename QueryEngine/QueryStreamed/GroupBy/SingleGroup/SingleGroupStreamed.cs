@@ -22,7 +22,7 @@ namespace QueryEngine
         private int matchersFinished;
         private bool ContainsNonAsterix;
 
-        public SingleGroupResultProcessorStreamed(Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper helper, int columnCount) : base(aggs, hashes, helper, columnCount)
+        public SingleGroupResultProcessorStreamed(Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper executionHelper, int columnCount) : base(aggs, hashes, executionHelper, columnCount)
         {
             this.finalResults = AggregateBucketResult.CreateBucketResults(this.aggregates);
             for (int i = 0; i < this.aggregates.Length; i++)
@@ -50,7 +50,7 @@ namespace QueryEngine
                 // Signal that the matcher has finished.
                 var tmp = Interlocked.Increment(ref this.matchersFinished);
                 // The last finished matcher stores the number of matched elements.
-                if (tmp == this.ThreadCount)
+                if (tmp == this.executionHelper.ThreadCount)
                 {
                     for (int i = 0; i < this.aggregates.Length; i++)
                         if (this.aggregates[i].IsAstCount) ((Count)this.aggregates[i]).IncBy(this.numberOfMatchedElements, this.finalResults[i]);

@@ -18,13 +18,13 @@ namespace QueryEngine
         private Dictionary<AggregateBucketResult[], AggregateBucketResult[]> stGroups = null;
         private BucketsKeyValueFactory[] matcherBucketFactories;
 
-        public GlobalGroupStreamed(Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper helper, int columnCount) : base(aggs, hashes, helper, columnCount)
+        public GlobalGroupStreamed(Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper executionHelper, int columnCount) : base(aggs, hashes, executionHelper, columnCount)
         {
-            this.matcherBucketFactories = new BucketsKeyValueFactory[this.ThreadCount];
-            for (int i = 0; i < this.ThreadCount; i++)
+            this.matcherBucketFactories = new BucketsKeyValueFactory[this.executionHelper.ThreadCount];
+            for (int i = 0; i < this.executionHelper.ThreadCount; i++)
                 this.matcherBucketFactories[i] = new BucketsKeyValueFactory(this.aggregates, this.hashes);
             var comparer = new RowEqualityComparerAggregateBucketResult(this.hashes.Length, this.hashes);
-            if (this.InParallel) this.parGroups = new ConcurrentDictionary<AggregateBucketResult[], AggregateBucketResult[]>(comparer);
+            if (this.executionHelper.InParallel) this.parGroups = new ConcurrentDictionary<AggregateBucketResult[], AggregateBucketResult[]>(comparer);
             else this.stGroups = new Dictionary<AggregateBucketResult[], AggregateBucketResult[]>(comparer);
         }
 
@@ -35,7 +35,7 @@ namespace QueryEngine
             var bucketFactory = this.matcherBucketFactories[matcherID];
             var buckets = bucketFactory.Create(result);
 
-            if (this.InParallel) bucketFactory.lastWasInserted = ProcessParallel(result, buckets);
+            if (this.executionHelper.InParallel) bucketFactory.lastWasInserted = ProcessParallel(result, buckets);
             else bucketFactory.lastWasInserted = ProcessSingleThread(result, buckets);
         }
 
@@ -74,7 +74,7 @@ namespace QueryEngine
         public override void RetrieveResults(out ITableResults resTable, out GroupByResults groupByResults)
         {
             resTable = new TableResults();
-            if (this.InParallel)
+            if (this.executionHelper.InParallel)
                 groupByResults = new ConDictStreamedBucket(this.parGroups, resTable);
             else groupByResults = new DictStreamedBucket(this.stGroups, resTable);
         }

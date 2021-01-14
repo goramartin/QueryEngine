@@ -28,7 +28,7 @@ namespace QueryEngine
         /// <summary>
         /// Factory method.
         /// </summary>
-        /// <param name="name"> A name of the clause to build. </param>
+        /// <param name="type"> A type of the clause to build. </param>
         /// <param name="graph"> A graph to conduct computation on. </param>
         /// <param name="helper"> A helper that contains information about execution. </param>
         /// <param name="map"> A map of variables. </param>

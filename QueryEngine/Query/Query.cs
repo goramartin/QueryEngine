@@ -138,10 +138,8 @@ namespace QueryEngine
             MatchObjectStreamed match = (MatchObjectStreamed)QueryObject.Factory
                  (typeof(MatchObjectStreamed), graph, qEhelper, variableMap, parsedClauses["match"], null);
 
-            ///
             // to do process grou pby clause  and obtain the aggregates and hashes, the all necessary info is in the expr info 
             // 
-            ///
 
 
             // SELECT is the last one to process the resuls.
@@ -170,7 +168,7 @@ namespace QueryEngine
                 this.query.Compute(out ITableResults res, out GroupByResults groupByResults);
                 this.Finished = true;
             }
-            else throw new Exception($"{this.GetType()}, trying to call a query that has finished already.");
+            else throw new Exception($"{this.GetType()}, trying to call a query that has already finished.");
         }
 
         /// <summary>

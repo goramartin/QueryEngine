@@ -25,9 +25,9 @@ namespace QueryEngine
         private Job[] matcherJobs;
         private ConcurrentDictionary<GroupDictKeyFull, AggregateBucketResult[]> globalGroups;
 
-        public LocalGroupGlobalMergeHalfStreamedBucket(Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper helper, int columnCount) : base(aggs, hashes, helper, columnCount)
+        public LocalGroupGlobalMergeHalfStreamedBucket(Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper executionHelper, int columnCount) : base(aggs, hashes, executionHelper, columnCount)
         {
-            this.matcherJobs = new Job[helper.ThreadCount];
+            this.matcherJobs = new Job[this.executionHelper.ThreadCount];
 
             // Create initial job, comps and hashers
             this.CreateHashersAndComparers(out ExpressionEqualityComparer[] equalityComparers, out ExpressionHasher[] hashers);
@@ -37,7 +37,7 @@ namespace QueryEngine
             firstHasher.SetCache(firstComp.Comparers);
 
             this.matcherJobs[0] = new Job(this.aggregates, this.ColumnCount, firstComp, firstHasher);
-            for (int i = 1; i < ThreadCount; i++)
+            for (int i = 1; i < this.executionHelper.ThreadCount; i++)
             {
                 this.CloneHasherAndComparer(firstComp, firstHasher, out RowEqualityComparerGroupKey newComp, out RowHasher newHasher);
                 matcherJobs[i] = new Job(this.aggregates, this.ColumnCount, newComp, newHasher);
