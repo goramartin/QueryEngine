@@ -63,7 +63,7 @@ namespace QueryEngine
         {
             this.graph = graph;
             this.variableMap = new VariableMap(); 
-            this.qEhelper = new QueryExecutionHelper(threadCount, printer, formater, verticesPerThread, fileName, "DFSParallel", "DFSSingleThread", "SIMPLE", "global", false);
+            this.qEhelper = new QueryExecutionHelper(threadCount, printer, formater, verticesPerThread, fileName, "DFSParallel", "DFSSingleThread", "SIMPLE", "refL");
 
             // Parse input query.
             var parsedClauses = Parser.Parse(tokens);
@@ -125,7 +125,7 @@ namespace QueryEngine
         {
             this.graph = graph;
             this.variableMap = new VariableMap();
-            this.qEhelper = new QueryExecutionHelper(threadCount, printer, formater, verticesPerThread, fileName, "DFSParallelStreamed", "DFSSingleThreadStreamed", "SIMPLE", "ref", false);
+            this.qEhelper = new QueryExecutionHelper(threadCount, printer, formater, verticesPerThread, fileName, "DFSParallelStreamed", "DFSSingleThreadStreamed", "SIMPLE", "ref");
 
             // Parse input query.
             var parsedClauses = Parser.Parse(tokens);
@@ -138,9 +138,13 @@ namespace QueryEngine
             MatchObjectStreamed match = (MatchObjectStreamed)QueryObject.Factory
                  (typeof(MatchObjectStreamed), graph, qEhelper, variableMap, parsedClauses["match"], null);
 
-            // to do process grou pby clause  and obtain the aggregates and hashes, the all necessary info is in the expr info 
-            // 
-
+            // Process GROUP BY and obtain the aggregates and hashes -> the all necessary info is in the expr info 
+            if (parsedClauses.ContainsKey("groupby"))
+            {
+                this.exprInfo = new QueryExpressionInfo(true);
+                GroupResultProcessor.ParseGroupBy(graph, variableMap, qEhelper, (GroupByNode)parsedClauses["groupby"], exprInfo);
+            }
+            else this.exprInfo = new QueryExpressionInfo(false);
 
             // SELECT is the last one to process the resuls.
             this.query = QueryObject.Factory
@@ -151,9 +155,10 @@ namespace QueryEngine
             if ((this.exprInfo.Aggregates.Count == 0 && this.qEhelper.IsSetSingleGroupGroupBy) || (!this.qEhelper.IsSetSingleGroupGroupBy && !parsedClauses.ContainsKey("groupby")))
                 throw new ArgumentException($"{this.GetType()}, no grouping was specified. The streamed version allows to compute only aggregations.");
 
-            // to do create processor
-
-
+            // Create a processor and set it to a matcher.
+            var groupProc = GroupResultProcessor.Factory(exprInfo, qEhelper, variableMap.GetCount());
+            match.PassResultProcessor(groupProc);
+            
             query.AddToEnd(match);
         }
 

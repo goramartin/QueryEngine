@@ -19,10 +19,10 @@ namespace QueryEngine
         /// </summary>
         protected int ColumnCount { get; }
 
-        protected GroupResultProcessor(Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper executionHelper, int columnCount)
+        protected GroupResultProcessor(QueryExpressionInfo expressionInfo, IGroupByExecutionHelper executionHelper, int columnCount)
         {
-            this.aggregates = aggs;
-            this.hashes = hashes;
+            this.aggregates = expressionInfo.Aggregates.ToArray();
+            this.hashes = expressionInfo.GroupByhashExprs.ToArray();
             this.executionHelper = executionHelper;
             this.ColumnCount = columnCount;
         }
@@ -49,6 +49,16 @@ namespace QueryEngine
             var groupbyVisitor = new GroupByVisitor(graph.labels, variableMap, exprInfo);
             groupbyVisitor.Visit(groupByNode);
             executionHelper.IsSetGroupBy = true;
+        }
+
+        public static ResultProcessor Factory(QueryExpressionInfo expressionInfo, IGroupByExecutionHelper executionHelper, int columnCount)
+        {
+            if (executionHelper.GrouperAlias == "singleHS") return new SingleGroupResultProcessorHalfStreamed(expressionInfo, executionHelper, columnCount);
+            else if (executionHelper.GrouperAlias == "singleS") return new SingleGroupResultProcessorStreamed(expressionInfo, executionHelper, columnCount);
+            else if (executionHelper.GrouperAlias == "globalS") return new GlobalGroupStreamed(expressionInfo, executionHelper, columnCount);
+            else if (executionHelper.GrouperAlias == "twowayHSB") return new LocalGroupGlobalMergeHalfStreamedBucket(expressionInfo, executionHelper, columnCount);
+            else if (executionHelper.GrouperAlias == "twowayHSL") return new LocalGroupGlobalMergeHalfStreamedListBucket(expressionInfo, executionHelper, columnCount);
+            else throw new ArgumentException("Group by result processor, trying to create an unknown grouper.");
         }
     }
 }

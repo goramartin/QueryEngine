@@ -48,19 +48,22 @@ namespace QueryEngine
             }
         }
 
-        public static Grouper Factory(string grouperAlias, Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper helper, bool bucketStorage)
+        public static Grouper Factory(string grouperAlias, Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper helper)
         {
-            if (grouperAlias == "ref" && bucketStorage) return new GroupWithBuckets(aggs, hashes, helper);
-            else if (grouperAlias == "ref" && !bucketStorage) return new GroupWithLists(aggs, hashes, helper);
-            else if (grouperAlias == "global") return new GlobalGroup(aggs, hashes, helper, bucketStorage);
-            else if (grouperAlias == "local") return new LocalGroupLocalMerge(aggs, hashes, helper, bucketStorage);
-            else if (grouperAlias == "twoway") return new LocalGroupGlobalMerge(aggs, hashes, helper, bucketStorage);
+            if (grouperAlias == "refB") return new GroupWithBuckets(aggs, hashes, helper);
+            else if (grouperAlias == "refL") return new GroupWithLists(aggs, hashes, helper);
+            else if (grouperAlias == "globalB") return new GlobalGroup(aggs, hashes, helper, true);
+            else if (grouperAlias == "globalL") return new GlobalGroup(aggs, hashes, helper, false);
+            else if (grouperAlias == "localB") return new LocalGroupLocalMerge(aggs, hashes, helper, true);
+            else if (grouperAlias == "localL") return new LocalGroupLocalMerge(aggs, hashes, helper, false);
+            else if (grouperAlias == "twowayB") return new LocalGroupGlobalMerge(aggs, hashes, helper, true);
+            else if (grouperAlias == "twowayL") return new LocalGroupGlobalMerge(aggs, hashes, helper, false);
             else throw new ArgumentException("Grouper, trying to create an unknown grouper.");
         }
 
         public static Grouper Factory(Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper helper)
         {
-            return Factory(helper.GrouperAlias, aggs, hashes, helper, helper.BucketStorage);
+            return Factory(helper.GrouperAlias, aggs, hashes, helper);
         }
 
     }

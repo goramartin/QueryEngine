@@ -29,8 +29,8 @@ namespace QueryEngine
     internal sealed class GroupByObject : QueryObject
     {
         private IGroupByExecutionHelper helper;
-        private List<ExpressionHolder> hashes;
-        private List<Aggregate> aggregates;
+        private ExpressionHolder[] hashes;
+        private Aggregate[] aggregates;
         /// <summary>
         /// Creates group by object for multigroup results.
         /// </summary>
@@ -48,20 +48,21 @@ namespace QueryEngine
 
             var groupbyVisitor = new GroupByVisitor(graph.labels, variableMap, exprInfo);
             groupbyVisitor.Visit(groupByNode);
-            this.hashes = groupbyVisitor.GetResult();
+            this.hashes = groupbyVisitor.GetResult().ToArray();
 
-            this.aggregates = exprInfo.Aggregates;
+            this.aggregates = exprInfo.Aggregates.ToArray();
             this.helper.IsSetGroupBy = true;
         }
 
         /// <summary>
         /// Creates group by object for single group result.
+        /// Assumes that the executionHelper.IsSetSingleGroupGroupBy is set to true.
         /// </summary>
         /// <param name="executionHelper"> Select execution helper. </param>
         /// <param name="exprInfo"> A query expression information. </param>
         public GroupByObject(IGroupByExecutionHelper executionHelper, QueryExpressionInfo exprInfo)
         {
-            this.aggregates = exprInfo.Aggregates;
+            this.aggregates = exprInfo.Aggregates.ToArray();
             this.helper = executionHelper;
         }
 
@@ -80,14 +81,14 @@ namespace QueryEngine
                 {
                     Grouper grouper;
                     if (this.helper.IsSetSingleGroupGroupBy)
-                        grouper = new SingleGroupGrouper(this.aggregates.ToArray(), null, this.helper);
+                        grouper = new SingleGroupGrouper(this.aggregates, null, this.helper);
                     else
                     {
                         // Use reference single thread solutions because the result table cannot be split equaly among thread .
                         // This also means that the result table is quite small.
                         if (results.NumberOfMatchedElements / helper.ThreadCount == 0)
-                            grouper = Grouper.Factory("ref", this.aggregates.ToArray(), this.hashes.ToArray(), this.helper, this.helper.BucketStorage);
-                        else grouper = Grouper.Factory(this.aggregates.ToArray(), this.hashes.ToArray(), this.helper);
+                            grouper = Grouper.Factory("refL", this.aggregates, this.hashes, this.helper);
+                        else grouper = Grouper.Factory(this.aggregates, this.hashes, this.helper);
                     }
                     groupByResults = grouper.Group(results);
                 }

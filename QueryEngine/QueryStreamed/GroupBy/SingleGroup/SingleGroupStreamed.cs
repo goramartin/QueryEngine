@@ -22,7 +22,7 @@ namespace QueryEngine
         private int matchersFinished;
         private bool ContainsNonAsterix;
 
-        public SingleGroupResultProcessorStreamed(Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper executionHelper, int columnCount) : base(aggs, hashes, executionHelper, columnCount)
+        public SingleGroupResultProcessorStreamed(QueryExpressionInfo expressionInfo, IGroupByExecutionHelper executionHelper, int columnCount) : base(expressionInfo, executionHelper, columnCount)
         {
             this.finalResults = AggregateBucketResult.CreateBucketResults(this.aggregates);
             for (int i = 0; i < this.aggregates.Length; i++)

@@ -25,7 +25,7 @@ namespace QueryEngine
         private Job[] matcherJobs;
         private ConcurrentDictionary<GroupDictKeyFull, AggregateBucketResult[]> globalGroups;
 
-        public LocalGroupGlobalMergeHalfStreamedListBucket(Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper executionHelper, int columnCount) : base(aggs, hashes, executionHelper, columnCount)
+        public LocalGroupGlobalMergeHalfStreamedListBucket(QueryExpressionInfo expressionInfo, IGroupByExecutionHelper executionHelper, int columnCount) : base(expressionInfo, executionHelper, columnCount)
         {
             this.matcherJobs = new Job[this.executionHelper.ThreadCount];
            

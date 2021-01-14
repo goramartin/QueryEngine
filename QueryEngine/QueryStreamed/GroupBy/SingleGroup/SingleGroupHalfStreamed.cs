@@ -28,7 +28,7 @@ namespace QueryEngine
         private AggregateBucketResult[] finalResults;
         private bool ContainsNonAstrix;
 
-        public SingleGroupResultProcessorHalfStreamed(Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper helper, int columnCount): base(aggs, hashes, helper, columnCount)
+        public SingleGroupResultProcessorHalfStreamed(QueryExpressionInfo expressionInfo, IGroupByExecutionHelper helper, int columnCount): base(expressionInfo, helper, columnCount)
         {
             this.matcherResults = new AggregateBucketResult[helper.ThreadCount][];
             this.numberOfMatchedElements = new int[helper.ThreadCount];
