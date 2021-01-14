@@ -45,7 +45,7 @@ namespace QueryEngine
         public Aggregate(ExpressionHolder expressionHolder)
         {
             this.expressionHolder = expressionHolder;
-            this.expressionHolder.SetExprPosition(-1);
+            if (this.expressionHolder != null) this.expressionHolder.SetExprPosition(-1);
         }
 
         /// <summary>

@@ -34,7 +34,7 @@ namespace QueryEngine
         /// <summary>
         /// It is equal to its position in the QueryExpressionInfo list.
         /// </summary>
-        protected int ExprPosition { get; set; }
+        protected int ExprPosition { get; set; } = -1;
 
         protected ExpressionBase()
         {}

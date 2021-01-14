@@ -86,9 +86,9 @@ namespace QueryEngine
                 if (parseTree != null) parsedParts.Add(parts[i].Item1, parseTree);
             }
 
-            if (position != tokens.Count) 
-                throw new ArgumentException("Parser, failed to parse every token.");
-            else return parsedParts;
+            if (position != tokens.Count) ThrowError("Parser", "failed to parse every token", position, tokens);
+            
+            return parsedParts;
         }
 
 
