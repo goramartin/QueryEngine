@@ -14,6 +14,7 @@ namespace QueryEngine
     /// The aggregate results are computed in a thread-safe manner.
     /// This simulated full streamed version, where the aggregates in the field finalResults, contain
     /// the newest values.
+    /// Notice that trying this algorithm makes sense only in the parallel enviroment.
     /// </summary>
     internal class SingleGroupResultProcessorStreamed : GroupResultProcessor
     {
@@ -62,8 +63,8 @@ namespace QueryEngine
         {
             var tmpDict = new Dictionary<GroupDictKey, AggregateBucketResult[]>();
             tmpDict.Add(new GroupDictKey(0, 0), this.finalResults);
-            resTable = null;
-            groupByResults = new DictGroupDictKeyBucket(tmpDict, new TableResults());
+            resTable = new TableResults();
+            groupByResults = new DictGroupDictKeyBucket(tmpDict, resTable);
         }
     }
 }

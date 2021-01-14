@@ -73,7 +73,7 @@ namespace QueryEngine
             var printer = Printer.Factory(this.helper.Printer, rowFormat, this.helper.Formater, this.helper.FileName);
             printer.PrintHeader();
             
-            if (!this.helper.IsSetGroupBy) Print(results, printer);
+            if (!this.helper.IsSetGroupBy && !this.helper.IsSetSingleGroupGroupBy) Print(results, printer);
             else Print(groupByResults, printer);
             
             printer.Dispose();
@@ -106,12 +106,12 @@ namespace QueryEngine
                     foreach (var item in tmpResults)
                         printer.PrintRow(item);
                 }
-                else if (results.GetType() == typeof(GroupByResultsList))
+                else if (results is GroupByResultsList)
                 {
                     var tmpResults = (GroupByResultsList)results;
                     foreach (var item in tmpResults)
                         printer.PrintRow(item);
-                } else if (results.GetType() == typeof(GroupByResultsStreamedBucket))
+                } else if (results is GroupByResultsStreamedBucket)
                 {
                     var tmpResults = (GroupByResultsStreamedBucket)results;
                     foreach (var item in tmpResults)

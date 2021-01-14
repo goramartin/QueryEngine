@@ -73,8 +73,8 @@ namespace QueryEngine
         {
             var tmpDict = new Dictionary<GroupDictKey, AggregateBucketResult[]>();
             tmpDict.Add(new GroupDictKey(0, 0), this.finalResults);
-            resTable = null;
-            groupByResults = new DictGroupDictKeyBucket(tmpDict, new TableResults());
+            resTable = new TableResults();
+            groupByResults = new DictGroupDictKeyBucket(tmpDict, resTable);
         }
     }
 }
