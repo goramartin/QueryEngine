@@ -141,7 +141,7 @@ namespace QueryEngine
                 // Note that the returned value can be the same as given in arguments. 
                 // That means that it inserted the given group.
                 // If it did not, merge its results with the returned one.
-                if (!object.ReferenceEquals(buckets, item.Value))
+                if (item.Value != null && !object.ReferenceEquals(buckets, item.Value))
                 {
                     for (int j = 0; j < aggregates.Length; j++)
                         aggregates[j].MergeThreadSafe(buckets[j], item.Value[j]);
@@ -197,7 +197,7 @@ namespace QueryEngine
             foreach (var item in groups)
             {
                 buckets = globalGroups.GetOrAdd(item.Key, spareBuckets);
-                if (object.ReferenceEquals(spareBuckets, buckets))
+                if (spareBuckets != null && object.ReferenceEquals(spareBuckets, buckets))
                     spareBuckets = AggregateBucketResult.CreateBucketResults(aggregates);
                 for (int j = 0; j < aggregates.Length; j++)
                     aggregates[j].MergeThreadSafe(buckets[j], aggResults[j], item.Value);

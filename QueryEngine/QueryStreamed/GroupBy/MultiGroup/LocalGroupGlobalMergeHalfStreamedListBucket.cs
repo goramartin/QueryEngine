@@ -78,7 +78,7 @@ namespace QueryEngine
                     {
                         var keyFull = new GroupDictKeyFull(item.Key.hash, tmpJob.results[item.Key.position]);
                         var buckets = this.globalGroups.GetOrAdd(keyFull, tmpJob.spareBuckets);
-                        if (object.ReferenceEquals(tmpJob.spareBuckets, buckets))
+                        if (tmpJob.spareBuckets != null && object.ReferenceEquals(tmpJob.spareBuckets, buckets))
                             tmpJob.spareBuckets = AggregateBucketResult.CreateBucketResults(this.aggregates);
                         for (int j = 0; j < this.aggregates.Length; j++)
                             this.aggregates[j].MergeThreadSafe(buckets[j], tmpJob.aggResults[j], item.Value);

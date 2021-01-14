@@ -193,7 +193,7 @@ namespace QueryEngine
                 row = results[i];
                 buckets = groups.GetOrAdd(i, spareBuckets);
                 // If the spare part was inserted, create a brand-new in advance.
-                if (object.ReferenceEquals(spareBuckets, buckets))
+                if (spareBuckets != null && object.ReferenceEquals(spareBuckets, buckets))
                     spareBuckets = AggregateBucketResult.CreateBucketResults(aggregates);
                 for (int j = 0; j < aggregates.Length; j++)
                     aggregates[j].ApplyThreadSafe(in row, buckets[j]);

@@ -73,6 +73,8 @@ namespace QueryEngine
             }
             else
             {
+                Console.WriteLine($"finished with {tmpJob.results.RowCount} on thread {Thread.CurrentThread.ManagedThreadId}.");
+
                 // If it runs in single thread. No need to merge the results.
                 if (this.matcherJobs.Length > 1)
                 {
@@ -80,7 +82,7 @@ namespace QueryEngine
                     {
                         var keyFull = new GroupDictKeyFull(item.Key.hash, tmpJob.results[item.Key.position]);
                         var buckets = this.globalGroups.GetOrAdd(keyFull, item.Value);
-                        if (!object.ReferenceEquals(buckets, item.Value))
+                        if (item.Value != null && !object.ReferenceEquals(buckets, item.Value))
                         {
                             for (int j = 0; j < aggregates.Length; j++)
                                 aggregates[j].MergeThreadSafe(buckets[j], item.Value[j]);
