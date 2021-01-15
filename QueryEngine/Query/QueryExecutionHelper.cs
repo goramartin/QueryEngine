@@ -55,13 +55,6 @@ namespace QueryEngine
         int VerticesPerThread { get; }
 
         /// <summary>
-        /// In cases where there are no optional pgql clauses, the matcher can omit merging of results to 
-        /// speed up the returning of the results.
-        /// </summary>
-        /// <returns> True if other clauses were defined. </returns>
-        bool IsMergeNeeded { get; }
-
-        /// <summary>
         /// A name of used parallel pattern matcher.
         /// </summary>
         string  ParallelPatternMatcherName { get; }
@@ -74,7 +67,6 @@ namespace QueryEngine
         /// A name of used pattern.
         /// </summary>
         string PatternName { get; }
-
     }
 
     internal interface ISelectExecutionHelper : IBaseExecutionHelper
@@ -137,7 +129,6 @@ namespace QueryEngine
         public string FileName {get; }
         
         public bool IsStoringResult { get; set; } = true;
-        public bool IsMergeNeeded => ((this.IsSetOrderBy || this.IsSetGroupBy || this.IsSetSingleGroupGroupBy) && this.IsStoringResult);
         public bool InParallel => ThreadCount != 1;
 
         public string ParallelPatternMatcherName { get; }

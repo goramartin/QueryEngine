@@ -7,12 +7,9 @@ The number of elements in the result defines the number of columns. (Each variab
 specific column.) The column that it pertains to is the number stored inside variable map of the query.
 That means, every column contains only the same variables (even types if they are defined).
   
-One result of the search can be look as an array of those elements, where the number of elements in the 
+One result of the search can be seen as an array of those elements, where the number of elements in the 
 array is the number of columns. The specific row can be access with an index or an enumeration, on these actions,
 the RowProxy struct is returned, henceforward, it enables the user access row's columns.
-
-The class also enables to store a temporary row that can be access via the row proxy even thought it might not be
-directly stored in the Lists of the actual table.
  */
 
 using System;
@@ -49,11 +46,13 @@ namespace QueryEngine
     /// If order must be defined on the table. The class is given an array of integers, where each single integer
     /// represents an index to the table. In other words, when we enumerate the class, the rows are returned based on 
     /// the indeces from the "order" array.
+    /// The class enables to store a temporary row, that can be accessed via the row proxy, however
+    /// the temporary row can be used only if the table was created with the constructor without passed table.
     /// Note that the results are stored by columns, that is to say, returning one row must be done through proxy class (RowProxy in another file).
     /// </summary>
     internal partial class TableResults : ITableResults
     {
-        private readonly List<Element>[] resTable;
+        private readonly List<Element[]>[] resTable;
         private int[] order;
 
         /// <summary>
@@ -63,7 +62,7 @@ namespace QueryEngine
         /// <summary>
         /// Number of rows in the table. Might be zero even if the matched elements are set.
         /// </summary>
-        public int RowCount => this.resTable[0].Count;
+        public int RowCount { get; private set; }
 
         /// <summary>
         /// Number of elements that actually were matched, if the query needs only count and not results explicitly.
@@ -76,6 +75,7 @@ namespace QueryEngine
         /// </summary>
         public Element[] temporaryRow { get; set; } = null;
 
+        public int FixedArraySize { get; private set; }
         /// <summary>
         /// Empty constructor for passing into group by results for streamed grouping.
         /// </summary>
@@ -83,38 +83,19 @@ namespace QueryEngine
 
         /// <summary>
         /// Gets results from a merged matcher results.
-        /// It expects that the results will be merged in the first thread index.
+        /// If the constructor runs the temporary row cannot be used.
         /// </summary>
-        /// <param name="elements"> Matcher results merged on the zeroth index. </param>
+        /// <param name="elements"> Merged matcher results. </param>
         /// <param name="count"> Number of matched elements even though they might not be stored in the table. </param>
-        public  TableResults(List<Element>[][] elements, int count)
+        /// <param name="fixedArraySize"> Size of blocks that store the results. </param>
+        /// <param name="wasStoringResults"> A flag whether the count is equal to the number of elements in the tables.</param>
+        public  TableResults(List<Element[]>[] elements, int count, int fixedArraySize, bool wasStoringResults)
         {
             this.order = null;
-            this.resTable = new List<Element>[elements.Length];
-            for (int i = 0; i < elements.Length; i++)
-            {
-                this.resTable[i] = elements[i][0];
-            }
+            this.resTable = elements;
             this.NumberOfMatchedElements = count;
-        }
-
-        /// <summary>
-        /// Gets results from a non merged matcher results.
-        /// The index indicates which thread results should be picked to create the instance.
-        /// </summary>
-        /// <param name="elements"> Matcher results merged on the zeroth index. </param>
-        /// <param name="threadNumber"> Number of a thread to pick results from. </param>
-        /// <param name="count"> Number of matched elements even though they might not be stored in the table. </param>
-        public TableResults(List<Element>[][] elements, int threadNumber, int count)
-        {
-            this.order = null;
-            this.resTable = new List<Element>[elements.Length];
-            for (int i = 0; i < elements.Length; i++)
-            {
-                this.resTable[i] = elements[i][threadNumber];
-            }
-
-            this.NumberOfMatchedElements = count;
+            if (wasStoringResults) this.RowCount = count;
+            this.FixedArraySize = fixedArraySize;
         }
 
         /// <summary>
@@ -123,9 +104,9 @@ namespace QueryEngine
         /// <param name="columnCount"> A number of columns.</param>
         public TableResults(int columnCount)
         {
-            this.resTable = new List<Element>[columnCount];
+            this.resTable = new List<Element[]>[columnCount];
             for (int i = 0; i < columnCount; i++)
-                this.resTable[i] = new List<Element>();
+                this.resTable[i] = new List<Element[]>();
         }
 
 
@@ -134,8 +115,18 @@ namespace QueryEngine
         /// </summary>
         public void StoreTemporaryRow()
         {
-            for (int i = 0; i < this.temporaryRow.Length; i++)
-                this.resTable[i].Add(this.temporaryRow[i]);
+            var posInBlock = this.RowCount % this.FixedArraySize;
+            var block = this.RowCount / this.FixedArraySize;
+
+            // Add a new block to each column.
+            if (posInBlock == 0)
+            {
+                for (int i = 0; i < this.ColumnCount; i++)
+                    this.resTable[i].Add(new Element[this.FixedArraySize]);
+            }
+            for (int i = 0; i < this.ColumnCount; i++)
+                this.resTable[i][block][posInBlock] = this.temporaryRow[i];
+            this.RowCount++;
         }
 
         /// <summary>
@@ -176,9 +167,6 @@ namespace QueryEngine
         {
             this.order = order;
         }
-
-
-
     }
 
 }

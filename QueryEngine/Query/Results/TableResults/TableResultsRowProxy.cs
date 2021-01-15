@@ -50,7 +50,12 @@ namespace QueryEngine
                 get
                 {
                     if (this.index == this.resTable.RowCount) return this.resTable.temporaryRow[column];
-                    else return this.resTable.resTable[column][this.index];
+                    else
+                    {
+                        return this.resTable.resTable[column]
+                                                     [this.index / this.resTable.FixedArraySize]  // Block
+                                                     [this.index % this.resTable.FixedArraySize]; // Position in block
+                    } 
                 }
             }
 

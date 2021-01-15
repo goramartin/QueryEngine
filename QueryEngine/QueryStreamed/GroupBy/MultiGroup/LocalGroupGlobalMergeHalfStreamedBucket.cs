@@ -73,8 +73,6 @@ namespace QueryEngine
             }
             else
             {
-                Console.WriteLine($"finished with {tmpJob.results.RowCount} on thread {Thread.CurrentThread.ManagedThreadId}.");
-
                 // If it runs in single thread. No need to merge the results.
                 if (this.matcherJobs.Length > 1)
                 {

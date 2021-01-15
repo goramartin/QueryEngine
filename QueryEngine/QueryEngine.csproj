@@ -100,6 +100,7 @@
     <Compile Include="Query\Match\DFSMatch\Matcher\DFSParallelPatternMatcher\DFSParallelPatternMatcherBase.cs" />
     <Compile Include="Query\Match\DFSMatch\Matcher\DFSParallelPatternMatcher\VertexDistributor.cs" />
     <Compile Include="Query\Match\DFSMatch\Matcher\DFSPatternMatcher\DFSPatternMatcher.cs" />
+    <Compile Include="Query\Match\MatchInternalResults\MatchInternalFixedResults.cs" />
     <Compile Include="Query\Match\MatchObjectBase.cs" />
     <Compile Include="Query\Match\ISingleThreadPatternMatcher.cs" />
     <Compile Include="Query\Select\Printer\IRowPrinter.cs" />
@@ -159,8 +160,6 @@
     <Compile Include="Query\Results\GroupByResults\GroupByResultsBucket.cs" />
     <Compile Include="Query\Results\GroupByResults\GroupByResultsList.cs" />
     <Compile Include="Query\Results\GroupByResults\GroupResults.cs" />
-    <Compile Include="Query\Match\DFSMatch\MatchInternalResults.cs" />
-    <Compile Include="Query\Results\TableResults\MultiTableResults.cs" />
     <Compile Include="Query\Results\TableResults\TableResults.cs" />
     <Compile Include="Query\Results\TableResults\TableResultsRowProxy.cs" />
     <Compile Include="Query\Select\Formater\Formater.cs" />

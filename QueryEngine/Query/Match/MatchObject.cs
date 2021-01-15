@@ -24,7 +24,7 @@ namespace QueryEngine
     /// </summary>
     internal sealed class MatchObject : MatchObjectBase
     {
-        private MatchResultsStorage queryResults;
+        private MatchInternalFixedResults queryResults;
         private  IPatternMatcher matcher;
 
         /// <summary>
@@ -54,7 +54,7 @@ namespace QueryEngine
             
             // Now we have got enough information about results. 
             // After creating pattern the variable map is filled and we know extend of the results.
-            this.queryResults = new MatchResultsStorage(variableMap.GetCount(), executionHelper.ThreadCount);
+            this.queryResults = new MatchInternalFixedResults(5_000_000, variableMap.GetCount(), executionHelper.ThreadCount);
 
             this.matcher = MatchFactory.CreateMatcher(helper.ParallelPatternMatcherName, pattern, graph, this.queryResults, executionHelper);
         }
@@ -78,9 +78,7 @@ namespace QueryEngine
         private ITableResults Search()
         {
             this.matcher.Search();
-            if (this.queryResults.IsMerged)
-                return new TableResults(this.queryResults.GetResults(), this.queryResults.NumberOfMatchedElements);
-            else return new MultiTableResults(this.queryResults.GetResults(), this.queryResults.NumberOfMatchedElements);
+            return new TableResults(this.queryResults.FinalMerged, this.queryResults.NumberOfMatchedElements, this.queryResults.FixedArraySize, this.helper.IsStoringResult);
         }
     }
 }

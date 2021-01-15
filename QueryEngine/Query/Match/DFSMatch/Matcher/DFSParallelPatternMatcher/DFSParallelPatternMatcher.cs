@@ -5,11 +5,12 @@ in query match expression.
 This paralel version only uses single threaded versions of the dfs search algorithm.
 The one single threaded matcher should not be used alone because it was made to be used by the parallel.
 The parallel algorithm is lock-free algorithm, saving results have been made lock free thanks to 
-storing result into their own place inside query result structure (thread index).
+storing result into their own place inside query result structure.
 Also, division of work is done lock free thanks to interlocked class that allows to devide workload of the threads
 with the help of VertexDistributor and ColumnDistributor.
 
-This version of the matcher uses a class MatchResultsStorage for storing the results. For more info visit a file named MatchInternalResults.cs. 
+This version of the matcher uses a class MatchInternalFixedResults for storing the results. 
+For more info visit a file named MatchInternalFixedResults.cs. 
  */
 
 using System;
@@ -27,7 +28,7 @@ namespace QueryEngine
     /// </summary>
     internal sealed class DFSParallelPatternMatcher : DFSParallelPatternMatcherBase
     {
-        private MatchResultsStorage results;
+        private MatchInternalFixedResults results;
         private ISingleThreadPatternMatcher[] matchers;
 
         /// <summary>
@@ -38,7 +39,7 @@ namespace QueryEngine
         /// <param name="graph"> Graph to search on.</param>
         /// <param name="results"> Where to store results. </param>
         /// <param name="executionHelper"> Query execution helper. </param>
-        public DFSParallelPatternMatcher(DFSPattern pattern, Graph graph, MatchResultsStorage results, IMatchExecutionHelper executionHelper): base(graph, executionHelper)
+        public DFSParallelPatternMatcher(DFSPattern pattern, Graph graph, MatchInternalFixedResults results, IMatchExecutionHelper executionHelper): base(graph, executionHelper)
         {
             if (pattern == null || results == null)
                 throw new ArgumentNullException($"{this.GetType()}, passed a null to a construtor.");
@@ -51,7 +52,7 @@ namespace QueryEngine
                                    .CreateMatcher(this.helper.SingleThreadPatternMatcherName,                  // Type of Matcher 
                                                   i == 0 ? pattern : pattern.Clone(), // Cloning of pattern (one was already created)
                                                   graph,
-                                                  results.GetThreadResults(i)); // Result storage
+                                                  results.GetMatcherResultsStorage(i)); // Result storage
             }
         }
 
@@ -62,11 +63,13 @@ namespace QueryEngine
         /// or the parallel search is used if more threads can be used.
         /// The Parallel search works in two steps, the first step is the graph search where each thread 
         /// saves its results into separate bins (however, still inside one result structure).
-        /// When the matchers finish, the results are then parallelly merged into one bin.
-        /// Notice the setting if the matchers should store the results directly is done here,
-        /// because during parsing of the user input, the value can be changed later on. (For exmample seting order by).
-        /// At the end, the counts of matched results are collected direcly, since sometimes user can input 
-        /// only count(*) and using one shared count is time consuming.
+        /// When the matchers finish, the results are then paralelly merged into one structure. (If it runs in single-thread,
+        /// the merging functions are called from within one thread and it merges all columns which in this case means
+        /// only move storage blocks into List.)
+        /// Notice that the setting whether the matcher should store results is done here.
+        /// It is because, during parsing of the user input, the value can be changed later on. (For exmample seting order by).
+        /// At the end, the counts of matched results are collected directly from each mather, since sometimes user can input 
+        /// only count(*) and using one shared count with atomics is worse.
         /// </summary>
         public override void Search()
         {
@@ -76,7 +79,11 @@ namespace QueryEngine
             if (!this.helper.InParallel) 
             { 
                 this.matchers[0].Search();
-                this.results.IsMerged = true;
+                
+                Console.WriteLine("Finished Search:");
+                QueryEngine.PrintElapsedTime();
+                
+                this.results.MergeAllColumns();
             }
             else
             {
@@ -85,13 +92,8 @@ namespace QueryEngine
                 Console.WriteLine("Finished Search:");
                 QueryEngine.PrintElapsedTime();
 
-                if (this.helper.IsMergeNeeded)
-                {
+                if (this.helper.IsStoringResult)
                     this.ParallelMergeThreadResults();
-                    this.results.IsMerged = true;
-                    Console.WriteLine("Finished Merge:");
-                    QueryEngine.PrintElapsedTime();
-                }
             }
             this.CollectCountFromMatchers();
 
@@ -195,37 +197,23 @@ namespace QueryEngine
         #region ParalelMerge
 
         /// <summary>
-        /// Update: So far, on desktop machine, the fastest way was using merging with columns, even
-        /// with only three columns and 16 threads (rows in the table). Actually, it is 
-        /// much more memory efficient as well. But needs to be tried on a bigger computer, probably
-        /// with a much faster ram.
-        /// Merges results from all threads into one list. Note that the number of rows to merge is the same number
-        /// as the number of threads (so one row represents one thread from the search algorithm).
-        /// Merging can be done in two ways. If the half of available threads is larger than the number of columns the merge rows method
-        /// is used because the number of threads for merging columns would be smaller, if the thread number lowers below the column count
-        /// it skips to merging by column. In every other case, the merging by column is used.
-        /// The first method: MergeRows, merges rows in parallel, it recursively splits range of rows into two parts while the first range
-        /// is being merged with the one thread while the other range is being merged with a second thread.
-        /// The second method: MergeColumn does parallel column merging, instead of merging of rows, it assignes columns to threads that merge the entire
-        /// columns into one column.
+        /// Merges columns in parallel. Each thread is given a column. The matchers stored results in their local result tables.
+        /// The thread merges the same column from all the result tables into a one column. More about the algorithm is in the match internal results
+        /// folder.
         /// </summary>
         private void ParallelMergeThreadResults()
         {
-          //   if (this.ThreadCount / 2 > this.Results.ColumnCount)
-          //    MergeRows();
-          //   else
-             MergeColumn();
-
+             MergeByColumn();
         }
 
-        #region MergeColumn
+        #region MergeByColumn
 
         /// <summary>
         /// Merges columns of the result table in parallel.
         /// Each thread askes for a column to merge from a column distributor.
         /// If there are no more columns to merge, the thread finishes.
         /// </summary>
-        private void MergeColumn()
+        private void MergeByColumn()
         {
             var columnDistributor = new ColumnDistributor(this.results.ColumnCount);
             var mergeColumnJob = new ParallelMergeColumnJob(columnDistributor, this.results);
@@ -259,7 +247,7 @@ namespace QueryEngine
                 columnIndex = job.columnDistributor.DistributeColumn();
                 
                 if (columnIndex == -1) break;
-                else job.elements.MergeColumn(columnIndex);
+                else job.matcherResults.MergeColumn(columnIndex);
             }
         }
 
@@ -268,78 +256,19 @@ namespace QueryEngine
         /// </summary>
         private class ParallelMergeColumnJob
         {
-            public MatchResultsStorage elements;
+            public MatchInternalFixedResults matcherResults;
             public ColumnDistributor columnDistributor;
-            public ParallelMergeColumnJob(ColumnDistributor columnDistributor, MatchResultsStorage elements)
+            public ParallelMergeColumnJob(ColumnDistributor columnDistributor, MatchInternalFixedResults matcherResults)
             {
-                this.elements = elements;
+                this.matcherResults = matcherResults;
                 this.columnDistributor = columnDistributor;
             }
         }
 
-        #endregion MergeColumn
-
-        #region MergeRows
-
-        /// <summary>
-        /// The merge can be view as a binary tree. Where merging is done bottom up.
-        /// If the number of used threads for merging on a tree level is smaller than the number of columns, the algorithm
-        /// will skip into merging by column because it can use more threads this way, because each level lowers the number of threads by half.
-        /// </summary>
-        private void MergeRows()
-        {
-           DFSParallelPatternMatcher.ParallelMergeRowWork(this.results, 0, this.helper.ThreadCount, 1);
-           if (this.results.ColumnCount != 1)
-                this.MergeColumn();
-        }
-
-        /// <summary>
-        /// A merge that looks like a binary tree. On each level of the binary tree, the thread knows what number of threads is used
-        /// to merge results from the lower level. If the number of used threads is smaller than the number of columns in the result table, the algorithm
-        /// will skip into merging by column instead of continuing with row merging. Why? Because more threads can be used for work.
-        /// Each call, the method receives a range to merge. If the range is smaller or equals three, it merges the results into the
-        /// row on position of the start argument. 
-        /// If the range is larger, the work can be split into two threads by calculating a middle position, then two threads receive
-        /// the halves of the range, until the range become small enough to be merged. (Binary tree build up.)
-        /// If the middle is on an odd number, the middle is moved one position back. What this means is that if we want to split range of 10,
-        /// middle is 5, and ranges 0-5, 5-10 are worked on separately, it would continue into 0 2, 2 5, 5 7, 7 9 merges. Which ommits one possible merge.
-        /// Each merge is stored to the position of start argument.
-        /// </summary>
-        /// <param name="results"> Result table to merge.</param>
-        /// <param name="start"> Starting index of the range of rows to merge. </param>
-        /// <param name="end"> End index of the range of rows to merge. </param>
-        /// <param name="threadsOnLevel"> A number of threads used for mergin on a current tree level. </param>
-        private static void ParallelMergeRowWork(MatchResultsStorage results, int start, int end, int threadsOnLevel)
-        {
-            if (end - start > 3)
-            {
-                // compute middle of the range
-                int middle = ((end - start) / 2) + start;
-                if (middle % 2 == 1) middle--;
-
-                // Spawned merge thread.
-                Task task = Task.Factory.StartNew(() => DFSParallelPatternMatcher.ParallelMergeRowWork(results, middle, end, threadsOnLevel * 2));
-                // Current thread work.
-                DFSParallelPatternMatcher.ParallelMergeRowWork(results, start, middle, threadsOnLevel*2);
-                
-                // Wait for the other task to finish and start merging its results with yours.
-                task.Wait();
-                if (threadsOnLevel >= results.ColumnCount)
-                    results.MergeRows(start, middle);
-                else return;  /* do nothing */
-
-            } else
-            { // Merge rows
-                for (int i = start + 1; i < end; i++)
-                    results.MergeRows(start, i);
-            }
-        }
-
-
-        #endregion MergeRow
+        #endregion MergeByColumn
 
         #endregion ParalelMerge
-   
+
 
     }
 }
