@@ -36,11 +36,11 @@ namespace QueryEngine
             firstComp.SetCache(firstHasher);
             firstHasher.SetCache(firstComp.Comparers);
             
-            this.matcherJobs[0] = new Job(this.aggregates, this.ColumnCount, firstComp, firstHasher, AggregateBucketResult.CreateBucketResults(this.aggregates));
+            this.matcherJobs[0] = new Job(this.aggregates, this.ColumnCount, firstComp, firstHasher, AggregateBucketResult.CreateBucketResults(this.aggregates), this.executionHelper.FixedArraySize);
             for (int i = 1; i < this.executionHelper.ThreadCount; i++)
             {
                 this.CloneHasherAndComparer(firstComp, firstHasher, out RowEqualityComparerGroupKey newComp, out RowHasher newHasher);
-                matcherJobs[i] = new Job(this.aggregates, this.ColumnCount, newComp, newHasher, AggregateBucketResult.CreateBucketResults(this.aggregates));
+                matcherJobs[i] = new Job(this.aggregates, this.ColumnCount, newComp, newHasher, AggregateBucketResult.CreateBucketResults(this.aggregates), this.executionHelper.FixedArraySize);
             }
 
             this.globalGroups = new ConcurrentDictionary<GroupDictKeyFull, AggregateBucketResult[]>(new RowEqualityComparerGroupDickKeyFull(firstComp.Clone().Comparers));
@@ -103,9 +103,9 @@ namespace QueryEngine
             public RowHasher hasher;
             public AggregateBucketResult[] spareBuckets;
 
-            public Job(Aggregate[] aggregates, int columnCount, RowEqualityComparerGroupKey comparer, RowHasher hasher, AggregateBucketResult[] spareBuckets)
+            public Job(Aggregate[] aggregates, int columnCount, RowEqualityComparerGroupKey comparer, RowHasher hasher, AggregateBucketResult[] spareBuckets, int arraySize)
             {
-                this.results = new TableResults(columnCount);
+                this.results = new TableResults(columnCount, arraySize);
                 comparer.Results = this.results;
                 this.groups = new Dictionary<GroupDictKey, int>(comparer);
                 this.hasher = hasher;

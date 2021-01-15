@@ -63,7 +63,7 @@ namespace QueryEngine
         {
             this.graph = graph;
             this.variableMap = new VariableMap(); 
-            this.qEhelper = new QueryExecutionHelper(threadCount, printer, formater, verticesPerThread, fileName, "DFSParallel", "DFSSingleThread", "SIMPLE", "refL");
+            this.qEhelper = new QueryExecutionHelper(threadCount, printer, formater, verticesPerThread, 3, fileName, "DFSParallel", "DFSSingleThread", "SIMPLE", "refL");
 
             // Parse input query.
             var parsedClauses = Parser.Parse(tokens);
@@ -125,7 +125,7 @@ namespace QueryEngine
         {
             this.graph = graph;
             this.variableMap = new VariableMap();
-            this.qEhelper = new QueryExecutionHelper(threadCount, printer, formater, verticesPerThread, fileName, "DFSParallelStreamed", "DFSSingleThreadStreamed", "SIMPLE", "singleS");
+            this.qEhelper = new QueryExecutionHelper(threadCount, printer, formater, verticesPerThread, 3, fileName, "DFSParallelStreamed", "DFSSingleThreadStreamed", "SIMPLE", "twowayHSB");
 
             // Parse input query.
             var parsedClauses = Parser.Parse(tokens);

@@ -47,7 +47,7 @@ namespace QueryEngine
     /// represents an index to the table. In other words, when we enumerate the class, the rows are returned based on 
     /// the indeces from the "order" array.
     /// The class enables to store a temporary row, that can be accessed via the row proxy, however
-    /// the temporary row can be used only if the table was created with the constructor without passed table.
+    /// the temporary row can be used only if the table was created with the constructor without passed table.ws
     /// Note that the results are stored by columns, that is to say, returning one row must be done through proxy class (RowProxy in another file).
     /// </summary>
     internal partial class TableResults : ITableResults
@@ -102,8 +102,9 @@ namespace QueryEngine
         /// Creates an empty instance with the specified number of columns.
         /// </summary>
         /// <param name="columnCount"> A number of columns.</param>
-        public TableResults(int columnCount)
+        public TableResults(int columnCount, int arraySize)
         {
+            this.FixedArraySize = arraySize;
             this.resTable = new List<Element[]>[columnCount];
             for (int i = 0; i < columnCount; i++)
                 this.resTable[i] = new List<Element[]>();

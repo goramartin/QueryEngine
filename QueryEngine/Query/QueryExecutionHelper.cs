@@ -43,6 +43,10 @@ namespace QueryEngine
         bool InParallel { get; }
 
         bool IsStoringResult { get; set; }
+        /// <summary>
+        /// A size of blocks to store matcher results.
+        /// </summary>
+        int FixedArraySize { get; }
 
     }
 
@@ -104,12 +108,13 @@ namespace QueryEngine
     /// </summary>
     internal class QueryExecutionHelper : IMatchExecutionHelper, ISelectExecutionHelper, IOrderByExecutionHelper, IGroupByExecutionHelper
     {
-        public QueryExecutionHelper(int threadCount, string printer, string formater, int verticesPerThread, string fileName, string ppmName, string stpmName, string patternName, string grouperName)
+        public QueryExecutionHelper(int threadCount, string printer, string formater, int verticesPerThread, int arraySize, string fileName, string ppmName, string stpmName, string patternName, string grouperName)
         {
             this.ThreadCount = threadCount;
             this.Printer = printer;
             this.Formater = formater;
             this.VerticesPerThread = verticesPerThread;
+            this.FixedArraySize = arraySize;
             this.FileName = fileName;
             this.ParallelPatternMatcherName = ppmName;
             this.SingleThreadPatternMatcherName = stpmName;
@@ -123,6 +128,7 @@ namespace QueryEngine
         public bool IsSetSingleGroupGroupBy { get; set; } = false;
 
         public int VerticesPerThread { get; }
+        public int FixedArraySize { get; }
         
         public string Printer {get; }
         public string Formater {get; }

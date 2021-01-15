@@ -54,7 +54,7 @@ namespace QueryEngine
             
             // Now we have got enough information about results. 
             // After creating pattern the variable map is filled and we know extend of the results.
-            this.queryResults = new MatchInternalFixedResults(5_000_000, variableMap.GetCount(), executionHelper.ThreadCount);
+            this.queryResults = new MatchInternalFixedResults(this.helper.FixedArraySize, variableMap.GetCount(), executionHelper.ThreadCount);
 
             this.matcher = MatchFactory.CreateMatcher(helper.ParallelPatternMatcherName, pattern, graph, this.queryResults, executionHelper);
         }
