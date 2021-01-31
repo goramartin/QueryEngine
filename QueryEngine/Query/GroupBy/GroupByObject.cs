@@ -30,7 +30,7 @@ namespace QueryEngine
     {
         private IGroupByExecutionHelper helper;
         private ExpressionHolder[] hashes;
-        private Aggregate[] aggregates;
+        private List<Aggregate> aggregates;
         /// <summary>
         /// Creates group by object for multigroup results.
         /// </summary>
@@ -50,7 +50,7 @@ namespace QueryEngine
             groupbyVisitor.Visit(groupByNode);
             this.hashes = groupbyVisitor.GetResult().ToArray();
 
-            this.aggregates = exprInfo.Aggregates.ToArray();
+            this.aggregates = exprInfo.Aggregates;
             this.helper.IsSetGroupBy = true;
         }
 
@@ -62,12 +62,14 @@ namespace QueryEngine
         /// <param name="exprInfo"> A query expression information. </param>
         public GroupByObject(IGroupByExecutionHelper executionHelper, QueryExpressionInfo exprInfo)
         {
-            this.aggregates = exprInfo.Aggregates.ToArray();
+            this.aggregates = exprInfo.Aggregates;
             this.helper = executionHelper;
         }
 
         public override void Compute(out ITableResults results, out GroupByResults groupByResults)
         {
+            var aggs = this.aggregates.ToArray();
+
             if (next != null)
             {
                 this.next.Compute(out results, out groupByResults);
@@ -81,14 +83,14 @@ namespace QueryEngine
                 {
                     Grouper grouper;
                     if (this.helper.IsSetSingleGroupGroupBy)
-                        grouper = new SingleGroupGrouper(this.aggregates, null, this.helper);
+                        grouper = new SingleGroupGrouper(aggs, null, this.helper);
                     else
                     {
                         // Use reference single thread solutions because the result table cannot be split equaly among thread .
                         // This also means that the result table is quite small.
                         if (results.NumberOfMatchedElements / helper.ThreadCount == 0)
-                            grouper = Grouper.Factory("refL", this.aggregates, this.hashes, this.helper);
-                        else grouper = Grouper.Factory(this.aggregates, this.hashes, this.helper);
+                            grouper = Grouper.Factory("refL", aggs, this.hashes, this.helper);
+                        else grouper = Grouper.Factory(aggs, this.hashes, this.helper);
                     }
                     groupByResults = grouper.Group(results);
                 }
