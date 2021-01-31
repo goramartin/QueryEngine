@@ -63,7 +63,7 @@ namespace QueryEngine
         {
             this.graph = graph;
             this.variableMap = new VariableMap(); 
-            this.qEhelper = new QueryExecutionHelper(threadCount, printer, formater, verticesPerThread, 3, fileName, "DFSParallel", "DFSSingleThread", "SIMPLE", "refL");
+            this.qEhelper = new QueryExecutionHelper(threadCount, printer, formater, verticesPerThread, 3, fileName, "DFSParallel", "DFSSingleThread", "SIMPLE", "refL", "mergeSort");
 
             // Parse input query.
             var parsedClauses = Parser.Parse(tokens);
@@ -125,7 +125,7 @@ namespace QueryEngine
         {
             this.graph = graph;
             this.variableMap = new VariableMap();
-            this.qEhelper = new QueryExecutionHelper(threadCount, printer, formater, verticesPerThread, 3, fileName, "DFSParallelStreamed", "DFSSingleThreadStreamed", "SIMPLE", "twowayHSB");
+            this.qEhelper = new QueryExecutionHelper(threadCount, printer, formater, verticesPerThread, 3, fileName, "DFSParallelStreamed", "DFSSingleThreadStreamed", "SIMPLE", "twowayHSB", "abtreeHS");
 
             // Parse input query.
             var parsedClauses = Parser.Parse(tokens);
@@ -138,7 +138,7 @@ namespace QueryEngine
             MatchObjectStreamed match = (MatchObjectStreamed)QueryObject.Factory
                  (typeof(MatchObjectStreamed), graph, qEhelper, variableMap, parsedClauses["match"], null);
 
-            // Process GROUP BY and obtain the aggregates and hashes -> the all necessary info is in the expr info 
+            // GROUP BY and obtain the aggregates and hashes -> the all necessary info is in the expr info 
             if (parsedClauses.ContainsKey("groupby"))
             {
                 this.exprInfo = new QueryExpressionInfo(true);
@@ -149,16 +149,24 @@ namespace QueryEngine
             // SELECT is the last one to process the resuls.
             this.query = QueryObject.Factory
                 (typeof(SelectObject), graph, qEhelper, variableMap, parsedClauses["select"], exprInfo);
+            
             SetSingleGroupFlags();
 
-            // Check if the query is aggregation and not a simply query.
+            // Check if the query is aggregation and not a simple query.
             if ((this.exprInfo.Aggregates.Count == 0 && this.qEhelper.IsSetSingleGroupGroupBy) || (!this.qEhelper.IsSetSingleGroupGroupBy && !parsedClauses.ContainsKey("groupby")))
                 throw new ArgumentException($"{this.GetType()}, no grouping was specified. The streamed version allows to compute only aggregations.");
 
-            // Create a processor and set it to a matcher.
-            var groupProc = GroupResultProcessor.Factory(exprInfo, qEhelper, variableMap.GetCount());
-            match.PassResultProcessor(groupProc);
-            
+            // ORDER BY
+            if (parsedClauses.ContainsKey("orderby"))
+            {
+                var orderByProc = OrderByResultProcessor.Factory(graph, variableMap, qEhelper, (OrderByNode)parsedClauses["orderby"], exprInfo, variableMap.GetCount());
+                match.PassResultProcessor(orderByProc);
+            } else
+            {
+                var groupByProc = GroupResultProcessor.Factory(exprInfo, qEhelper, variableMap.GetCount());
+                match.PassResultProcessor(groupByProc);
+            }
+
             query.AddToEnd(match);
         }
 

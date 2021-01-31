@@ -94,7 +94,9 @@ namespace QueryEngine
     }
 
     internal interface IOrderByExecutionHelper : IBaseExecutionHelper
-    { }
+    { 
+        string SorterAlias { get; }
+    }
 
     internal interface IGroupByExecutionHelper : IBaseExecutionHelper 
     { 
@@ -108,7 +110,7 @@ namespace QueryEngine
     /// </summary>
     internal class QueryExecutionHelper : IMatchExecutionHelper, ISelectExecutionHelper, IOrderByExecutionHelper, IGroupByExecutionHelper
     {
-        public QueryExecutionHelper(int threadCount, string printer, string formater, int verticesPerThread, int arraySize, string fileName, string ppmName, string stpmName, string patternName, string grouperName)
+        public QueryExecutionHelper(int threadCount, string printer, string formater, int verticesPerThread, int arraySize, string fileName, string ppmName, string stpmName, string patternName, string grouperName, string sorterName)
         {
             this.ThreadCount = threadCount;
             this.Printer = printer;
@@ -120,6 +122,7 @@ namespace QueryEngine
             this.SingleThreadPatternMatcherName = stpmName;
             this.PatternName = patternName;
             this.GrouperAlias = grouperName;
+            this.SorterAlias = sorterName;
         }
 
         public int ThreadCount { get; }
@@ -142,5 +145,7 @@ namespace QueryEngine
         public string PatternName { get; }
 
         public string GrouperAlias { get; }
+        public string SorterAlias { get;  }
+
     }
 }
