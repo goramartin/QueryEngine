@@ -8,6 +8,7 @@ namespace QueryEngine
 {
     /// <summary>
     /// A base class for every group result processor.
+    /// When instantiating the class. The users input query must be parsed before running constructors of any child class.
     /// </summary>
     internal abstract class GroupResultProcessor : ResultProcessor
     {
@@ -39,7 +40,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Parses Group by node tree, the information is stored in the expression info class.
+        /// Parses Group by parse tree, the information is stored in the expression info class.
         /// </summary>
         public static void ParseGroupBy(Graph graph, VariableMap variableMap, IGroupByExecutionHelper executionHelper, GroupByNode groupByNode, QueryExpressionInfo exprInfo)
         {
@@ -51,6 +52,11 @@ namespace QueryEngine
             executionHelper.IsSetGroupBy = true;
         }
 
+        /// <summary>
+        /// Constructs Group by result processor.
+        /// The suffix HS stands for Half Streamed solution, whereas the S stands for Full Streamed solution.
+        /// The additional suffices B and L stand for the type of result storages. B is for buckets and L is for Lists.
+        /// </summary>
         public static ResultProcessor Factory(QueryExpressionInfo expressionInfo, IGroupByExecutionHelper executionHelper, int columnCount)
         {
             if (executionHelper.GrouperAlias == "singleHS") return new SingleGroupResultProcessorHalfStreamed(expressionInfo, executionHelper, columnCount);

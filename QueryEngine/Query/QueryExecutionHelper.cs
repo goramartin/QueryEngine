@@ -122,7 +122,7 @@ namespace QueryEngine
             this.GrouperAlias = grouperName;
         }
 
-        public int ThreadCount {get; }
+        public int ThreadCount { get; }
         public bool IsSetOrderBy { get; set; } = false;
         public bool IsSetGroupBy { get; set; } = false;
         public bool IsSetSingleGroupGroupBy { get; set; } = false;
