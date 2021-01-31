@@ -88,6 +88,7 @@
     <Compile Include="QueryStreamed\Match\IPatternMatcherStreamed.cs" />
     <Compile Include="QueryStreamed\Match\ISingleThreadPatternMatcherStreamed.cs" />
     <Compile Include="QueryStreamed\Match\MatchObjectStreamed.cs" />
+    <Compile Include="QueryStreamed\OrderBy\OrderByResultProcessor.cs" />
     <Compile Include="QueryStreamed\ResultProcessor.cs" />
     <Compile Include="QueryStreamed\Results\GroupByResultsStreamedBuckets.cs" />
     <Compile Include="Query\Expression\Expression.cs" />
@@ -211,8 +212,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="QueryStreamed\OrderBy\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

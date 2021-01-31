@@ -74,6 +74,7 @@ namespace QueryEngine
 
             var tmpExpr = new ExpressionHolder(expr, label);
             this.holders.Add(tmpExpr);
+            // The returned position always points to the passed expression.
             this.exprInfo.AddGroupByHash(tmpExpr);
         }
 

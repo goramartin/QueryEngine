@@ -26,7 +26,7 @@ namespace QueryEngine
     /// Class stores each expression into a list of expressions.
     /// When adding the group by hash expr, the hash expr is also an expression. Thus, it is added into lists of expressions and the list of hashes.
     /// Note that in order to make this class work properly, the group by object must be created first. Because this class assumes the 
-    /// hash expression are already inside before adding other expressions from other clauses.
+    /// hash expressions are already inside before adding other expressions from other clauses.
     /// </summary>
     internal class QueryExpressionInfo
     {
@@ -43,7 +43,7 @@ namespace QueryEngine
         /// </summary>
         public List<Aggregate> Aggregates { get; } = new List<Aggregate>();
         /// <summary>
-        /// Every other expression used inside query.
+        /// Every expression in the query except aggregates.
         /// </summary>
         public List<ExpressionHolder> Exprs { get; } = new List<ExpressionHolder>();
         public bool IsSetGroupBy { get; set; } = false;
@@ -54,18 +54,19 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Checks whether an expression (no aggregation) is valid, mainly in terms of grouping expressions.
+        /// Checks whether an expression (no aggregation) is valid, in terms of grouping expressions.
         /// That is to say, if the group by is set, the clause provides expressions to group the results with.
-        /// This function should check, whether the expressions in other clauses are as same as the grouping exp.
+        /// This function should check, whether the expressions in other clauses are the same as in the grouping exp.
         /// Because, only the same expressions can be referenced throughout the query + aggregates.
         /// 
-        /// If no group by is set and aggregation is referenced, then only aggregations can be referenced in the entire query.
+        /// If no group by is set and aggregation is referenced, then only aggregations can be referenced in the entire query -> single group group by.
         ///
         /// This function is very simplified becuase expressions contain only one block.
         /// Thus, it must be reimplemented in the future.
+        /// So far called only from Select clause parser.
         /// </summary>
         /// <param name="expressionHolder"> An expression. </param>
-        /// <returns> A position of the added expression.  </returns>
+        /// <returns> Returns position of the passed expression in the main expression list.  </returns>
         public int AddExpression(ExpressionHolder expressionHolder)
         {
             // Only expressions from group by clause and aggregates can be used.
@@ -92,8 +93,9 @@ namespace QueryEngine
 
         /// <summary>
         /// Adds an aggregate to common aggregate functions.
+        /// This does not throw because aggregates can be scattered across multiple clauses.
         /// </summary>
-        /// <param name="aggregate">An aggregate function. </param>
+        /// <param name="aggregate"> An aggregate function. </param>
         /// <returns> Returns position where it was added or the position of the aggregate that has been already added.</returns>
         public int AddAggregate(Aggregate aggregate)
         {
@@ -114,6 +116,7 @@ namespace QueryEngine
         /// Thus, hashes and expr have the same count.
         /// </summary>
         /// <param name="expressionHolder"> An expression to hash with. </param>
+        /// <returns> Returns position of the passed expression in the main expression list. </returns>
         public int AddGroupByHash(ExpressionHolder expressionHolder)
         {
             if (expressionHolder.ContainsAggregate())
@@ -121,9 +124,10 @@ namespace QueryEngine
             else if (this.GroupByhashExprs.Contains(expressionHolder))
                 throw new ArgumentException($"{this.GetType()}, group by clause cannot contain the same key multiple times.");
             else 
-            { 
-                this.GroupByhashExprs.Add(expressionHolder);
-                return InsertExpr(expressionHolder);
+            {
+                var pos = InsertExpr(expressionHolder);
+                this.GroupByhashExprs.Add(this.Exprs[pos]);
+                return pos;
             }
         }
 
@@ -132,14 +136,16 @@ namespace QueryEngine
         /// Cannot contain multiple occurrences of the same comparer expression.
         /// </summary>
         /// <param name="expressionHolder"> An expression to sort with. </param>
+        /// <returns> Returns position of the passed expression in the main expression list. </returns>
         public int AddOrderByComp(ExpressionHolder expressionHolder)
         {
             if (this.OrderByComparerExprs.Contains(expressionHolder))
                 throw new ArgumentException($"{this.GetType()}, order by clause cannot contain the same comparer expression multiple times.");
             else
             {
-                this.OrderByComparerExprs.Add(expressionHolder);
-                return InsertExpr(expressionHolder);
+                var pos = InsertExpr(expressionHolder);
+                this.OrderByComparerExprs.Add(this.Exprs[pos]);
+                return pos;
             }
         }
 
@@ -158,7 +164,7 @@ namespace QueryEngine
         /// Tried to insert an expression to the general expr. list.
         /// </summary>
         /// <param name="holder"> An expression to add to the general expr. list. </param>
-        /// <returns> If it contains the expression, return its position. Otherwise add the expression and return its new position. </returns>
+        /// <returns> If the main expression list contains the expression, return its position. Otherwise add the expression and return its new position. </returns>
         private int InsertExpr(ExpressionHolder expressionHolder)
         {
             int position = -1;
