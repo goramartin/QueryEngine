@@ -150,9 +150,9 @@
     <Compile Include="Query\OrderBy\Comparer\RowComparer\RowComparer.cs" />
     <Compile Include="Query\OrderBy\Comparer\RowComparer\Wrappers\IndexToRowProxyComparer.cs" />
     <Compile Include="Query\OrderBy\OrderByObject.cs" />
-    <Compile Include="Query\OrderBy\Sorter\SimpleSorter\MultiColumnSimpleSorter.cs" />
-    <Compile Include="Query\OrderBy\Sorter\SimpleSorter\SimpleSorter.cs" />
-    <Compile Include="Query\OrderBy\Sorter\Sorter.cs" />
+    <Compile Include="Query\OrderBy\Sorter\TableSorter\MultiColumnTableSorter.cs" />
+    <Compile Include="Query\OrderBy\Sorter\TableSorter\TableSorter.cs" />
+    <Compile Include="Query\OrderBy\Sorter\ISorter.cs" />
     <Compile Include="Query\Query.cs" />
     <Compile Include="Query\QueryExecutionHelper.cs" />
     <Compile Include="Query\QueryObject.cs" />

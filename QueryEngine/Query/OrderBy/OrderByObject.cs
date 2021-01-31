@@ -76,7 +76,7 @@ namespace QueryEngine
         private ITableResults Sort(ITableResults sortData)
         {
              Console.WriteLine("Order start");
-             Sorter sorter = new MultiColumnSorter(sortData, this.comparers, this.helper.InParallel);
+             ISorter sorter = new MultiColumnTableSorter(sortData, this.comparers, this.helper.InParallel);
              var sortedResults =  sorter.Sort();
 
              TimeSpan ts = QueryEngine.stopwatch.Elapsed;

@@ -19,12 +19,12 @@ namespace QueryEngine
     /// Represents sorter that sorts given results table by rows in the table.
     /// The given row comparers are used to compare the rows.
     /// </summary>
-    internal abstract class SimpleSorter : Sorter
+    internal abstract class TableSorter : ISorter
     {
         protected ITableResults dataTable;
         protected bool inParallel;
 
-        protected SimpleSorter(ITableResults sortData, bool inParallel)
+        protected TableSorter(ITableResults sortData, bool inParallel)
         {
             this.inParallel = inParallel;
             this.dataTable = sortData;

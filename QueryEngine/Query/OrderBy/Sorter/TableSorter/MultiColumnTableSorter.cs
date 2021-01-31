@@ -22,7 +22,7 @@ namespace QueryEngine
     /// Sorter takes creates array of indeces representing rows in the table and the indeces are 
     /// sorted instead of actual rows in the table.
     /// </summary>
-    internal sealed class MultiColumnSorter : SimpleSorter
+    internal sealed class MultiColumnTableSorter : TableSorter
     {
         private IndexToRowProxyComparer indexComparer;
 
@@ -33,7 +33,7 @@ namespace QueryEngine
         /// <param name="sortData"> Result table to sort. </param>
         /// <param name="rowComparers"> Comparers for comparing rows in the table. </param>
         /// <param name="inParallel"> Flag is the table should be sorted in parallel. </param>
-        public MultiColumnSorter(ITableResults sortData, ExpressionComparer[] rowComparers, bool inParallel) : base(sortData, inParallel)
+        public MultiColumnTableSorter(ITableResults sortData, ExpressionComparer[] rowComparers, bool inParallel) : base(sortData, inParallel)
         {
             var tmpComp = new RowComparer(rowComparers);
             tmpComp.SetCachingResults(!inParallel);

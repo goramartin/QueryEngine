@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace QueryEngine
 {
-    internal abstract class Sorter
+    internal abstract class ISorter
     {
         public abstract ITableResults Sort();
     }

@@ -17,7 +17,7 @@ namespace QueryEngine
 
         protected OrderByResultProcessor(QueryExpressionInfo expressionInfo, IOrderByExecutionHelper executionHelper, int columnCount)
         {
-            this.comparers = expressionInfo.OrderByComparerExprs.ToArray();
+            //this.comparers = expressionInfo.OrderByComparerExprs.ToArray();
             this.ColumnCount = columnCount;
             this.executionHelper = executionHelper;
 

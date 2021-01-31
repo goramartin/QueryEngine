@@ -41,6 +41,9 @@ namespace QueryEngine
 
         /// <summary>
         /// Parses Group by parse tree, the information is stored in the expression info class.
+        /// The reason this method is separated from constructor is because it cannot guess whether the 
+        /// clause is a normal group by or a single group group by. And the group by must always be parsed
+        /// as the first clause after the Match clause.
         /// </summary>
         public static void ParseGroupBy(Graph graph, VariableMap variableMap, IGroupByExecutionHelper executionHelper, GroupByNode groupByNode, QueryExpressionInfo exprInfo)
         {
