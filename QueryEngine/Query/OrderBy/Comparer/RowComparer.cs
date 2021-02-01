@@ -31,13 +31,13 @@ namespace QueryEngine
     /// </summary>
     internal class RowComparer : IExpressionComparer
     {
-        private readonly IExpressionComparer[] comparers;
+        private readonly ExpressionComparer[] comparers;
 
         /// <summary>
         /// Creates a row comparer.
         /// </summary>
         /// <param name="expressionComparers"> Expected a list of expression comparers.</param>
-        public RowComparer(IExpressionComparer[] expressionComparers)
+        public RowComparer(ExpressionComparer[] expressionComparers)
         {
             this.comparers = expressionComparers;
         }
@@ -62,19 +62,19 @@ namespace QueryEngine
             return result;
         }
 
-        public void SetCachingResults(bool setValue)
+        public void SetCaching(bool setValue)
         {
             for (int i = 0; i < this.comparers.Length; i++)
-                this.comparers[i].SetCachingResults(setValue);
+                this.comparers[i].SetCaching(setValue);
         }
 
         /// <summary>
         /// Note that the cloning does set the flag whether the comparer uses caching.
         /// This needs to be done separately after cloning.
         /// </summary>
-        public IExpressionComparer Clone()
+        public RowComparer Clone()
         {
-            var newComparers = new IExpressionComparer[this.comparers.Length];
+            var newComparers = new ExpressionComparer[this.comparers.Length];
             for (int i = 0; i < newComparers.Length; i++)
                 newComparers[i] = this.comparers[i].Clone();
             

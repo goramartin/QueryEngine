@@ -28,7 +28,7 @@ namespace QueryEngine
     /// </summary>
     internal sealed class OrderByObject : QueryObject
     {
-        private IExpressionComparer[] comparers;
+        private ExpressionComparer[] comparers;
         private IOrderByExecutionHelper helper;
 
         /// <summary>

@@ -15,18 +15,18 @@ namespace QueryEngine
     /// </summary>
     internal sealed class IndexToRowProxyComparer : IComparer<int>
     {
-        private readonly IExpressionComparer comparer;
+        private readonly RowComparer rowComparer;
         private readonly ITableResults results;
 
-        public IndexToRowProxyComparer(IExpressionComparer comparer, ITableResults results)
+        public IndexToRowProxyComparer(RowComparer rowComparer, ITableResults results)
         {
-            this.comparer = comparer;
+            this.rowComparer = rowComparer;
             this.results = results;
         }
 
         public int Compare(int x, int y)
         {
-            return this.comparer.Compare(this.results[x], this.results[y]);  
+            return this.rowComparer.Compare(this.results[x], this.results[y]);  
         }
     }
 }

@@ -33,10 +33,10 @@ namespace QueryEngine
         /// <param name="sortData"> Result table to sort. </param>
         /// <param name="rowComparers"> Comparers for comparing rows in the table. </param>
         /// <param name="inParallel"> Flag is the table should be sorted in parallel. </param>
-        public MultiColumnTableSorter(ITableResults sortData, IExpressionComparer[] expressionComparers, bool inParallel) : base(sortData, inParallel)
+        public MultiColumnTableSorter(ITableResults sortData, ExpressionComparer[] expressionComparers, bool inParallel) : base(sortData, inParallel)
         {
             var rowComparer = new RowComparer(expressionComparers);
-            rowComparer.SetCachingResults(!inParallel);
+            rowComparer.SetCaching(!inParallel);
             this.indexComparer = new IndexToRowProxyComparer(rowComparer, sortData);
         }
 

@@ -64,12 +64,12 @@ namespace QueryEngine
             return true;
         }
 
-        public void SetCachingResults(bool setValue)
+        public void SetCaching(bool setValue)
         {
             this.cacheResults = setValue;
         }
 
-        public abstract IExpressionComparer Clone();
+        public abstract ExpressionComparer Clone();
     }
 
     internal abstract class ExpressionComparer<T> : ExpressionComparer
@@ -149,7 +149,7 @@ namespace QueryEngine
             return xValue.CompareTo(yValue);
         }
 
-        public override IExpressionComparer Clone()
+        public override ExpressionComparer Clone()
         {
             return new ExpressionIntegerComparer(this.expressionHolder, this.isAscending);
         }
@@ -164,7 +164,7 @@ namespace QueryEngine
             return xValue.CompareTo(yValue);
         }
 
-        public override IExpressionComparer Clone()
+        public override ExpressionComparer Clone()
         {
             return new ExpressionStringComparer(this.expressionHolder, this.isAscending);
         }
