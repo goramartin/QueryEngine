@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace QueryEngine.QueryStreamed.OrderBy.Sorter
+namespace QueryEngine
 {
     class ABTreeStreamedSortercs
     {

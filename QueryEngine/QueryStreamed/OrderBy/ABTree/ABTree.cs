@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace BenchmarkArrayVsTrees
+namespace QueryEngine
 {
     /// <summary>
     /// (A, B) Tree implementation that uses only insert and iteration.
@@ -13,7 +13,7 @@ namespace BenchmarkArrayVsTrees
     /// No duplicate values.
     /// </summary>
     /// <typeparam name="T"> The type of keys stored in the nodes.</typeparam>
-    internal class ABTreeList<T> : IEnumerable<T>
+    internal class ABTree<T> : IEnumerable<T>
     {
         public int Count { get; private set; } = 0;
 
@@ -22,17 +22,17 @@ namespace BenchmarkArrayVsTrees
         private int maxChildren;
         private int minChildren;
 
-        public ABTreeList(int bValue, IComparer<T> comparer)
+        public ABTree(int B, IComparer<T> comparer)
         {
-            if (bValue % 2 == 1)
+            if (B % 2 == 1)
                 throw new ArgumentException($"{this.GetType()}, passed non even B value as the max children count.");
             else if (comparer == null)
                 throw new ArgumentException($"{this.GetType()}, passed comparer as null.");
-            else if (bValue < 4)
+            else if (B < 4)
                 throw new ArgumentException($"{this.GetType()}, passed  4 > B value. Choose a higher B value.");
 
-            this.maxChildren = bValue;
-            this.minChildren = bValue / 2;
+            this.maxChildren = B;
+            this.minChildren = B / 2;
             this.comparer = comparer;
         }
 

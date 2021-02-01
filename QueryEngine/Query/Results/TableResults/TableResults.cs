@@ -33,6 +33,7 @@ namespace QueryEngine
         int RowCount { get; }
         Element[] temporaryRow { get; set; }
         void StoreTemporaryRow();
+        void StoreRow(Element[] row);
         TableResults.RowProxy this[int rowIndex] { get; }
         void AddOrder(int[] order);
     }
@@ -110,11 +111,7 @@ namespace QueryEngine
                 this.resTable[i] = new List<Element[]>();
         }
 
-
-        /// <summary>
-        /// Store temporary row in the table.
-        /// </summary>
-        public void StoreTemporaryRow()
+        public void StoreRow(Element[] row)
         {
             var posInBlock = this.RowCount % this.FixedArraySize;
             var block = this.RowCount / this.FixedArraySize;
@@ -126,8 +123,13 @@ namespace QueryEngine
                     this.resTable[i].Add(new Element[this.FixedArraySize]);
             }
             for (int i = 0; i < this.ColumnCount; i++)
-                this.resTable[i][block][posInBlock] = this.temporaryRow[i];
+                this.resTable[i][block][posInBlock] = row[i];
             this.RowCount++;
+        }
+
+        public void StoreTemporaryRow()
+        {
+            this.StoreRow(this.temporaryRow);
         }
 
         /// <summary>
