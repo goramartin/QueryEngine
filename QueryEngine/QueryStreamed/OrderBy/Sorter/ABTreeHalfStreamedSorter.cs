@@ -58,11 +58,11 @@ namespace QueryEngine
             }
         }
 
-        private IndexToRowProxyComparer CreateComparer(RowComparer comparer, TableResults results) 
+        private IndexToRowProxyComparerNoDup CreateComparer(RowComparer comparer, TableResults results) 
         {
             var newComparer = comparer.Clone();
             newComparer.SetCaching(true);
-            return new IndexToRowProxyComparer(newComparer, results);
+            return new IndexToRowProxyComparerNoDup(newComparer, results);
         }
     }
 }
