@@ -13,6 +13,8 @@ namespace QueryEngine
     internal interface IExpressionComparer
     {
         int Compare(in TableResults.RowProxy x, in TableResults.RowProxy y);
+        void SetCachingResults(bool SetCachingResults);
+        IExpressionComparer Clone();
     }
 
 }

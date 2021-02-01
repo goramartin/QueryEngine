@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace QueryEngine
 {
-    internal sealed class OrderByVisitor : IVisitor<List<ExpressionComparer>>
+    internal sealed class OrderByVisitor : IVisitor<List<IExpressionComparer>>
     {
-        private List<ExpressionComparer> result;
+        private List<IExpressionComparer> result;
         private Dictionary<string, Tuple<int, Type>> labels;
         private VariableMap variableMap;
         private ExpressionHolder expressionHolder;
@@ -16,13 +16,13 @@ namespace QueryEngine
 
         public OrderByVisitor(Dictionary<string, Tuple<int, Type>> labels, VariableMap map, QueryExpressionInfo exprInfo)
         {
-            this.result = new List<ExpressionComparer>();
+            this.result = new List<IExpressionComparer>();
             this.labels = labels;
             this.variableMap = map;
             this.exprInfo = exprInfo;
         }
 
-        public List<ExpressionComparer> GetResult()
+        public List<IExpressionComparer> GetResult()
         {
             if (this.result == null || this.result.Count == 0)
                 throw new ArgumentException($"{this.GetType()} final result is empty or null");
@@ -48,8 +48,7 @@ namespace QueryEngine
             if (node.exp == null) throw new ArgumentNullException($"{this.GetType()}, failed access expression.");
             else node.exp.Accept(this);
 
-            this.result.Add(ExpressionComparer.Factory(this.expressionHolder, node.isAscending,
-                                                      this.expressionHolder.ExpressionType));
+            this.result.Add(ExpressionComparer.Factory(this.expressionHolder, node.isAscending));
 
             if (node.next != null) node.next.Accept(this);
         }

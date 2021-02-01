@@ -88,7 +88,10 @@
     <Compile Include="QueryStreamed\Match\IPatternMatcherStreamed.cs" />
     <Compile Include="QueryStreamed\Match\ISingleThreadPatternMatcherStreamed.cs" />
     <Compile Include="QueryStreamed\Match\MatchObjectStreamed.cs" />
+    <Compile Include="QueryStreamed\OrderBy\ABTree\ABTree.cs" />
+    <Compile Include="QueryStreamed\OrderBy\Sorter\ABTreeHalfStreamedSorter.cs" />
     <Compile Include="QueryStreamed\OrderBy\OrderByResultProcessor.cs" />
+    <Compile Include="QueryStreamed\OrderBy\Sorter\ABTreeStreamedSortercs.cs" />
     <Compile Include="QueryStreamed\ResultProcessor.cs" />
     <Compile Include="QueryStreamed\Results\GroupByResultsStreamedBuckets.cs" />
     <Compile Include="Query\Expression\Expression.cs" />

@@ -38,14 +38,13 @@ namespace QueryEngine
         /// </summary>
         /// <param name="expressionHolder"> Expression to be evaluated. </param>
         /// <param name="ascending"> Whether to use ascending order or descending. </param>
-        /// <param name="typeOfExpression"> Type of comparer. </param>
         /// <returns> Specialised comparer. </returns>
-        public static ExpressionComparer Factory(ExpressionHolder expressionHolder, bool ascending, Type typeOfExpression)
+        public static ExpressionComparer Factory(ExpressionHolder expressionHolder, bool isAscending)
         {
-            if (typeOfExpression == typeof(int))
-                return new ExpressionIntegerComparer(expressionHolder, ascending);
-            else if (typeOfExpression == typeof(string))
-                return new ExpressionStringComparer(expressionHolder, ascending);
+            if (expressionHolder.ExpressionType == typeof(int))
+                return new ExpressionIntegerComparer(expressionHolder, isAscending);
+            else if (expressionHolder.ExpressionType == typeof(string))
+                return new ExpressionStringComparer(expressionHolder, isAscending);
             else throw new ArgumentException($"Expression comparer factory, unknown type passed to a expression comparer factory.");
         }
 
@@ -69,6 +68,8 @@ namespace QueryEngine
         {
             this.cacheResults = setValue;
         }
+
+        public abstract IExpressionComparer Clone();
     }
 
     internal abstract class ExpressionComparer<T> : ExpressionComparer
@@ -138,7 +139,6 @@ namespace QueryEngine
         protected abstract int CompareValues(T xValue, T yValue);
     }
 
-
     internal class ExpressionIntegerComparer : ExpressionComparer<int>
     {
         public ExpressionIntegerComparer(ExpressionHolder expressionHolder, bool ascending) : base(expressionHolder, ascending)
@@ -147,6 +147,11 @@ namespace QueryEngine
         protected override int CompareValues(int xValue, int yValue)
         {
             return xValue.CompareTo(yValue);
+        }
+
+        public override IExpressionComparer Clone()
+        {
+            return new ExpressionIntegerComparer(this.expressionHolder, this.isAscending);
         }
     }
 
@@ -159,5 +164,9 @@ namespace QueryEngine
             return xValue.CompareTo(yValue);
         }
 
+        public override IExpressionComparer Clone()
+        {
+            return new ExpressionStringComparer(this.expressionHolder, this.isAscending);
+        }
     }
 }

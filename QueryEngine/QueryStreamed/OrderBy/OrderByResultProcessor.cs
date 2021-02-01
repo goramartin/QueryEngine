@@ -8,7 +8,7 @@ namespace QueryEngine
 {
     internal abstract class OrderByResultProcessor : ResultProcessor
     {
-        protected ExpressionComparer[] comparers;
+        protected IExpressionComparer[] comparers;
         protected IOrderByExecutionHelper executionHelper;
         /// <summary>
         /// Represents a number of variables defined in the match clause of the query.
