@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace QueryEngine
 {
@@ -18,50 +19,117 @@ namespace QueryEngine
     /// </summary>
     internal class ABTreeHalfStreamedSorter : OrderByResultProcessor
     {
-        private Job[] localSortJobs;
-
+        private SortJob[] sortJobs;
+        private int sortJobsFinished = 0;
+        private object globalLock = new object();
+        private MergeJob mergeJob;
 
         public ABTreeHalfStreamedSorter(Graph graph, VariableMap variableMap, IOrderByExecutionHelper executionHelper, OrderByNode orderByNode, QueryExpressionInfo exprInfo, int columnCount) 
             : base(graph, variableMap, executionHelper, orderByNode, exprInfo, columnCount) 
         {
             var tmpComp = new RowComparer(this.comparers);
-            this.localSortJobs = new Job[this.executionHelper.ThreadCount];
-            for (int i = 0; i < localSortJobs.Length; i++)
+            this.sortJobs = new SortJob[this.executionHelper.ThreadCount];
+            for (int i = 0; i < sortJobs.Length; i++)
             {
                 var results = new TableResults(this.ColumnCount, this.executionHelper.FixedArraySize);
-                this.localSortJobs[i] = new Job(this.CreateComparer(tmpComp, results), results);
+                this.sortJobs[i] = new SortJob(this.CreateComparer(tmpComp, results), results);
             }
         } 
 
         public override void Process(int matcherID, Element[] result)
         {
-            var tmpJob = this.localSortJobs[matcherID];
+            var job = this.sortJobs[matcherID];
             if (result != null)
             {
-                tmpJob.results.StoreRow(result);
-                tmpJob.tree.Insert(tmpJob.results.RowCount - 1);
+                job.results.StoreRow(result);
+                job.tree.Insert(job.results.RowCount - 1);
             } else
             {
-                // Parallel part
-                if (this.localSortJobs.Length > 1)
+                if (this.sortJobs.Length > 1)
                 {
-
+                    // Last finished thread, inits merging of the results.
+                    if (Interlocked.Increment(ref this.sortJobsFinished) == this.executionHelper.ThreadCount)
+                    {
+                        this.mergeJob = InitMergeJob();
+                        this.MergeResuls();
+                    }
                 }
             }
         }
 
+        // rec
+        private void MergeResuls() 
+        { 
+        
+        
+        
+        
+        } 
 
-        public override void RetrieveResults(out ITableResults resTable, out GroupByResults groupByResults)
+        private void MergeResultsRecursion(int start, int end)
         {
-            throw new NotImplementedException();
+
+
+
+
+
         }
 
-        private class Job
+
+        /// <summary>
+        /// Copy results of one sortJob into array that will be provided for the Merge methods. 
+        /// </summary>
+        /// <param name="jobIndex"> Results to copy. </param>
+        /// <param name="startIndex"> An index where to start inserting elements to the source array. </param>
+        private void CopySortJobResults(int jobIndex)
+        {
+            var job = this.sortJobs[jobIndex];
+            var source = this.mergeJob.source;
+
+            int i = this.mergeJob.startRanges[jobIndex];
+            foreach (var item in job.tree)
+            {
+                source[i] = job.results[item];
+                i++;
+            }
+        }
+
+        private MergeJob InitMergeJob()
+        {
+            int count = 0;
+            int[] startRanges = new int[this.executionHelper.ThreadCount];
+
+            for (int i = 0; i < this.sortJobs.Length; i++)
+            {
+                if (this.sortJobs[i].tree.Count == 0)
+                    startRanges[i] = -1;
+                else
+                {
+                    startRanges[i] = count;
+                    count += this.sortJobs[i].tree.Count;
+                }
+            }
+            return new MergeJob(count, startRanges);
+        }
+
+        private class MergeJob
+        {
+            public TableResults.RowProxy[] source;
+            public TableResults.RowProxy[] destination;
+            public int[] startRanges;
+
+            public MergeJob(int sourceSize, int[] startRanges)
+            {
+                this.source = new TableResults.RowProxy[sourceSize];
+                this.startRanges = startRanges;
+            }
+        }
+        private class SortJob
         {
             public ABTree<int> tree;
             public TableResults results;
 
-            public Job(IComparer<int> comparer, TableResults results)
+            public SortJob(IComparer<int> comparer, TableResults results)
             {
                 this.tree = new ABTree<int>(256, comparer);
                 this.results = results;
@@ -73,6 +141,10 @@ namespace QueryEngine
             var newComparer = comparer.Clone();
             newComparer.SetCaching(true);
             return new IndexToRowProxyComparerNoDup(newComparer, results);
+        }
+        public override void RetrieveResults(out ITableResults resTable, out GroupByResults groupByResults)
+        {
+            throw new NotImplementedException();
         }
     }
 }

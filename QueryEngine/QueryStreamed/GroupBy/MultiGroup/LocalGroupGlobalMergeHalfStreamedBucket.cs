@@ -22,12 +22,12 @@ namespace QueryEngine
     /// </summary>
     internal class LocalGroupGlobalMergeHalfStreamedBucket : GroupResultProcessor
     {
-        private Job[] matcherJobs;
+        private GroupJob[] groupJobs;
         private ConcurrentDictionary<GroupDictKeyFull, AggregateBucketResult[]> globalGroups;
 
         public LocalGroupGlobalMergeHalfStreamedBucket(QueryExpressionInfo expressionInfo, IGroupByExecutionHelper executionHelper, int columnCount) : base(expressionInfo, executionHelper, columnCount)
         {
-            this.matcherJobs = new Job[this.executionHelper.ThreadCount];
+            this.groupJobs = new GroupJob[this.executionHelper.ThreadCount];
 
             // Create initial job, comps and hashers
             this.CreateHashersAndComparers(out ExpressionEqualityComparer[] equalityComparers, out ExpressionHasher[] hashers);
@@ -36,11 +36,11 @@ namespace QueryEngine
             firstComp.SetCache(firstHasher);
             firstHasher.SetCache(firstComp.Comparers);
 
-            this.matcherJobs[0] = new Job(this.aggregates, this.ColumnCount, firstComp, firstHasher, this.executionHelper.FixedArraySize);
+            this.groupJobs[0] = new GroupJob(this.aggregates, this.ColumnCount, firstComp, firstHasher, this.executionHelper.FixedArraySize);
             for (int i = 1; i < this.executionHelper.ThreadCount; i++)
             {
-                this.CloneHasherAndComparer(firstComp, firstHasher, out RowEqualityComparerGroupKey newComp, out RowHasher newHasher);
-                matcherJobs[i] = new Job(this.aggregates, this.ColumnCount, newComp, newHasher, this.executionHelper.FixedArraySize);
+                CloneHasherAndComparer(firstComp, firstHasher, out RowEqualityComparerGroupKey newComp, out RowHasher newHasher);
+                groupJobs[i] = new GroupJob(this.aggregates, this.ColumnCount, newComp, newHasher, this.executionHelper.FixedArraySize);
             }
 
             this.globalGroups = new ConcurrentDictionary<GroupDictKeyFull, AggregateBucketResult[]>(new RowEqualityComparerGroupDickKeyFull(firstComp.Clone().Comparers));
@@ -48,25 +48,25 @@ namespace QueryEngine
 
         public override void Process(int matcherID, Element[] result)
         {
-            var tmpJob = this.matcherJobs[matcherID];
+            var job = this.groupJobs[matcherID];
             if (result != null)
             {
                 // Create a temporary row.
-                tmpJob.results.temporaryRow = result;
-                int rowPosition = tmpJob.results.RowCount;
-                TableResults.RowProxy row = tmpJob.results[rowPosition];
-                var key = new GroupDictKey(tmpJob.hasher.Hash(in row), rowPosition); // It's a struct.
+                job.results.temporaryRow = result;
+                int rowPosition = job.results.RowCount;
+                TableResults.RowProxy row = job.results[rowPosition];
+                var key = new GroupDictKey(job.hasher.Hash(in row), rowPosition); // It's a struct.
                 AggregateBucketResult[] buckets = null;
 
-                if (!tmpJob.groups.TryGetValue(key, out buckets))
+                if (!job.groups.TryGetValue(key, out buckets))
                 {
                     buckets = AggregateBucketResult.CreateBucketResults(aggregates);
-                    tmpJob.groups.Add(key, buckets);
+                    job.groups.Add(key, buckets);
                     // Store the temporary row in the table. This causes copying of the row to the actual lists of table.
                     // While the position of the stored row proxy remains the same, next time someone tries to access it,
                     // it returns the elements from the actual table and not the temporary row.
-                    tmpJob.results.StoreTemporaryRow();
-                    tmpJob.results.temporaryRow = null;
+                    job.results.StoreTemporaryRow();
+                    job.results.temporaryRow = null;
                 }
                 for (int j = 0; j < this.aggregates.Length; j++)
                     this.aggregates[j].Apply(in row, buckets[j]);
@@ -74,37 +74,47 @@ namespace QueryEngine
             else
             {
                 // If it runs in single thread. No need to merge the results.
-                if (this.matcherJobs.Length > 1)
+                if (this.groupJobs.Length > 1)
                 {
-                    foreach (var item in tmpJob.groups)
-                    {
-                        var keyFull = new GroupDictKeyFull(item.Key.hash, tmpJob.results[item.Key.position]);
-                        var buckets = this.globalGroups.GetOrAdd(keyFull, item.Value);
-                        if (item.Value != null && !object.ReferenceEquals(buckets, item.Value))
-                        {
-                            for (int j = 0; j < aggregates.Length; j++)
-                                aggregates[j].MergeThreadSafe(buckets[j], item.Value[j]);
-                        }
-                    }
-                    this.matcherJobs[matcherID] = null;
+                    this.MergeResults(job, matcherID);
                 }
             }
         }
 
+        /// <summary>
+        /// Called only if the grouping runs in paralel.
+        /// Merges local group results into the global results.
+        /// </summary>
+        private void MergeResults(GroupJob job, int matcherID) 
+        {
+            foreach (var item in job.groups)
+            {
+                var keyFull = new GroupDictKeyFull(item.Key.hash, job.results[item.Key.position]);
+                var buckets = this.globalGroups.GetOrAdd(keyFull, item.Value);
+                if (item.Value != null && !object.ReferenceEquals(buckets, item.Value))
+                {
+                    for (int j = 0; j < aggregates.Length; j++)
+                        aggregates[j].MergeThreadSafe(buckets[j], item.Value[j]);
+                }
+            }
+            this.groupJobs[matcherID] = null;
+        }
+
+
         public override void RetrieveResults(out ITableResults resTable, out GroupByResults groupByResults)
         {
             resTable = new TableResults();
-            if (this.matcherJobs.Length > 1) groupByResults = new ConDictGroupDictKeyFullBucket(this.globalGroups, resTable);
-            else groupByResults = new DictGroupDictKeyBucket(this.matcherJobs[0].groups, this.matcherJobs[0].results);
+            if (this.groupJobs.Length > 1) groupByResults = new ConDictGroupDictKeyFullBucket(this.globalGroups, resTable);
+            else groupByResults = new DictGroupDictKeyBucket(this.groupJobs[0].groups, this.groupJobs[0].results);
         }
 
-        private class Job
+        private class GroupJob
         {
             public TableResults results;
             public Dictionary<GroupDictKey, AggregateBucketResult[]> groups;
             public RowHasher hasher;
 
-            public Job(Aggregate[] aggregates, int columnCount, RowEqualityComparerGroupKey comparer, RowHasher hasher, int arraySize)
+            public GroupJob(Aggregate[] aggregates, int columnCount, RowEqualityComparerGroupKey comparer, RowHasher hasher, int arraySize)
             {
                 this.results = new TableResults(columnCount, arraySize);
                 comparer.Results = this.results;
@@ -112,14 +122,5 @@ namespace QueryEngine
                 this.hasher = hasher;
             }
         }
-
-        private void CloneHasherAndComparer(RowEqualityComparerGroupKey comparer, RowHasher hasher, out RowEqualityComparerGroupKey retComparer, out RowHasher retHasher)
-        {
-            retComparer = comparer.Clone();
-            retHasher = hasher.Clone();
-            retComparer.SetCache(retHasher);
-            retHasher.SetCache(retComparer.Comparers);
-        }
-
     }
 }

@@ -92,7 +92,7 @@
     <Compile Include="QueryStreamed\OrderBy\Comparer\Wrapper\IndexToRowProxyNoDup.cs" />
     <Compile Include="QueryStreamed\OrderBy\Sorter\ABTreeHalfStreamedSorter.cs" />
     <Compile Include="QueryStreamed\OrderBy\OrderByResultProcessor.cs" />
-    <Compile Include="QueryStreamed\OrderBy\Sorter\ABTreeStreamedSortercs.cs" />
+    <Compile Include="QueryStreamed\OrderBy\Sorter\ABTreeStreamedSorter.cs" />
     <Compile Include="QueryStreamed\ResultProcessor.cs" />
     <Compile Include="QueryStreamed\Results\GroupByResultsStreamedBuckets.cs" />
     <Compile Include="Query\Expression\Expression.cs" />

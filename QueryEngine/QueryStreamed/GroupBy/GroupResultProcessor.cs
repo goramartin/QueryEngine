@@ -28,7 +28,7 @@ namespace QueryEngine
             this.ColumnCount = columnCount;
         }
 
-        protected virtual void CreateHashersAndComparers(out ExpressionEqualityComparer[] comparers, out ExpressionHasher[] hashers)
+        protected void CreateHashersAndComparers(out ExpressionEqualityComparer[] comparers, out ExpressionHasher[] hashers)
         {
             comparers = new ExpressionEqualityComparer[this.hashes.Length];
             hashers = new ExpressionHasher[this.hashes.Length];
@@ -38,6 +38,15 @@ namespace QueryEngine
                 hashers[i] = (ExpressionHasher.Factory(this.hashes[i], this.hashes[i].ExpressionType));
             }
         }
+
+        protected static void CloneHasherAndComparer(RowEqualityComparerGroupKey comparer, RowHasher hasher, out RowEqualityComparerGroupKey retComparer, out RowHasher retHasher)
+        {
+            retComparer = comparer.Clone();
+            retHasher = hasher.Clone();
+            retComparer.SetCache(retHasher);
+            retHasher.SetCache(retComparer.Comparers);
+        }
+
 
         /// <summary>
         /// Parses Group by parse tree, the information is stored in the expression info class.
