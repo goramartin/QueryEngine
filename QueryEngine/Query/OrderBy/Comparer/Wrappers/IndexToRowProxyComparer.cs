@@ -12,7 +12,7 @@ namespace QueryEngine
     /// During the ordering the order algorithm orders indeces of rows inside the result table 
     /// instead of ordering rows explicitly.
     /// </summary>
-    internal sealed class IndexToRowProxyComparer : IComparer<int>
+    internal sealed class IndexToRowProxyComparer : Comparer<int>
     {
         private readonly RowComparer rowComparer;
         private readonly ITableResults results;
@@ -23,7 +23,7 @@ namespace QueryEngine
             this.results = results;
         }
 
-        public int Compare(int x, int y)
+        public override int Compare(int x, int y)
         {
             return this.rowComparer.Compare(this.results[x], this.results[y]);  
         }

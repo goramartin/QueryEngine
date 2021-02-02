@@ -29,7 +29,7 @@ namespace QueryEngine
     /// Compares two rows.
     /// Contains list of all expression to compared with the rows.
     /// </summary>
-    internal class RowComparer : IExpressionComparer
+    internal class RowComparer : Comparer<TableResults.RowProxy>, IExpressionComparer
     {
         private readonly ExpressionComparer[] comparers;
 
@@ -62,6 +62,20 @@ namespace QueryEngine
             return result;
         }
 
+        /// <summary>
+        /// The same method as above. It is copied since it is need for the HPCSharp library.
+        /// </summary>
+        public override int Compare(TableResults.RowProxy x, TableResults.RowProxy y)
+        {
+            int result = 0;
+            for (int i = 0; i < this.comparers.Length; i++)
+            {
+                result = this.comparers[i].Compare(x, y);
+                if (result != 0) return result;
+            }
+            return result;
+        }
+
         public void SetCaching(bool setValue)
         {
             for (int i = 0; i < this.comparers.Length; i++)
@@ -80,5 +94,6 @@ namespace QueryEngine
             
             return new RowComparer(newComparers);
         }
+
     }
 }

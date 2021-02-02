@@ -13,7 +13,7 @@ namespace QueryEngine
     /// Thus a index of the row is used as a unique identifier, since each row in the table exists only
     /// once.
     /// </summary>
-    internal sealed class IndexToRowProxyComparerNoDup : IComparer<int>
+    internal sealed class IndexToRowProxyComparerNoDup : Comparer<int>
     {
         private readonly RowComparer rowComparer;
         private readonly ITableResults results;
@@ -24,7 +24,7 @@ namespace QueryEngine
             this.results = results;
         }
 
-        public int Compare(int x, int y)
+        public override int Compare(int x, int y)
         {
             var compRes = this.rowComparer.Compare(this.results[x], this.results[y]);
             if (compRes == 0) return x.CompareTo(y);
