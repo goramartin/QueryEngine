@@ -68,16 +68,18 @@ namespace QueryEngine
         {
             SplitToFullNonFull(columnIndex, out List<Element[]> columnBlocks, out List<Tuple<Element[], int>> lastColumnBlocks);
             // Sort the blocks according to their capacity in ascending order.
-            lastColumnBlocks.Sort(Comparer<Tuple<Element[], int>>.Create((i1, i2) => i1.Item2.CompareTo(i2.Item2)));
-            int firstAfterEmpty = MergeLastBlocks(lastColumnBlocks);
-            // Copy the blocks that are full, and lastly the last non full block.
-            for (int i = lastColumnBlocks.Count - 1; firstAfterEmpty <= i; i--)
+            
+            if (lastColumnBlocks.Count != 0)
             {
-                // Try if the last block is at least half full otherwise reallocate it.
-                if (i == firstAfterEmpty) columnBlocks.Add(TryReallocLastCopiedBlock(lastColumnBlocks[i].Item1, GetSizeOfLastBlocks(lastColumnBlocks)));
-                else columnBlocks.Add(lastColumnBlocks[i].Item1);
+                lastColumnBlocks.Sort(Comparer<Tuple<Element[], int>>.Create((i1, i2) => i1.Item2.CompareTo(i2.Item2)));
+                int firstAfterEmpty = MergeLastBlocks(lastColumnBlocks);
+                for (int i = lastColumnBlocks.Count - 1; firstAfterEmpty <= i; i--)
+                {
+                    // Try if the last block is at least half full otherwise reallocate it.
+                    if (i == firstAfterEmpty) columnBlocks.Add(TryReallocLastCopiedBlock(lastColumnBlocks[i].Item1, GetSizeOfLastBlocks(lastColumnBlocks)));
+                    else columnBlocks.Add(lastColumnBlocks[i].Item1);
+                }
             }
-
             this.FinalMerged[columnIndex] = columnBlocks;
         }
 
@@ -90,7 +92,7 @@ namespace QueryEngine
             var lastBlockSize = sumOfLastBlocks % this.FixedArraySize;
 
             // If it is lower than 50%. 
-            if (lastBlockSize < (this.FixedArraySize / 2))
+            if (lastBlockSize != 0 && lastBlockSize < (this.FixedArraySize / 2))
                 Array.Resize(ref lastBlock, lastBlockSize);
             return lastBlock;
         }

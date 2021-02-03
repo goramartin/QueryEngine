@@ -138,7 +138,7 @@ namespace QueryEngine
         {
             this.graph = graph;
             this.variableMap = new VariableMap();
-            this.qEhelper = new QueryExecutionHelper(threadCount, printer, formater, verticesPerThread, 3, fileName, "DFSParallelStreamed", "DFSSingleThreadStreamed", "SIMPLE", "twowayHSB", "abtreeHS");
+            this.qEhelper = new QueryExecutionHelper(threadCount, printer, formater, verticesPerThread, 5_000_000, fileName, "DFSParallelStreamed", "DFSSingleThreadStreamed", "SIMPLE", "twowayHSB", "abtreeHS");
 
             // Parse input query.
             var parsedClauses = Parser.Parse(tokens);
@@ -163,10 +163,6 @@ namespace QueryEngine
             
             SetSingleGroupFlags();
 
-            // Check if the query is aggregation and not a simple query.
-            if ((this.exprInfo.Aggregates.Count == 0 && this.qEhelper.IsSetSingleGroupGroupBy) || (!this.qEhelper.IsSetSingleGroupGroupBy && !parsedClauses.ContainsKey("groupby")))
-                throw new ArgumentException($"{this.GetType()}, no grouping was specified. The streamed version allows to compute only aggregations.");
-
             // ORDER BY
             if (parsedClauses.ContainsKey("orderby"))
             {
@@ -174,10 +170,13 @@ namespace QueryEngine
                 match.PassResultProcessor(orderByProc);
             } else
             {
+                // Check if the query is aggregation and not a simple query.
                 var groupByProc = GroupResultProcessor.Factory(exprInfo, qEhelper, variableMap.GetCount());
+                if ((this.exprInfo.Aggregates.Count == 0 && this.qEhelper.IsSetSingleGroupGroupBy) || (!this.qEhelper.IsSetSingleGroupGroupBy && !parsedClauses.ContainsKey("groupby")))
+                throw new ArgumentException($"{this.GetType()}, no grouping was specified. The streamed version allows to compute only aggregations.");
+                
                 match.PassResultProcessor(groupByProc);
             }
-
             query.AddToEnd(match);
         }
 

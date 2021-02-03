@@ -164,7 +164,7 @@ namespace QueryEngine
                 {
                     Console.WriteLine();
                     Query query = Query.Create(reader, graph, ThreadCount, Printer, Formater, VerticesPerThread, FileName);
-                     //Query query = Query.CreateStreamed(reader, graph, ThreadCount, Printer, Formater, VerticesPerThread, FileName);
+                    //Query query = Query.CreateStreamed(reader, graph, ThreadCount, Printer, Formater, VerticesPerThread, FileName);
                     Console.WriteLine();
                     query.Compute();
                    

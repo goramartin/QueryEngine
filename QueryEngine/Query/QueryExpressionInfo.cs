@@ -138,6 +138,8 @@ namespace QueryEngine
         {
             if (this.OrderByComparerExprs.Contains(expressionHolder))
                 throw new ArgumentException($"{this.GetType()}, order by clause cannot contain the same comparer expression multiple times.");
+            else if (expressionHolder.ContainsAggregate())
+                throw new ArgumentException($"{this.GetType()}, order by clause cannot contain aggregates.");
             else
             {
                 var pos = InsertExpr(expressionHolder);

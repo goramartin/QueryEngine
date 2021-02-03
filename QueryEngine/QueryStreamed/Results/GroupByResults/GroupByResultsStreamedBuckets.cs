@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 
-
 namespace QueryEngine
 {
     internal abstract class GroupByResultsStreamedBucket : GroupByResults, IEnumerable<AggregateBucketResult[]>

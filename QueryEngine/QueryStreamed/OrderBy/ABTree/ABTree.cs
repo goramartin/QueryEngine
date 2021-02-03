@@ -184,9 +184,13 @@ namespace QueryEngine
                     // Return all keys.
                     for (int i = 0; i < node.keys.Count; i++)
                         yield return node.keys[i];
-                    // Return to the parent.
-                    branchIndex = node.index;
-                    node = node.parent;
+
+                    if (node.parent == null) break;
+                    else {
+                        // Return to the parent.
+                        branchIndex = node.index;
+                        node = node.parent;
+                    }
                 }
                 else
                 // Internal Node -> must have children.

@@ -7,7 +7,6 @@ It is used during enumeration of results classes and as a argument to evaluation
 
 namespace QueryEngine
 {
-
     internal partial class TableResults
     {
         /// <summary>

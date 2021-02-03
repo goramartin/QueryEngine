@@ -36,7 +36,7 @@ namespace QueryEngine
         /// Creates a templated expression comparers based on a given type.
         /// </summary>
         /// <param name="expressionHolder"> Expression to be evaluated. </param>
-        /// <param name="ascending"> Whether to use ascending order or descending. </param>
+        /// <param name="isAscending"> Whether to use ascending order or descending. </param>
         /// <returns> Specialised comparer. </returns>
         public static ExpressionComparer Factory(ExpressionHolder expressionHolder, bool isAscending)
         {
@@ -117,6 +117,7 @@ namespace QueryEngine
             var ySuccess = this.expr.TryEvaluate(y, out T yValue);
             return this.Compare(xSuccess, ySuccess, xValue, yValue);
         }
+
         private int Compare(bool xSuccess, bool ySuccess, T xValue, T yValue)
         {
             int retValue = 0;
