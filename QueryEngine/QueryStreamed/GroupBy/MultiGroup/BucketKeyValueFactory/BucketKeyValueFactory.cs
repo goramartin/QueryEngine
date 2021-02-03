@@ -1,11 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QueryEngine
 {
+    /// <summary>
+    /// Class servers as a creator of buckets that are inserted into a dictionary during 
+    /// streamed version of the group by and the values are directly stored in the key/values, and not as row proxies.
+    /// The class creates an array of buckets where the first n buckets are used as keys in the dictionary while
+    /// the rest are used as values holders for the computed aggregate values.
+    /// </summary>
     internal class BucketsKeyValueFactory
     {
         public bool lastWasInserted = true;

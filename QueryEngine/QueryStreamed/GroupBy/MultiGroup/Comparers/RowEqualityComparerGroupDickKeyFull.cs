@@ -1,11 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace QueryEngine
 {
+    /// <summary>
+    /// A EqualityComparer that is used during half streamed group by.
+    /// The full key contains full row proxy and it is hash values.
+    /// The row proxies are comparer for the key equality.
+    /// </summary>
     class RowEqualityComparerGroupDickKeyFull : IEqualityComparer<GroupDictKeyFull>
     {
         public ExpressionEqualityComparer[] Comparers { get; }

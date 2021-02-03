@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QueryEngine
 {
     /// <summary>
     /// The matcher will instead of storing results into a table will pass the result
-    /// for further processing.
+    /// for further processing. Otherwise it works the same as the normal one.
     /// </summary>
     internal class DFSPatternMatcherStreamed : DFSPatternMatcherBase, ISingleThreadPatternMatcherStreamed
     {

@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
 
 namespace QueryEngine
 {
@@ -11,6 +7,9 @@ namespace QueryEngine
     /// Class representing a streamed group by if a clause group by is set.
     /// The computation does not store results of the matcher in any way, instead it stores only the 
     /// group keys and aggregate func. results in one entry in the dictionary using AggregateBucketResult[].
+    /// Note that the array contains directly the values and not row proxies.
+    /// The first n buckets are used as a key inside the dictionary, while the rest are used as value holders for the computed
+    /// aggregate function.
     /// </summary>
     internal class GlobalGroupStreamed : GroupResultProcessor
     {

@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QueryEngine
 {   
+
+    /// <summary>
+    /// It works the same as the normal MatchObject, except it allow to pass result processors to the matchers.
+    /// </summary>
     internal class MatchObjectStreamed : MatchObjectBase
     {
         private IPatternMatcherStreamed matcher;

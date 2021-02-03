@@ -1,14 +1,11 @@
-﻿using System.Collections.Generic;
-using System;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
 
 namespace QueryEngine
 {
     /// <summary>
     /// A base class for every group result processor.
-    /// When instantiating the class. The users input query must be parsed before running constructors of any child class.
+    /// When instantiating the class.
+    /// The users input query must be parsed before running constructors of any child class.
     /// </summary>
     internal abstract class GroupResultProcessor : ResultProcessor
     {

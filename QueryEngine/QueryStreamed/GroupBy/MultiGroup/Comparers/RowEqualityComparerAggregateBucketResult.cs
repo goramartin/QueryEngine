@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QueryEngine
 {
+    /// <summary>
+    /// The class serves as EqualityComparer that is used during streamed group by where the key values are 
+    /// stored directly in the buckets and not as row proxies.
+    /// The first n buckets are used as keys inside the dictionary, thus the first n values are compared for the key
+    /// equality by calling static methods on the specialised buckets.
+    /// </summary>
     internal class RowEqualityComparerAggregateBucketResult : IEqualityComparer<AggregateBucketResult[]>
     {
         /// <summary>

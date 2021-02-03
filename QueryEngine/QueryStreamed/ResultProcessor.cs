@@ -2,6 +2,11 @@
 
 namespace QueryEngine {
 
+    /// <summary>
+    /// The base class for every result processor. 
+    /// In the streamed version, instead of using QueryObjects as the execution chain. The result processors are
+    /// passed to the matchers of the MatchObject, this enables to process the found result immediately.
+    /// </summary>
     internal abstract class ResultProcessor
     {
         protected ResultProcessor next;

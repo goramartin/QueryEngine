@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace QueryEngine
+﻿namespace QueryEngine
 {
     /// <summary>
     /// Class representing a dictionary key in the streamed version of the grouping.
