@@ -1,25 +1,22 @@
 ﻿/*! \file 
-Includes definition of a vertex. The vertex is an element of a graph. Each vertex is stored in a vertex list in the graph.
+Includes definition of a vertex. 
+The vertex is an element of a graph. Each vertex is stored in a vertex list in the graph.
 Vertices are connected with edges. Each vertex knows the edges that are going outward and also inward.
-The edges are contained in lists (one list for outward and one list for inward edges) of edges in the database.
+The edges are contained in Lists (one list for outward and one list for inward edges) of edges.
 The vertices contain information about the starting and ending positions of edges in the structures containing the edges, so that
 the edges can be accessed quickly.
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QueryEngine
 {
     /// <summary>
     /// Vertex serves as a node in a graph.
-    /// Each vertex is stored in a vertex list in a graph.
-    /// To each vertex there are two corresponding lists of edges, one list includes outgoing edges,
+    /// Each vertex is stored in a vertex List in a graph.
+    /// To each vertex there are two corresponding Lists of edges, one List includes outgoing edges,
     /// and the other encompasses inwards edges.
-    /// If the vertex does now have any edges (in or out), then the corresponding positions (start and end) are set to -1.
+    /// If the vertex does not have any edges (in or out), then the corresponding positions (start and end) are set to -1.
     /// </summary>
     internal sealed class Vertex : Element
     {

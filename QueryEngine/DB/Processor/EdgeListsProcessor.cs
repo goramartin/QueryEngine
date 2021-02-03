@@ -15,9 +15,6 @@ States are singletons and flyweight since they do not contain any additional var
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QueryEngine
 {
@@ -212,7 +209,6 @@ namespace QueryEngine
             {
                 var proc = (EdgeListProcessor)processor;
 
-                
                 Vertex fromVertex = proc.FindVertex(param);
                 if (!fromVertex.HasOutEdges()) fromVertex.OutEdgesStartPosition = proc.outEdges.Count;
 

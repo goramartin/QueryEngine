@@ -1,28 +1,23 @@
 ﻿/*! \file
-  
-File includes definition of tables.
+The file includes definition of tables.
 Each graph element has a pointer to a type, that is to say, a table.
 Each table holds all the nodes of the same type.
-Table has got a list and two dictionaries.
-The list for property ids = property ids in the same order they were added.
-The dictionary of IDs, each entry is a representation of a graph element (element ID), on that entry lies the position of the element in table.
+Table has got a List and two Dictionaries.
+The List for property IDs = property IDs in the same order as they were added.
+The Dictionary of IDs, each entry is a representation of a graph element (element ID), on that entry lies the position of the element in table.
 On the same position we will find values of properties of the element in the property lists.
-The dictionary of properties is used for fast access to property via propID.
+The Dictionary of properties is used for fast access to property via propID.
   
 Properties are formed from an abstract type Property that is visible from within a table.
 Generic properties extend Property, and specialisations are created separately. 
 Properties are created with a help of an Activator class based on a passed name.
 Properties are access via property ids that were assigned to them during schema parsing.
-That means that when accessing properties, only ids are used, while graph class holds a
+That means that when accessing properties, only their IDs are used, while graph class holds a
 map of the ids associated with their string names. 
-  
-This file contains also static factory for creation of tables.
  */
 
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.IO;
 
 namespace QueryEngine
 {

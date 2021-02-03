@@ -1,21 +1,17 @@
 ﻿/*! \file
-This file includes definitions of specialised properties (e.i string, integer).
+This file includes definitions of specialised properties (e.i T = string, integer).
 Each speicalised property can parse its values itself from a string.
 Each property contains a list of typed values.
  */
 
 
-
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QueryEngine
 {
     /// <summary>
-    /// Represents typed property of a table.
+    /// Represents typed property of a Table class.
     /// We create specialisations based on the type of T.
     /// Its functions are not visible from a table.
     /// </summary>

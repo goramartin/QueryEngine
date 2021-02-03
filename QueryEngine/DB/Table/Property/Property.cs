@@ -1,26 +1,20 @@
 ﻿/*! \file
-  
 File includes definition of a base class for a property that is visible to the Table class.
 Properties are enclosed in the Table class.
 Each property contains the name of the property defined in the json input schema.
 
-Specialisations are generic and contain a list of values of the properties.
+Specialisations are generics and contain a List of values of the properties.
 The base non generic property must be used to create a list of properties in the table,
 because the types of properties are unknown before runtime.
  */
 
-
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QueryEngine
 {
     /// <summary>
-    /// Abstract property, holds only id of a property (name).
-    /// Its functions are visible from a table.
+    /// Abstract property, holds only ID of a property (name).
+    /// Its functions are visible to a table.
     /// </summary>
     internal abstract class Property
     {

@@ -1,5 +1,8 @@
 ﻿/*! \file
-This file includes definition of one query. 
+This file includes definition of one query and the streamed query version as well.
+It is the same class, only different constructors are used. 
+
+Normal Query:
 This could be considered as a facade because it includes classes that form more complicated 
 structures.
 Query is formed by query objects, those are match object, select object, order by ...
@@ -8,18 +11,29 @@ They also perform the duties with relation to their semantic meaning, such as, m
 select prints results to the output and orderby sorts the results.
 
 The query is given a graph to compute the query on, a reader that reads user input query, a query execution helper that provides neccessary information
-for the query object (for example the number of threads available).
+for the query objects (for example the number of threads to use).
 
 The query itself is constructed as follows.
 Firstly the user input is tokenized from the reader. Then parsed trees are created from the tokens.
-Parsed trees are passed to constructors of each query object.
+Parsed trees are passed to constructors of each query object and then visitors collect all the neccessary information.
 
-The query objects form an simple execution plan, where the objects that has to finish first are put at the end of the chains and vice versa.
+The query objects inside the Query class form a simple execution plan, where the objects that has to finish first are put at the end of the chains and vice versa.
 The user calls compute on the query and the chains calls recursively to the last object. When object finished, it passes arguments in 
 the out parameter and the computation continues.
 
 Some query clauses must be present every time. Those are the select and the match clause.
 Other clauses are purely optional. Those are group by and order by.
+
+Example: 
+Clauses Select, Match, Order by form a chain Select -> Order by -> Match. After the Match is finished, it passes its results to the Order by.
+
+Streamed Query:
+The only difference is that instead of chaining the objects that has to finish first to the end, they are the first one in the chains.
+The classes for this type of chaining are called ResultProcessors. Note that the SelectObject and MatchObject are the same as before.
+
+Thus, the chains is alwasy Select -> Match and now instead of chaining the OrderBy or GroupBy in between the Select and Match. The processors
+are chained in such a way, that the Matchers of the MatchObject store direct references to them. This enables to pass the brand new results of the 
+matcher for further processing immediatly upon its find.
  */
 
 using System;
@@ -51,6 +65,8 @@ namespace QueryEngine
 
         /// <summary>
         /// Builds a query from an input.
+        /// Cannot contain order by and group by simultaneously.
+        /// Called by static Create method.
         /// </summary>
         /// <param name="tokens"> An input query. </param>
         /// <param name="graph"> A graph to compute the query on. </param>
@@ -58,7 +74,7 @@ namespace QueryEngine
         /// <param name="printer"> A printer to use. </param>
         /// <param name="formater"> A formater to use by printer. </param>
         /// <param name="verticesPerThread"> A number of vertices distributed to threads during parallel computation of the query.</param>
-        /// <param name="fileName"> A file to store results into. </param>
+        /// <param name="fileName"> A file to store results into if set, otherwise null. </param>
         private Query(List<Token> tokens, Graph graph, int threadCount, string printer, string formater, int verticesPerThread, string fileName)
         {
             this.graph = graph;
@@ -68,7 +84,7 @@ namespace QueryEngine
             // Parse input query.
             var parsedClauses = Parser.Parse(tokens);
 
-            // Create execution chain. // 
+            // Create execution chain. 
             if (parsedClauses.ContainsKey("groupby") && parsedClauses.ContainsKey("orderby"))
                 throw new ArgumentException($"{this.GetType()}, the query cannot contain both order by and group by");
             QueryObject groupBy = null;
@@ -101,7 +117,7 @@ namespace QueryEngine
                 query.AddToEnd(orderBy);
             }
             
-            // If the single group by is set, add 
+            // If the single group by is set, add GroupBy object to the execution chain.
             if (this.qEhelper.IsSetSingleGroupGroupBy && !this.qEhelper.IsSetGroupBy)
                 groupBy = QueryObject.Factory(typeof(GroupByObject), null, qEhelper, null, null, exprInfo);
 
@@ -111,16 +127,17 @@ namespace QueryEngine
 
         /// <summary>
         /// Builds a streamed version of a query from an input.
+        /// Cannot contain order by and group by simultaneously.
         /// Called by static create method.
         /// </summary>
-        /// <param name="tokens"> An input query. </param>
-        /// <param name="graph"> A graph to compute the query on. </param>
-        /// <param name="threadCount"> Maximum number of threads available to use. </param>
+        /// <param name="tokens"> An input query.</param>
+        /// <param name="graph"> A graph to compute the query on.</param>
+        /// <param name="threadCount"> Maximum number of threads available to use.</param>
         /// <param name="printer"> A printer to use. </param>
         /// <param name="formater"> A formater to use by printer. </param>
         /// <param name="verticesPerThread"> A number of vertices distributed to threads during parallel computation of the query.</param>
-        /// <param name="fileName"> A file to store results into. </param>
-        /// <param name="isStreamed"> A flag to distinguish a normal construtor.</param>
+        /// <param name="fileName">  A file to store results into if set, otherwise null. </param>
+        /// <param name="isStreamed"> A flag to distinguish a normal construtor from streamed constructor.</param>
         private Query(List<Token> tokens, Graph graph, int threadCount, string printer, string formater, int verticesPerThread, string fileName, bool isStreamed)
         {
             this.graph = graph;
@@ -129,8 +146,6 @@ namespace QueryEngine
 
             // Parse input query.
             var parsedClauses = Parser.Parse(tokens);
-
-            // Create execution chain. // 
             if (parsedClauses.ContainsKey("orderby") && parsedClauses.ContainsKey("groupby"))
                 throw new ArgumentException($"{this.GetType()}, the streamed version of the query cannot contain group by and order by at the same time.");
 
@@ -138,7 +153,7 @@ namespace QueryEngine
             MatchObjectStreamed match = (MatchObjectStreamed)QueryObject.Factory
                  (typeof(MatchObjectStreamed), graph, qEhelper, variableMap, parsedClauses["match"], null);
 
-            // GROUP BY and obtain the aggregates and hashes -> the all necessary info is in the expr info 
+            // GROUP BY and obtain the aggregates and hashes -> the all necessary info is in the expressionInfo class. 
             if (parsedClauses.ContainsKey("groupby"))
             {
                 this.exprInfo = new QueryExpressionInfo(true);
@@ -182,8 +197,8 @@ namespace QueryEngine
 
         /// <summary>
         /// Sets flags to execution helper after the definition of group by and select.
-        /// The flag should be set to false, in case there is not set group by and the select clause
-        /// contains only count(*) in that case the results are not needed. Otherwise they are needed.
+        /// The flag should be set to false in case there is not set group by and the select clause
+        /// contains only count(*) because in that case the results are not needed. Otherwise they are needed.
         /// Note that this sets to false even though the order by is set.
         /// </summary>
         private void SetSingleGroupFlags()

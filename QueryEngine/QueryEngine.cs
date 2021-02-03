@@ -31,6 +31,8 @@ namespace QueryEngine
             string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
             Console.WriteLine("Elapsed: " + elapsedTime);
         }
+
+        #region ParseProgramArgs
         /// <summary>
         /// Parses argument that expects to be a thread count.
         /// </summary>
@@ -107,6 +109,8 @@ namespace QueryEngine
             else return null; 
         }
 
+        #endregion ParseProgramArgs
+       
         /// <summary>
         /// Awaits an user to input answer whether the user wants to input another query.
         /// </summary>
@@ -126,10 +130,10 @@ namespace QueryEngine
 
     /// <summary>
     /// Main algorith.
-    /// Infinite loop when user inputs queries which are subsequently computed and results are printed.
+    /// Infinite loop when user inputs queries which are subsequently computed and results are printed into the defined output.
     /// </summary>
     /// <param name="args"> Program arguments.</param>
-    /// <param name="reader"> Reader from which to read input. </param>
+    /// <param name="reader"> Reader from which to read input.</param>
     private static void Run(string[] args, TextReader reader)
         {
             if (args.Length < 3) throw new ArgumentException("Wrong number of program parameters.");
@@ -163,8 +167,6 @@ namespace QueryEngine
                 try
                 {
                     Console.WriteLine();
-
-
                     Query query = Query.Create(reader, graph, ThreadCount, Printer, Formater, VerticesPerThread, FileName);
                      //Query query = Query.CreateStreamed(reader, graph, ThreadCount, Printer, Formater, VerticesPerThread, FileName);
                     Console.WriteLine();

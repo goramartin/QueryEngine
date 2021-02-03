@@ -5,21 +5,18 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QueryEngine
 {
     /// <summary>
     /// Property factory.
     /// Class includes register of all the property types.
-    /// Enables to create instance of a property based on a string token.
+    /// Enables to create instances of properties based on a string token.
     /// </summary>
     internal static class PropertyFactory
     {
         /// <summary>
-        /// Register with valid value types.
+        /// Register with valid types.
         /// </summary>
         private readonly static Dictionary<string, Type> registry;
 
@@ -39,11 +36,10 @@ namespace QueryEngine
         {
             RegisterProperty("string", typeof(StringProperty));
             RegisterProperty("integer", typeof(IntProperty));
-
         }
 
         /// <summary>
-        /// Registers a property with a given token and bounds a given type to the string.
+        /// Registers a property with a given token and bounds a given type to it.
         /// </summary>
         /// <param name="token"> Property type. </param>
         /// <param name="type"> Type of property type. </param>
@@ -61,18 +57,16 @@ namespace QueryEngine
         /// <summary>
         /// Creates an instance of a property based on a given token.
         /// </summary>
-        /// <param name="token"> Property type </param>
-        /// <param name="name"> Type of a property type. </param>
-        /// <returns> Specialiased property on a given type. </returns>
+        /// <param name="token"> The property type </param>
+        /// <param name="name"> The type of a property type. </param>
+        /// <returns> The specialiased property for the given type. </returns>
         public static Property CreateProperty(string token, string name)
         {
             if (token == null || name == null)
                 throw new ArgumentException($"PropertyFactory, passed null name or null token.");
 
             if (registry.TryGetValue(token, out Type propType))
-            {
                 return (Property)Activator.CreateInstance(propType, name);
-            }
             else throw new ArgumentException($"PropertyFactory, failed to load type from registry. Type = {token}.");
 
         }
