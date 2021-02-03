@@ -8,12 +8,7 @@ The count function have multiple uses.
     value of x.PropName first and check if it is null or not.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace QueryEngine
 {

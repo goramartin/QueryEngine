@@ -1,10 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.SqlTypes;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QueryEngine
 {
@@ -115,6 +110,10 @@ namespace QueryEngine
             return this.Aggr.ToString();
         }
 
+        public override int GetHashCode()
+        {
+            throw new NotImplementedException($"{this.GetType()}, calling not impl. function.");
+        }
     }
 
     internal static class AggregateReferenceFactory 

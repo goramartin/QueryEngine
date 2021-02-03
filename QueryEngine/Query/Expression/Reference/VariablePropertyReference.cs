@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QueryEngine
 {
@@ -92,6 +88,10 @@ namespace QueryEngine
             }
         }
 
+        public override int GetHashCode()
+        {
+            throw new NotImplementedException($"{this.GetType()}, calling not impl. function.");
+        }
     }
     /// <summary>
     /// Factory for templated property reference.

@@ -5,12 +5,8 @@ Expression holder serves as a wrapper around expression tree.
 It adds api that helps evaluation the expression.
 */
 
-
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QueryEngine
 {
@@ -86,6 +82,11 @@ namespace QueryEngine
         {
             this.ExprPosition = exprPos;
             this.Expr.SetExprPosition(exprPos);
+        }
+
+        public override int GetHashCode()
+        {
+            throw new NotImplementedException($"{this.GetType()}, callin not impl. function.");
         }
     }
 }

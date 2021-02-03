@@ -3,13 +3,7 @@ This file contains definition of a min and max function.
 The min/max functions can be specialised on any type.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Threading;
-using System.Security.AccessControl;
 
 namespace QueryEngine
 {
@@ -118,7 +112,6 @@ namespace QueryEngine
             if (into == tmpList1.aggResults.Count) tmpList1.aggResults.Add(tmpList2.aggResults[from]);
             else if (Compare(tmpList1.aggResults[into], tmpList2.aggResults[from])) tmpList1.aggResults[into] = tmpList2.aggResults[from];
         }
-        
         
         public override void ApplyThreadSafe(in TableResults.RowProxy row, AggregateArrayResults array, int position)
         {

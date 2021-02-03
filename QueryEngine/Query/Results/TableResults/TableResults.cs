@@ -1,5 +1,4 @@
 ﻿/*! \file
-  
 This file includes a class that hold results from query matcher. 
   
 Each result consists of certain number of elements, those are variables defined in PGQL match section.
@@ -12,12 +11,8 @@ array is the number of columns. The specific row can be access with an index or 
 the RowProxy struct is returned, henceforward, it enables the user access row's columns.
  */
 
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QueryEngine
 {
@@ -50,9 +45,13 @@ namespace QueryEngine
     /// The class enables to store a temporary row, that can be accessed via the row proxy, however
     /// the temporary row can be used only if the table was created with the constructor without passed table.ws
     /// Note that the results are stored by columns, that is to say, returning one row must be done through proxy class (RowProxy in another file).
+    /// The table itself is implemented as a List of fixed sized arrays.
     /// </summary>
     internal partial class TableResults : ITableResults
     {
+        /// <summary>
+        /// [column][block][position in block]
+        /// </summary>
         private readonly List<Element[]>[] resTable;
         private int[] order;
 

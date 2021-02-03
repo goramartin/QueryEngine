@@ -4,10 +4,6 @@ The avg function can be specialised only on "number" type.
 The class computes avg using incremental approach.
 */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 
 namespace QueryEngine 

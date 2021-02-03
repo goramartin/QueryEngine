@@ -18,12 +18,6 @@ Notice that the aggregate function compute the values only if the evaluated expr
 is not null.
  */
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using System.Security.Policy;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QueryEngine
 {
@@ -192,7 +186,13 @@ namespace QueryEngine
         /// <param name="position"> A position of a value in the list.</param>
         public abstract void Merge(AggregateBucketResult bucket, AggregateListResults list, int position);
 
+
         #endregion InterCompatibility
+       
+        public override int GetHashCode()
+        {
+            throw new NotImplementedException($"{this.GetType()}, calling not impl. function.");
+        }
     }
 
     /// <summary>

@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QueryEngine 
 {
@@ -83,6 +79,11 @@ namespace QueryEngine
                 if (tmp.VariableIndex == this.VariableIndex) return true;
                 else return false;
             }
+        }
+
+        public override int GetHashCode()
+        {
+            throw new NotImplementedException($"{this.GetType()}, calling not impl. function.");
         }
     }
 

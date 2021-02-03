@@ -3,12 +3,7 @@ This file contains definition of a sum function.
 The sum function can be specialised only on "number" types.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace QueryEngine
 {

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-
-namespace QueryEngine 
+﻿namespace QueryEngine 
 {
     /// <summary>
     /// A function that will retreive results from the aggregate result storages.

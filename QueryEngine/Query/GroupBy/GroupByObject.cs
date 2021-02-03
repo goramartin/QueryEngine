@@ -1,5 +1,4 @@
 ﻿/*! \file
-
 This file contains definition of a group by object.
 A group by can be conducted multiple ways.
 Firstly, based on IsParallel flag in the execution helper.
@@ -20,9 +19,6 @@ out the query. No single expressions can be referrenced.
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QueryEngine
 {
@@ -74,7 +70,8 @@ namespace QueryEngine
             {
                 this.next.Compute(out results, out groupByResults);
                 this.next = null;
-                if (results == null) throw new ArgumentNullException($"{this.GetType()}, table results are set to null.");
+                if (results == null) 
+                    throw new ArgumentNullException($"{this.GetType()}, table results are set to null.");
 
                 // If there are no results, return empty storage.
                 if (results.NumberOfMatchedElements == 0)
@@ -86,7 +83,7 @@ namespace QueryEngine
                         grouper = new SingleGroupGrouper(aggs, null, this.helper);
                     else
                     {
-                        // Use reference single thread solutions because the result table cannot be split equaly among thread .
+                        // Use reference single thread solutions because the result table cannot be split equaly among threads.
                         // This also means that the result table is quite small.
                         if (results.NumberOfMatchedElements / helper.ThreadCount == 0)
                             grouper = Grouper.Factory("refL", aggs, this.hashes, this.helper);

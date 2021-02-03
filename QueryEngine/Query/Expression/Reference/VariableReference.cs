@@ -6,12 +6,7 @@ The references contain holder that includes information what part of a result th
 This file also includes a factory for references stated above.
  */
 
-
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QueryEngine
 {

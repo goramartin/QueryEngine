@@ -5,13 +5,6 @@ Then it implements an indexer to provide access to each column of the row.
 It is used during enumeration of results classes and as a argument to evaluation of expression.
 */
 
-using System;
-using System.CodeDom;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace QueryEngine
 {
 
