@@ -2,11 +2,8 @@
 This file includes definition of a mark down formater.
 Prints header and values into a markd down table format.
 */
-using System;
+
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
 
 namespace QueryEngine 

@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QueryEngine
 {
@@ -23,7 +20,7 @@ namespace QueryEngine
     /// 2. A reference to that aggregation is created which defines an expression which is then Added via AddExpression.
     ///    The check whether there are called simple expression and aggregation when no group by is defined is done always with the AddExpression.
     ///    
-    /// Class stores each expression into a list of expressions.
+    /// Class stores each expression into a List of expressions.
     /// When adding the group by hash expr, the hash expr is also an expression. Thus, it is added into lists of expressions and the list of hashes.
     /// Note that in order to make this class work properly, the group by object must be created first. Because this class assumes the 
     /// hash expressions are already inside before adding other expressions from other clauses.

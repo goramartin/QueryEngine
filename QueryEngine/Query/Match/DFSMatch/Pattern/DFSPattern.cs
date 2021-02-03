@@ -1,5 +1,4 @@
 ﻿/*! \file
-  
 This file includes definition of pattern used by a dfs match algorithm.
   
 Pattern itself is created from ParsedPattern nodes that visitor of match expression tree collects.
@@ -18,9 +17,6 @@ stored in the variable map. Hence, only elements from scope are copies into resu
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QueryEngine
 {

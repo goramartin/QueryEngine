@@ -4,13 +4,10 @@ Formater formats out put of a select expression.
 So far there are two formaters and those are simple and markdown formater.
  */
 
-
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.IO;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace QueryEngine
 {

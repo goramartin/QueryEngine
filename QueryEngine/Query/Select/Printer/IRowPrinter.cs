@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace QueryEngine
+﻿namespace QueryEngine
 {
+    /// <summary>
+    /// A base interface for printers. It defines the neccessary functions, that will be handle by the printer.
+    /// </summary>
     interface IRowPrinter
     {
         void PrintRow(in TableResults.RowProxy elements);

@@ -1,5 +1,4 @@
 ﻿/*! \file 
- 
 This file contains definitions of a row comparer and a expression comparer.
     
 Each row comparer contains a list of expression comparers.
@@ -10,18 +9,9 @@ Expression comparer is given two rows and computes expression value of the both 
 using templated compare methods. 
 
 Null values in descenging order appear as last elements.
- 
 */
 
-
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Security.Policy;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace QueryEngine 
 {
@@ -64,6 +54,7 @@ namespace QueryEngine
 
         /// <summary>
         /// The same method as above. It is copied since it is need for the HPCSharp library.
+        /// Because it doesnt allow to use the IComparer(T) interface.
         /// </summary>
         public override int Compare(TableResults.RowProxy x, TableResults.RowProxy y)
         {

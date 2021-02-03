@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Threading;
 
 namespace QueryEngine
 {
@@ -11,6 +7,9 @@ namespace QueryEngine
     /// Base class for expression value comparing.
     /// Each class contains an expression that will be evaluated with given rows.
     /// Then the values are compared with templated compare method.
+    /// The child classes can cache the left argument in the compare function.
+    /// It is because the same left argument is compared with multiple elements in a row, thus it can save a bit of computation.
+    /// However, this is only done in the single threaded enviroment.
     /// </summary>
     internal abstract class ExpressionComparer : IExpressionComparer
     {
@@ -33,7 +32,7 @@ namespace QueryEngine
         public abstract int Compare(in TableResults.RowProxy x, in TableResults.RowProxy y);
 
         /// <summary>
-        /// Expression comparer facotry.
+        /// Expression comparer factory.
         /// Creates a templated expression comparers based on a given type.
         /// </summary>
         /// <param name="expressionHolder"> Expression to be evaluated. </param>

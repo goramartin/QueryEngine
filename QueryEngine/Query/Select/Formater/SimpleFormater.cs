@@ -4,11 +4,7 @@ Simple formater formats output columns only with defined number od spaces.
 Header and values are separated only by a line of dashes.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
 
 namespace QueryEngine

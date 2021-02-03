@@ -1,15 +1,10 @@
 ﻿/*! \file
 This file contains definition of a execution helper.
 Execution helper's job is to help with execution of a specific clauses of a query computation.
+That means, it contains information that defines execution of the clauses. Such as a thread count is used
+to create appropriate number of Matcher inside MatchObject, or pick the correct implementatin of processing algorithm.
 Each query object adds interface to the helper that the object needs.
  */
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Policy;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QueryEngine
 {

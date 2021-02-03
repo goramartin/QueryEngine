@@ -1,5 +1,4 @@
-﻿
-/*! \file
+﻿/*! \file
 This file includes definition of a Printer.
 Printer is used by a select object to print results with appropriate format.
 Printer holds a formater and manages printing of results to output.
@@ -8,9 +7,6 @@ Printer holds a formater and manages printing of results to output.
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QueryEngine
 {
@@ -124,7 +120,6 @@ namespace QueryEngine
         }
 
         public abstract void Dispose();
-
     }
 
 

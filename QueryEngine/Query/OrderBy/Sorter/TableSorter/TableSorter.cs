@@ -1,17 +1,10 @@
 ﻿/*! \file 
- 
 This file includes definition of a simple sorter.
 Simple sorter is used in case when the group by is not used. In other words it sorts only rows
 from the matching algorithm using hpc sharp methods.
-    
  */
 
-
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QueryEngine
 {
@@ -41,6 +34,5 @@ namespace QueryEngine
             if (this.inParallel) HPCsharp.ParallelAlgorithm.SortMergePar(ls, comparer);
             else HPCsharp.Algorithm.SortMerge(ls, comparer);
         }
-
     }
 }

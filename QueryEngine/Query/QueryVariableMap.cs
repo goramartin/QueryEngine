@@ -1,15 +1,6 @@
-﻿/*! \file
-This file contains definition of variable map.
-Variable map stores information about variables defined in match expression.
- */
-
-
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QueryEngine
 {
@@ -22,7 +13,7 @@ namespace QueryEngine
     /// the x variable and the second column represents the z variable. So the indeces for the variables of x and z are
     /// 0 and 1, because when accessing x variable the 0 th column is used and vice versa.
     /// 
-    /// Note that this pattern is very simple and in case the patterns are connected and shuffled the indeces might not be 
+    /// Note that this pattern is very simple and in case the patterns are connected and shuffled, then the indeces might not be 
     /// visible to the user.
     /// Each variable is inserted only once despite possible multiple occurences of the same variable.
     /// </summary>
@@ -58,7 +49,6 @@ namespace QueryEngine
             if (this.variableMap.ContainsKey(varName))
                 throw new ArgumentException($"{this.GetType()} Variable is already in the Score. Name = {varName}.");
             else this.variableMap.Add(varName, Tuple.Create<int, Table>(position, table));
-
         }
 
         /// <summary>

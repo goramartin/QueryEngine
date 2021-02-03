@@ -15,12 +15,8 @@ The results are always printed in a form of a table. A header of the table is cr
 by calling ToString() method on the list of expressions.
  */
 
-
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QueryEngine
 {
@@ -35,6 +31,7 @@ namespace QueryEngine
         /// </summary>
         private readonly List<ExpressionToStringWrapper> rowFormat;
         private ISelectExecutionHelper helper;
+        
         /// <summary>
         /// Creates Select object.
         /// Parsing is done beforehand because first we need to parse match expression for variable definitions.

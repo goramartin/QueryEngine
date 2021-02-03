@@ -1,5 +1,4 @@
 ﻿/*! \file 
-  
 This file includes definitions of match classes that form pattern chains.
 Each class represents one graph element that can be matched during search algorithm.
 e.g. vertex and specific edge type.
@@ -10,10 +9,6 @@ This class is directly connected to the dfs pattern class.
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QueryEngine
 {

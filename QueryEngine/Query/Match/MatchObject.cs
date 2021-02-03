@@ -8,14 +8,9 @@ variable map of for the query.
 */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QueryEngine
 {
-
     /// <summary>
     /// Contains Matcher to match pattern in graph.
     /// Also contains pattern to match in main match algorithm  it checks th correctness of the pattern when creating it.

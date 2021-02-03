@@ -4,12 +4,8 @@ Matchers and patterns are saved inside a registry.
 Each matcher has a set of available patterns.
  */
 
-
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QueryEngine
 {

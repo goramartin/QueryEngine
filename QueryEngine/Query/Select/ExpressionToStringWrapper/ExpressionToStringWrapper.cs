@@ -4,11 +4,8 @@ These classes are used to obtain string representation of an expression value du
 There is a need to obtains string values from evaluated expressions. Because we cannot implicitly work with the 
 generic types, there must be a middle medium, which is this generic class.
 */
+
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QueryEngine
 {

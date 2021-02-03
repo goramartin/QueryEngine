@@ -14,9 +14,7 @@ For more info visit a file named MatchInternalFixedResults.cs.
  */
 
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.Threading;
 
 namespace QueryEngine
 {
