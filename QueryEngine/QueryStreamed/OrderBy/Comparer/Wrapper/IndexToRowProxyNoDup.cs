@@ -8,8 +8,8 @@ namespace QueryEngine
 {
     /// <summary>
     /// A wrapper class for a row proxy comparer. 
-    /// It is used inside ABTree. This comparer handles cases where the expression results
-    /// are completely same but the tree does not support the same keys inside.
+    /// It is used inside ABTree during HS order by. This comparer handles cases where the expression results
+    /// are completely the same but the tree does not support the same keys inside.
     /// Thus a index of the row is used as a unique identifier, since each row in the table exists only
     /// once.
     /// </summary>

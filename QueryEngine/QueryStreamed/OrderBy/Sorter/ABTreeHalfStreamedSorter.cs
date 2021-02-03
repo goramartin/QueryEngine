@@ -100,7 +100,7 @@ namespace QueryEngine
             public RowComparer comparer;
             public TableResults.RowProxy[] source;
             public TableResults.RowProxy[] destination;
-            public int[] startRanges;
+            public int[] startIndecesOfRanges;
             
             /// <summary>
             /// Chooses only jobs that had non zero results during search.
@@ -127,18 +127,17 @@ namespace QueryEngine
 
                 this.source = new TableResults.RowProxy[count];
                 this.destination = new TableResults.RowProxy[count];
-                this.startRanges = startRan.ToArray();
+                this.startIndecesOfRanges = startRan.ToArray();
                 this.jobsToMerge = mergeJobs.ToArray();
             }
 
             public int GetStartOfRange(int jobIndex)
             {
-                return this.startRanges[jobIndex];
+                return this.startIndecesOfRanges[jobIndex];
             }
             public int GetRange(int jobIndex)
             {
-                if (jobIndex + 1 == this.jobsToMerge.Length)
-                    return this.jobsToMerge.Length - this.GetStartOfRange(jobIndex);
+                if (jobIndex + 1 == this.jobsToMerge.Length) return this.jobsToMerge.Length - this.GetStartOfRange(jobIndex);
                 else return this.GetStartOfRange(jobIndex + 1) - this.GetStartOfRange(jobIndex);
             }
 
@@ -161,7 +160,7 @@ namespace QueryEngine
             {
                 var job = this.jobsToMerge[jobIndex];
 
-                int i = this.startRanges[jobIndex];
+                int i = this.startIndecesOfRanges[jobIndex];
                 foreach (var item in job.tree)
                 {
                     arr[i] = job.results[item];
