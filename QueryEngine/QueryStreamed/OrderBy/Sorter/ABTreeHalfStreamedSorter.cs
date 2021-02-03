@@ -101,7 +101,7 @@ namespace QueryEngine
             public TableResults.RowProxy[] source;
             public TableResults.RowProxy[] destination;
             public int[] startRanges;
-
+            
             /// <summary>
             /// Chooses only jobs that had non zero results during search.
             /// </summary>
@@ -175,106 +175,120 @@ namespace QueryEngine
 
             public TableResults.RowProxy[] Merge()
             {
-                var rootLevel = this.MergeResultsParallel(0, this.jobsToMerge.Length);
-                if (rootLevel.Item1) return this.source;
-                else return this.destination;
+                this.MergeResultsParallel(0, this.jobsToMerge.Length, true);
+                return this.destination; 
             }
 
             /// <summary>
+            /// Creates a binary tree. 
+            /// The leaf nodes represents copying results of the jobs into an array.
+            /// The internal nodes represent merging of the subarrays.
             /// The method is initially called only if the end - start >= 2.
             /// </summary>
-            /// <returns> 
-            /// True if the upper layer should merge from source to destination otherwise false.
-            /// The integer stands for the length of the merged sequence from the lower leyer.
-            /// </returns>
-            public Tuple<bool,int> MergeResultsParallel(int start, int end)
+            /// <param name="start"> An index of the job, that starts the subarray.</param>
+            /// <param name="end"> An index of the job, that ends the subarray.</param>
+            /// <param name="srcToDest"> On each tree level, it denotes whether, the subsarrays
+            /// should be merged into the destination or source array.
+            /// True for source to destination, the opposite otherwise. </param>
+            /// <returns> The length of the merged sequence from the lower leyer.</returns>
+            public int MergeResultsParallel(int start, int end, bool srcToDest)
             {
-                // Internal node
+                // Internal node.
                 if (end - start > 3)
                 {
-                    // compute middle of the range
+                    // Compute middle of the range.
                     int middle = ((end - start) / 2) + start;
                     if (middle % 2 == 1) middle--;
 
-                    Task<Tuple<bool, int>> task = Task<Tuple<bool, int>>.Factory.StartNew(() => MergeResultsParallel(middle, end));
+                    Task<int> task = Task<int>.Factory.StartNew(() => MergeResultsParallel(middle, end, !srcToDest));
                     // Current thread work.
-                    var leftRes = MergeResultsParallel(start, middle);
-                    var rightRes = task.Result;
-                    // Merge
+                    int leftLength = MergeResultsParallel(start, middle, !srcToDest);
+                    int rightLength = task.Result;
                 
-                    // Source to destination
-                    if (leftRes.Item1)
+                    // Merge from source to destination.
+                    if (srcToDest)
                     {
                         HPCsharp.ParallelAlgorithm.MergePar<TableResults.RowProxy>(
-                            this.source,                // Merge from 
-                            this.GetStartOfRange(start),  // Start of the left part
-                            leftRes.Item2,              // Right part length
-                            this.GetStartOfRange(middle), // Start of the right part
-                            rightRes.Item2,             // Right part length
-                            this.destination,           // Merge to
-                            this.GetStartOfRange(start),  // Index of the merged result
-                            this.comparer);             // Comparer
-                        return new Tuple<bool, int>(false, leftRes.Item2 + rightRes.Item2);
+                            this.source,                     // Merge from 
+                            this.GetStartOfRange(start),     // Start of the left part
+                            leftLength,                      // Right part length
+                            this.GetStartOfRange(middle),    // Start of the right part
+                            rightLength,                     // Right part length
+                            this.destination,                // Merge to
+                            this.GetStartOfRange(start),     // Index of the merged result
+                            this.comparer);                  // Comparer
                     }
-                    // Destination to source
+                    // Merge from destination to source.
                     else
                     {
                         HPCsharp.ParallelAlgorithm.MergePar<TableResults.RowProxy>(
-                            this.destination,           // Merge from 
-                            this.GetStartOfRange(start),  // Start of the left part
-                            leftRes.Item2,              // Left part length
-                            this.GetStartOfRange(middle), // Start of the Reft part
-                            rightRes.Item2,             // Reft part length
-                            this.source,                // Merge to
-                            this.GetStartOfRange(start),  // Index of the merged result
-                            this.comparer);             // Comparer
-                        return new Tuple<bool, int>(true, leftRes.Item2 + rightRes.Item2);
+                            this.destination,                 // Merge from 
+                            this.GetStartOfRange(start),      // Start of the left part
+                            leftLength,                       // Left part length
+                            this.GetStartOfRange(middle),     // Start of the Reft part
+                            rightLength,                      // Reft part length
+                            this.source,                      // Merge to
+                            this.GetStartOfRange(start),      // Index of the merged result
+                            this.comparer);                   // Comparer
                     }
+                    return leftLength + rightLength;
                 }
+                // Internal node one level before the leaf level.
+                // The length of the range is always either 2 or 3.
                 else
-                {   // The length of the range is always either 2 or 3
-                    if (end - start == 2)
+                { 
+                    var from = this.source;
+                    var to = this.destination;
+                    if (!srcToDest)
                     {
-                        Parallel.Invoke(() => CopySortJobResultsAndClearTree(start, this.source),
-                                        () => CopySortJobResultsAndClearTree(start+1, this.source));
-                        
-                        HPCsharp.ParallelAlgorithm.MergePar<TableResults.RowProxy>(
-                           this.source,                // Merge from 
-                           this.GetStartOfRange(start),  // Start of the left part
-                           this.GetRange(start),              // Right part length
-                           this.GetStartOfRange(start + 1), // Start of the right part
-                           this.GetRange(start + 1),             // Right part length
-                           this.destination,           // Merge to
-                           this.GetStartOfRange(start),  // Index of the merged result
-                           this.comparer);             // Comparer
-                        return new Tuple<bool, int>(false, this.GetRange(start) + this.GetRange(start + 1));
-                    } else
-                    {
-                        Parallel.Invoke(() => CopySortJobResultsAndClearTree(start, this.destination),
-                                        () => CopySortJobResultsAndClearTree(start + 1, this.destination),
-                                        () => CopySortJobResultsAndClearTree(start + 2, this.source));
+                        from = this.destination;
+                        to = this.source;
+                    } 
 
-                        // First merge  2 from destination to source.
+                    if (end - start == 2)
+                    {   // Copy the SortJob results into the "from" array.
+                        Parallel.Invoke(() => CopySortJobResultsAndClearTree(start, from),
+                                        () => CopySortJobResultsAndClearTree(start + 1, from));
+                        // Merge the two subarrays into the "to" array.
                         HPCsharp.ParallelAlgorithm.MergePar<TableResults.RowProxy>(
-                          this.destination,                      // Merge from 
+                           this.source,                         // Merge from 
+                           this.GetStartOfRange(start),         // Start of the left part
+                           this.GetRange(start),                // Right part length
+                           this.GetStartOfRange(start + 1),     // Start of the right part
+                           this.GetRange(start + 1),            // Right part length
+                           this.destination,                    // Merge to
+                           this.GetStartOfRange(start),         // Index of the merged result
+                           this.comparer);                      // Comparer
+                        return this.GetRange(start) + this.GetRange(start + 1);
+                    } else
+                    {   // This happens only if the start - end is equal to 3.
+                        // Copy the first two SortJob results into the "to" and the third one to "from".
+                        Parallel.Invoke(() => CopySortJobResultsAndClearTree(start, to),
+                                        () => CopySortJobResultsAndClearTree(start + 1, to),
+                                        () => CopySortJobResultsAndClearTree(start + 2, from));
+
+                        // First merge  the first two from "to" to "from".
+                        HPCsharp.ParallelAlgorithm.MergePar<TableResults.RowProxy>(
+                          to,                                    // Merge from 
                           this.GetStartOfRange(start),           // Start of the left part
                           this.GetRange(start),                  // Right part length
                           this.GetStartOfRange(start + 1),       // Start of the right part
                           this.GetRange(start + 1),              // Right part length
-                          this.source,                           // Merge to
+                          from,                                  // Merge to
                           this.GetStartOfRange(start),           // Index of the merged result
                           this.comparer);                        // Comparer
-                        // Then merge the result of the above 2 with the third one into the destination.
+                        // Then merge the result of the above two with the third one into the "to".
                         HPCsharp.ParallelAlgorithm.MergePar<TableResults.RowProxy>(
-                          this.source,                                      // Merge from 
+                          from,                                             // Merge from 
                           this.GetStartOfRange(start),                      // Start of the left part
                           this.GetRange(start) + this.GetRange(start + 1),  // Right part length
                           this.GetStartOfRange(start + 2),                  // Start of the right part
                           this.GetRange(start + 2),                         // Right part length
-                          this.destination,                                 // Merge to
+                          to,                                               // Merge to
                           this.GetStartOfRange(start),                      // Index of the merged result
                           this.comparer);                                   // Comparer
-                        return new Tuple<bool, int>(false, this.GetRange(start) + this.GetRange(start + 1) + this.GetRange(start + 2));
+                        // The merged result of the above three will now be in the "to" array.
+                        return this.GetRange(start) + this.GetRange(start + 1) + this.GetRange(start + 2);
                     }
                 }
             }
