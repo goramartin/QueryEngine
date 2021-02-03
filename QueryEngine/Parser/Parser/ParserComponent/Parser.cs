@@ -1,5 +1,4 @@
-﻿
-/*! \file
+﻿/*! \file
 This file contains definitions of a Parser.
 (Sometimes in comments there are used "o-" instead of "<-" because it destroys xml formatting)
   
@@ -41,8 +40,6 @@ VariablePropertyReference -> IDENTIFIER
 
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.IO;
 
 namespace QueryEngine
 {
@@ -133,18 +130,15 @@ namespace QueryEngine
         public class ParserException : Exception
         {
             public ParserException()
-            {
-            }
+            { }
 
             public ParserException(string message)
                 : base(message)
-            {
-            }
+            { }
 
             public ParserException(string message, Exception inner)
                 : base(message, inner)
-            {
-            }
+            { }
         }
 
 

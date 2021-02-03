@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace QueryEngine
 {
@@ -12,7 +8,6 @@ namespace QueryEngine
     internal static partial class Parser
     {
         #region ORDERBY
-
 
         /// <summary>
         /// Parses order by expression. 

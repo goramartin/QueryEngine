@@ -9,9 +9,7 @@ Properties are set to a table defined by a TYPE and ID is a unique identifier in
 Hence the ID is not direcly a property of the element.
 
 States of a processor are singletons and flyweight since they do not encompass any additional varibales.
-
  */
-
 
 using System;
 using System.Collections.Generic;

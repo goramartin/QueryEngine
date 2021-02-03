@@ -1,15 +1,13 @@
 ﻿/*! \file 
 File includes definition of graph.
 Graph contains three lists... inward edges, outgoing edges and vertices.
-The base class for nodes and edges is the Element class, each element in a graph has an ID and
-a table (type). Also each element knows its position in the list where it is included. 
+The base class for nodes and edges is the Element class, each element in a graph has an ID and a table (type).
+Also each element knows its position in the list where it is included. 
 Graph also contains a list of all labels from a data scheme input file to ensure a quick access to the label type.
  */
+
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QueryEngine
 {
@@ -25,7 +23,6 @@ namespace QueryEngine
 
         public EdgeListHolder() {this.outEdges = null; this.inEdges = null; }
     }
-
 
     /// <summary>
     /// Graph contains vertices, outgoing edges and inwards edges, also types of elements inside a graph.

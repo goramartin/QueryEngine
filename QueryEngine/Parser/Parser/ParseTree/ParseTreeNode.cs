@@ -1,17 +1,10 @@
 ﻿/*! \file
-  
 This file includes definitions of nodes used to create a parse tree of the query.
 Nodes are used by a Parser to create the parse tree.
 
 Each query clause has its root node. Such as select, match...
 Grammars are defined in Parser files.
  */
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QueryEngine { 
    

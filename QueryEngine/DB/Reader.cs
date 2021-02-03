@@ -1,17 +1,16 @@
 ﻿/*! \file 
 This file contains definition of file readers.
 These readers are used for loading a graph.
+
 There are two readers, one reader is used for parsing edges and vertices from a file.
 The second one is used for parsing a JSON schema for table definitions.
+
 The difference is that reader for the schema must not omit certain special characters.
  */
 
-
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.IO;
 
 namespace QueryEngine

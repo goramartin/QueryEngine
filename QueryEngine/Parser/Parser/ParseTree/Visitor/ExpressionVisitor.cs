@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QueryEngine
 {
@@ -11,6 +8,7 @@ namespace QueryEngine
     /// So far there are implemented only variable references and aggregation references.
     /// There can be only either the var or agg ref. that means that the Expr variable
     /// contains only variantions of these two classes.
+    /// Note that during parsing, the aggregation it self are created.
     /// </summary>
     internal sealed class ExpressionVisitor : IVisitor<ExpressionBase>
     {

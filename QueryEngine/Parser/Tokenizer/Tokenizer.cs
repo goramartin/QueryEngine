@@ -8,16 +8,12 @@ Tokenizer reads input by single character and stops when it reaches a character 
 user input. When it reads the character if firstly tries to find a token from the registry (a single
 character token) otherwise it expects a string that is either a token or an identifier (which is also a token).
 
-Notice that only inputted identifiers are considered case sensitive (e.g names of variables).
+Notice that only inputted identifiers are considered case sensitive (e.g. names of variables).
 */
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
-using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace QueryEngine
 {
@@ -39,6 +35,7 @@ namespace QueryEngine
 
         /// <summary>
         /// Generates stream from a string.
+        /// Be careful with the encoding.
         /// </summary>
         /// <param name="input"> An input string. </param>
         /// <returns> A stream containing inputed string. </returns>

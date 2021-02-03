@@ -1,16 +1,7 @@
 ﻿/*! \file 
- 
-    This file contains definition of a token.
-    Token is used during tokenisation of an input query.
- 
-     */
-
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+This file contains definition of a token.
+Token is used during tokenisation of an input query.
+*/
 
 namespace QueryEngine
 {

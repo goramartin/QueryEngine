@@ -1,16 +1,8 @@
-﻿
-/*! \file
+﻿/*! \file
   This file includes definitions of visitor used to collect data from created parsed trees. 
   Each query object has its own visitor.
   Visitor iterates over nodes defined in ParseTreeNodes.cs
  */
-
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QueryEngine
 {
