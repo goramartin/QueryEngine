@@ -76,6 +76,10 @@ namespace QueryEngine
         protected bool lastXSuccess = false;
         protected int lastXRow = -1;
         protected T lastXValue = default;
+
+        protected bool lastYSuccess = false;
+        protected int lastYRow = -1;
+        protected T lastYValue = default;
         ExpressionReturnValue<T> expr;
 
         public ExpressionComparer(ExpressionHolder expressionHolder, bool ascending) : base(expressionHolder, ascending)
@@ -108,8 +112,12 @@ namespace QueryEngine
                 this.lastXSuccess = this.expr.TryEvaluate(x, out this.lastXValue);
                 this.lastXRow = x.index;
             }
-            var ySuccess = this.expr.TryEvaluate(y, out T yValue);
-            return this.Compare(this.lastXSuccess, ySuccess, this.lastXValue, yValue);
+            if (y.index != this.lastYRow)
+            {
+                this.lastYSuccess = this.expr.TryEvaluate(y, out this.lastYValue);
+                this.lastYRow = y.index;
+            }
+            return this.Compare(this.lastXSuccess, this.lastYSuccess, this.lastXValue, this.lastYValue);
         }
         private int NonCachedCompare(in TableResults.RowProxy x, in TableResults.RowProxy y)
         {
