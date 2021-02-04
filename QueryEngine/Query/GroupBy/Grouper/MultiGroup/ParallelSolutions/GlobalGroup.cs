@@ -30,9 +30,9 @@ namespace QueryEngine
         /// Each thread receives a portion from the result table and tries to add/get
         /// the each row into the global dictionary and receives a group, subsequently computes aggregates for the group.
         /// </summary>
-        private GroupByResults ParallelGroupBy(RowEqualityComparerInt equalityComparer, ITableResults results)
+        private GroupByResults ParallelGroupBy(RowEqualityComparerInt equalityComparer, ITableResults resTable)
         {
-            var jobs = CreateJobs(equalityComparer, results);
+            var jobs = CreateJobs(equalityComparer, resTable);
             var tasks = new Task[this.ThreadCount - 1];
 
             for (int i = 0; i < tasks.Length; i++)
@@ -56,19 +56,19 @@ namespace QueryEngine
         /// Note that everything is shared. Nothing is a hard copy. The equalityComparer, the aggregates, results and the concurernt dictionary, semaphore, are shared
         /// among all threads. They hold no state.
         /// </summary>
-        private GroupByJob[] CreateJobs(RowEqualityComparerInt equalityComparer, ITableResults results)
+        private GroupByJob[] CreateJobs(RowEqualityComparerInt equalityComparer, ITableResults resTable)
         {
             GroupByJob[] jobs = new GroupByJob[this.ThreadCount];
             int current = 0;
-            int addition = results.NumberOfMatchedElements / this.ThreadCount;
+            int addition = resTable.NumberOfMatchedElements / this.ThreadCount;
             if (addition == 0)
                 throw new ArgumentException($"{this.GetType()}, a range for a thread cannot be 0.");
 
-            if (this.BucketStorage) return CreateJobsBuckets(jobs, equalityComparer, results, current, addition);
-            else return CreateJobsArrays(jobs, equalityComparer, results, current, addition);
+            if (this.BucketStorage) return CreateJobsBuckets(jobs, equalityComparer, resTable, current, addition);
+            else return CreateJobsArrays(jobs, equalityComparer, resTable, current, addition);
         }
 
-        private GroupByJob[] CreateJobsArrays(GroupByJob[] jobs, RowEqualityComparerInt equalityComparer, ITableResults results, int current, int addition)
+        private GroupByJob[] CreateJobsArrays(GroupByJob[] jobs, RowEqualityComparerInt equalityComparer, ITableResults resTable, int current, int addition)
         {
             var aggResults = AggregateArrayResults.CreateArrayResults(this.aggregates);
             var concurrentDictArrays = new ConcurrentDictionary<int, int>(equalityComparer);
@@ -78,22 +78,22 @@ namespace QueryEngine
 
             for (int i = 0; i < jobs.Length - 1; i++)
             {
-                jobs[i] = new GroupByJobArrays(concurrentDictArrays, this.aggregates, results, current, current + addition, aggResults, positionFactory, semaphore, jobs.Length);
+                jobs[i] = new GroupByJobArrays(concurrentDictArrays, this.aggregates, resTable, current, current + addition, aggResults, positionFactory, semaphore, jobs.Length);
                 current += addition;
             }
-            jobs[jobs.Length - 1] = new GroupByJobArrays(concurrentDictArrays, this.aggregates, results, current, results.NumberOfMatchedElements, aggResults, positionFactory, semaphore, jobs.Length);
+            jobs[jobs.Length - 1] = new GroupByJobArrays(concurrentDictArrays, this.aggregates, resTable, current, resTable.NumberOfMatchedElements, aggResults, positionFactory, semaphore, jobs.Length);
             return jobs;
         }
 
-        private GroupByJob[] CreateJobsBuckets(GroupByJob[] jobs, RowEqualityComparerInt equalityComparer, ITableResults results, int current, int addition)
+        private GroupByJob[] CreateJobsBuckets(GroupByJob[] jobs, RowEqualityComparerInt equalityComparer, ITableResults resTable, int current, int addition)
         {
             var concurrentDictBuckets = new ConcurrentDictionary<int, AggregateBucketResult[]>(equalityComparer);
             for (int i = 0; i < jobs.Length - 1; i++)
             {
-                jobs[i] = new GroupByJobBuckets(concurrentDictBuckets, this.aggregates, results, current, current + addition);
+                jobs[i] = new GroupByJobBuckets(concurrentDictBuckets, this.aggregates, resTable, current, current + addition);
                 current += addition;
             }
-            jobs[jobs.Length - 1] = new GroupByJobBuckets(concurrentDictBuckets, this.aggregates, results, current, results.NumberOfMatchedElements);
+            jobs[jobs.Length - 1] = new GroupByJobBuckets(concurrentDictBuckets, this.aggregates, resTable, current, resTable.NumberOfMatchedElements);
             return jobs;
         }
 
@@ -118,7 +118,7 @@ namespace QueryEngine
         {
             #region DECL
             var tmpJob = ((GroupByJobArrays)job);
-            var results = tmpJob.results;
+            var results = tmpJob.resTable;
             var groups = tmpJob.groups;
             var aggregates = tmpJob.aggregates;
             var semaphore = tmpJob.semaphore;
@@ -177,7 +177,7 @@ namespace QueryEngine
         {
             #region DECL
             var tmpJob = ((GroupByJobBuckets)job);
-            var results = tmpJob.results;
+            var results = tmpJob.resTable;
             var groups = tmpJob.groups;
             var aggregates = tmpJob.aggregates;
             AggregateBucketResult[] buckets = null;
@@ -204,13 +204,13 @@ namespace QueryEngine
         private abstract class GroupByJob
         {
             public Aggregate[] aggregates;
-            public ITableResults results;
+            public ITableResults resTable;
             public int start;
             public int end;
-            public GroupByJob(Aggregate[] aggregates, ITableResults results, int start, int end)
+            public GroupByJob(Aggregate[] aggregates, ITableResults resTable, int start, int end)
             {
                 this.aggregates = aggregates;
-                this.results = results;
+                this.resTable = resTable;
                 this.start = start;
                 this.end = end;
             }
@@ -220,10 +220,10 @@ namespace QueryEngine
         {
             public ConcurrentDictionary<int, AggregateBucketResult[]> groups;
 
-            public GroupByJobBuckets(ConcurrentDictionary<int, AggregateBucketResult[]> groups, Aggregate[] aggregates, ITableResults results, int start, int end) : base(aggregates, results, start, end)
+            public GroupByJobBuckets(ConcurrentDictionary<int, AggregateBucketResult[]> groups, Aggregate[] aggregates, ITableResults resTable, int start, int end) : base(aggregates, resTable, start, end)
             {
                 this.aggregates = aggregates;
-                this.results = results;
+                this.resTable = resTable;
                 this.start = start;
                 this.end = end;
                 this.groups = groups;
@@ -238,10 +238,10 @@ namespace QueryEngine
             public Semaphore semaphore;
             public int threadCount;
 
-            public GroupByJobArrays(ConcurrentDictionary<int, int> groups, Aggregate[] aggregates, ITableResults results, int start, int end, AggregateArrayResults[] aggResults, Func<int, int> positionFactory, Semaphore semaphore, int threadCount) : base(aggregates, results, start, end)
+            public GroupByJobArrays(ConcurrentDictionary<int, int> groups, Aggregate[] aggregates, ITableResults resTable, int start, int end, AggregateArrayResults[] aggResults, Func<int, int> positionFactory, Semaphore semaphore, int threadCount) : base(aggregates, resTable, start, end)
             {
                 this.aggregates = aggregates;
-                this.results = results;
+                this.resTable = resTable;
                 this.start = start;
                 this.end = end;
                 this.groups = groups;
@@ -259,12 +259,12 @@ namespace QueryEngine
             if (this.BucketStorage)
             {
                 var tmpJob = (GroupByJobBuckets)job;
-                return new ConDictIntBucket(tmpJob.groups, tmpJob.results);
+                return new ConDictIntBucket(tmpJob.groups, tmpJob.resTable);
             }
             else
             {
                 var tmpJob = (GroupByJobArrays)job;
-                return new GroupByResultsArray(tmpJob.groups, tmpJob.aggResults, tmpJob.results);
+                return new GroupByResultsArray(tmpJob.groups, tmpJob.aggResults, tmpJob.resTable);
             }
         }
     }

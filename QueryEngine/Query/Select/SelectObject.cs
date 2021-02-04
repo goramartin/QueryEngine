@@ -54,34 +54,34 @@ namespace QueryEngine
             this.rowFormat = visitor.GetResult();
         }
 
-        public override void Compute(out ITableResults results, out GroupByResults groupByResults)
+        public override void Compute(out ITableResults resTable, out GroupByResults groupByResults)
         {
             if (next != null)
             {
-                this.next.Compute(out results, out groupByResults);
+                this.next.Compute(out resTable, out groupByResults);
                 this.next = null;
-                this.Print(results, groupByResults);
+                this.Print(resTable, groupByResults);
             }
             else throw new NullReferenceException($"{this.GetType()}, next is set to null."); 
         }
 
-        private void Print(ITableResults results, GroupByResults groupByResults)
+        private void Print(ITableResults resTable, GroupByResults groupByResults)
         {
             var printer = Printer.Factory(this.helper.Printer, rowFormat, this.helper.Formater, this.helper.FileName);
             printer.PrintHeader();
             
-            if (!this.helper.IsSetGroupBy && !this.helper.IsSetSingleGroupGroupBy) Print(results, printer);
+            if (!this.helper.IsSetGroupBy && !this.helper.IsSetSingleGroupGroupBy) Print(resTable, printer);
             else Print(groupByResults, printer);
             
             printer.Dispose();
         }
 
-        private void Print(ITableResults results, Printer printer)
+        private void Print(ITableResults resTable, Printer printer)
         {
-            if (results == null) throw new ArgumentNullException($"{this.GetType()}, recieved table results as null.");
+            if (resTable == null) throw new ArgumentNullException($"{this.GetType()}, recieved table results as null.");
             else
             {
-                foreach (var item in results)
+                foreach (var item in resTable)
                     printer.PrintRow(item);
             }
         }

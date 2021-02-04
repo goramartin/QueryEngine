@@ -50,16 +50,16 @@ namespace QueryEngine
             this.comparers = comps.ToArray();
         }
 
-        public override void Compute(out ITableResults results, out GroupByResults groupByResults)
+        public override void Compute(out ITableResults resTable, out GroupByResults groupByResults)
         {
             if (this.next != null)
             {
-                this.next.Compute(out results, out groupByResults);
+                this.next.Compute(out resTable, out groupByResults);
                 this.next = null;
-                if (results == null || groupByResults != null) 
+                if (resTable == null || groupByResults != null) 
                     throw new ArgumentNullException($"{this.GetType()}, table results are set to null or groupByResults are not null.");
 
-                if (this.helper.IsStoringResult) this.Sort(results);
+                if (this.helper.IsStoringResult) this.Sort(resTable);
             }
             else throw new NullReferenceException($"{this.GetType()}, next is set to null.");
         }
@@ -67,12 +67,12 @@ namespace QueryEngine
         /// <summary>
         /// Sorts given data.
         /// </summary>
-        /// <param name="sortData"> Query reults to be sorted. </param>
+        /// <param name="resTable"> Query reults to be sorted. </param>
         /// <returns> Sorted data. </returns>
-        private ITableResults Sort(ITableResults sortData)
+        private ITableResults Sort(ITableResults resTable)
         {
              Console.WriteLine("Order start");
-             ISorter sorter = new MultiColumnTableSorter(sortData, this.comparers, this.helper.InParallel);
+             ISorter sorter = new MultiColumnTableSorter(resTable, this.comparers, this.helper.InParallel);
              var sortedResults =  sorter.Sort();
 
              TimeSpan ts = QueryEngine.stopwatch.Elapsed;

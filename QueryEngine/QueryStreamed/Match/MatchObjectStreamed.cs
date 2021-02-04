@@ -38,12 +38,12 @@ namespace QueryEngine
             this.matcher = (IPatternMatcherStreamed)MatchFactory.CreateMatcher(helper.ParallelPatternMatcherName, pattern, graph, executionHelper);
         }
 
-        public override void Compute(out ITableResults results, out GroupByResults groupByResults)
+        public override void Compute(out ITableResults resTable, out GroupByResults groupByResults)
         {
             if (next != null)
                 throw new Exception($"{this.GetType()}, there was an execution block after match block.");
             this.matcher.Search();
-            this.resultProcessor.RetrieveResults(out results, out groupByResults);
+            this.resultProcessor.RetrieveResults(out resTable, out groupByResults);
         }
 
         public void PassResultProcessor(ResultProcessor resultProcessor)

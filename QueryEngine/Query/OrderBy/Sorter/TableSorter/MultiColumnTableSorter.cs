@@ -22,14 +22,14 @@ namespace QueryEngine
         /// Constructs multi column sorter.
         /// It comprises of  row comparers wrapped inside an integer comparer.
         /// </summary>
-        /// <param name="sortData"> Result table to sort. </param>
+        /// <param name="resTable"> Result table to sort. </param>
         /// <param name="expressionComparers"> Comparers for comparing rows in the table. </param>
         /// <param name="inParallel"> Flag is the table should be sorted in parallel. </param>
-        public MultiColumnTableSorter(ITableResults sortData, ExpressionComparer[] expressionComparers, bool inParallel) : base(sortData, inParallel)
+        public MultiColumnTableSorter(ITableResults resTable, ExpressionComparer[] expressionComparers, bool inParallel) : base(resTable, inParallel)
         {
             var rowComparer = new RowComparer(expressionComparers);
             rowComparer.SetCaching(!inParallel);
-            this.indexComparer = new IndexToRowProxyComparer(rowComparer, sortData);
+            this.indexComparer = new IndexToRowProxyComparer(rowComparer, resTable);
         }
 
         /// <summary>
@@ -41,13 +41,13 @@ namespace QueryEngine
         /// <returns> Sorted result table. </returns>
         public override ITableResults Sort()
         {
-            int[] order = new int[this.dataTable.RowCount];
+            int[] order = new int[this.resTable.RowCount];
             order.AscPopulate(0);
 
             this.ArraySort(order, this.indexComparer);
 
-            this.dataTable.AddOrder(order);
-            return this.dataTable;
+            this.resTable.AddOrder(order);
+            return this.resTable;
         }
 
     }

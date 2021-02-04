@@ -12,17 +12,17 @@ namespace QueryEngine
     internal sealed class IndexToRowProxyComparerNoDup : Comparer<int>
     {
         private readonly RowComparer rowComparer;
-        private readonly ITableResults results;
+        private readonly ITableResults resTable;
 
-        public IndexToRowProxyComparerNoDup(RowComparer rowComparer, ITableResults results)
+        public IndexToRowProxyComparerNoDup(RowComparer rowComparer, ITableResults resTable)
         {
             this.rowComparer = rowComparer;
-            this.results = results;
+            this.resTable = resTable;
         }
 
         public override int Compare(int x, int y)
         {
-            var compRes = this.rowComparer.Compare(this.results[x], this.results[y]);
+            var compRes = this.rowComparer.Compare(this.resTable[x], this.resTable[y]);
             if (compRes == 0) return x.CompareTo(y);
             else return compRes;
         }

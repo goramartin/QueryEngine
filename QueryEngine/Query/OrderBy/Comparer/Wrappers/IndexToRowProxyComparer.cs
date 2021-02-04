@@ -11,17 +11,17 @@ namespace QueryEngine
     internal sealed class IndexToRowProxyComparer : Comparer<int>
     {
         private readonly RowComparer rowComparer;
-        private readonly ITableResults results;
+        private readonly ITableResults resTable;
 
-        public IndexToRowProxyComparer(RowComparer rowComparer, ITableResults results)
+        public IndexToRowProxyComparer(RowComparer rowComparer, ITableResults resTable)
         {
             this.rowComparer = rowComparer;
-            this.results = results;
+            this.resTable = resTable;
         }
 
         public override int Compare(int x, int y)
         {
-            return this.rowComparer.Compare(this.results[x], this.results[y]);  
+            return this.rowComparer.Compare(this.resTable[x], this.resTable[y]);  
         }
     }
 }

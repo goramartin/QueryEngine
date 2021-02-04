@@ -38,16 +38,16 @@ namespace QueryEngine
         /// Note that they are all copies, because they contain a private stete (hasher contains reference to the equality comparers to enable caching when computing the hash.
         /// The comparers and hashers build in the constructor of this class are given to the last job, just like the aggregates passed to the construtor.
         /// </summary>
-        private GroupByJob[] CreateJobs(ITableResults results, Aggregate[] aggs, ExpressionEqualityComparer[] equalityComparers, ExpressionHasher[] hashers)
+        private GroupByJob[] CreateJobs(ITableResults resTable, Aggregate[] aggs, ExpressionEqualityComparer[] equalityComparers, ExpressionHasher[] hashers)
         {
             GroupByJob[] jobs = new GroupByJob[this.ThreadCount];
             int current = 0;
-            int addition = results.NumberOfMatchedElements / this.ThreadCount;
+            int addition = resTable.NumberOfMatchedElements / this.ThreadCount;
             if (addition == 0)
                 throw new ArgumentException($"{this.GetType()}, a range for a thread cannot be 0.");
              
             // Set their internal cache.
-            var lastComp = new RowEqualityComparerGroupKey(results, equalityComparers);
+            var lastComp = new RowEqualityComparerGroupKey(resTable, equalityComparers);
             var lastHasher = new RowHasher(hashers);
             lastComp.SetCache(lastHasher);
             lastHasher.SetCache(lastComp.Comparers);
@@ -58,13 +58,13 @@ namespace QueryEngine
                 var tmpHash = lastHasher.Clone();
                 tmpComp.SetCache(tmpHash); 
                 tmpHash.SetCache(tmpComp.Comparers);
-                if (!this.BucketStorage) jobs[i] = new GroupByJobLists(tmpHash, tmpComp, aggs, results, current, current + addition);
-                else jobs[i] = new GroupByJobBuckets(tmpHash, tmpComp, aggs, results, current, current + addition);
+                if (!this.BucketStorage) jobs[i] = new GroupByJobLists(tmpHash, tmpComp, aggs, resTable, current, current + addition);
+                else jobs[i] = new GroupByJobBuckets(tmpHash, tmpComp, aggs, resTable, current, current + addition);
                 current += addition;
             }
            
-            if (!this.BucketStorage) jobs[jobs.Length - 1] = new GroupByJobLists(lastHasher, lastComp, aggs, results, current, results.NumberOfMatchedElements);
-            else jobs[jobs.Length - 1] = new GroupByJobBuckets(lastHasher, lastComp, aggs, results, current, results.NumberOfMatchedElements);
+            if (!this.BucketStorage) jobs[jobs.Length - 1] = new GroupByJobLists(lastHasher, lastComp, aggs, resTable, current, resTable.NumberOfMatchedElements);
+            else jobs[jobs.Length - 1] = new GroupByJobBuckets(lastHasher, lastComp, aggs, resTable, current, resTable.NumberOfMatchedElements);
             return jobs;
         }
 
@@ -175,7 +175,7 @@ namespace QueryEngine
             var tmpJob = ((GroupByJobBuckets)job);
             var hasher = tmpJob.hasher;
             var aggregates = tmpJob.aggregates;
-            var results = tmpJob.results;
+            var results = tmpJob.resTable;
             var groups = tmpJob.groups;
             AggregateBucketResult[] buckets;
             TableResults.RowProxy row;
@@ -244,7 +244,7 @@ namespace QueryEngine
             var tmpJob = ((GroupByJobLists)job);
             var hasher = tmpJob.hasher;
             var aggregates = tmpJob.aggregates;
-            var results = tmpJob.results;
+            var results = tmpJob.resTable;
             var groups = tmpJob.groups;
             var aggResults = tmpJob.aggResults;
             int position;
@@ -273,16 +273,16 @@ namespace QueryEngine
         {
             public RowHasher hasher;
             public Aggregate[] aggregates;
-            public ITableResults results;
+            public ITableResults resTable;
             public int start;
             public int end;
             public bool bucketStorage;
 
-            protected GroupByJob(RowHasher hasher, RowEqualityComparerGroupKey comparer, Aggregate[] aggregates, ITableResults results, int start, int end, bool bucketStorage)
+            protected GroupByJob(RowHasher hasher, RowEqualityComparerGroupKey comparer, Aggregate[] aggregates, ITableResults resTable, int start, int end, bool bucketStorage)
             {
                 this.hasher = hasher;
                 this.aggregates = aggregates;
-                this.results = results;
+                this.resTable = resTable;
                 this.start = start;
                 this.end = end;
                 this.bucketStorage = bucketStorage;
@@ -293,7 +293,7 @@ namespace QueryEngine
         {
             public Dictionary<GroupDictKey, AggregateBucketResult[]> groups;
 
-            public GroupByJobBuckets(RowHasher hasher, RowEqualityComparerGroupKey comparer, Aggregate[] aggregates, ITableResults results, int start, int end): base(hasher, comparer, aggregates, results, start, end, true)
+            public GroupByJobBuckets(RowHasher hasher, RowEqualityComparerGroupKey comparer, Aggregate[] aggregates, ITableResults resTable, int start, int end): base(hasher, comparer, aggregates, resTable, start, end, true)
             {
                 this.groups = new Dictionary<GroupDictKey, AggregateBucketResult[]>(comparer);
             }
@@ -303,7 +303,7 @@ namespace QueryEngine
         {
             public Dictionary<GroupDictKey, int> groups;
             public AggregateListResults[] aggResults;
-            public GroupByJobLists(RowHasher hasher, RowEqualityComparerGroupKey comparer, Aggregate[] aggregates, ITableResults results, int start, int end) : base(hasher, comparer, aggregates, results, start, end, false)
+            public GroupByJobLists(RowHasher hasher, RowEqualityComparerGroupKey comparer, Aggregate[] aggregates, ITableResults resTable, int start, int end) : base(hasher, comparer, aggregates, resTable, start, end, false)
             {
                 this.groups = new Dictionary<GroupDictKey, int>(comparer);
                 this.aggResults = AggregateListResults.CreateListResults(aggregates);
@@ -316,11 +316,11 @@ namespace QueryEngine
             if (this.BucketStorage)
             {
                 var tmp = (GroupByJobBuckets)job;
-                return new DictGroupDictKeyBucket(tmp.groups, tmp.results);
+                return new DictGroupDictKeyBucket(tmp.groups, tmp.resTable);
             } else
             {
                 var tmp = (GroupByJobLists)job;
-                return new GroupByResultsList(tmp.groups, tmp.aggResults, tmp.results);
+                return new GroupByResultsList(tmp.groups, tmp.aggResults, tmp.resTable);
             }
         }
 

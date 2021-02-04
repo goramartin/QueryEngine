@@ -162,7 +162,7 @@ namespace QueryEngine
         /// <summary>
         /// Tried to insert an expression to the general expr. list.
         /// </summary>
-        /// <param name="holder"> An expression to add to the general expr. list. </param>
+        /// <param name="expressionHolder"> An expression to add to the general expr. list. </param>
         /// <returns> If the main expression list contains the expression, return its position. Otherwise add the expression and return its new position. </returns>
         private int InsertExpr(ExpressionHolder expressionHolder)
         {

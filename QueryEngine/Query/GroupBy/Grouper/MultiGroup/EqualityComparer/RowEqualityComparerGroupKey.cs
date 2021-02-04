@@ -16,20 +16,20 @@ namespace QueryEngine
     /// </summary>
     internal class RowEqualityComparerGroupKey : IEqualityComparer<GroupDictKey>
     {
-        public ITableResults Results { get; set; }
+        public ITableResults ResTable { get; set; }
         public ExpressionEqualityComparer[] Comparers { get; }
         public bool CacheOn { get; private set; }
         
-        public RowEqualityComparerGroupKey(ITableResults results, ExpressionEqualityComparer[] comparers)
+        public RowEqualityComparerGroupKey(ITableResults resTable, ExpressionEqualityComparer[] comparers)
         {
-            this.Results = results;
+            this.ResTable = resTable;
             this.Comparers = comparers;
         }
 
         public bool Equals(GroupDictKey x, GroupDictKey y)
         {
             for (int i = 0; i < this.Comparers.Length; i++)
-                if (!this.Comparers[i].Equals(Results[x.position], Results[y.position])) return false;
+                if (!this.Comparers[i].Equals(this.ResTable[x.position], this.ResTable[y.position])) return false;
 
             return true;
         }
@@ -49,7 +49,7 @@ namespace QueryEngine
             for (int i = 0; i < this.Comparers.Length; i++)
                 tmp[i] = (this.Comparers[i].Clone());
 
-            return new RowEqualityComparerGroupKey(this.Results, tmp);
+            return new RowEqualityComparerGroupKey(this.ResTable, tmp);
         }
 
         public void SetCache(RowHasher hasher)

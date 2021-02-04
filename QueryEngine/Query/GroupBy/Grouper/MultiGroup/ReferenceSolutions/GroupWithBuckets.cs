@@ -21,7 +21,7 @@ namespace QueryEngine
             return this.SingleThreadGroupBy(new RowHasher(hashers), new RowEqualityComparerGroupKey(resTable, equalityComparers), resTable);
         }
 
-        private GroupByResults SingleThreadGroupBy(RowHasher hasher, RowEqualityComparerGroupKey equalityComparer, ITableResults results)
+        private GroupByResults SingleThreadGroupBy(RowHasher hasher, RowEqualityComparerGroupKey equalityComparer, ITableResults resTable)
         {
             #region DECL
             hasher.SetCache(equalityComparer.Comparers);
@@ -32,9 +32,9 @@ namespace QueryEngine
             GroupDictKey key;
             #endregion DECL
 
-            for (int i = 0; i < results.NumberOfMatchedElements; i++)
+            for (int i = 0; i < resTable.NumberOfMatchedElements; i++)
             {
-                row = results[i];
+                row = resTable[i];
                 key = new GroupDictKey(hasher.Hash(in row), i); // It's a struct.
                 if (!groups.TryGetValue(key, out buckets))
                 {
@@ -46,7 +46,7 @@ namespace QueryEngine
                     this.aggregates[j].Apply(in row, buckets[j]);
             }
 
-            return new DictGroupDictKeyBucket(groups, results);
+            return new DictGroupDictKeyBucket(groups, resTable);
         }
     }
 }

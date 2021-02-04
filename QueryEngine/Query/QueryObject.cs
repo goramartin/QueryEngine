@@ -16,7 +16,7 @@ namespace QueryEngine
         /// </summary>
         protected QueryObject next;
 
-        public abstract void Compute(out ITableResults results, out GroupByResults groupByResults);
+        public abstract void Compute(out ITableResults resTable, out GroupByResults groupByResults);
 
         /// <summary>
         /// Factory method.
@@ -35,7 +35,7 @@ namespace QueryEngine
             else if (type == typeof(OrderByObject)) return new OrderByObject(graph, map, helper, (OrderByNode)parseTree, exprInfo);
             else if (type == typeof(GroupByObject) && graph == null && map == null && parseTree == null) return new GroupByObject(helper, exprInfo);
             else if (type == typeof(GroupByObject)) return new GroupByObject(graph, map, helper, (GroupByNode)parseTree, exprInfo);
-            else throw new ArgumentException($"Query object factory, cannot create type {type.ToString()}.");
+            else throw new ArgumentException($"Query object factory, cannot create type {type}.");
         }
 
         public void AddToEnd(QueryObject queryObject)

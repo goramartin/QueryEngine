@@ -32,11 +32,11 @@ namespace QueryEngine
             firstComp.SetCache(firstHasher);
             firstHasher.SetCache(firstComp.Comparers);
 
-            this.groupJobs[0] = new GroupJob(this.aggregates, this.ColumnCount, firstComp, firstHasher, this.executionHelper.FixedArraySize);
+            this.groupJobs[0] = new GroupJob(this.aggregates, firstComp, firstHasher, new TableResults(this.ColumnCount, this.executionHelper.FixedArraySize));
             for (int i = 1; i < this.executionHelper.ThreadCount; i++)
             {
                 CloneHasherAndComparer(firstComp, firstHasher, out RowEqualityComparerGroupKey newComp, out RowHasher newHasher);
-                groupJobs[i] = new GroupJob(this.aggregates, this.ColumnCount, newComp, newHasher, this.executionHelper.FixedArraySize);
+                groupJobs[i] = new GroupJob(this.aggregates, newComp, newHasher, new TableResults(this.ColumnCount, this.executionHelper.FixedArraySize));
             }
 
             this.globalGroups = new ConcurrentDictionary<GroupDictKeyFull, AggregateBucketResult[]>(new RowEqualityComparerGroupDickKeyFull(firstComp.Clone().Comparers));
@@ -48,9 +48,9 @@ namespace QueryEngine
             if (result != null)
             {
                 // Create a temporary row.
-                job.results.temporaryRow = result;
-                int rowPosition = job.results.RowCount;
-                TableResults.RowProxy row = job.results[rowPosition];
+                job.resTable.temporaryRow = result;
+                int rowPosition = job.resTable.RowCount;
+                TableResults.RowProxy row = job.resTable[rowPosition];
                 var key = new GroupDictKey(job.hasher.Hash(in row), rowPosition); // It's a struct.
                 AggregateBucketResult[] buckets = null;
 
@@ -61,8 +61,8 @@ namespace QueryEngine
                     // Store the temporary row in the table. This causes copying of the row to the actual lists of table.
                     // While the position of the stored row proxy remains the same, next time someone tries to access it,
                     // it returns the elements from the actual table and not the temporary row.
-                    job.results.StoreTemporaryRow();
-                    job.results.temporaryRow = null;
+                    job.resTable.StoreTemporaryRow();
+                    job.resTable.temporaryRow = null;
                 }
                 for (int j = 0; j < this.aggregates.Length; j++)
                     this.aggregates[j].Apply(in row, buckets[j]);
@@ -85,7 +85,7 @@ namespace QueryEngine
         {
             foreach (var item in job.groups)
             {
-                var keyFull = new GroupDictKeyFull(item.Key.hash, job.results[item.Key.position]);
+                var keyFull = new GroupDictKeyFull(item.Key.hash, job.resTable[item.Key.position]);
                 var buckets = this.globalGroups.GetOrAdd(keyFull, item.Value);
                 if (item.Value != null && !object.ReferenceEquals(buckets, item.Value))
                 {
@@ -101,19 +101,19 @@ namespace QueryEngine
         {
             resTable = new TableResults();
             if (this.groupJobs.Length > 1) groupByResults = new ConDictGroupDictKeyFullBucket(this.globalGroups, resTable);
-            else groupByResults = new DictGroupDictKeyBucket(this.groupJobs[0].groups, this.groupJobs[0].results);
+            else groupByResults = new DictGroupDictKeyBucket(this.groupJobs[0].groups, this.groupJobs[0].resTable);
         }
 
         private class GroupJob
         {
-            public TableResults results;
+            public ITableResults resTable;
             public Dictionary<GroupDictKey, AggregateBucketResult[]> groups;
             public RowHasher hasher;
 
-            public GroupJob(Aggregate[] aggregates, int columnCount, RowEqualityComparerGroupKey comparer, RowHasher hasher, int arraySize)
+            public GroupJob(Aggregate[] aggregates, RowEqualityComparerGroupKey comparer, RowHasher hasher, ITableResults resTable)
             {
-                this.results = new TableResults(columnCount, arraySize);
-                comparer.Results = this.results;
+                this.resTable = resTable;
+                comparer.ResTable = this.resTable;
                 this.groups = new Dictionary<GroupDictKey, AggregateBucketResult[]>(comparer);
                 this.hasher = hasher;
             }

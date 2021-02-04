@@ -62,20 +62,20 @@ namespace QueryEngine
             this.helper = executionHelper;
         }
 
-        public override void Compute(out ITableResults results, out GroupByResults groupByResults)
+        public override void Compute(out ITableResults resTable, out GroupByResults groupByResults)
         {
             var aggs = this.aggregates.ToArray();
 
             if (next != null)
             {
-                this.next.Compute(out results, out groupByResults);
+                this.next.Compute(out resTable, out groupByResults);
                 this.next = null;
-                if (results == null) 
+                if (resTable == null) 
                     throw new ArgumentNullException($"{this.GetType()}, table results are set to null.");
 
                 // If there are no results, return empty storage.
-                if (results.NumberOfMatchedElements == 0)
-                    groupByResults = new GroupByResultsList(new Dictionary<GroupDictKey, int>(), null, results);
+                if (resTable.NumberOfMatchedElements == 0)
+                    groupByResults = new GroupByResultsList(new Dictionary<GroupDictKey, int>(), null, resTable);
                 else
                 {
                     Grouper grouper;
@@ -85,11 +85,11 @@ namespace QueryEngine
                     {
                         // Use reference single thread solutions because the result table cannot be split equaly among threads.
                         // This also means that the result table is quite small.
-                        if (results.NumberOfMatchedElements / helper.ThreadCount == 0)
+                        if (resTable.NumberOfMatchedElements / helper.ThreadCount == 0)
                             grouper = Grouper.Factory("refL", aggs, this.hashes, this.helper);
                         else grouper = Grouper.Factory(aggs, this.hashes, this.helper);
                     }
-                    groupByResults = grouper.Group(results);
+                    groupByResults = grouper.Group(resTable);
                 }
             }
             else throw new NullReferenceException($"{this.GetType()}, next is set to null.");

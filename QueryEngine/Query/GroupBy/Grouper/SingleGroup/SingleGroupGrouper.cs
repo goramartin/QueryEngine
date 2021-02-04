@@ -60,16 +60,16 @@ namespace QueryEngine
         /// That means, that the results when the function returns are stored in the passed parameter
         /// of aggregates.
         /// </summary>
-        /// <param name="results"> A result table from match clause. </param>
+        /// <param name="resTable"> A result table from match clause. </param>
         /// <param name="aggs"> Aggregation functions. </param>
         /// <param name="aggResults"> The results of the merge is stored in this isntances. </param>
-        private void ParallelGroupBy(ITableResults results, Aggregate[] aggs, AggregateBucketResult[] aggResults)
+        private void ParallelGroupBy(ITableResults resTable, Aggregate[] aggs, AggregateBucketResult[] aggResults)
         {
             // -1 because the main thread works as well
             Task[] tasks = new Task[this.ThreadCount - 1];
 
             // Create jobs
-            var jobs = CreateJobs(results, aggs, aggResults);
+            var jobs = CreateJobs(resTable, aggs, aggResults);
             for (int i = 0; i < tasks.Length; i++)
             {
                 var tmp = jobs[i];
@@ -90,35 +90,35 @@ namespace QueryEngine
         /// Note that the passed aggregates results, are the ones that the rest will be merged into.
         /// They are expected to be at the last index of the jobs => they must have at least one result assigned.
         /// </summary>
-        /// <param name="results"> A place to store aggregation results. </param>
+        /// <param name="resTable"> A place to store aggregation results. </param>
         /// <param name="aggs"> Aggregation functions. </param>
         /// <param name="aggResults"> The results of the merge is stored in this isntances. It is placed into the last job. </param>
-        private GroupByJob[] CreateJobs(ITableResults results, Aggregate[] aggs, AggregateBucketResult[] aggResults)
+        private GroupByJob[] CreateJobs(ITableResults resTable, Aggregate[] aggs, AggregateBucketResult[] aggResults)
         {
             GroupByJob[] jobs = new GroupByJob[this.ThreadCount];
             int current = 0;
             // No that this is never <= 0 because it was checked when picking the impl.
-            int addition = results.NumberOfMatchedElements / this.ThreadCount;
+            int addition = resTable.NumberOfMatchedElements / this.ThreadCount;
 
             for (int i = 0; i < jobs.Length - 1; i++)
             {
-                jobs[i] = new GroupByJob(aggs, AggregateBucketResult.CreateBucketResults(aggs), current, current + addition, results);
+                jobs[i] = new GroupByJob(aggs, AggregateBucketResult.CreateBucketResults(aggs), current, current + addition, resTable);
                 current += addition;
             }
 
-            jobs[jobs.Length - 1] = new GroupByJob(aggs, aggResults, current, results.NumberOfMatchedElements, results);
+            jobs[jobs.Length - 1] = new GroupByJob(aggs, aggResults, current, resTable.NumberOfMatchedElements, resTable);
             return jobs;
         }
 
         /// <summary>
         /// Computes single threadedly aggregates.
         /// </summary>
-        /// <param name="results"> A place to store aggregation results. </param>
+        /// <param name="resTable"> A place to store aggregation results. </param>
         /// <param name="aggs"> Aggregation functions. </param>
         /// <param name="aggResults"> The results of the merge is stored in this isntances. </param>
-        private void SingleThreadGroupBy(ITableResults results, Aggregate[] aggs, AggregateBucketResult[] aggResults)
+        private void SingleThreadGroupBy(ITableResults resTable, Aggregate[] aggs, AggregateBucketResult[] aggResults)
         {
-            var job = new GroupByJob(aggs, aggResults, 0, results.NumberOfMatchedElements, results);
+            var job = new GroupByJob(aggs, aggResults, 0, resTable.NumberOfMatchedElements, resTable);
             SingleThreadGroupByWork(job);
         }
 
@@ -132,7 +132,7 @@ namespace QueryEngine
         {
             #region DECL
             var groupByJob = (GroupByJob)job;
-            var results = groupByJob.results;
+            var results = groupByJob.resTable;
             var aggregates = groupByJob.aggregates;
             var aggResults = groupByJob.aggResults;
             #endregion DECL
@@ -169,23 +169,23 @@ namespace QueryEngine
             public AggregateBucketResult[] aggResults;
             public int start;
             public int end;
-            public ITableResults results;
+            public ITableResults resTable;
 
-            public GroupByJob(Aggregate[] aggs, AggregateBucketResult[] aggRes, int start, int end, ITableResults res)
+            public GroupByJob(Aggregate[] aggs, AggregateBucketResult[] aggRes, int start, int end, ITableResults resTable)
             {
                 this.aggregates = aggs;
                 this.start = start;
                 this.end = end;
-                this.results = res;
+                this.resTable = resTable;
                 this.aggResults = aggRes;
             }
         }
 
-        private GroupByResults CreateGroupByResults(AggregateBucketResult[] bucket, ITableResults results)
+        private GroupByResults CreateGroupByResults(AggregateBucketResult[] bucket, ITableResults resTable)
         {
             var tmpDict = new Dictionary<GroupDictKey, AggregateBucketResult[]>();
             tmpDict.Add(new GroupDictKey(0, 0), bucket);
-            return new DictGroupDictKeyBucket(tmpDict, results);
+            return new DictGroupDictKeyBucket(tmpDict, resTable);
         }
     }
 }

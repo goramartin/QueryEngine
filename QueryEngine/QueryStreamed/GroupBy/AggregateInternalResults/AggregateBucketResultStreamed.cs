@@ -37,7 +37,7 @@ namespace QueryEngine
     {
         /// <summary>
         /// A methods that is used only in the context of fully streamed version of group by.
-        /// The keys put in the concurrent dictionary will be of the base type AggregateBucketResult<T> since
+        /// The keys put in the concurrent dictionary will be of the base type AggregateBucketResult(T) since
         /// the keys and agg value will be stored in the same array to save a bit of memory.
         /// Note that the values must always be set beforehand.
         /// </summary>

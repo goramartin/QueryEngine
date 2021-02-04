@@ -14,13 +14,13 @@ namespace QueryEngine
     /// </summary>
     internal abstract class TableSorter : ISorter
     {
-        protected ITableResults dataTable;
+        protected ITableResults resTable;
         protected bool inParallel;
 
-        protected TableSorter(ITableResults sortData, bool inParallel)
+        protected TableSorter(ITableResults resTable, bool inParallel)
         {
             this.inParallel = inParallel;
-            this.dataTable = sortData;
+            this.resTable = resTable;
         }
 
         protected void ArraySort<T>(T[] arr, IComparer<T> comparer)

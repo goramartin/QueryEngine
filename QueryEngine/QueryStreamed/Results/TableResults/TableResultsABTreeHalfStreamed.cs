@@ -11,16 +11,16 @@ namespace QueryEngine
     /// <summary>
     /// A wrapper class of the results table with a tree index.
     /// </summary>
-    internal class TableResultsHalfStreamed : ITableResults
+    internal class TableResultsABTreeHalfStreamed : ITableResults
     {
-        ABTree<int> tree;
-        TableResults resultTable;
+        ABTree<int> indexTree;
+        ITableResults resultTable;
 
         public TableResults.RowProxy this[int rowIndex]
         {
             get {
                 int i = 0;
-                foreach (var row in tree)
+                foreach (var row in indexTree)
                 {
                     if (i == rowIndex) return this.resultTable[row];
                     i++;
@@ -29,11 +29,11 @@ namespace QueryEngine
             }
         }
 
-        public TableResultsHalfStreamed(ABTree<int> tree, TableResults resultTable)
+        public TableResultsABTreeHalfStreamed(ABTree<int> indexTree, ITableResults resultTable)
         {
-            if (tree == null || resultTable == null)
+            if (indexTree == null || resultTable == null)
                 throw new ArgumentNullException($"{this.GetType()}, trying to assign null to a constructor.");
-            this.tree = tree;
+            this.indexTree = indexTree;
             this.resultTable = resultTable;
         }
 
@@ -57,7 +57,7 @@ namespace QueryEngine
         public void StoreRow(Element[] row)
         {
             this.resultTable.StoreRow(row);
-            this.tree.Insert(this.resultTable.RowCount - 1);
+            this.indexTree.Insert(this.resultTable.RowCount - 1);
         }
 
         public void StoreTemporaryRow()
@@ -67,7 +67,7 @@ namespace QueryEngine
 
         public IEnumerator<TableResults.RowProxy> GetEnumerator()
         {
-            foreach (var rowIndex in this.tree)
+            foreach (var rowIndex in this.indexTree)
                 yield return this.resultTable[rowIndex];
         }
 

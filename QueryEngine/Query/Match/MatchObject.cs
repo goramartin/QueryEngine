@@ -54,13 +54,13 @@ namespace QueryEngine
             this.matcher = MatchFactory.CreateMatcher(helper.ParallelPatternMatcherName, pattern, graph, this.queryResults, executionHelper);
         }
 
-        public override void Compute(out ITableResults results, out GroupByResults groupByResults)
+        public override void Compute(out ITableResults resTable, out GroupByResults groupByResults)
         {
             if (next != null)
                 throw new Exception($"{this.GetType()}, there was an execution block after match block.");
             else
             {
-                results = this.Search();
+                resTable = this.Search();
                 groupByResults = null;
             }
         }
@@ -68,7 +68,6 @@ namespace QueryEngine
         /// <summary>
         /// Starts searching of the graph and returns results of the search.
         /// </summary>
-        /// <param name="executionHelper"> Match execution helper. </param>
         /// <returns> Results of search algorithm </returns>
         private ITableResults Search()
         {

@@ -184,7 +184,7 @@ namespace QueryEngine
         {
             if (!this.Finished)
             {
-                this.query.Compute(out ITableResults res, out GroupByResults groupByResults);
+                this.query.Compute(out ITableResults resTable, out GroupByResults groupByResults);
                 this.Finished = true;
             }
             else throw new Exception($"{this.GetType()}, trying to call a query that has already finished.");

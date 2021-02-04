@@ -56,8 +56,8 @@ namespace QueryEngine
             var job = this.sortJobs[matcherID];
             if (result != null)
             {
-                job.results.StoreRow(result);
-                job.tree.Insert(job.results.RowCount - 1);
+                job.resTable.StoreRow(result);
+                job.tree.Insert(job.resTable.RowCount - 1);
             } else
             {
                 if (this.sortJobs.Length > 1)
@@ -161,7 +161,7 @@ namespace QueryEngine
                 int i = this.startIndecesOfRanges[jobIndex];
                 foreach (var item in job.tree)
                 {
-                    arr[i] = job.results[item];
+                    arr[i] = job.resTable[item];
                     i++;
                 }
                 int treeCount = job.tree.Count;
@@ -302,20 +302,20 @@ namespace QueryEngine
         private class SortJob
         {
             public ABTree<int> tree;
-            public TableResults results;
+            public ITableResults resTable;
 
-            public SortJob(IComparer<int> comparer, TableResults results)
+            public SortJob(IComparer<int> comparer, ITableResults resTable)
             {
                 this.tree = new ABTree<int>(256, comparer);
-                this.results = results;
+                this.resTable = resTable;
             }
         }
 
-        private IndexToRowProxyComparerNoDup CreateComparer(RowComparer comparer, TableResults results) 
+        private IndexToRowProxyComparerNoDup CreateComparer(RowComparer comparer, ITableResults resTable) 
         {
             var newComparer = comparer.Clone();
             newComparer.SetCaching(true);
-            return new IndexToRowProxyComparerNoDup(newComparer, results);
+            return new IndexToRowProxyComparerNoDup(newComparer, resTable);
         }
         public override void RetrieveResults(out ITableResults resTable, out GroupByResults groupByResults)
         {

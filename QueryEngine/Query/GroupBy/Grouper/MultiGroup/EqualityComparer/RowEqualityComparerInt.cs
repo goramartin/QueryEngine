@@ -11,7 +11,7 @@ namespace QueryEngine
     /// </summary>
     internal class RowEqualityComparerInt : IEqualityComparer<int>
     {
-        public ITableResults Results { get; }
+        public ITableResults ResTable { get; }
         public ExpressionEqualityComparer[] Comparers { get; }
         public RowHasher Hasher { get; }
 
@@ -19,9 +19,9 @@ namespace QueryEngine
         /// Construst equality comparer.
         /// </summary>
         /// <param name="CacheOn"> The cache signals, whether the given hasher should cache results for the comparers.</param>
-        public RowEqualityComparerInt(ITableResults results, ExpressionEqualityComparer[] comparers, RowHasher hasher, bool CacheOn)
+        public RowEqualityComparerInt(ITableResults resTable, ExpressionEqualityComparer[] comparers, RowHasher hasher, bool CacheOn)
         {
-            this.Results = results;
+            this.ResTable = resTable;
             this.Comparers = comparers;
             this.Hasher = hasher;
 
@@ -41,14 +41,14 @@ namespace QueryEngine
         public bool Equals(int x, int y)
         {
             for (int i = 0; i < this.Comparers.Length; i++)
-                if (!this.Comparers[i].Equals(Results[x], Results[y])) return false;
+                if (!this.Comparers[i].Equals(this.ResTable[x], this.ResTable[y])) return false;
 
             return true;
         }
 
         public int GetHashCode(int obj)
         {
-            return this.Hasher.Hash(this.Results[obj]);
+            return this.Hasher.Hash(this.ResTable[obj]);
         }
 
         private void SetCache()

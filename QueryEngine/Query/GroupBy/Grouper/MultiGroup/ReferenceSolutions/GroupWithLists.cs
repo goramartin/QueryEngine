@@ -25,10 +25,10 @@ namespace QueryEngine
         /// Creates groups and computes aggregate values for each group.
         /// </summary>
         /// <param name="equalityComparer"> Equality comparer where T is group key and computes internaly the hash for each row from the result table.</param>
-        /// <param name="results"> A result table from the matching clause.</param>
+        /// <param name="resTable"> A result table from the matching clause.</param>
         /// <param name="hasher"> Hasher of rows. </param>
         /// <returns> Aggregate results. </returns>
-        private GroupByResults SingleThreadGroupBy(RowHasher hasher, RowEqualityComparerGroupKey equalityComparer, ITableResults results)
+        private GroupByResults SingleThreadGroupBy(RowHasher hasher, RowEqualityComparerGroupKey equalityComparer, ITableResults resTable)
         {
             #region DECL
             equalityComparer.SetCache(hasher);
@@ -41,9 +41,9 @@ namespace QueryEngine
             #endregion DECL
 
             // Create groups and compute aggregates for each individual group.
-            for (int i = 0; i < results.NumberOfMatchedElements; i++)
+            for (int i = 0; i < resTable.NumberOfMatchedElements; i++)
             {
-                row = results[i];
+                row = resTable[i];
                 key = new GroupDictKey(hasher.Hash(in row), i); // It's a struct.
                 if (!groups.TryGetValue(key, out position))
                 {
@@ -55,7 +55,7 @@ namespace QueryEngine
                     aggregates[j].Apply(in row, aggResults[j], position);
             }
 
-            return new GroupByResultsList(groups, aggResults, results);
+            return new GroupByResultsList(groups, aggResults, resTable);
         }
     }
 }
