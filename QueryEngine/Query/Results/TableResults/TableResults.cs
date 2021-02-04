@@ -11,7 +11,6 @@ array is the number of columns. The specific row can be access with an index or 
 the RowProxy struct is returned, henceforward, it enables the user access row's columns.
  */
 
-using System;
 using System.Collections;
 using System.Collections.Generic;
 

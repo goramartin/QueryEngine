@@ -129,6 +129,14 @@ namespace QueryEngine
                 this.jobsToMerge = mergeJobs.ToArray();
             }
 
+            public List<ITableResults> GetTablesOfSortedJobs()
+            {
+                List<ITableResults> resTables = new List<ITableResults>();
+                for (int i = 0; i < this.jobsToMerge.Length; i++)
+                    resTables.Add(this.jobsToMerge[i].resTable);
+                return resTables;
+            }
+
             public int GetStartOfRange(int jobIndex)
             {
                 return this.startIndecesOfRanges[jobIndex];
@@ -319,7 +327,9 @@ namespace QueryEngine
         }
         public override void RetrieveResults(out ITableResults resTable, out GroupByResults groupByResults)
         {
-            throw new NotImplementedException();
+            groupByResults = null;
+            if (this.sortJobs != null) resTable = new TableResultsABTreeHalfStreamed(this.sortJobs[0].tree, this.sortJobs[0].resTable);
+            else resTable = new TableResultsArrayHalfStreamed(this.mergeJob.GetTablesOfSortedJobs(), this.mergedResults);
         }
     }
 }

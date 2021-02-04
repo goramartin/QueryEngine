@@ -1,50 +1,65 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QueryEngine
 {
+
+    /// <summary>
+    /// A class is a wrapper class that contains multiple result tables and their global index.
+    /// </summary>
     internal class TableResultsArrayHalfStreamed : ITableResults
     {
-        List<ITableResults> resultTables;
-        TableResults.RowProxy[] order;
+        List<ITableResults> resTables;
+        TableResults.RowProxy[] indexArray;
 
-        public TableResults.RowProxy this[int rowIndex] => throw new NotImplementedException();
+        public TableResultsArrayHalfStreamed(List<ITableResults> resTables, TableResults.RowProxy[] indexArray)
+        {
+            if (resTables == null || indexArray == null || resTables.Count == 0) 
+                throw new ArgumentNullException($"{this.GetType()}, passed null arguments to the constructor.");
 
-        public int NumberOfMatchedElements => throw new NotImplementedException();
+            this.resTables = resTables;
+            this.indexArray = indexArray;
+        }
 
-        public int ColumnCount => throw new NotImplementedException();
+        public TableResults.RowProxy this[int rowIndex] => this.indexArray[rowIndex];
 
-        public int RowCount => throw new NotImplementedException();
+        public int NumberOfMatchedElements => this.indexArray.Length;
 
-        public Element[] temporaryRow { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public int ColumnCount => this.resTables[0].ColumnCount;
+
+        public int RowCount => this.indexArray.Length;
+
+        public Element[] temporaryRow { 
+            get => throw new ArgumentException($"{this.GetType()}, cannot get a temporary row in the sorted table."); 
+            set => throw new ArgumentException($"{this.GetType()}, cannot store a temporary row in the already sorted table.");
+        }
 
         public void AddOrder(int[] order)
         {
-            throw new NotImplementedException();
+            throw new ArgumentException($"{this.GetType()}, cannot pass an order to the already sorted table.");
         }
 
-        public IEnumerator<TableResults.RowProxy> GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
 
         public void StoreRow(Element[] row)
         {
-            throw new NotImplementedException();
+            throw new ArgumentException($"{this.GetType()}, cannot store a row in the already sorted table.");
         }
 
         public void StoreTemporaryRow()
         {
-            throw new NotImplementedException();
+            throw new ArgumentException($"{this.GetType()}, cannot store a temporary row in the already sorted table.");
+        }
+
+        public IEnumerator<TableResults.RowProxy> GetEnumerator()
+        {
+            for (int i = 0; i < this.indexArray.Length; i++)
+                yield return this.indexArray[i];
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            throw new NotImplementedException();
+            return this.GetEnumerator();
         }
     }
 }
