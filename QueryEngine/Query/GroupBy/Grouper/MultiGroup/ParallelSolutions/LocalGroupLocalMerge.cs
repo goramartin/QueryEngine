@@ -278,7 +278,7 @@ namespace QueryEngine
             public int end;
             public bool bucketStorage;
 
-            protected GroupByJob(RowHasher hasher, RowEqualityComparerGroupKey comparer, Aggregate[] aggregates, ITableResults resTable, int start, int end, bool bucketStorage)
+            protected GroupByJob(RowHasher hasher, Aggregate[] aggregates, ITableResults resTable, int start, int end, bool bucketStorage)
             {
                 this.hasher = hasher;
                 this.aggregates = aggregates;
@@ -293,7 +293,7 @@ namespace QueryEngine
         {
             public Dictionary<GroupDictKey, AggregateBucketResult[]> groups;
 
-            public GroupByJobBuckets(RowHasher hasher, RowEqualityComparerGroupKey comparer, Aggregate[] aggregates, ITableResults resTable, int start, int end): base(hasher, comparer, aggregates, resTable, start, end, true)
+            public GroupByJobBuckets(RowHasher hasher, RowEqualityComparerGroupKey comparer, Aggregate[] aggregates, ITableResults resTable, int start, int end): base(hasher, aggregates, resTable, start, end, true)
             {
                 this.groups = new Dictionary<GroupDictKey, AggregateBucketResult[]>(comparer);
             }
@@ -303,7 +303,7 @@ namespace QueryEngine
         {
             public Dictionary<GroupDictKey, int> groups;
             public AggregateListResults[] aggResults;
-            public GroupByJobLists(RowHasher hasher, RowEqualityComparerGroupKey comparer, Aggregate[] aggregates, ITableResults resTable, int start, int end) : base(hasher, comparer, aggregates, resTable, start, end, false)
+            public GroupByJobLists(RowHasher hasher, RowEqualityComparerGroupKey comparer, Aggregate[] aggregates, ITableResults resTable, int start, int end) : base(hasher, aggregates, resTable, start, end, false)
             {
                 this.groups = new Dictionary<GroupDictKey, int>(comparer);
                 this.aggResults = AggregateListResults.CreateListResults(aggregates);

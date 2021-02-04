@@ -215,7 +215,7 @@ namespace QueryEngine
             public int end;
             public ConcurrentDictionary<GroupDictKey, AggregateBucketResult[]> globalGroups;
 
-            public GroupByJob(RowHasher hasher, RowEqualityComparerGroupKey comparer, Aggregate[] aggregates, ITableResults resTable, int start, int end, ConcurrentDictionary<GroupDictKey, AggregateBucketResult[]> globalGroups)
+            public GroupByJob(RowHasher hasher, Aggregate[] aggregates, ITableResults resTable, int start, int end, ConcurrentDictionary<GroupDictKey, AggregateBucketResult[]> globalGroups)
             {
                 this.hasher = hasher;
                 this.aggregates = aggregates;
@@ -230,7 +230,7 @@ namespace QueryEngine
         {
             public Dictionary<GroupDictKey, AggregateBucketResult[]> groups;
 
-            public GroupByJobBuckets(RowHasher hasher, RowEqualityComparerGroupKey comparer, Aggregate[] aggregates, ITableResults resTable, int start, int end, ConcurrentDictionary<GroupDictKey, AggregateBucketResult[]> globalGroups): base(hasher, comparer, aggregates, resTable, start, end, globalGroups)
+            public GroupByJobBuckets(RowHasher hasher, RowEqualityComparerGroupKey comparer, Aggregate[] aggregates, ITableResults resTable, int start, int end, ConcurrentDictionary<GroupDictKey, AggregateBucketResult[]> globalGroups): base(hasher, aggregates, resTable, start, end, globalGroups)
             {
                 this.groups = new Dictionary<GroupDictKey, AggregateBucketResult[]>((IEqualityComparer<GroupDictKey>)comparer);
             }
@@ -241,7 +241,7 @@ namespace QueryEngine
             public Dictionary<GroupDictKey, int> groups;
             public AggregateListResults[] aggResults;
 
-            public GroupByJobMixListsBuckets(RowHasher hasher, RowEqualityComparerGroupKey comparer, Aggregate[] aggregates, ITableResults resTable, int start, int end, ConcurrentDictionary<GroupDictKey, AggregateBucketResult[]> globalGroups) : base(hasher, comparer, aggregates, resTable, start, end, globalGroups)
+            public GroupByJobMixListsBuckets(RowHasher hasher, RowEqualityComparerGroupKey comparer, Aggregate[] aggregates, ITableResults resTable, int start, int end, ConcurrentDictionary<GroupDictKey, AggregateBucketResult[]> globalGroups) : base(hasher, aggregates, resTable, start, end, globalGroups)
             {
                 this.groups = new Dictionary<GroupDictKey, int>((IEqualityComparer<GroupDictKey>)comparer);
                 this.aggResults = AggregateListResults.CreateListResults(aggregates);

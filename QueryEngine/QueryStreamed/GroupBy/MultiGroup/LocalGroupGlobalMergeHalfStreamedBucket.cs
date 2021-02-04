@@ -32,11 +32,11 @@ namespace QueryEngine
             firstComp.SetCache(firstHasher);
             firstHasher.SetCache(firstComp.Comparers);
 
-            this.groupJobs[0] = new GroupJob(this.aggregates, firstComp, firstHasher, new TableResults(this.ColumnCount, this.executionHelper.FixedArraySize));
+            this.groupJobs[0] = new GroupJob(firstComp, firstHasher, new TableResults(this.ColumnCount, this.executionHelper.FixedArraySize));
             for (int i = 1; i < this.executionHelper.ThreadCount; i++)
             {
                 CloneHasherAndComparer(firstComp, firstHasher, out RowEqualityComparerGroupKey newComp, out RowHasher newHasher);
-                groupJobs[i] = new GroupJob(this.aggregates, newComp, newHasher, new TableResults(this.ColumnCount, this.executionHelper.FixedArraySize));
+                groupJobs[i] = new GroupJob(newComp, newHasher, new TableResults(this.ColumnCount, this.executionHelper.FixedArraySize));
             }
 
             this.globalGroups = new ConcurrentDictionary<GroupDictKeyFull, AggregateBucketResult[]>(new RowEqualityComparerGroupDickKeyFull(firstComp.Clone().Comparers));
@@ -110,7 +110,7 @@ namespace QueryEngine
             public Dictionary<GroupDictKey, AggregateBucketResult[]> groups;
             public RowHasher hasher;
 
-            public GroupJob(Aggregate[] aggregates, RowEqualityComparerGroupKey comparer, RowHasher hasher, ITableResults resTable)
+            public GroupJob(RowEqualityComparerGroupKey comparer, RowHasher hasher, ITableResults resTable)
             {
                 this.resTable = resTable;
                 comparer.ResTable = this.resTable;
