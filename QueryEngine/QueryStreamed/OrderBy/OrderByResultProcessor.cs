@@ -34,7 +34,7 @@ namespace QueryEngine
         /// </summary>
         public static ResultProcessor Factory(Graph graph, VariableMap variableMap, IOrderByExecutionHelper executionHelper, OrderByNode orderByNode, QueryExpressionInfo exprInfo, int columnCount)
         {
-            if (executionHelper.SorterAlias == "abtreeHS") return null;
+            if (executionHelper.SorterAlias == "abtreeHS") return new ABTreeHalfStreamedSorter(graph, variableMap, executionHelper, orderByNode, exprInfo, columnCount);
             else if (executionHelper.SorterAlias == "abtreeS") return null;
             else throw new ArgumentException($"Order by result processor, trying to create an unknown sorter.");
         }

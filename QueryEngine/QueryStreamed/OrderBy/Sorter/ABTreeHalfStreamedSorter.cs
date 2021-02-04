@@ -135,7 +135,7 @@ namespace QueryEngine
             }
             public int GetRange(int jobIndex)
             {
-                if (jobIndex + 1 == this.jobsToMerge.Length) return this.jobsToMerge.Length - this.GetStartOfRange(jobIndex);
+                if (jobIndex + 1 == this.jobsToMerge.Length) return this.source.Length - this.GetStartOfRange(jobIndex);
                 else return this.GetStartOfRange(jobIndex + 1) - this.GetStartOfRange(jobIndex);
             }
 
@@ -152,8 +152,8 @@ namespace QueryEngine
             /// After copying the tree can be removed.
             /// </summary>
             /// <param name="jobIndex"> Results to copy. </param>
-            /// <param name="startIndex"> An index where to start inserting elements to the source array. </param>
-            /// <returns> The number of elements copied. </returns>
+            /// <param name="arr"> Array where to copy the elements. </param>
+            /// <returns> A number of copied elements. </returns>
             private int CopySortJobResultsAndClearTree(int jobIndex, TableResults.RowProxy[] arr)
             {
                 var job = this.jobsToMerge[jobIndex];
@@ -197,10 +197,11 @@ namespace QueryEngine
                     int middle = ((end - start) / 2) + start;
                     if (middle % 2 == 1) middle--;
 
-                    Task<int> task = Task<int>.Factory.StartNew(() => MergeResultsParallel(middle, end, !srcToDest));
+                    //Task<int> task = Task<int>.Factory.StartNew(() => MergeResultsParallel(middle, end, !srcToDest));
+                    int rightLength = MergeResultsParallel(middle, end, !srcToDest);
                     // Current thread work.
                     int leftLength = MergeResultsParallel(start, middle, !srcToDest);
-                    int rightLength = task.Result;
+                    //int rightLength = task.Result;
                 
                     // Merge from source to destination.
                     if (srcToDest)
@@ -208,7 +209,7 @@ namespace QueryEngine
                         HPCsharp.ParallelAlgorithm.MergePar<TableResults.RowProxy>(
                             this.source,                     // Merge from 
                             this.GetStartOfRange(start),     // Start of the left part
-                            leftLength,                      // Right part length
+                            leftLength,                      // Left part length
                             this.GetStartOfRange(middle),    // Start of the right part
                             rightLength,                     // Right part length
                             this.destination,                // Merge to
@@ -228,6 +229,7 @@ namespace QueryEngine
                             this.GetStartOfRange(start),      // Index of the merged result
                             this.comparer);                   // Comparer
                     }
+                    
                     return leftLength + rightLength;
                 }
                 // Internal node one level before the leaf level.
@@ -240,7 +242,7 @@ namespace QueryEngine
                     {
                         from = this.destination;
                         to = this.source;
-                    } 
+                    }
 
                     if (end - start == 2)
                     {   // Copy the SortJob results into the "from" array.
@@ -248,17 +250,22 @@ namespace QueryEngine
                                         () => CopySortJobResultsAndClearTree(start + 1, from));
                         // Merge the two subarrays into the "to" array.
                         HPCsharp.ParallelAlgorithm.MergePar<TableResults.RowProxy>(
-                           this.source,                         // Merge from 
-                           this.GetStartOfRange(start),         // Start of the left part
-                           this.GetRange(start),                // Right part length
-                           this.GetStartOfRange(start + 1),     // Start of the right part
-                           this.GetRange(start + 1),            // Right part length
-                           this.destination,                    // Merge to
-                           this.GetStartOfRange(start),         // Index of the merged result
-                           this.comparer);                      // Comparer
+                           from,                              // Merge from  
+                           this.GetStartOfRange(start),       // Start of the left part 
+                           this.GetRange(start),              // Left part length 
+                           this.GetStartOfRange(start + 1),   // Start of the right part 
+                           this.GetRange(start + 1),          // Right part length 
+                           to,                                // Merge to 
+                           this.GetStartOfRange(start),       // Index of the merged result 
+                           this.comparer);                    // Comparer 
                         return this.GetRange(start) + this.GetRange(start + 1);
-                    } else
-                    {   // This happens only if the start - end is equal to 3.
+                    }
+                    else if (end - start == 3) 
+                    {
+                        // It needs to leave the function with all the elements in the "to" array.
+                        // To do that it firstly copies the first 2 into the "to" array and the third one to the "from"
+                        // Now it will merge the 2 from "to" into "from" and lastly merge the merged result of the 2 with the third one from "from" to "to".
+
                         // Copy the first two SortJob results into the "to" and the third one to "from".
                         Parallel.Invoke(() => CopySortJobResultsAndClearTree(start, to),
                                         () => CopySortJobResultsAndClearTree(start + 1, to),
@@ -268,7 +275,7 @@ namespace QueryEngine
                         HPCsharp.ParallelAlgorithm.MergePar<TableResults.RowProxy>(
                           to,                                    // Merge from 
                           this.GetStartOfRange(start),           // Start of the left part
-                          this.GetRange(start),                  // Right part length
+                          this.GetRange(start),                  // Left part length
                           this.GetStartOfRange(start + 1),       // Start of the right part
                           this.GetRange(start + 1),              // Right part length
                           from,                                  // Merge to
@@ -278,7 +285,7 @@ namespace QueryEngine
                         HPCsharp.ParallelAlgorithm.MergePar<TableResults.RowProxy>(
                           from,                                             // Merge from 
                           this.GetStartOfRange(start),                      // Start of the left part
-                          this.GetRange(start) + this.GetRange(start + 1),  // Right part length
+                          this.GetRange(start) + this.GetRange(start + 1),  // Left part length
                           this.GetStartOfRange(start + 2),                  // Start of the right part
                           this.GetRange(start + 2),                         // Right part length
                           to,                                               // Merge to
@@ -287,6 +294,7 @@ namespace QueryEngine
                         // The merged result of the above three will now be in the "to" array.
                         return this.GetRange(start) + this.GetRange(start + 1) + this.GetRange(start + 2);
                     }
+                    else throw new ArgumentException($"{this.GetType()}, a division of the ranges went wrong... end - start = {end - start}");
                 }
             }
         }
