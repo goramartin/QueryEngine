@@ -195,7 +195,7 @@ namespace QueryEngine
             /// <param name="srcToDest"> On each tree level, it denotes whether, the subsarrays
             /// should be merged into the destination or source array.
             /// True for source to destination, the opposite otherwise. </param>
-            /// <returns> The length of the merged sequence from the lower leyer.</returns>
+            /// <returns> The length of the merged sequence.</returns>
             public int MergeResultsParallel(int start, int end, bool srcToDest)
             {
                 // Internal node.
@@ -205,11 +205,10 @@ namespace QueryEngine
                     int middle = ((end - start) / 2) + start;
                     if (middle % 2 == 1) middle--;
 
-                    //Task<int> task = Task<int>.Factory.StartNew(() => MergeResultsParallel(middle, end, !srcToDest));
-                    int rightLength = MergeResultsParallel(middle, end, !srcToDest);
+                    Task<int> task = Task<int>.Factory.StartNew(() => MergeResultsParallel(middle, end, !srcToDest));
                     // Current thread work.
                     int leftLength = MergeResultsParallel(start, middle, !srcToDest);
-                    //int rightLength = task.Result;
+                    int rightLength = task.Result;
                 
                     // Merge from source to destination.
                     if (srcToDest)
@@ -302,7 +301,7 @@ namespace QueryEngine
                         // The merged result of the above three will now be in the "to" array.
                         return this.GetRange(start) + this.GetRange(start + 1) + this.GetRange(start + 2);
                     }
-                    else throw new ArgumentException($"{this.GetType()}, a division of the ranges went wrong... end - start = {end - start}");
+                    else throw new ArgumentException($"{this.GetType()}, a division of the ranges went wrong... end - start = {end - start}, but it must be either 2 or 3.");
                 }
             }
         }
