@@ -19,12 +19,12 @@ namespace QueryEngine
         /// <summary>
         /// Register of valid matchers.
         /// </summary>
-        static readonly Dictionary<string, Type> matcherRegistry;
+        static Dictionary<string, Type> matcherRegistry;
 
         /// <summary>
         /// Register of valid patterns for a given matcher.
         /// </summary>
-        static readonly Dictionary<string, Dictionary<string, Type>> matcherPatternRegistry;
+        static Dictionary<string, Dictionary<string, Type>> matcherPatternRegistry;
 
         /// <summary>
         /// Inicialises registries.

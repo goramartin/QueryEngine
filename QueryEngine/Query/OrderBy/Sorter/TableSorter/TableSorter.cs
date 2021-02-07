@@ -15,7 +15,7 @@ namespace QueryEngine
     internal abstract class TableSorter : ISorter
     {
         protected ITableResults resTable;
-        protected bool inParallel;
+        protected readonly bool inParallel;
 
         protected TableSorter(ITableResults resTable, bool inParallel)
         {

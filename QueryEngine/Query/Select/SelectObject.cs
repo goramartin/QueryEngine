@@ -29,7 +29,7 @@ namespace QueryEngine
         /// <summary>
         /// List of arguments to print from a select expression.
         /// </summary>
-        private readonly List<ExpressionToStringWrapper> rowFormat;
+        private List<ExpressionToStringWrapper> rowFormat;
         private ISelectExecutionHelper helper;
         
         /// <summary>

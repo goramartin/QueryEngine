@@ -21,7 +21,7 @@ namespace QueryEngine
     /// </summary>
     internal class RowComparer : Comparer<TableResults.RowProxy>, IExpressionComparer
     {
-        private readonly ExpressionComparer[] comparers;
+        private ExpressionComparer[] comparers;
         public readonly bool cacheResults;
 
         /// <summary>
@@ -29,12 +29,10 @@ namespace QueryEngine
         /// </summary>
         /// <param name="expressionComparers"> Expected a list of expression comparers.</param>
         /// <param name="cacheResults"> Whether to cache results of the comparison.</param>
-        public RowComparer(ExpressionComparer[] expressionComparers, bool cacheResults)
+        private RowComparer(ExpressionComparer[] expressionComparers, bool cacheResults)
         {
             this.comparers = expressionComparers;
             this.cacheResults = cacheResults;
-            this.SetCaching(this.cacheResults);
-
         }
 
         /// <summary>
@@ -71,23 +69,16 @@ namespace QueryEngine
             }
             return result;
         }
-       
-        private void SetCaching(bool cacheResults)
-        {
-            for (int i = 0; i < this.comparers.Length; i++)
-                this.comparers[i].SetCaching(cacheResults);
-        }
 
         /// <summary>
-        /// Note that the cloning does set the flag whether the comparer uses caching.
-        /// This needs to be done separately after cloning.
+        /// Creates a new instance by cloning the comparers and seting appropriately the cache flag.
         /// </summary>
-        /// <param name="setCaching"> Whether to cache results of the comparison. </param>
-        public RowComparer Clone(bool cacheResults)
+        /// <param name="cacheResults"> Whether to cache results of the comparison. </param>
+        public static RowComparer Factory(ExpressionComparer[] comparers, bool cacheResults)
         {
-            var newComparers = new ExpressionComparer[this.comparers.Length];
+            var newComparers = new ExpressionComparer[comparers.Length];
             for (int i = 0; i < newComparers.Length; i++)
-                newComparers[i] = this.comparers[i].Clone();
+                newComparers[i] = comparers[i].Clone(cacheResults);
             
            return new RowComparer(newComparers, cacheResults);
         }

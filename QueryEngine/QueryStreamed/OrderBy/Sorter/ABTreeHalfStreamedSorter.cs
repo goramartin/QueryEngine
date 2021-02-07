@@ -34,12 +34,11 @@ namespace QueryEngine
         public ABTreeHalfStreamedSorter(Graph graph, VariableMap variableMap, IOrderByExecutionHelper executionHelper, OrderByNode orderByNode, QueryExpressionInfo exprInfo, int columnCount) 
             : base(graph, variableMap, executionHelper, orderByNode, exprInfo, columnCount) 
         {
-            var tmpComp = new RowComparer(this.comparers, false);
             this.sortJobs = new SortJob[this.executionHelper.ThreadCount];
             for (int i = 0; i < sortJobs.Length; i++)
             {
                 var results = new TableResults(this.ColumnCount, this.executionHelper.FixedArraySize);
-                this.sortJobs[i] = new SortJob(new IndexToRowProxyComparer(tmpComp.Clone(true), results, false), results);
+                this.sortJobs[i] = new SortJob(new IndexToRowProxyComparer(RowComparer.Factory(this.comparers, true), results, false), results);
             }
         } 
 
@@ -65,7 +64,7 @@ namespace QueryEngine
                     // Last finished thread, inits merging of the results.
                     if (Interlocked.Increment(ref this.sortJobsFinished) == this.executionHelper.ThreadCount)
                     {
-                        this.mergeJob = new MergeObject(this.sortJobs, new RowComparer(this.comparers, false));
+                        this.mergeJob = new MergeObject(this.sortJobs, RowComparer.Factory(this.comparers, false));
                         if (this.mergeJob.jobsToMerge.Length >= 2)
                         {
                             this.sortJobs = null;

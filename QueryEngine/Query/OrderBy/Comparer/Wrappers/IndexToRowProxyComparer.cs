@@ -10,8 +10,8 @@ namespace QueryEngine
     /// </summary>
     internal sealed class IndexToRowProxyComparer : Comparer<int>
     {
-        private readonly RowComparer rowComparer;
-        private readonly ITableResults resTable;
+        private RowComparer rowComparer;
+        private ITableResults resTable;
         /// <summary>
         /// A flag whether to allow returning of 0 as the comparison result.
         /// </summary>

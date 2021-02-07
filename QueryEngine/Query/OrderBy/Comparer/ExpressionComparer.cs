@@ -13,19 +13,22 @@ namespace QueryEngine
     /// </summary>
     internal abstract class ExpressionComparer : IExpressionComparer
     {
-        protected readonly ExpressionHolder expressionHolder;
-        protected readonly bool isAscending;
-        protected readonly int[] usedVars;
-        protected bool cacheResults;
+        protected ExpressionHolder expressionHolder;
+        protected int[] usedVars;
+        public readonly bool isAscending;
+        public readonly bool cacheResults;
+        
         /// <summary>
         /// Constructs expression comparer.
         /// </summary>
         /// <param name="expressionHolder"> Expression to be evaluated during comparing. </param>
         /// <param name="ascending"> Whether to use asc or desc order. </param>
-        protected ExpressionComparer(ExpressionHolder expressionHolder, bool ascending)
+        /// <param name="cacheResults"> Whether to cache results of the computed expressions. </param>
+        protected ExpressionComparer(ExpressionHolder expressionHolder, bool ascending, bool cacheResults)
         {
             this.expressionHolder = expressionHolder;
             this.isAscending = ascending;
+            this.cacheResults = cacheResults;
             this.usedVars = expressionHolder.CollectUsedVars(new List<int>()).ToArray();
         }
 
@@ -37,13 +40,14 @@ namespace QueryEngine
         /// </summary>
         /// <param name="expressionHolder"> Expression to be evaluated. </param>
         /// <param name="isAscending"> Whether to use ascending order or descending. </param>
+        /// <param name="cacheResults"> Whether to cache results of the computed expressions. </param>
         /// <returns> Specialised comparer. </returns>
-        public static ExpressionComparer Factory(ExpressionHolder expressionHolder, bool isAscending)
+        public static ExpressionComparer Factory(ExpressionHolder expressionHolder, bool isAscending, bool cacheResults)
         {
             if (expressionHolder.ExpressionType == typeof(int))
-                return new ExpressionIntegerComparer(expressionHolder, isAscending);
+                return new ExpressionIntegerComparer(expressionHolder, isAscending, cacheResults);
             else if (expressionHolder.ExpressionType == typeof(string))
-                return new ExpressionStringComparer(expressionHolder, isAscending);
+                return new ExpressionStringComparer(expressionHolder, isAscending, cacheResults);
             else throw new ArgumentException($"Expression comparer factory, unknown type passed to a expression comparer factory.");
         }
 
@@ -63,16 +67,12 @@ namespace QueryEngine
             return true;
         }
 
-        public void SetCaching(bool cacheResults)
-        {
-            this.cacheResults = cacheResults;
-        }
-
-        public abstract ExpressionComparer Clone();
+        public abstract ExpressionComparer Clone(bool cacheResults);
     }
 
     internal abstract class ExpressionComparer<T> : ExpressionComparer
     {
+        private ExpressionReturnValue<T> expr;
         protected bool lastXSuccess = false;
         protected int lastXRow = -1;
         protected T lastXValue = default;
@@ -80,9 +80,8 @@ namespace QueryEngine
         protected bool lastYSuccess = false;
         protected int lastYRow = -1;
         protected T lastYValue = default;
-        ExpressionReturnValue<T> expr;
 
-        public ExpressionComparer(ExpressionHolder expressionHolder, bool ascending) : base(expressionHolder, ascending)
+        public ExpressionComparer(ExpressionHolder expressionHolder, bool ascending, bool cacheResults) : base(expressionHolder, ascending, cacheResults)
         {
             this.expr = (ExpressionReturnValue<T>)expressionHolder.Expr;
         }
@@ -149,7 +148,7 @@ namespace QueryEngine
 
     internal class ExpressionIntegerComparer : ExpressionComparer<int>
     {
-        public ExpressionIntegerComparer(ExpressionHolder expressionHolder, bool ascending) : base(expressionHolder, ascending)
+        public ExpressionIntegerComparer(ExpressionHolder expressionHolder, bool ascending, bool cacheResults) : base(expressionHolder, ascending, cacheResults)
         {  }
 
         protected override int CompareValues(int xValue, int yValue)
@@ -157,24 +156,24 @@ namespace QueryEngine
             return xValue.CompareTo(yValue);
         }
 
-        public override ExpressionComparer Clone()
+        public override ExpressionComparer Clone(bool cacheResults)
         {
-            return new ExpressionIntegerComparer(this.expressionHolder, this.isAscending);
+            return new ExpressionIntegerComparer(this.expressionHolder, this.isAscending, cacheResults);
         }
     }
 
     internal class ExpressionStringComparer : ExpressionComparer<string>
     {
-        public ExpressionStringComparer(ExpressionHolder expressionHolder, bool ascending) : base(expressionHolder, ascending)
+        public ExpressionStringComparer(ExpressionHolder expressionHolder, bool ascending, bool cacheResults) : base(expressionHolder, ascending, cacheResults)
         { }
         protected override int CompareValues(string xValue, string yValue)
         {
             return xValue.CompareTo(yValue);
         }
 
-        public override ExpressionComparer Clone()
+        public override ExpressionComparer Clone(bool cacheResults)
         {
-            return new ExpressionStringComparer(this.expressionHolder, this.isAscending);
+            return new ExpressionStringComparer(this.expressionHolder, this.isAscending, cacheResults);
         }
     }
 }
