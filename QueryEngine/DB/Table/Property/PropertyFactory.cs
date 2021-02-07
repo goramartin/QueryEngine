@@ -18,7 +18,7 @@ namespace QueryEngine
         /// <summary>
         /// Register with valid types.
         /// </summary>
-        private readonly static Dictionary<string, Type> registry;
+        private static Dictionary<string, Type> registry;
 
         /// <summary>
         /// Inicialises registry.

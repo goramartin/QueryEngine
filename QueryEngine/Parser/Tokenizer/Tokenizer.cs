@@ -24,7 +24,7 @@ namespace QueryEngine
     internal static class Tokenizer
     {
         // Dict of possible tokens.
-        private static readonly Dictionary<string, Token.TokenType> tokenTypes;
+        private static Dictionary<string, Token.TokenType> tokenTypes;
         private // Character ending query.
         static char EndOfQueryCharacter => ';';
         static Tokenizer()

@@ -52,7 +52,7 @@ namespace QueryEngine
         /// <summary>
         /// [column][block][position in block]
         /// </summary>
-        private readonly List<Element[]>[] resTable;
+        private List<Element[]>[] resTable;
         private int[] order;
 
         /// <summary>
