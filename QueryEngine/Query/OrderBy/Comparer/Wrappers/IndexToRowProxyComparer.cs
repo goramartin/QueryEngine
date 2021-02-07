@@ -12,16 +12,27 @@ namespace QueryEngine
     {
         private readonly RowComparer rowComparer;
         private readonly ITableResults resTable;
+        /// <summary>
+        /// A flag whether to allow returning of 0 as the comparison result.
+        /// </summary>
+        public readonly bool allowDuplicities;
 
-        public IndexToRowProxyComparer(RowComparer rowComparer, ITableResults resTable)
+        public IndexToRowProxyComparer(RowComparer rowComparer, ITableResults resTable, bool allowDuplicities)
         {
             this.rowComparer = rowComparer;
             this.resTable = resTable;
+            this.allowDuplicities = allowDuplicities;
         }
 
         public override int Compare(int x, int y)
         {
-            return this.rowComparer.Compare(this.resTable[x], this.resTable[y]);  
+            int compRes = this.rowComparer.Compare(this.resTable[x], this.resTable[y]);
+            if (this.allowDuplicities) return compRes;
+            else
+            {
+                if (compRes == 0) return x.CompareTo(y);
+                else return compRes;
+            }
         }
     }
 }

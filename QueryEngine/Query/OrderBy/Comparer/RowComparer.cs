@@ -22,14 +22,19 @@ namespace QueryEngine
     internal class RowComparer : Comparer<TableResults.RowProxy>, IExpressionComparer
     {
         private readonly ExpressionComparer[] comparers;
+        public readonly bool cacheResults;
 
         /// <summary>
         /// Creates a row comparer.
         /// </summary>
         /// <param name="expressionComparers"> Expected a list of expression comparers.</param>
-        public RowComparer(ExpressionComparer[] expressionComparers)
+        /// <param name="cacheResults"> Whether to cache results of the comparison.</param>
+        public RowComparer(ExpressionComparer[] expressionComparers, bool cacheResults)
         {
             this.comparers = expressionComparers;
+            this.cacheResults = cacheResults;
+            this.SetCaching(this.cacheResults);
+
         }
 
         /// <summary>
@@ -67,24 +72,24 @@ namespace QueryEngine
             return result;
         }
        
-
-        public void SetCaching(bool setValue)
+        private void SetCaching(bool cacheResults)
         {
             for (int i = 0; i < this.comparers.Length; i++)
-                this.comparers[i].SetCaching(setValue);
+                this.comparers[i].SetCaching(cacheResults);
         }
 
         /// <summary>
         /// Note that the cloning does set the flag whether the comparer uses caching.
         /// This needs to be done separately after cloning.
         /// </summary>
-        public RowComparer Clone()
+        /// <param name="setCaching"> Whether to cache results of the comparison. </param>
+        public RowComparer Clone(bool cacheResults)
         {
             var newComparers = new ExpressionComparer[this.comparers.Length];
             for (int i = 0; i < newComparers.Length; i++)
                 newComparers[i] = this.comparers[i].Clone();
             
-            return new RowComparer(newComparers);
+           return new RowComparer(newComparers, cacheResults);
         }
 
     }

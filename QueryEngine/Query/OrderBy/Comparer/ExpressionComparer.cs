@@ -63,9 +63,9 @@ namespace QueryEngine
             return true;
         }
 
-        public void SetCaching(bool setValue)
+        public void SetCaching(bool cacheResults)
         {
-            this.cacheResults = setValue;
+            this.cacheResults = cacheResults;
         }
 
         public abstract ExpressionComparer Clone();

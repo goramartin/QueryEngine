@@ -34,12 +34,12 @@ namespace QueryEngine
         public ABTreeHalfStreamedSorter(Graph graph, VariableMap variableMap, IOrderByExecutionHelper executionHelper, OrderByNode orderByNode, QueryExpressionInfo exprInfo, int columnCount) 
             : base(graph, variableMap, executionHelper, orderByNode, exprInfo, columnCount) 
         {
-            var tmpComp = new RowComparer(this.comparers);
+            var tmpComp = new RowComparer(this.comparers, false);
             this.sortJobs = new SortJob[this.executionHelper.ThreadCount];
             for (int i = 0; i < sortJobs.Length; i++)
             {
                 var results = new TableResults(this.ColumnCount, this.executionHelper.FixedArraySize);
-                this.sortJobs[i] = new SortJob(this.CreateComparer(tmpComp, results), results);
+                this.sortJobs[i] = new SortJob(new IndexToRowProxyComparer(tmpComp.Clone(true), results, false), results);
             }
         } 
 
@@ -65,7 +65,7 @@ namespace QueryEngine
                     // Last finished thread, inits merging of the results.
                     if (Interlocked.Increment(ref this.sortJobsFinished) == this.executionHelper.ThreadCount)
                     {
-                        this.mergeJob = new MergeObject(this.sortJobs, new RowComparer(this.comparers));
+                        this.mergeJob = new MergeObject(this.sortJobs, new RowComparer(this.comparers, false));
                         if (this.mergeJob.jobsToMerge.Length >= 2)
                         {
                             this.sortJobs = null;
@@ -107,9 +107,7 @@ namespace QueryEngine
             {
                 List<SortJob> mergeJobs = new List<SortJob>();
                 List<int> startRan = new List<int>();
-                
                 this.comparer = comparer;
-                this.comparer.SetCaching(false);
 
                 int count = 0;
                 for (int i = 0; i < jobs.Length; i++)
@@ -318,12 +316,6 @@ namespace QueryEngine
             }
         }
 
-        private IndexToRowProxyComparerNoDup CreateComparer(RowComparer comparer, ITableResults resTable) 
-        {
-            var newComparer = comparer.Clone();
-            newComparer.SetCaching(true);
-            return new IndexToRowProxyComparerNoDup(newComparer, resTable);
-        }
         public override void RetrieveResults(out ITableResults resTable, out GroupByResults groupByResults)
         {
             groupByResults = null;
