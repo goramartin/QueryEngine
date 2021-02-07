@@ -91,9 +91,9 @@
     <Compile Include="QueryStreamed\Match\ISingleThreadPatternMatcherStreamed.cs" />
     <Compile Include="QueryStreamed\Match\MatchObjectStreamed.cs" />
     <Compile Include="QueryStreamed\OrderBy\ABTree\ABTree.cs" />
-    <Compile Include="QueryStreamed\OrderBy\Sorter\ABTreeHalfStreamedSorter.cs" />
+    <Compile Include="QueryStreamed\OrderBy\Sorter\ABTreeSorterHalfStreamed.cs" />
     <Compile Include="QueryStreamed\OrderBy\OrderByResultProcessor.cs" />
-    <Compile Include="QueryStreamed\OrderBy\Sorter\ABTreeStreamedSorter.cs" />
+    <Compile Include="QueryStreamed\OrderBy\Sorter\ABTreeSorterStreamed.cs" />
     <Compile Include="QueryStreamed\ResultProcessor.cs" />
     <Compile Include="QueryStreamed\Results\GroupByResults\GroupByResultsStreamedBuckets.cs" />
     <Compile Include="QueryStreamed\Results\TableResults\TableResultsABTreeHalfStreamed.cs" />
