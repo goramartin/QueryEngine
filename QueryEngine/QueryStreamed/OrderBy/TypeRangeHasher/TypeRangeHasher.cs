@@ -29,13 +29,15 @@ namespace QueryEngine
         }
     }
 
+
+
     /// <summary>
     /// Range of Int32.MinValue ... Int32.MaxValue.
     /// BucketCount = #thread * #thread 
     /// rangeSize = UInt32.MaxValue / BucketCount  
     /// Notice that the content of the sticking bucket if (UInt32.MaxValue % BucketCount != 0) is fit into the last bucket.
     /// Because the thread count is restricted, it assumes that range size is always > 0;
-    /// Note that the 0 is mapped onto the range containing the value Int.MaxInt + 1.
+    /// The
     /// </summary>
     internal class IntRangeHasher : TypeRangeHasher<int>
     {
@@ -43,11 +45,32 @@ namespace QueryEngine
         /// <summary>
         /// Represents values - 2 147 483 648 (Int32.MinValue)
         /// </summary>
-        private uint halfRange = UInt32.MaxValue / 2 + 1; 
+        private uint halfRange = UInt32.MaxValue / 2 + 1;
+        
+        /*
+        /// <summary>
+        ///  A point that devides the range into the buckets containing +1 range size from the rest.
+        /// </summary>
+        private uint distributionPoint;
+        /// <summary>
+        /// A number of buckets until the distribution point.
+        /// </summary>
+        private uint distributionBuckets;
+         */
+
         public IntRangeHasher(int threadCount) : base(threadCount)
         {
             this.BucketCount = threadCount * threadCount;
             this.rangeSize = (UInt32.MaxValue / (uint)this.BucketCount);
+            
+            /*
+            // Values that are not distribued.
+            var unDistributedValues = (UInt32.MaxValue % (uint)this.BucketCount);
+            // A point that devides the range into the buckets containing +1 range size from the rest.
+            this.distributionPoint = (rangeSize * (unDistributedValues)) + unDistributedValues;
+            // A num
+            this.distributionBuckets = (unDistributedValues);
+             */
         }
 
         public override int Hash(int value)
@@ -61,7 +84,14 @@ namespace QueryEngine
                 else 
                     tmpValue = this.halfRange + (uint)value;
 
-                return (int)(tmpValue / this.rangeSize);
+                return (int)(tmpValue / (this.rangeSize));
+
+                /*
+                if (tmpValue <= distributionPoint)
+                    return (int)(tmpValue / (this.rangeSize + 1));
+                else 
+                    return (int)((this.distributionBuckets) + (( tmpValue - distributionPoint) / this.rangeSize));
+                 */
             }
         }
     }
@@ -74,9 +104,14 @@ namespace QueryEngine
 
     internal class AsciiStringRangeHasher : StringRangeHasher
     {
+
+
+
+
+
         public override int Hash(string value)
         {
-            throw new NotImplementedException();
+           
         }
     }
 
