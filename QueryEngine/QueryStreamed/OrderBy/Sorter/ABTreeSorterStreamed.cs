@@ -39,9 +39,9 @@ namespace QueryEngine
         private ExpressionReturnValue<T> firstKeyExpression;
 
         /// <summary>
-        /// Hasher that determines the correct range bucket of the given value.
+        /// Hasher that determines the correct bucket of the given value.
         /// </summary>
-        private FirstKeyHasher<T> firstKeyHasher;
+        private TypeRangeHasher<T> firstKeyHasher;
         
 
         public ABTreeStreamedSorter(Graph graph, VariableMap variableMap, IOrderByExecutionHelper executionHelper, OrderByNode orderByNode, QueryExpressionInfo exprInfo, int columnCount)
