@@ -6,7 +6,83 @@ using System.Threading.Tasks;
 
 namespace QueryEngine
 {
-    class ABTreeStreamedSortercs
+    /// <summary>
+    /// Class represents a full streamed order by.
+    /// Note that single thread version of the full streamed order by is considered to be
+    /// the single thread solution of the half streamed order by since it maintains the sorted order for the 
+    /// entire set of immediate results. 
+    /// This class should be used solely in the parallel enviroment.
+    /// The class contains an array of objects (ab tree, table results), each object represents a 
+    /// particular range from the universum of the first key that is used to sort the results.
+    /// The key is computed for each incoming result and a hasher class is used to determine the correct range 
+    /// the result belongs to. After the determination is done, the thread locks the object representing the range
+    /// and inserts it into the table and into the ab tree.
+    /// The generics of this class is to manipulate more easily with the type of the first key.
+    /// </summary>
+    /// <typeparam name="T"> A type of the first key that it sorts with. </typeparam>
+    internal class ABTreeStreamedSorter<T> : OrderByResultProcessor
     {
+        /// <summary>
+        /// The universum of the first key split into ranges.
+        /// </summary>
+        private ResultsRange[] resultsRanges;
+        /// <summary>
+        /// Comparers used inside the AB trees, so that after computing the first key.
+        /// The comparer upon insert would otherwise compute it again.
+        /// </summary>
+        private ExpressionComparer<T>[] firstKeyComparers;
+
+        /// <summary>
+        /// Expression to compute the first key.
+        /// </summary>
+        private ExpressionHolder firstKeyExpressionHolder;
+        private ExpressionReturnValue<T> firstKeyExpression;
+        
+        private FirstKeyHasher<T> firstKeyHasher;
+
+
+        public ABTreeStreamedSorter(Graph graph, VariableMap variableMap, IOrderByExecutionHelper executionHelper, OrderByNode orderByNode, QueryExpressionInfo exprInfo, int columnCount)
+            : base(graph, variableMap, executionHelper, orderByNode, exprInfo, columnCount)
+        {
+            throw new NotImplementedException($"{this.GetType()}");
+        }
+
+        public override void Process(int matcherID, Element[] result)
+        {
+            
+
+
+
+
+
+
+
+
+
+
+
+        }
+
+        /// <summary>
+        /// A class that represents a certain range of results.
+        /// What range it represents is confined in the enclosing class.
+        /// </summary>
+        private class ResultsRange
+        {
+            public ABTree<int> tree;
+            public ITableResults resTable;
+
+            public ResultsRange(IComparer<int> comparer, ITableResults resTable)
+            {
+                this.tree = new ABTree<int>(256, comparer);
+                this.resTable = resTable;
+            }
+
+        }
+
+        public override void RetrieveResults(out ITableResults resTable, out GroupByResults groupByResults)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

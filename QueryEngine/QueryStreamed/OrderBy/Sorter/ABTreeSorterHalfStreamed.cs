@@ -85,6 +85,14 @@ namespace QueryEngine
         /// <summary>
         /// Class represents information about merging.
         /// </summary>
+
+        public override void RetrieveResults(out ITableResults resTable, out GroupByResults groupByResults)
+        {
+            groupByResults = null;
+            if (this.sortJobs != null) resTable = new TableResultsABTreeHalfStreamed(this.sortJobs[0].tree, this.sortJobs[0].resTable);
+            else resTable = new TableResultsArrayHalfStreamed(this.mergeJob.GetTablesOfSortedJobs(), this.mergedResults);
+        }
+
         private class MergeObject
         {
             /// <summary>
@@ -313,13 +321,6 @@ namespace QueryEngine
                 this.tree = new ABTree<int>(256, comparer);
                 this.resTable = resTable;
             }
-        }
-
-        public override void RetrieveResults(out ITableResults resTable, out GroupByResults groupByResults)
-        {
-            groupByResults = null;
-            if (this.sortJobs != null) resTable = new TableResultsABTreeHalfStreamed(this.sortJobs[0].tree, this.sortJobs[0].resTable);
-            else resTable = new TableResultsArrayHalfStreamed(this.mergeJob.GetTablesOfSortedJobs(), this.mergedResults);
         }
     }
 }
