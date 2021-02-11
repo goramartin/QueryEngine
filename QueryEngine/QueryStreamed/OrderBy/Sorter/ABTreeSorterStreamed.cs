@@ -48,21 +48,17 @@ namespace QueryEngine
             : base(graph, variableMap, executionHelper, orderByNode, exprInfo, columnCount)
         {
             throw new NotImplementedException($"{this.GetType()}");
-
-
-
         }
 
         public override void Process(int matcherID, Element[] result)
         {
-            bool evalSuccess = this.firstKeyExpression.TryEvaluate(result, out T resValue);
-            
             // Compute the correct placement (range) of the computed value.
             // Else it will be placed into the first bucket since the value is null.
             int bucketIndex = 0;
             
             if (this.executionHelper.InParallel)
             {
+                bool evalSuccess = this.firstKeyExpression.TryEvaluate(result, out T resValue);
                 if (evalSuccess)
                     bucketIndex = this.firstKeyHasher.Hash(resValue);
 
