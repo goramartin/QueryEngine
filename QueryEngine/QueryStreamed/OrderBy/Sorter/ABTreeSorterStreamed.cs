@@ -49,7 +49,17 @@ namespace QueryEngine
 
         public override void Process(int matcherID, Element[] result)
         {
+            bool evalSuccess = this.firstKeyExpression.TryEvaluate(result, out T resValue);
+            int rangeIndex = 0;
             
+            // Compute correct placement (range) of the computed value.
+            // Else it will be placed into the first bucket since the value is null.
+            if (evalSuccess)
+            {
+
+
+            }
+
 
 
 

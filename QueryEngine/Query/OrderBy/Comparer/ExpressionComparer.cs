@@ -10,6 +10,7 @@ namespace QueryEngine
     /// The child classes can cache the left argument in the compare function.
     /// It is because the same left argument is compared with multiple elements in a row, thus it can save a bit of computation.
     /// However, this is only done in the single threaded enviroment.
+    /// Null values in ascending order appear as the first.
     /// </summary>
     internal abstract class ExpressionComparer : IExpressionComparer
     {
@@ -128,8 +129,8 @@ namespace QueryEngine
         private int Compare(bool xSuccess, bool ySuccess, T xValue, T yValue)
         {
             int retValue = 0;
-            if (xSuccess && !ySuccess) retValue = -1;
-            else if (!xSuccess && ySuccess) retValue = 1;
+            if (xSuccess && !ySuccess) retValue = 1;
+            else if (!xSuccess && ySuccess) retValue = -1;
             else if (!xSuccess && !ySuccess) retValue = 0;
             else retValue = this.CompareValues(xValue, yValue);
 
@@ -137,7 +138,7 @@ namespace QueryEngine
             {
                 if (retValue == -1) retValue = 1;
                 else if (retValue == 1) retValue = -1;
-                else { }
+                else { /* retValue == 0 */}
             }
 
             return retValue;
