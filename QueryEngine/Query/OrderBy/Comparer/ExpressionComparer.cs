@@ -145,6 +145,19 @@ namespace QueryEngine
         }
 
         protected abstract int CompareValues(T xValue, T yValue);
+
+        public void SetYCache(bool ySuccess, int yRow, T yValue)
+        {
+            this.lastYSuccess = ySuccess;
+            this.lastYRow = yRow;
+            this.lastYValue = yValue;
+        }
+        public void SetXCache(bool xSuccess, int xRow, T xValue)
+        {
+            this.lastXSuccess = xSuccess;
+            this.lastXRow = xRow;
+            this.lastXValue = xValue;
+        }
     }
 
     internal class ExpressionIntegerComparer : ExpressionComparer<int>

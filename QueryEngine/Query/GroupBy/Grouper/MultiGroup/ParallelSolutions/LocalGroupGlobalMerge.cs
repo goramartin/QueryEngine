@@ -7,6 +7,7 @@ namespace QueryEngine
 {
     /// <summary>
     /// Class represents a grouping algorithm.
+    /// The class should be used only as the parallel solution and not with thread count set to 1.
     /// The algorithm is composed of a local group by and a global merge (two way group by)
     /// The algorithm uses only aggregate bucket storages or a mix of lists and buckets.
     /// Firstly, each thread receives a range from the results table, hasher and comparer and computes

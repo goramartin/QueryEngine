@@ -7,6 +7,7 @@ namespace QueryEngine
 {
     /// <summary>
     /// A class represents a multi group grouping algorithm.
+    /// The class should be used only as the parallel solution and not with thread count set to 1.
     /// The class uses aggretation with buckets or arrays.
     /// Each thread recieves a portion of the results from the result table.
     /// Subsequently, the threads start to aggrgate the results with the help of 
