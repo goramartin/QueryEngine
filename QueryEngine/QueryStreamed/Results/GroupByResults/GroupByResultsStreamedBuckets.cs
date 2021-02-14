@@ -14,7 +14,6 @@ namespace QueryEngine
         {
             return this.GetEnumerator();
         }
-
     }
 
     internal class ConDictStreamedBucket : GroupByResultsStreamedBucket
@@ -36,7 +35,6 @@ namespace QueryEngine
     internal class DictStreamedBucket : GroupByResultsStreamedBucket
     {
         protected Dictionary<AggregateBucketResult[], AggregateBucketResult[]> groups;
-
 
         public DictStreamedBucket(Dictionary<AggregateBucketResult[], AggregateBucketResult[]> groups, ITableResults resTable) : base(groups.Count, resTable)
         {

@@ -110,7 +110,17 @@ namespace QueryEngine
 
         public override void RetrieveResults(out ITableResults resTable, out GroupByResults groupByResults)
         {
-            throw new NotImplementedException();
+            groupByResults = null;
+            if (this.executionHelper.ThreadCount == 1)
+                resTable = new TableResultsABTree(this.rangeBuckets[0].tree, this.rangeBuckets[0].resTable);
+            else
+            {
+
+
+
+
+
+            }
         }
     }
 }

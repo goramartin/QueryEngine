@@ -89,8 +89,8 @@ namespace QueryEngine
         public override void RetrieveResults(out ITableResults resTable, out GroupByResults groupByResults)
         {
             groupByResults = null;
-            if (this.sortJobs != null) resTable = new TableResultsABTreeHalfStreamed(this.sortJobs[0].tree, this.sortJobs[0].resTable);
-            else resTable = new TableResultsArrayHalfStreamed(this.mergeJob.GetTablesOfSortedJobs(), this.mergedResults);
+            if (this.sortJobs != null) resTable = new TableResultsABTree(this.sortJobs[0].tree, this.sortJobs[0].resTable);
+            else resTable = new MultiTableResultsRowProxyArray(this.mergeJob.GetTablesOfSortedJobs(), this.mergedResults);
         }
 
         private class MergeObject

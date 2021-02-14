@@ -8,10 +8,10 @@ namespace QueryEngine
     /// <summary>
     /// A wrapper class of the results table with a tree index.
     /// </summary>
-    internal class TableResultsABTreeHalfStreamed : ITableResults
+    internal class TableResultsABTree : ITableResults
     {
-        ABTree<int> indexTree;
-        ITableResults resTable;
+        private ABTree<int> indexTree;
+        private ITableResults resTable;
 
         public TableResults.RowProxy this[int rowIndex]
         {
@@ -26,7 +26,7 @@ namespace QueryEngine
             }
         }
 
-        public TableResultsABTreeHalfStreamed(ABTree<int> indexTree, ITableResults resultTable)
+        public TableResultsABTree(ABTree<int> indexTree, ITableResults resultTable)
         {
             if (indexTree == null || resultTable == null)
                 throw new ArgumentNullException($"{this.GetType()}, trying to assign null to a constructor.");

@@ -97,8 +97,9 @@
     <Compile Include="QueryStreamed\OrderBy\Sorter\ABTreeSorterStreamed.cs" />
     <Compile Include="QueryStreamed\ResultProcessor.cs" />
     <Compile Include="QueryStreamed\Results\GroupByResults\GroupByResultsStreamedBuckets.cs" />
-    <Compile Include="QueryStreamed\Results\TableResults\TableResultsABTreeHalfStreamed.cs" />
-    <Compile Include="QueryStreamed\Results\TableResults\TableResultsArrayHalfStreamed.cs" />
+    <Compile Include="QueryStreamed\Results\TableResults\TableResultsABTree.cs" />
+    <Compile Include="QueryStreamed\Results\TableResults\MultiTableResultsABTree.cs" />
+    <Compile Include="QueryStreamed\Results\TableResults\MultiTableResultsRowProxyArray.cs" />
     <Compile Include="Query\Expression\Expression.cs" />
     <Compile Include="Query\Expression\ExpressionHolder.cs" />
     <Compile Include="Query\Expression\IExpressionComparer.cs" />

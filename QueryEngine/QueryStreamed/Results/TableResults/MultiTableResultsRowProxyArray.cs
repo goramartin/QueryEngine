@@ -8,12 +8,12 @@ namespace QueryEngine
     /// <summary>
     /// A class is a wrapper class that contains multiple result tables and their global index.
     /// </summary>
-    internal class TableResultsArrayHalfStreamed : ITableResults
+    internal class MultiTableResultsRowProxyArray : ITableResults
     {
-        List<ITableResults> resTables;
-        TableResults.RowProxy[] indexArray;
+        private List<ITableResults> resTables;
+        private TableResults.RowProxy[] indexArray;
 
-        public TableResultsArrayHalfStreamed(List<ITableResults> resTables, TableResults.RowProxy[] indexArray)
+        public MultiTableResultsRowProxyArray(List<ITableResults> resTables, TableResults.RowProxy[] indexArray)
         {
             if (resTables == null || indexArray == null || resTables.Count == 0) 
                 throw new ArgumentNullException($"{this.GetType()}, passed null arguments to the constructor.");
