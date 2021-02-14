@@ -21,7 +21,7 @@ namespace QueryEngine
     /// </summary>
     internal class RowComparer : Comparer<TableResults.RowProxy>, IExpressionComparer
     {
-        private ExpressionComparer[] comparers;
+        public ExpressionComparer[] comparers;
         public readonly bool cacheResults;
 
         /// <summary>

@@ -47,7 +47,19 @@ namespace QueryEngine
         public ABTreeStreamedSorter(Graph graph, VariableMap variableMap, IOrderByExecutionHelper executionHelper, OrderByNode orderByNode, QueryExpressionInfo exprInfo, int columnCount)
             : base(graph, variableMap, executionHelper, orderByNode, exprInfo, columnCount)
         {
-            throw new NotImplementedException($"{this.GetType()}");
+            this.firstKeyHasher = (TypeRangeHasher<T>)TypeRangeHasher.Factory(this.executionHelper.ThreadCount, typeof(T));
+            this.firstKeyExpressionHolder = this.comparers[0].GetExpressionHolder();
+            this.firstKeyExpression = (ExpressionReturnValue<T>)this.firstKeyExpressionHolder.Expr;
+            
+            this.rangeBuckets = new RangeBucket[this.firstKeyHasher.BucketCount];
+            this.firstKeyComparers = new ExpressionComparer<T>[this.rangeBuckets.Length];
+            for (int i = 0; i < this.rangeBuckets.Length; i++)
+            {
+                var results = new TableResults(this.ColumnCount, this.executionHelper.FixedArraySize);
+                var tmpRowComparer = RowComparer.Factory(this.comparers, true);
+                this.firstKeyComparers[i] = (ExpressionComparer<T>)tmpRowComparer.comparers[0];
+                this.rangeBuckets[i] = new RangeBucket(new IndexToRowProxyComparer(tmpRowComparer, results, false), results);
+            }
         }
 
         public override void Process(int matcherID, Element[] result)

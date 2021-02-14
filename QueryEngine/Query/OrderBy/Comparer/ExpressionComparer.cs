@@ -69,6 +69,8 @@ namespace QueryEngine
         }
 
         public abstract ExpressionComparer Clone(bool cacheResults);
+
+        public ExpressionHolder GetExpressionHolder() => this.expressionHolder;
     }
 
     internal abstract class ExpressionComparer<T> : ExpressionComparer
