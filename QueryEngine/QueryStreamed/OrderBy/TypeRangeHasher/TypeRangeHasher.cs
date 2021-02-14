@@ -56,7 +56,7 @@ namespace QueryEngine
         /// <summary>
         /// Represents values - 2 147 483 648 (Int32.MinValue)
         /// </summary>
-        private uint halfRange = UInt32.MaxValue / 2 + 1;
+        private uint negativeRange = UInt32.MaxValue / 2 + 1;
         
 
         /*
@@ -89,9 +89,9 @@ namespace QueryEngine
             {
                 uint tmpValue = 0;
                 if (value < 0)
-                    tmpValue = halfRange - ((uint)-value);
+                    tmpValue = this.negativeRange - (uint)(-value);
                 else 
-                    tmpValue = this.halfRange + (uint)value;
+                    tmpValue = this.negativeRange + (uint)value;
 
                 return (int)(tmpValue / this.rangeSize);
                 /*
