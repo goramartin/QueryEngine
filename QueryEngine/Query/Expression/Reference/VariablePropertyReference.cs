@@ -18,6 +18,9 @@ namespace QueryEngine
         /// <param name="propID"> ID of the accessed property. </param>
         public VariablePropertyReference(VariableReferenceNameHolder nHolder, int varIndex, int propID) : base(nHolder, varIndex)
         {
+            if (propID < 0)
+                throw new ArgumentException($"{this.GetType()}, property ID must be >= 0, propID == {propID}.");
+
             this.PropertyID = propID;
         }
 

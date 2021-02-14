@@ -6,6 +6,8 @@ and the resulting array represents the sorted elements of a table. The array is 
 By sorting only indeces, it helps to speed up the process of swapping long rows in the result table.
  */
 
+using System;
+
 namespace QueryEngine
 {
     /// <summary>
@@ -27,6 +29,9 @@ namespace QueryEngine
         /// <param name="inParallel"> Flag is the table should be sorted in parallel. </param>
         public MultiColumnTableSorter(ITableResults resTable, ExpressionComparer[] expressionComparers, bool inParallel) : base(resTable, inParallel)
         {
+            if (resTable == null || expressionComparers == null || expressionComparers.Length == 0)
+                throw new ArgumentNullException($"{this.GetType()}, trying to assign null to a construtor.");
+
             var rowComparer = RowComparer.Factory(expressionComparers, !inParallel);
             this.indexComparer = new IndexToRowProxyComparer(rowComparer, resTable, true);
         }

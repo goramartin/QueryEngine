@@ -115,7 +115,7 @@ namespace QueryEngine
                 resTable = new TableResultsABTree(this.rangeBuckets[0].tree, this.rangeBuckets[0].resTable);
             else
             {
-
+                resTable = null;
 
 
 

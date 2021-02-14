@@ -27,6 +27,9 @@ namespace QueryEngine
         /// <param name="cacheResults"> Whether to cache results of the computed expressions. </param>
         protected ExpressionComparer(ExpressionHolder expressionHolder, bool ascending, bool cacheResults)
         {
+            if (expressionHolder == null)
+                throw new ArgumentException($"{this.GetType()}, trying to assign null to a constructor.");
+
             this.expressionHolder = expressionHolder;
             this.isAscending = ascending;
             this.cacheResults = cacheResults;

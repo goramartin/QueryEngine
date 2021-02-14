@@ -28,6 +28,9 @@ namespace QueryEngine
         /// <param name="expressionHolder"> Expression. </param>
         public ExpressionToStringWrapper(ExpressionHolder expressionHolder)
         {
+            if (expressionHolder == null)
+                throw new ArgumentNullException($"{this.GetType()}, trying to assign null to a constructor.");
+
             this.expressionHolder = expressionHolder;
         }
 

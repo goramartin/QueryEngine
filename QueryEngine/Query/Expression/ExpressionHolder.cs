@@ -27,6 +27,9 @@ namespace QueryEngine
         /// <param name="label"> Label of the expression. </param>
         public ExpressionHolder(ExpressionBase ex, string label = null)
         {
+            if (ex == null)
+                throw new ArgumentNullException($"{this.GetType()}, trying to assign null to a constructor.");
+
             this.Expr = ex;
             this.ExpressionType = ex.GetExpressionType();
             this.Label = label;

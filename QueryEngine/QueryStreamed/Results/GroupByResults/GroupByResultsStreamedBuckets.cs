@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System;
 
 namespace QueryEngine
 {
@@ -22,6 +23,10 @@ namespace QueryEngine
 
         public ConDictStreamedBucket(ConcurrentDictionary<AggregateBucketResult[], AggregateBucketResult[]> groups, ITableResults resTable) : base(groups.Count, resTable)
         {
+            if (groups == null)
+                throw new ArgumentNullException($"{this.GetType()}, trying to assign null to a constructor.");
+
+
             this.groups = groups;
         }
 
@@ -38,6 +43,9 @@ namespace QueryEngine
 
         public DictStreamedBucket(Dictionary<AggregateBucketResult[], AggregateBucketResult[]> groups, ITableResults resTable) : base(groups.Count, resTable)
         {
+            if (groups == null)
+                throw new ArgumentNullException($"{this.GetType()}, trying to assign null to a constructor.");
+
             this.groups = groups;
         }
 

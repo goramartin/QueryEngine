@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace QueryEngine
 {
@@ -19,6 +20,9 @@ namespace QueryEngine
 
         public IndexToRowProxyComparer(RowComparer rowComparer, ITableResults resTable, bool allowDuplicities)
         {
+            if (rowComparer == null || resTable == null)
+                throw new ArgumentException($"{this.GetType()}, trying to assign null to a constructor.");
+
             this.rowComparer = rowComparer;
             this.resTable = resTable;
             this.allowDuplicities = allowDuplicities;

@@ -7,12 +7,25 @@ using System.Threading.Tasks;
 
 namespace QueryEngine
 {
+
+    /// <summary>
+    /// A class representing multiple tables and an multiple tree indeces on the tables.
+    /// The class is used by the streamed order by.
+    /// The iteration over the tables/indeces is based on whether the indeces are supposed to be 
+    /// read in the asc. or desc. order.
+    /// </summary>
     internal class MultiTableResultsABTree : ITableResults
     {
+        private List<TableResultsABTree> resTables;
+        private bool isAsc;
 
-
-
-
+        public MultiTableResultsABTree(List<TableResultsABTree> resTables, bool isAsc) 
+        {
+            if (resTables == null || resTables.Count == 0)
+                throw new ArgumentNullException($"{this.GetType()}, trying to assign null to a constructor.");
+            this.resTables = resTables;
+            this.isAsc = isAsc;
+        }
 
         public TableResults.RowProxy this[int rowIndex] => throw new NotImplementedException();
 

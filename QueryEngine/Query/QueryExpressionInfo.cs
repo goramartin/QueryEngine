@@ -66,6 +66,8 @@ namespace QueryEngine
         /// <returns> Returns position of the passed expression in the main expression list.  </returns>
         public int AddExpression(ExpressionHolder expressionHolder)
         {
+            CheckNullExpression(expressionHolder);
+
             // Only expressions from group by clause and aggregates can be used.
             if (this.IsSetGroupBy)
             {
@@ -96,6 +98,8 @@ namespace QueryEngine
         /// <returns> Returns position where it was added or the position of the aggregate that has been already added.</returns>
         public int AddAggregate(Aggregate aggregate)
         {
+            CheckAggregateNull(aggregate);
+
             int position = -1;
             if ((position = this.Aggregates.IndexOf(aggregate)) != -1) return position;
             else
@@ -116,6 +120,8 @@ namespace QueryEngine
         /// <returns> Returns position of the passed expression in the main expression list. </returns>
         public int AddGroupByHash(ExpressionHolder expressionHolder)
         {
+            CheckNullExpression(expressionHolder);
+
             if (expressionHolder.ContainsAggregate())
                 throw new ArgumentException($"{this.GetType()}, group by clause cannot contain aggregates.");
             else if (this.GroupByhashExprs.Contains(expressionHolder))
@@ -136,6 +142,8 @@ namespace QueryEngine
         /// <returns> Returns position of the passed expression in the main expression list. </returns>
         public int AddOrderByComp(ExpressionHolder expressionHolder)
         {
+            CheckNullExpression(expressionHolder);
+
             if (this.OrderByComparerExprs.Contains(expressionHolder))
                 throw new ArgumentException($"{this.GetType()}, order by clause cannot contain the same comparer expression multiple times.");
             else if (expressionHolder.ContainsAggregate())
@@ -166,6 +174,8 @@ namespace QueryEngine
         /// <returns> If the main expression list contains the expression, return its position. Otherwise add the expression and return its new position. </returns>
         private int InsertExpr(ExpressionHolder expressionHolder)
         {
+            CheckNullExpression(expressionHolder);
+
             int position = -1;
             if ((position = this.Exprs.IndexOf(expressionHolder)) != -1) return position;
             else
@@ -174,6 +184,18 @@ namespace QueryEngine
                 expressionHolder.SetExprPosition(this.Exprs.Count - 1);
                 return this.Exprs.Count - 1;
             }
+        }
+
+        private static void CheckNullExpression(ExpressionHolder expressionHolder)
+        {
+            if (expressionHolder == null || expressionHolder.Expr == null)
+                throw new ArgumentNullException($"Query expression info, cannot store null expressions.");
+        }
+
+        private static void CheckAggregateNull(Aggregate aggregate)
+        {
+            if (aggregate == null)
+                throw new ArgumentNullException($"Query expression info, cannot store null expressions.");
         }
     }
 }

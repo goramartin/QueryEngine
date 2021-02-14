@@ -1,4 +1,6 @@
-﻿namespace QueryEngine
+﻿using System;
+
+namespace QueryEngine
 {
     /// <summary>
     /// The class represents a group by results.
@@ -12,6 +14,9 @@
     
         protected GroupByResults(int count, ITableResults resTable)
         {
+            if (resTable == null)
+                throw new ArgumentNullException($"{this.GetType()}, trying to assign null to a constructor.");
+
             this.Count = count;
             this.resTable = resTable;
         }

@@ -3,7 +3,7 @@ This file includes definition of a simple sorter.
 Simple sorter is used in case when the group by is not used. In other words it sorts only rows
 from the matching algorithm using hpc sharp methods.
  */
-
+using System;
 using System.Collections.Generic;
 
 namespace QueryEngine
@@ -19,6 +19,9 @@ namespace QueryEngine
 
         protected TableSorter(ITableResults resTable, bool inParallel)
         {
+            if (resTable == null)
+                throw new ArgumentNullException($"{this.GetType()}, trying to assign null to a construtor.");
+
             this.inParallel = inParallel;
             this.resTable = resTable;
         }

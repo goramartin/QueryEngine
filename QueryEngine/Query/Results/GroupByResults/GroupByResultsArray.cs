@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System;
 
 namespace QueryEngine
 {
@@ -16,6 +17,9 @@ namespace QueryEngine
 
         public GroupByResultsArray(ConcurrentDictionary<int, int> groups, AggregateArrayResults[] aggregateResults, ITableResults resTable) : base(groups.Count, resTable)
         {
+            if (groups == null)
+                throw new ArgumentNullException($"{this.GetType()}, trying to assign null to a constructor.");
+
             this.groups = groups;
             this.aggregateResults = aggregateResults;
         }

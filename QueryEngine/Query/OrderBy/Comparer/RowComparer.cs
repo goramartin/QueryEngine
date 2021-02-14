@@ -11,6 +11,7 @@ using templated compare methods.
 Null values in descenging order appear as last elements.
 */
 
+using System;
 using System.Collections.Generic;
 
 namespace QueryEngine 
@@ -31,6 +32,9 @@ namespace QueryEngine
         /// <param name="cacheResults"> Whether to cache results of the comparison.</param>
         private RowComparer(ExpressionComparer[] expressionComparers, bool cacheResults)
         {
+            if (expressionComparers == null || expressionComparers.Length == 0)
+                throw new ArgumentException($"{this.GetType()}, trying to assign null to a constructor.");
+
             this.comparers = expressionComparers;
             this.cacheResults = cacheResults;
         }

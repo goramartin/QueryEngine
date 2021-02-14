@@ -5,7 +5,7 @@ These expressions will evaluate based on a given element result.
 The references contain holder that includes information what part of a result they refer to.
 This file also includes a factory for references stated above.
  */
-
+using System;
 using System.Collections.Generic;
 
 namespace QueryEngine
@@ -33,6 +33,11 @@ namespace QueryEngine
         /// <param name="varIndex"> Index of an element in a result during evaluation.</param>
         protected VariableReference(VariableReferenceNameHolder nHolder, int varIndex)
         {
+            if (nHolder == null)
+                throw new ArgumentNullException($"{this.GetType()}, trying to assign null to a construtor.");
+            else if (varIndex < 0)
+                throw new ArgumentException($"{this.GetType()}, variable index must be >= 0, index == {varIndex}.");
+
             this.NameHolder = nHolder;
             this.VariableIndex = varIndex;
         }

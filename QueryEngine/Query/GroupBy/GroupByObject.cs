@@ -58,6 +58,9 @@ namespace QueryEngine
         /// <param name="exprInfo"> A query expression information. </param>
         public GroupByObject(IGroupByExecutionHelper executionHelper, QueryExpressionInfo exprInfo)
         {
+            if (executionHelper == null || exprInfo == null)
+                throw new ArgumentNullException($"{this.GetType()}, passing null arguments to the constructor.");
+
             this.aggregates = exprInfo.Aggregates;
             this.helper = executionHelper;
         }

@@ -10,7 +10,7 @@ One result of the search can be seen as an array of those elements, where the nu
 array is the number of columns. The specific row can be access with an index or an enumeration, on these actions,
 the RowProxy struct is returned, henceforward, it enables the user access row's columns.
  */
-
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -76,6 +76,7 @@ namespace QueryEngine
         public Element[] temporaryRow { get; set; } = null;
 
         public int FixedArraySize { get; private set; }
+        
         /// <summary>
         /// Empty constructor for passing into group by results for streamed grouping.
         /// </summary>
@@ -91,19 +92,28 @@ namespace QueryEngine
         /// <param name="wasStoringResults"> A flag whether the count is equal to the number of elements in the tables.</param>
         public  TableResults(List<Element[]>[] elements, int count, int fixedArraySize, bool wasStoringResults)
         {
-            this.order = null;
-            this.resTable = elements;
-            this.NumberOfMatchedElements = count;
-            if (wasStoringResults) this.RowCount = count;
-            this.FixedArraySize = fixedArraySize;
+            if (elements == null)
+                throw new ArgumentNullException($"{this.GetType()}, trying to assign null to a constructor.");
+            else if (elements.Length < 1 || fixedArraySize < 1)
+                throw new ArgumentException($"{this.GetType()}, number of columns or array size, cannot be <= 0. columns == {elements.Length}, array size == {fixedArraySize}.");
+            else
+            {
+                this.resTable = elements;
+                this.NumberOfMatchedElements = count;
+                this.FixedArraySize = fixedArraySize;
+                if (wasStoringResults) this.RowCount = count;
+            }
         }
 
         /// <summary>
         /// Creates an empty instance with the specified number of columns.
         /// </summary>
-        public TableResults(int columnCount, int arraySize)
+        public TableResults(int columnCount, int fixedArraySize)
         {
-            this.FixedArraySize = arraySize;
+            if (columnCount < 1 || fixedArraySize < 1)
+                throw new ArgumentException($"{this.GetType()}, number of columns or array size, cannot be <= 0. columns == {columnCount}, array size == {fixedArraySize}.");
+
+            this.FixedArraySize = fixedArraySize;
             this.resTable = new List<Element[]>[columnCount];
             for (int i = 0; i < columnCount; i++)
                 this.resTable[i] = new List<Element[]>();
@@ -166,6 +176,9 @@ namespace QueryEngine
         /// <param name="order"> Array containing integers as indeces to the enclosed result table. </param>
         public void AddOrder(int[] order)
         {
+            if (order == null)
+                throw new ArgumentNullException($"{this.GetType()}, cannot assign null as an order to a table.");
+
             this.order = order;
         }
     }

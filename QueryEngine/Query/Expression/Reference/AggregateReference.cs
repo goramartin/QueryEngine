@@ -34,10 +34,15 @@ namespace QueryEngine
         /// Creates aggregate reference.
         /// </summary>
         /// <param name="aggPos"> An aggregation position.</param>
-        /// <param name="agg"> An actual aggregation. </param>
         /// <param name="keyCount"> A key count. </param>
+        /// <param name="agg"> An actual aggregation. </param>
         public AggregateReference(int aggPos, int keyCount, Aggregate agg)
         {
+            if (agg == null)
+                throw new ArgumentNullException($"{this.GetType()}, trying to assign null to a constructor.");
+            else if (aggPos < 0 || keyCount < 0)
+                throw new ArgumentException($"{this.GetType()}, aggregate position and key count must be >= 0, aggPos == {aggPos}, keyCount == {keyCount}.");
+
             this.AggrPosition = aggPos;
             this.Aggr = agg;
             this.KeyCount = keyCount;

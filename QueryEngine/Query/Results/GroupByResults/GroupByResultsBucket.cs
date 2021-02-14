@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System;
 
 namespace QueryEngine
 {
@@ -44,6 +45,9 @@ namespace QueryEngine
         protected Dictionary<GroupDictKey, AggregateBucketResult[]> groups;
         public DictGroupDictKeyBucket(Dictionary<GroupDictKey, AggregateBucketResult[]> groups, ITableResults resTable) : base(groups.Count, resTable)
         {
+            if (groups == null)
+                throw new ArgumentNullException($"{this.GetType()}, trying to assign null to a constructor.");
+
             this.groups = groups;
         }
 
@@ -59,6 +63,9 @@ namespace QueryEngine
         protected ConcurrentDictionary<GroupDictKey, AggregateBucketResult[]> groups;
         public ConDictGroupByResultsBucket(ConcurrentDictionary<GroupDictKey, AggregateBucketResult[]> groups, ITableResults resTable) : base(groups.Count, resTable)
         {
+            if (groups == null)
+                throw new ArgumentNullException($"{this.GetType()}, trying to assign null to a constructor.");
+
             this.groups = groups;
         }
 
@@ -74,6 +81,9 @@ namespace QueryEngine
         protected ConcurrentDictionary<int, AggregateBucketResult[]> groups;
         public ConDictIntBucket(ConcurrentDictionary<int, AggregateBucketResult[]> groups, ITableResults resTable) : base(groups.Count, resTable)
         {
+            if (groups == null)
+                throw new ArgumentNullException($"{this.GetType()}, trying to assign null to a constructor.");
+
             this.groups = groups;
         }
 
@@ -91,6 +101,9 @@ namespace QueryEngine
 
         public ConDictGroupDictKeyFullBucket(ConcurrentDictionary<GroupDictKeyFull, AggregateBucketResult[]> groups, ITableResults resTable) : base(groups.Count, resTable)
         {
+            if (groups == null)
+                throw new ArgumentNullException($"{this.GetType()}, trying to assign null to a constructor.");
+
             this.groups = groups;
         }
 

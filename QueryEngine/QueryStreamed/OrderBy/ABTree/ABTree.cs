@@ -29,7 +29,7 @@ namespace QueryEngine
             else if (comparer == null)
                 throw new ArgumentException($"{this.GetType()}, passed comparer as null.");
             else if (B < 4)
-                throw new ArgumentException($"{this.GetType()}, passed  4 > B value. Choose a higher B value.");
+                throw new ArgumentException($"{this.GetType()}, passed 4 > B value. Choose a higher B value.");
 
             this.maxChildren = B;
             this.minChildren = B / 2;
