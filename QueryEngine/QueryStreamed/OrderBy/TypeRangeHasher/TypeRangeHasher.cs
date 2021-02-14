@@ -58,6 +58,8 @@ namespace QueryEngine
         /// </summary>
         private uint halfRange = UInt32.MaxValue / 2 + 1;
         
+
+        /*
         /// <summary>
         ///  A point that devides the range into the buckets containing +1 range size from the rest.
         /// </summary>
@@ -66,15 +68,18 @@ namespace QueryEngine
         /// A number of buckets until the distribution point.
         /// </summary>
         private uint distributionBuckets;
+         */
 
         public IntRangeHasher(int threadCount) : base(threadCount)
         {
             this.BucketCount = threadCount * threadCount;
             this.rangeSize = (UInt32.MaxValue / (uint)this.BucketCount);
             
+            /*
             var unDistributedValues = (UInt32.MaxValue % (uint)this.BucketCount);
             this.distributionPoint = (rangeSize * (unDistributedValues)) + unDistributedValues;
             this.distributionBuckets = (unDistributedValues);
+             */
         }
 
         public override int Hash(int value)
@@ -88,11 +93,14 @@ namespace QueryEngine
                 else 
                     tmpValue = this.halfRange + (uint)value;
 
+                return (int)(tmpValue / this.rangeSize);
+                /*
                 // Until distributionPoint, buckets have +1 on range.
                 if (tmpValue <= distributionPoint)
                     return (int)(tmpValue / (this.rangeSize + 1));
                 else 
                     return (int)((this.distributionBuckets) + (( tmpValue - distributionPoint) / this.rangeSize));
+                 */
             }
         }
     }
@@ -136,7 +144,7 @@ namespace QueryEngine
 
             // If non printable, choose the first bucket otherwise the DEL char is in last bucket.
             if (firstChar < spaceChar) return 0;
-            else if (firstChar == 127) return this.BucketCount - 1;
+            else if (firstChar == delChar) return this.BucketCount - 1;
             else
             {
                 // Non printable goes into the bucket where is the beginning of the letter as the first char.
