@@ -34,7 +34,7 @@ namespace QueryEngine
             this.resTable = resultTable;
         }
 
-        public int NumberOfMatchedElements => this.resTable.NumberOfMatchedElements;
+        public int NumberOfMatchedElements => this.RowCount;
 
         public int ColumnCount => this.resTable.ColumnCount;
 

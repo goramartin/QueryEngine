@@ -16,12 +16,12 @@ namespace QueryEngine
     /// </summary>
     internal class MultiTableResultsABTree : ITableResults
     {
-        private List<TableResultsABTree> resTables;
+        private TableResultsABTree[] resTables;
         private bool isAsc;
 
-        public MultiTableResultsABTree(List<TableResultsABTree> resTables, bool isAsc) 
+        public MultiTableResultsABTree(TableResultsABTree[] resTables, bool isAsc) 
         {
-            if (resTables == null || resTables.Count == 0)
+            if (resTables == null || resTables.Length == 0)
                 throw new ArgumentNullException($"{this.GetType()}, trying to assign null to a constructor.");
             this.resTables = resTables;
             this.isAsc = isAsc;
@@ -29,23 +29,51 @@ namespace QueryEngine
 
         public TableResults.RowProxy this[int rowIndex] => throw new NotImplementedException();
 
-        public int NumberOfMatchedElements => throw new NotImplementedException();
+        public int NumberOfMatchedElements => this.RowCount;
 
-        public int ColumnCount => throw new NotImplementedException();
+        public int ColumnCount => resTables[0].ColumnCount;
 
-        public int RowCount => throw new NotImplementedException();
+        public int RowCount
+        {
+            get
+            {
+                int rowCount = 0;
+                for (int i = 0; i < this.resTables.Length; i++)
+                    rowCount += this.resTables[0].RowCount;
+                return rowCount;
+            } 
+        }
 
         public Element[] temporaryRow { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+        public IEnumerator<TableResults.RowProxy> GetEnumerator()
+        {
+            if (isAsc)
+            {
+                for (int i = 0; i < this.resTables.Length; i++)
+                {
+                    foreach (var item in this.resTables[i])
+                        yield return item;
+                }
+            } else
+            {
+                for (int i = this.resTables.Length-1; i >= 0 ; i--)
+                {
+                    foreach (var item in this.resTables[i])
+                        yield return item;
+                }
+            }
+        }
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
+        }
 
         public void AddOrder(int[] order)
         {
             throw new NotImplementedException();
         }
 
-        public IEnumerator<TableResults.RowProxy> GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
 
         public void StoreRow(Element[] row)
         {
@@ -57,9 +85,5 @@ namespace QueryEngine
             throw new NotImplementedException();
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
     }
 }

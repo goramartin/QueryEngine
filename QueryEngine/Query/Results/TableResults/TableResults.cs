@@ -16,23 +16,6 @@ using System.Collections.Generic;
 
 namespace QueryEngine
 {
-
-    /// <summary>
-    /// Base interface for table result classes.
-    /// Table results represent results from match query stored in a form of a table.
-    /// </summary>
-    internal interface ITableResults : IEnumerable<TableResults.RowProxy>
-    {
-        int NumberOfMatchedElements { get; }
-        int ColumnCount { get; }
-        int RowCount { get; }
-        Element[] temporaryRow { get; set; }
-        void StoreTemporaryRow();
-        void StoreRow(Element[] row);
-        TableResults.RowProxy this[int rowIndex] { get; }
-        void AddOrder(int[] order);
-    }
-
     /// <summary>
     /// Represents a table that consists of columns and rows.
     /// Each column represents one variable and each row represents an ordered set of those variables.

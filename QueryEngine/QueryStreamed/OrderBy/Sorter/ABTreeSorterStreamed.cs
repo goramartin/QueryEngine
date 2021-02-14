@@ -105,7 +105,6 @@ namespace QueryEngine
                 this.tree = new ABTree<int>(256, comparer);
                 this.resTable = resTable;
             }
-
         }
 
         public override void RetrieveResults(out ITableResults resTable, out GroupByResults groupByResults)
@@ -115,11 +114,10 @@ namespace QueryEngine
                 resTable = new TableResultsABTree(this.rangeBuckets[0].tree, this.rangeBuckets[0].resTable);
             else
             {
-                resTable = null;
-
-
-
-
+                TableResultsABTree[] tmpResults = new TableResultsABTree[this.rangeBuckets.Length];
+                for (int i = 0; i < this.rangeBuckets.Length; i++)
+                    tmpResults[i] = (new TableResultsABTree(this.rangeBuckets[i].tree, this.rangeBuckets[i].resTable));
+                resTable = new MultiTableResultsABTree(tmpResults, this.firstKeyComparers[0].isAscending);
             }
         }
     }

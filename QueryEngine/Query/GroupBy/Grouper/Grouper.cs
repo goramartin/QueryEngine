@@ -19,7 +19,7 @@ namespace QueryEngine
 
         protected Grouper(Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper helper, bool bucketStorage)
         {
-            if (helper == null || aggs == null)
+            if (helper == null || aggs == null || hashes == null)
                 throw new ArgumentNullException($"{this.GetType()}, passing null arguments to the constructor.");
 
             this.ThreadCount = helper.ThreadCount;

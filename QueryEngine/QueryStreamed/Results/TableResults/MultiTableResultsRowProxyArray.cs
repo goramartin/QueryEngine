@@ -29,37 +29,34 @@ namespace QueryEngine
         public int ColumnCount => this.resTables[0].ColumnCount;
 
         public int RowCount => this.indexArray.Length;
-
-        public Element[] temporaryRow { 
-            get => throw new ArgumentException($"{this.GetType()}, cannot get a temporary row in the sorted table."); 
-            set => throw new ArgumentException($"{this.GetType()}, cannot store a temporary row in the already sorted table.");
-        }
-
-        public void AddOrder(int[] order)
-        {
-            throw new ArgumentException($"{this.GetType()}, cannot pass an order to the already sorted table.");
-        }
-
-
-        public void StoreRow(Element[] row)
-        {
-            throw new ArgumentException($"{this.GetType()}, cannot store a row in the already sorted table.");
-        }
-
-        public void StoreTemporaryRow()
-        {
-            throw new ArgumentException($"{this.GetType()}, cannot store a temporary row in the already sorted table.");
-        }
-
         public IEnumerator<TableResults.RowProxy> GetEnumerator()
         {
             for (int i = 0; i < this.indexArray.Length; i++)
                 yield return this.indexArray[i];
         }
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return this.GetEnumerator();
         }
+
+
+        public Element[] temporaryRow { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+        public void AddOrder(int[] order)
+        {
+            throw new NotImplementedException();
+        }
+
+
+        public void StoreRow(Element[] row)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void StoreTemporaryRow()
+        {
+            throw new NotImplementedException();
+        }
+
     }
 }
