@@ -55,22 +55,6 @@ namespace QueryEngine
             else throw new ArgumentException($"Expression comparer factory, unknown type passed to a expression comparer factory.");
         }
 
-        /// <summary>
-        /// Checks whether used variables inside expression are same.
-        /// In case there are the same, the expression should give the same 
-        /// result.
-        /// </summary>
-        /// <param name="x"> First row. </param>
-        /// <param name="y"> Second row.</param>
-        /// <returns> True if all used variables are the same. </returns>
-        protected bool AreIdenticalVars(in TableResults.RowProxy x, in TableResults.RowProxy y)
-        {
-            for (int i = 0; i < this.usedVars.Length; i++)
-                if (x[i].ID != y[i].ID) return false;
-
-            return true;
-        }
-
         public abstract ExpressionComparer Clone(bool cacheResults);
 
         public ExpressionHolder GetExpressionHolder() => this.expressionHolder;
@@ -104,7 +88,7 @@ namespace QueryEngine
         /// Greater than zero x follows y in the sort order.</returns>
         public override int Compare(in TableResults.RowProxy x, in TableResults.RowProxy y)
         {
-            if (AreIdenticalVars(x, y)) return 0;
+            if (TableResults.RowProxy.AreIdenticalVars(in x, in y, this.usedVars)) return 0;
 
             if (this.cacheResults) return CachedCompare(in x, in y);
             else return NonCachedCompare(in x, in y);
@@ -145,7 +129,6 @@ namespace QueryEngine
                 else if (retValue == 1) retValue = -1;
                 else { /* retValue == 0 */}
             }
-
             return retValue;
         }
 

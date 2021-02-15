@@ -68,6 +68,23 @@ namespace QueryEngine
             
                 return tmpString;
             }
+
+            /// <summary>
+            /// Checks whether used variables inside expression are same.
+            /// In case there are the same, the expression should give the same 
+            /// result.
+            /// </summary>
+            /// <param name="x"> First row. </param>
+            /// <param name="y"> Second row.</param>
+            /// <param name="usedVars"> Variables to compare. </param>
+            /// <returns> True if all used variables are the same. </returns>
+            public static bool AreIdenticalVars(in TableResults.RowProxy x, in TableResults.RowProxy y, int[] usedVars)
+            {
+                for (int i = 0; i < usedVars.Length; i++)
+                    if (x[usedVars[i]].ID != y[usedVars[i]].ID) return false;
+
+                return true;
+            }
         }
     }
 }

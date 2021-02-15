@@ -115,6 +115,7 @@
     <Compile Include="Query\Match\MatchInternalResults\MatchInternalFixedResults.cs" />
     <Compile Include="Query\Match\MatchObjectBase.cs" />
     <Compile Include="Query\Match\ISingleThreadPatternMatcher.cs" />
+    <Compile Include="Query\Results\TableResults\ITableResults.cs" />
     <Compile Include="Query\Select\Printer\IRowPrinter.cs" />
     <Compile Include="Query\Expression\Reference\AggregateReference.cs" />
     <Compile Include="Query\Expression\Reference\VariableIDReference.cs" />

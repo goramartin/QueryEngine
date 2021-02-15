@@ -48,6 +48,9 @@ namespace QueryEngine
             int[] order = new int[this.resTable.RowCount];
             order.AscPopulate(0);
 
+
+            //Array.Sort(order, this.indexComparer);
+
             this.ArraySort(order, this.indexComparer);
 
             this.resTable.AddOrder(order);

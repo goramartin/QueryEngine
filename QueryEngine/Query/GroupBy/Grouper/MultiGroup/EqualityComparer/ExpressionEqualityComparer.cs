@@ -52,21 +52,6 @@ namespace QueryEngine
             else throw new ArgumentException($"Expression equality comparer factory, unknown type passed to a expression comparer factory.");
         }
 
-        /// <summary>
-        /// Checks whether used variables inside expression are same.
-        /// In case there are the same, the expression should give the same 
-        /// result.
-        /// </summary>
-        /// <param name="x"> First row. </param>
-        /// <param name="y"> Second row.</param>
-        /// <returns> True if all used variables are the same. </returns>
-        protected bool AreIdenticalVars(in TableResults.RowProxy x, in TableResults.RowProxy y)
-        {
-            for (int i = 0; i < usedVars.Length; i++)
-                if (x[i].ID != y[i].ID) return false;
-
-            return true;
-        }
         public abstract ExpressionEqualityComparer Clone();
         public abstract void SetCache(ExpressionHasher cache);
     }
@@ -92,7 +77,7 @@ namespace QueryEngine
         public override bool Equals(in TableResults.RowProxy x, in TableResults.RowProxy y)
         {
             // Check if used variables in expression are same
-            if (AreIdenticalVars(x, y)) return true;
+            if (TableResults.RowProxy.AreIdenticalVars(in x, in y, this.usedVars)) return true;
 
             if (this.boundHasher == null) return this.EqualsNotCached(in x, in y);
             else return this.EqualsCached(in x, in y);

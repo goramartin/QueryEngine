@@ -83,7 +83,6 @@ namespace QueryEngine
             var newComparers = new ExpressionComparer[comparers.Length];
             for (int i = 0; i < newComparers.Length; i++)
                 newComparers[i] = comparers[i].Clone(cacheResults);
-            
            return new RowComparer(newComparers, cacheResults);
         }
 
