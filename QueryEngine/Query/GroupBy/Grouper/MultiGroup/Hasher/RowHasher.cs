@@ -1,4 +1,6 @@
-﻿namespace QueryEngine
+﻿using System;
+
+namespace QueryEngine
 {
    
     /// <summary>
@@ -22,6 +24,9 @@
 
         public RowHasher(ExpressionHasher[] hashers)
         {
+            if (hashers == null || hashers.Length == 0)
+                throw new ArgumentNullException($"{this.GetType()}, trying to assign null to a constructor.");
+
             this.Hashers = hashers;
         }
 

@@ -50,7 +50,7 @@ namespace QueryEngine
                     position = groups.Count;
                     groups.Add(key, position);
                 }
-
+                
                 for (int j = 0; j < aggregates.Length; j++)
                     aggregates[j].Apply(in row, aggResults[j], position);
             }

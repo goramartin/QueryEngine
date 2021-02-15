@@ -19,6 +19,9 @@ namespace QueryEngine
 
         protected ExpressionHasher(ExpressionHolder expressionHolder)
         {
+            if (expressionHolder == null)
+                throw new ArgumentNullException($"{this.GetType()}, trying to assign null to a constructor.");
+
             this.expressionHolder = expressionHolder;
         }
 
@@ -53,18 +56,23 @@ namespace QueryEngine
 
         public override int Hash(in TableResults.RowProxy row)
         {
-            if (this.cache == null)
-            {
-                if (this.expr.TryEvaluate(in row, out T returnValue)) return returnValue.GetHashCode();
-                else return 0;
-            }
-            else
-            {
-                this.cache.lastYSuccess = this.expr.TryEvaluate(in row, out this.cache.lastYValue);
-                this.cache.lastYRow = row.index;
-                if (this.cache.lastYSuccess) return this.cache.lastYValue.GetHashCode();
-                else return 0;
-            }
+            if (this.cache == null) return this.NonCachedHash(in row);
+            else return this.CachedHash(in row);
+        }
+
+        private int NonCachedHash(in TableResults.RowProxy row)
+        {
+            if (this.expr.TryEvaluate(in row, out T returnValue)) 
+                return returnValue.GetHashCode();
+            else return 0;
+        }
+
+        private int CachedHash(in TableResults.RowProxy row)
+        {
+            this.cache.lastYSuccess = this.expr.TryEvaluate(in row, out this.cache.lastYValue);
+            this.cache.lastYRow = row.index;
+            if (this.cache.lastYSuccess) return this.cache.lastYValue.GetHashCode();
+            else return 0;
         }
 
         public override ExpressionHasher Clone()
