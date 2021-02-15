@@ -26,10 +26,10 @@ namespace QueryEngine
             this.resTable = resTable;
         }
 
-        protected void ArraySort<T>(T[] arr, IComparer<T> comparer)
+        protected T[] ArraySort<T>(T[] arr, IComparer<T> comparer)
         {
-            if (this.inParallel) HPCsharp.ParallelAlgorithm.SortMergePar(arr, comparer);
-            else HPCsharp.Algorithm.SortMerge(arr, comparer);
+            if (this.inParallel) return HPCsharp.ParallelAlgorithm.SortMergePar(arr, comparer);
+            else return HPCsharp.Algorithm.SortMerge(arr, comparer);
         }
     }
 }

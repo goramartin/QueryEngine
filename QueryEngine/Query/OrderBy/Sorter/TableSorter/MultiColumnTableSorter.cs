@@ -5,7 +5,7 @@ The sort is done via allocating array of indeces (0 to result count). The array 
 and the resulting array represents the sorted elements of a table. The array is then added to the table.
 By sorting only indeces, it helps to speed up the process of swapping long rows in the result table.
  */
-
+using System.Collections.Generic;
 using System;
 
 namespace QueryEngine
@@ -47,13 +47,8 @@ namespace QueryEngine
         {
             int[] order = new int[this.resTable.RowCount];
             order.AscPopulate(0);
-
-
-            //Array.Sort(order, this.indexComparer);
-
-            this.ArraySort(order, this.indexComparer);
-
-            this.resTable.AddOrder(order);
+            
+            this.resTable.AddOrder(this.ArraySort(order, this.indexComparer));
             return this.resTable;
         }
 

@@ -30,15 +30,13 @@ namespace QueryEngine
 
         public override int Compare(int x, int y)
         {
-            return this.rowComparer.Compare(this.resTable[x], this.resTable[y]);
-
-            //int compRes = this.rowComparer.Compare(this.resTable[x], this.resTable[y]);
-            // if (this.allowDuplicities) return compRes;
-            // else
-            //  {
-            //      if (compRes == 0) return x.CompareTo(y);
-            //      else return compRes;
-            //   }
+            int compRes = this.rowComparer.Compare(this.resTable[x], this.resTable[y]);
+            if (this.allowDuplicities) return compRes;
+            else
+            {
+               if (compRes == 0) return x.CompareTo(y);
+               else return compRes;
+            }
         }
     }
 }
