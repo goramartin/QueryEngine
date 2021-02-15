@@ -51,8 +51,9 @@ namespace QueryEngine
 
         public override void DoubleSize(int position)
         {
-            Array.Resize<T>(ref this.aggResults, (position + (position % 2)) * 2);
-            size = (position + (position % 2)) * 2;
+            int newSize = (position + (position % 2)) * 2;
+            Array.Resize<T>(ref this.aggResults, newSize);
+            size = newSize;
         }
 
         public override int ArraySize()
@@ -76,7 +77,8 @@ namespace QueryEngine
 
         public override void DoubleSize(int position)
         {
-            Array.Resize<int>(ref this.eltsUsed, (position + (position % 2)) * 2);
+            int newSize = (position + (position % 2)) * 2;
+            Array.Resize<int>(ref this.eltsUsed, newSize);
             base.DoubleSize( position);
         }
     }
@@ -88,7 +90,6 @@ namespace QueryEngine
             return (double)this.aggResults[position] / this.eltsUsed[position];
         }
     }
-
 
     /// <summary>
     /// Mainly it is used during computing average.

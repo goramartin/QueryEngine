@@ -127,7 +127,6 @@ namespace QueryEngine
             }
         }
 
-
         protected void MergeThreadSafeInternal(ref T value, T applied)
         {
             T initialValue, replacement;
