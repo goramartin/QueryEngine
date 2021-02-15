@@ -128,12 +128,12 @@ namespace QueryEngine
             }
         }
 
-        private void AddInternal(ref int placement, ref int eltsUsed, int value, int eltsValue)
+        private static void AddInternal(ref int placement, ref int eltsUsed, int value, int eltsValue)
         {
             placement += value;
             eltsUsed += eltsValue;
         }
-        private void AddThreadSafeInternal(ref int placement, ref int eltsUsed, int value, int eltsValue)
+        private static void AddThreadSafeInternal(ref int placement, ref int eltsUsed, int value, int eltsValue)
         {
             Interlocked.Add(ref placement, value);
             Interlocked.Add(ref eltsUsed, eltsValue);

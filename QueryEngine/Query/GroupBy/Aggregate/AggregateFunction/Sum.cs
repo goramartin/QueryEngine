@@ -88,14 +88,11 @@ namespace QueryEngine
         }
 
 
-
-
-
-        private void AddInternal(ref int placement, int value)
+        private static void AddInternal(ref int placement, int value)
         {
             placement += value;
         }
-        private void AddThreadSafeInternal(ref int placement, int value)
+        private static void AddThreadSafeInternal(ref int placement, int value)
         {
             Interlocked.Add(ref placement, value);
         }

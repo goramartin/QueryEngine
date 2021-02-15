@@ -28,16 +28,20 @@ namespace QueryEngine
         {
             return "count";
         }
-        public void IncBy(int value, AggregateBucketResult bucket)
+
+        public static void IncBy(int value, AggregateBucketResult bucket)
         {
             var tmpBucket = (AggregateBucketResult<int>)bucket;
             tmpBucket.aggResult += value;
         }
-        public void IncByThreadSafe(int value, AggregateBucketResult bucket)
+        public static void IncByThreadSafe(int value, AggregateBucketResult bucket)
         {
             var tmpBucket = (AggregateBucketResult<int>)bucket;
             Interlocked.Add(ref tmpBucket.aggResult, value);
         }
+
+
+        // Buckets
         public override void Apply(in TableResults.RowProxy row, AggregateBucketResult bucket)
         {
             if (!this.IsAstCount)
@@ -83,6 +87,7 @@ namespace QueryEngine
         {
             AddThreadSafeInternal(ref ((AggregateBucketResult<int>)bucket1).aggResult, ((AggregateBucketResult<int>)bucket2).aggResult);
         }
+
         public override void Merge(AggregateBucketResult bucket, AggregateListResults list, int position)
         {
             AddInternal(ref ((AggregateBucketResult<int>)bucket).aggResult, ((AggregateListResults<int>)list).aggResults[position]);
@@ -91,6 +96,9 @@ namespace QueryEngine
         {
             AddThreadSafeInternal(ref ((AggregateBucketResult<int>)bucket).aggResult, ((AggregateListResults<int>)list).aggResults[position]);
         }
+
+
+        // Lists
         public override void Merge(AggregateListResults list1, int into, AggregateListResults list2, int from)
         {
             var tmpList1 = (AggregateListResults<int>)list1;
@@ -117,6 +125,8 @@ namespace QueryEngine
                 else tmpList.aggResults[position]++;
             }
         }
+
+        // Arrays
         public override void ApplyThreadSafe(in TableResults.RowProxy row, AggregateArrayResults array, int position)
         {
              if (!this.IsAstCount)
@@ -127,19 +137,19 @@ namespace QueryEngine
              else IncrementThreadSafeInternal(ref ((AggregateArrayResults<int>)array).aggResults[position]);
         }
 
-        private void AddInternal(ref int placement, int value)
+        private static void AddInternal(ref int placement, int value)
         {
             placement += value;
         }
-        private void AddThreadSafeInternal(ref int placement, int value)
+        private static void AddThreadSafeInternal(ref int placement, int value)
         {
             Interlocked.Add(ref placement, value);
         }
-        private void IncrementInternal(ref int placement)
+        private static void IncrementInternal(ref int placement)
         {
             placement++;
         }
-        private void IncrementThreadSafeInternal(ref int placement)
+        private static void IncrementThreadSafeInternal(ref int placement)
         {
             Interlocked.Increment(ref placement);
         }

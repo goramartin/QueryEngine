@@ -89,7 +89,7 @@ namespace QueryEngine
 
         public override int GetHashCode()
         {
-            throw new NotImplementedException($"{this.GetType()}, callin not impl. function.");
+            throw new NotImplementedException($"{this.GetType()}, should never be called.");
         }
     }
 }

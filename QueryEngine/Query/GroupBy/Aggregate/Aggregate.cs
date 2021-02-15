@@ -6,14 +6,19 @@ The property IsAstCount serves as a helper to avoid unneccessary passing of rows
 count function. ( count(*) increases only the value, it doesnt have to compute the value)
 
 There are two types of aggregates, the types stem from the way the results are stored.
-The first one is array like storage and the second one is bucket like storage.
+The first one is array like storage (Array, List) and the second one is bucket like storage.
 
 The array like storage:
-The aggregates will also serve as a holders for the computed values (direct reference to the array result holders).
-This enables to omit casting of the storage classes.
-The Aggregate array results<> contains a list of immediate values that represent computes agg. values for a certain group. After the computation each index holds
-the final computed value. In other words each index represents a single group.
+The values are stored in an array/list and can be accessed via the provided index pertaining to a group.
+The array/list contain values of all groups.
+
+The bucket like stora:
+The values are stored in classes that store the computed values. The classes are stored in an array.
+The array represents aggregate values for a single group.
  
+The main point of having two types of storage classes is that the array/list can save a lot of memory,
+while the buckets are much more usefull in terms of parallel execution of the algorithms, since they are singletons (1:1 ratio to a group).
+
 Notice that the aggregate function compute the values only if the evaluated expression value
 is not null.
  */
@@ -39,18 +44,9 @@ namespace QueryEngine
         public Aggregate(ExpressionHolder expressionHolder)
         {
             this.expressionHolder = expressionHolder;
+            // The provided expressions are not stored in the expression info manager since 
+            // it stores the aggregates directly.
             if (this.expressionHolder != null) this.expressionHolder.SetExprPosition(-1);
-        }
-
-        /// <summary>
-        /// Creates a shallow copy.
-        /// The expression is a shallow copy.
-        /// The data stored inside the generic list are not coppied.
-        /// Note that field IsAstCount is set based on the exp field.
-        /// </summary>
-        public Aggregate Clone()
-        {
-            return (Aggregate)Activator.CreateInstance(this.GetType(), this.expressionHolder);
         }
 
         /// <summary>
@@ -71,14 +67,6 @@ namespace QueryEngine
             else throw new ArgumentException($"Aggregate factory, trying to create a non existent array bound aggregate. {funcName}, {compType}");
         }
 
-        /// <summary>
-        /// Creates an aggregate that is bound with the bucket type results.
-        /// </summary>
-        /// <param name="agg"> A aggregate to build from. </param>
-        public static Aggregate Factory(Aggregate agg)
-        {
-            return Factory(agg.GetFuncName(), agg.GetAggregateReturnType(), agg.expressionHolder);
-        }
         public override bool Equals(object obj)
         {
             if (obj == null) return false;
@@ -94,7 +82,6 @@ namespace QueryEngine
         public abstract Type GetAggregateReturnType();
         public abstract string GetFuncName();
        
-        
         #region Buckets
         /// <summary>
         /// Is called only on aggregates that are bound with the bucket type results.

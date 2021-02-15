@@ -26,9 +26,9 @@ namespace QueryEngine
             this.resTable = resTable;
         }
 
-        protected T[] ArraySort<T>(T[] arr, IComparer<T> comparer)
+        protected static T[] ArraySort<T>(T[] arr, IComparer<T> comparer, bool inParallel)
         {
-            if (this.inParallel) return HPCsharp.ParallelAlgorithm.SortMergePar(arr, comparer);
+            if (inParallel) return HPCsharp.ParallelAlgorithm.SortMergePar(arr, comparer);
             else return HPCsharp.Algorithm.SortMerge(arr, comparer);
         }
     }

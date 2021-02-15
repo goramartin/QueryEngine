@@ -48,7 +48,7 @@ namespace QueryEngine
             int[] order = new int[this.resTable.RowCount];
             order.AscPopulate(0);
             
-            this.resTable.AddOrder(this.ArraySort(order, this.indexComparer));
+            this.resTable.AddOrder(ArraySort(order, this.indexComparer, this.inParallel));
             return this.resTable;
         }
 
