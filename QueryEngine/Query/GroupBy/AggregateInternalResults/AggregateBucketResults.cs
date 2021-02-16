@@ -25,6 +25,7 @@ namespace QueryEngine
             if (type == typeof(int) && funcName == "avg") return new AggregateBucketAvgIntResult();
             else if (type == typeof(int) && (funcName == "min" || funcName == "max")) return new AggregateBucketResultWithSetFlag<int>();
             else if (type == typeof(string) && (funcName == "min" || funcName == "max")) return new AggregateBucketResultWithSetFlag<string>();
+            else if (funcName == "count") return new AggregateBucketResult<int>();
             else if (type == typeof(int)) return new AggregateBucketResult<int>();
             else if (type == typeof(string)) return new AggregateBucketResult<string>();
             else throw new ArgumentException($"Aggregate bucket result factory, cannot create a results holder with the type {type} for function {funcName}.");

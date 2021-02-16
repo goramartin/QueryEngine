@@ -29,6 +29,7 @@ namespace QueryEngine
             if (type == typeof(int) && funcName == "avg") return new AggregateListAvgIntResults();
             else if (type == typeof(int) && (funcName == "min" || funcName == "max")) return new AggregateListResultsWithSetFlag<int>();
             else if (type == typeof(string) && (funcName == "min" || funcName == "max")) return new AggregateListResultsWithSetFlag<string>();
+            else if (funcName == "count") return new AggregateListResults<int>();
             else if (type == typeof(int)) return new AggregateListResults<int>();
             else if (type == typeof(string)) return new AggregateListResults<string>();
             else throw new ArgumentException($"Aggregate list results factory, cannot create a results holder with the type {type} for function {funcName}.");
