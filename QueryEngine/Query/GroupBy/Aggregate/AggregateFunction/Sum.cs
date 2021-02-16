@@ -64,12 +64,12 @@ namespace QueryEngine
         // Lists
         public override void Apply(in TableResults.RowProxy row, AggregateListResults list, int position)
         {
-                if (this.expr.TryEvaluate(in row, out int returnValue))
-                {
-                    var tmpList = (AggregateListResults<int>)list;
-                    if (position == tmpList.aggResults.Count) tmpList.aggResults.Add(returnValue);
-                    else tmpList.aggResults[position] += returnValue;
-                }
+            var tmpList = (AggregateListResults<int>)list;
+            if (position == tmpList.aggResults.Count) 
+                tmpList.aggResults.Add(default);
+            
+            if (this.expr.TryEvaluate(in row, out int returnValue))
+                tmpList.aggResults[position] += returnValue;
         }
         public override void Merge(AggregateListResults list1, int into, AggregateListResults list2, int from)
         {

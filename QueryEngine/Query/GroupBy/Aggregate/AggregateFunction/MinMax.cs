@@ -13,7 +13,7 @@ namespace QueryEngine
         { }
 
         protected abstract bool Compare(T x, T y);
-        protected abstract bool CompareExchange(ref T value, T applied, T initial);
+        protected abstract bool CompareExchangeInternal(ref T value, T applied, T initial);
 
 
         // Buckets
@@ -22,16 +22,15 @@ namespace QueryEngine
             if (this.expr.TryEvaluate(in row, out T returnValue))
             {
                 var tmpBucket = ((AggregateBucketResultWithSetFlag<T>)bucket);
-                if (tmpBucket.isSet)
-                {
-                    if (Compare(tmpBucket.aggResult, returnValue)) tmpBucket.aggResult = returnValue;
-                    else { }
-                }
-                else
-                {
-                    tmpBucket.aggResult = returnValue;
-                    tmpBucket.isSet = true;
-                }
+                ApplyInternal(ref tmpBucket.aggResult, ref tmpBucket.isSet, returnValue);
+            }
+        }
+        public override void Apply(in Element[] row, AggregateBucketResult bucket)
+        {
+            if (this.expr.TryEvaluate(in row, out T returnValue))
+            {
+                var tmpBucket = ((AggregateBucketResultWithSetFlag<T>)bucket);
+                ApplyInternal(ref tmpBucket.aggResult, ref tmpBucket.isSet, returnValue);
             }
         }
         public override void ApplyThreadSafe(in TableResults.RowProxy row, AggregateBucketResult bucket)
@@ -40,23 +39,6 @@ namespace QueryEngine
             {
                 var tmpBucket = ((AggregateBucketResultWithSetFlag<T>)bucket);
                 ApplyThreadSafeInternal(ref tmpBucket.aggResult, ref tmpBucket.isSet, returnValue, tmpBucket);
-            }
-        }
-        public override void Apply(in Element[] row, AggregateBucketResult bucket)
-        {
-            if (this.expr.TryEvaluate(in row, out T returnValue))
-            {
-                var tmpBucket = ((AggregateBucketResultWithSetFlag<T>)bucket);
-                if (tmpBucket.isSet)
-                {
-                    if (Compare(tmpBucket.aggResult, returnValue)) tmpBucket.aggResult = returnValue;
-                    else { }
-                }
-                else
-                {
-                    tmpBucket.aggResult = returnValue;
-                    tmpBucket.isSet = true;
-                }
             }
         }
         public override void ApplyThreadSafe(in Element[] row, AggregateBucketResult bucket)
@@ -68,53 +50,86 @@ namespace QueryEngine
             }
         }
 
-
         public override void Merge(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
         {
             var tmpBucket1 = ((AggregateBucketResultWithSetFlag<T>)bucket1);
             var tmpBucket2 = ((AggregateBucketResultWithSetFlag<T>)bucket2);
-            if (Compare(tmpBucket1.aggResult, tmpBucket2.aggResult)) tmpBucket1.aggResult = tmpBucket2.aggResult;
-            else { }
-        }
-        public override void MergeThreadSafe(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
-        {
-            var tmpBucket1 = ((AggregateBucketResultWithSetFlag<T>)bucket1);
-            // The second is not accessed anymore, because the group in dictionary represents
-            // the first one.
-            var tmpBucket2 = ((AggregateBucketResultWithSetFlag<T>)bucket2);
-            MergeThreadSafeInternal(ref tmpBucket1.aggResult, tmpBucket2.aggResult);
+            MergeInternal(ref tmpBucket1.aggResult, ref tmpBucket1.isSet, tmpBucket2.aggResult, tmpBucket2.isSet);
         }
         public override void Merge(AggregateBucketResult bucket, AggregateListResults list, int position)
         {
-            var tmpBucket = ((AggregateBucketResult<T>)bucket);
-            var tmpList = ((AggregateListResults<T>)list);
-            if (Compare(tmpBucket.aggResult, tmpList.aggResults[position])) tmpBucket.aggResult = tmpList.aggResults[position];
+            var tmpBucket = ((AggregateBucketResultWithSetFlag<T>)bucket);
+            var tmpList = ((AggregateListResultsWithSetFlag<T>)list);
+            MergeInternal(ref tmpBucket.aggResult, ref tmpBucket.isSet, tmpList.aggResults[position], tmpList.isSet[position]);
+        }
+
+
+        public override void MergeThreadSafe(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
+        {
+            var tmpBucket1 = ((AggregateBucketResultWithSetFlag<T>)bucket1);
+            var tmpBucket2 = ((AggregateBucketResultWithSetFlag<T>)bucket2);
+
+            if (!tmpBucket2.isSet) return;
+            else
+                ApplyThreadSafeInternal(ref tmpBucket1.aggResult, ref tmpBucket1.isSet, tmpBucket2.aggResult, tmpBucket1);
         }
         public override void MergeThreadSafe(AggregateBucketResult bucket, AggregateListResults list, int position)
         {
-            var tmpBucket = ((AggregateBucketResult<T>)bucket);
-            var tmpList = ((AggregateListResults<T>)list);
-            MergeThreadSafeInternal(ref tmpBucket.aggResult, tmpList.aggResults[position]);
+            var tmpBucket = ((AggregateBucketResultWithSetFlag<T>)bucket);
+            var tmpList = ((AggregateListResultsWithSetFlag<T>)list);
+            
+            if (!tmpList.isSet[position]) return;
+            else
+                ApplyThreadSafeInternal(ref tmpBucket.aggResult, ref tmpBucket.isSet, tmpList.aggResults[position], tmpBucket);
         }
-      
+
 
         // Lists
         public override void Apply(in TableResults.RowProxy row, AggregateListResults list, int position)
         {
+            var tmpList = (AggregateListResultsWithSetFlag<T>)list;
+            // If it is the first entry.
+            if (position  == tmpList.aggResults.Count)
+            {
+                tmpList.aggResults.Add(default);
+                tmpList.isSet.Add(false);
+            }
+
             if (this.expr.TryEvaluate(in row, out T returnValue))
             {
-                var tmpList = (AggregateListResults<T>)list;
-                if (position == tmpList.aggResults.Count) tmpList.aggResults.Add(returnValue);
-                else if (Compare(tmpList.aggResults[position], returnValue)) tmpList.aggResults[position] = returnValue;
+                if (!tmpList.isSet[position])
+                {
+                    tmpList.isSet[position] = true;
+                    tmpList.aggResults[position] = returnValue;
+                } 
+                else if (Compare(tmpList.aggResults[position], returnValue)) 
+                    tmpList.aggResults[position] = returnValue;
+                else { }
             }
         }
         public override void Merge(AggregateListResults list1, int into, AggregateListResults list2, int from)
         {
-            var tmpList1 = (AggregateListResults<T>)list1;
-            var tmpList2 = (AggregateListResults<T>)list2;
+            var tmpList1 = (AggregateListResultsWithSetFlag<T>)list1;
+            var tmpList2 = (AggregateListResultsWithSetFlag<T>)list2;
 
-            if (into == tmpList1.aggResults.Count) tmpList1.aggResults.Add(tmpList2.aggResults[from]);
-            else if (Compare(tmpList1.aggResults[into], tmpList2.aggResults[from])) tmpList1.aggResults[into] = tmpList2.aggResults[from];
+            if (tmpList1.aggResults.Count == into)
+            {
+                tmpList1.aggResults.Add(default);
+                tmpList1.isSet.Add(false);
+            }
+
+            if (tmpList1.isSet[into] && tmpList2.isSet[from])
+            {
+                if (Compare(tmpList1.aggResults[into], tmpList2.aggResults[from]))
+                    tmpList1.aggResults[into] = tmpList2.aggResults[from];
+                else { }
+            }
+            else if (tmpList1.isSet[into] && !tmpList2.isSet[from]) return;
+            else
+            {
+                tmpList1.isSet[into] = true;
+                tmpList1.aggResults[into] = tmpList2.aggResults[from];
+            }
         }
         
         // Arrays
@@ -127,7 +142,40 @@ namespace QueryEngine
             }
         }
 
-        protected void MergeThreadSafeInternal(ref T value, T applied)
+
+        protected void MergeInternal(ref T value1, ref bool isSet1, T value2, bool isSet2)
+        {
+            // Both are set, choose the smaller/larger.
+            if (isSet1 && isSet2)
+            {
+                if (Compare(value1, value2)) value1 = value2;
+                else { }
+            }
+            // The second has no result.
+            else if (isSet1 && !isSet2) return;
+            // Move the result from the second to the first.
+            else
+            {
+                isSet1 = true;
+                value1 = value2;
+            }
+        }
+        protected void ApplyInternal(ref T value, ref bool isSet, T applied)
+        {
+            if (isSet)
+            {
+                if (Compare(value, applied)) value = applied;
+                else { }
+            }
+            else
+            {
+                value = applied;
+                isSet = true;
+            }
+        }
+        
+        
+        protected void CompareExchange(ref T value, T applied)
         {
             T initialValue, replacement;
             do
@@ -139,7 +187,7 @@ namespace QueryEngine
                 // Thus, the applied value can never succeed in the first place.
                 else break; //replacement = initialValue;
             }
-            while (!CompareExchange(ref value, replacement, initialValue));
+            while (!CompareExchangeInternal(ref value, replacement, initialValue));
         }
         protected void ApplyThreadSafeInternal(ref T value, ref bool isSet, T applied, object lockingObject)
         {
@@ -148,7 +196,7 @@ namespace QueryEngine
             {
                 if (isSet)
                 {
-                    MergeThreadSafeInternal(ref value, applied);
+                    CompareExchange(ref value, applied);
                     wasSet = true;
                 }
                 else
@@ -200,7 +248,7 @@ namespace QueryEngine
             return (x.CompareTo(y) > 0);
         }
 
-        protected override bool CompareExchange(ref int value, int applied, int initial)
+        protected override bool CompareExchangeInternal(ref int value, int applied, int initial)
         {
             return (initial == Interlocked.CompareExchange(ref value, applied, initial));
         }
@@ -215,7 +263,7 @@ namespace QueryEngine
             return (x.CompareTo(y) > 0);
         }
 
-        protected override bool CompareExchange(ref string value, string applied, string initial)
+        protected override bool CompareExchangeInternal(ref string value, string applied, string initial)
         {
             return (initial == Interlocked.CompareExchange(ref value, applied, initial));
         }
@@ -246,7 +294,7 @@ namespace QueryEngine
             return (x.CompareTo(y) < 0);
         }
 
-        protected override bool CompareExchange(ref int value, int applied, int initial)
+        protected override bool CompareExchangeInternal(ref int value, int applied, int initial)
         {
             return (initial == Interlocked.CompareExchange(ref value, applied, initial));
         }
@@ -261,7 +309,7 @@ namespace QueryEngine
             return (x.CompareTo(y) < 0);
         }
 
-        protected override bool CompareExchange(ref string value, string applied, string initial)
+        protected override bool CompareExchangeInternal(ref string value, string applied, string initial)
         {
             return (initial == Interlocked.CompareExchange(ref value, applied, initial));
         }

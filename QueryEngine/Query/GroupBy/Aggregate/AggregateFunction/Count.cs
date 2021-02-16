@@ -51,15 +51,6 @@ namespace QueryEngine
             }
             else IncrementInternal(ref ((AggregateBucketResult<int>)bucket).aggResult);
         }
-        public override void ApplyThreadSafe(in TableResults.RowProxy row, AggregateBucketResult bucket)
-        {
-            if (!this.IsAstCount)
-            {
-                if (this.expr.TryEvaluate(in row, out int returnValue))
-                    IncrementThreadSafeInternal(ref ((AggregateBucketResult<int>)bucket).aggResult);
-            }
-            else IncrementThreadSafeInternal(ref ((AggregateBucketResult<int>)bucket).aggResult);
-        }
         public override void Apply(in Element[] row, AggregateBucketResult bucket)
         {
             if (!this.IsAstCount)
@@ -68,6 +59,15 @@ namespace QueryEngine
                     IncrementInternal(ref ((AggregateBucketResult<int>)bucket).aggResult);
             }
             else IncrementInternal(ref ((AggregateBucketResult<int>)bucket).aggResult);
+        }
+        public override void ApplyThreadSafe(in TableResults.RowProxy row, AggregateBucketResult bucket)
+        {
+            if (!this.IsAstCount)
+            {
+                if (this.expr.TryEvaluate(in row, out int returnValue))
+                    IncrementThreadSafeInternal(ref ((AggregateBucketResult<int>)bucket).aggResult);
+            }
+            else IncrementThreadSafeInternal(ref ((AggregateBucketResult<int>)bucket).aggResult);
         }
         public override void ApplyThreadSafe(in Element[] row, AggregateBucketResult bucket)
         {
@@ -109,21 +109,16 @@ namespace QueryEngine
         }
         public override void Apply(in TableResults.RowProxy row, AggregateListResults list, int position)
         {
+            var tmpList = (AggregateListResults<int>)list;
+            if (position == tmpList.aggResults.Count)
+                tmpList.aggResults.Add(default);
+
             if (!this.IsAstCount)
             {
                 if (this.expr.TryEvaluate(in row, out int returnValue))
-                {
-                    var tmpList = (AggregateListResults<int>)list;
-                    if (position == tmpList.aggResults.Count) tmpList.aggResults.Add(1);
-                    else tmpList.aggResults[position]++;
-                }
+                    tmpList.aggResults[position]++;
             }
-            else
-            {
-                var tmpList = (AggregateListResults<int>)list;
-                if (position == tmpList.aggResults.Count) tmpList.aggResults.Add(1);
-                else tmpList.aggResults[position]++;
-            }
+            else tmpList.aggResults[position]++;
         }
 
         // Arrays
@@ -136,6 +131,7 @@ namespace QueryEngine
              }
              else IncrementThreadSafeInternal(ref ((AggregateArrayResults<int>)array).aggResults[position]);
         }
+
 
         private static void AddInternal(ref int placement, int value)
         {

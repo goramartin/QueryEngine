@@ -27,6 +27,8 @@ namespace QueryEngine
         public static AggregateListResults Factory(Type type, string funcName)
         {
             if (type == typeof(int) && funcName == "avg") return new AggregateListAvgIntResults();
+            else if (type == typeof(int) && (funcName == "min" || funcName == "max")) return new AggregateListResultsWithSetFlag<int>();
+            else if (type == typeof(string) && (funcName == "min" || funcName == "max")) return new AggregateListResultsWithSetFlag<string>();
             else if (type == typeof(int)) return new AggregateListResults<int>();
             else if (type == typeof(string)) return new AggregateListResults<string>();
             else throw new ArgumentException($"Aggregate list results factory, cannot create a results holder with the type {type} for function {funcName}.");
@@ -42,6 +44,11 @@ namespace QueryEngine
         {
             return this.aggResults[position];
         }
+    }
+
+    internal class AggregateListResultsWithSetFlag<T>: AggregateListResults<T>
+    {
+        public List<bool> isSet = new List<bool>();
     }
 
     /// <summary>
