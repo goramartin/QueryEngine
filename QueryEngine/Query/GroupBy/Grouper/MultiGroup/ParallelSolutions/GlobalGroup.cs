@@ -156,8 +156,10 @@ namespace QueryEngine
                     }
 
                     semaphore.WaitOne();
+
                     for (int j = 0; j < aggregates.Length; j++)
                         aggregates[j].ApplyThreadSafe(in row, aggResults[j], position);
+                    
                     semaphore.Release();
                 }
             }
@@ -223,10 +225,6 @@ namespace QueryEngine
 
             public GroupByJobBuckets(ConcurrentDictionary<int, AggregateBucketResult[]> groups, Aggregate[] aggregates, ITableResults resTable, int start, int end) : base(aggregates, resTable, start, end)
             {
-                this.aggregates = aggregates;
-                this.resTable = resTable;
-                this.start = start;
-                this.end = end;
                 this.groups = groups;
             }
         }
@@ -241,10 +239,6 @@ namespace QueryEngine
 
             public GroupByJobArrays(ConcurrentDictionary<int, int> groups, Aggregate[] aggregates, ITableResults resTable, int start, int end, AggregateArrayResults[] aggResults, Func<int, int> positionFactory, Semaphore semaphore, int threadCount) : base(aggregates, resTable, start, end)
             {
-                this.aggregates = aggregates;
-                this.resTable = resTable;
-                this.start = start;
-                this.end = end;
                 this.groups = groups;
                 this.aggResults = aggResults;
                 this.positionFactory = positionFactory;

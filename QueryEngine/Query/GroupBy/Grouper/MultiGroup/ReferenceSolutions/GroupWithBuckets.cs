@@ -15,8 +15,6 @@ namespace QueryEngine
         {
             //if (this.InParallel) throw new ArgumentException($"{this.GetType()}, cannot perform a parallel group by.");
 
-            // Create hashers and equality comparers.
-            // The hashers receive also the equality comparer as cache.
             CreateHashersAndComparers(out ExpressionComparer[] comparers, out ExpressionHasher[] hashers);
             return this.SingleThreadGroupBy(new RowHasher(hashers), RowEqualityComparerGroupKey.Factory(resTable, comparers, true), resTable);
         }
@@ -44,7 +42,7 @@ namespace QueryEngine
                 for (int j = 0; j < this.aggregates.Length; j++)
                     this.aggregates[j].Apply(in row, buckets[j]);
             }
-
+            
             return new DictGroupDictKeyBucket(groups, resTable);
         }
     }
