@@ -31,7 +31,7 @@ namespace QueryEngine
                 if (this.aggregates[i].IsAstCount)
                 {
                     // Actualise Count(*).
-                    ((Count)aggregates[i]).IncBy(resTable.NumberOfMatchedElements, aggResults[i]);
+                    ((Count<int>)aggregates[i]).IncBy(resTable.NumberOfMatchedElements, aggResults[i]);
                 }
                 else
                 {

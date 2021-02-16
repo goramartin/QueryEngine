@@ -57,7 +57,8 @@ namespace QueryEngine
         /// <param name="holder"> An expression to compute values with for the aggregate.</param>
         public static Aggregate Factory(string funcName, Type compType, ExpressionHolder holder = null)
         {
-            if (funcName == "count" && compType == typeof(int)) return new Count(holder);
+            if (funcName == "count" && compType == typeof(int)) return new Count<int>(holder);
+            else if (funcName == "count" && compType == typeof(string)) return new Count<string>(holder);
             else if (funcName == "max" && compType == typeof(int)) return new IntMax(holder);
             else if (funcName == "max" && compType == typeof(string)) return new StrMax(holder);
             else if (funcName == "min" && compType == typeof(int)) return new IntMin(holder);

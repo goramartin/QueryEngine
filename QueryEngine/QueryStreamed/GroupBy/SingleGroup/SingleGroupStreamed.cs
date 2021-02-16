@@ -51,7 +51,7 @@ namespace QueryEngine
                 if (tmp == this.executionHelper.ThreadCount)
                 {
                     for (int i = 0; i < this.aggregates.Length; i++)
-                        if (this.aggregates[i].IsAstCount) ((Count)this.aggregates[i]).IncBy(this.numberOfMatchedElements, this.finalResults[i]);
+                        if (this.aggregates[i].IsAstCount) ((Count<int>)this.aggregates[i]).IncBy(this.numberOfMatchedElements, this.finalResults[i]);
                 }
             }
         }

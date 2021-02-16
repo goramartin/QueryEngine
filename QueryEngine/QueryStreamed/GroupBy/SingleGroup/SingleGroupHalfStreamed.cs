@@ -60,7 +60,7 @@ namespace QueryEngine
                 for (int i = 0; i < this.aggregates.Length; i++)
                 {
                     if (!this.aggregates[i].IsAstCount) this.aggregates[i].MergeThreadSafe(this.finalResults[i], tmpRes[i]);
-                    else ((Count)this.aggregates[i]).IncByThreadSafe(this.numberOfMatchedElements[matcherID], finalResults[i]);
+                    else ((Count<int>)this.aggregates[i]).IncByThreadSafe(this.numberOfMatchedElements[matcherID], finalResults[i]);
                 }
             }
         }
