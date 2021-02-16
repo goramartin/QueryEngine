@@ -12,7 +12,7 @@ using System.Threading;
 
 namespace QueryEngine
 {
-    internal class Count : Aggregate<int>
+    internal class Count<T> : Aggregate<T>
     {
         public Count(ExpressionHolder expressionHolder) : base(expressionHolder)
         {
@@ -46,7 +46,7 @@ namespace QueryEngine
         {
             if (!this.IsAstCount)
             {
-                if (this.expr.TryEvaluate(in row, out int returnValue))
+                if (this.expr.TryEvaluate(in row, out T returnValue))
                    IncrementInternal(ref ((AggregateBucketResult<int>)bucket).aggResult);
             }
             else IncrementInternal(ref ((AggregateBucketResult<int>)bucket).aggResult);
@@ -55,7 +55,7 @@ namespace QueryEngine
         {
             if (!this.IsAstCount)
             {
-                if (this.expr.TryEvaluate(in row, out int returnValue))
+                if (this.expr.TryEvaluate(in row, out T returnValue))
                     IncrementInternal(ref ((AggregateBucketResult<int>)bucket).aggResult);
             }
             else IncrementInternal(ref ((AggregateBucketResult<int>)bucket).aggResult);
@@ -64,7 +64,7 @@ namespace QueryEngine
         {
             if (!this.IsAstCount)
             {
-                if (this.expr.TryEvaluate(in row, out int returnValue))
+                if (this.expr.TryEvaluate(in row, out T returnValue))
                     IncrementThreadSafeInternal(ref ((AggregateBucketResult<int>)bucket).aggResult);
             }
             else IncrementThreadSafeInternal(ref ((AggregateBucketResult<int>)bucket).aggResult);
@@ -73,7 +73,7 @@ namespace QueryEngine
         {
             if (!this.IsAstCount)
             {
-                if (this.expr.TryEvaluate(in row, out int returnValue))
+                if (this.expr.TryEvaluate(in row, out T returnValue))
                     IncrementThreadSafeInternal(ref ((AggregateBucketResult<int>)bucket).aggResult);
             }
             else IncrementThreadSafeInternal(ref ((AggregateBucketResult<int>)bucket).aggResult);
@@ -115,7 +115,7 @@ namespace QueryEngine
 
             if (!this.IsAstCount)
             {
-                if (this.expr.TryEvaluate(in row, out int returnValue))
+                if (this.expr.TryEvaluate(in row, out T returnValue))
                     tmpList.aggResults[position]++;
             }
             else tmpList.aggResults[position]++;
@@ -126,12 +126,11 @@ namespace QueryEngine
         {
              if (!this.IsAstCount)
              {
-                if (this.expr.TryEvaluate(in row, out int returnValue))
+                if (this.expr.TryEvaluate(in row, out T returnValue))
                     IncrementThreadSafeInternal(ref ((AggregateArrayResults<int>)array).aggResults[position]);
              }
              else IncrementThreadSafeInternal(ref ((AggregateArrayResults<int>)array).aggResults[position]);
         }
-
 
         private static void AddInternal(ref int placement, int value)
         {
