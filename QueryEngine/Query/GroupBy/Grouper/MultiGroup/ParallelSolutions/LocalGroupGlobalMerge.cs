@@ -22,16 +22,16 @@ namespace QueryEngine
         {
             // Create hashers and equality comparers.
             // The hashers receive also the equality comparer as cache.
-            CreateHashersAndComparers(out ExpressionEqualityComparer[] equalityComparers, out ExpressionHasher[] hashers);
-            return ParallelGroupBy(resTable, equalityComparers, hashers);
+            CreateHashersAndComparers(out ExpressionComparer[] comparers, out ExpressionHasher[] hashers);
+            return ParallelGroupBy(resTable, comparers, hashers);
         }
 
         /// <summary>
         /// Note that the received hashers and equality comparers have already set their internal cache to each other.
         /// </summary>
-        private GroupByResults ParallelGroupBy(ITableResults resTable, ExpressionEqualityComparer[] equalityComparers, ExpressionHasher[] hashers)
+        private GroupByResults ParallelGroupBy(ITableResults resTable, ExpressionComparer[] comparers, ExpressionHasher[] hashers)
         {
-            GroupByJob[] jobs = CreateJobs(resTable, this.aggregates, equalityComparers, hashers);
+            GroupByJob[] jobs = CreateJobs(resTable, this.aggregates, comparers, hashers);
             var tasks = new Task[this.ThreadCount - 1];
 
             for (int i = 0; i < tasks.Length; i++)
@@ -58,7 +58,7 @@ namespace QueryEngine
         /// The comparers and hashers build in the constructor of this class are given to the last job, just like the aggregates passed to the construtor.
         /// The global dictionary recieves a comparer that has no internal comparers set to some hasher.
         /// </summary>
-        private GroupByJob[] CreateJobs(ITableResults resTable, Aggregate[] aggs, ExpressionEqualityComparer[] equalityComparers, ExpressionHasher[] hashers)
+        private GroupByJob[] CreateJobs(ITableResults resTable, Aggregate[] aggs, ExpressionComparer[] comparers, ExpressionHasher[] hashers)
         {
             GroupByJob[] jobs = new GroupByJob[this.ThreadCount];
             int current = 0;
@@ -66,20 +66,18 @@ namespace QueryEngine
             if (addition == 0)
                 throw new ArgumentException($"{this.GetType()}, a range for a thread cannot be 0.");
 
-            var lastComp = new RowEqualityComparerGroupKey(resTable, equalityComparers);
+            var lastComp = RowEqualityComparerGroupKey.Factory(resTable, comparers, true);
             var lastHasher = new RowHasher(hashers);
-            lastComp.SetCache(lastHasher);
-            lastHasher.SetCache(lastComp.Comparers);
+            lastHasher.SetCache(lastComp.comparers);
 
             // Global merge dictionary
             // It needs only comparator that has no comparers set as a cache to some hasher.
-            var globalGroups = new ConcurrentDictionary<GroupDictKey, AggregateBucketResult[]>(lastComp.Clone());
+            var globalGroups = new ConcurrentDictionary<GroupDictKey, AggregateBucketResult[]>(lastComp.Clone(cacheResults: false));
             for (int i = 0; i < jobs.Length - 1; i++)
             {
-                var tmpComp = lastComp.Clone();
+                var tmpComp = lastComp.Clone(cacheResults: true);
                 var tmpHash = lastHasher.Clone();
-                tmpComp.SetCache(tmpHash);
-                tmpHash.SetCache(tmpComp.Comparers);
+                tmpHash.SetCache(tmpComp.comparers);
                 if (this.BucketStorage) jobs[i] = new GroupByJobBuckets(tmpHash, tmpComp, aggs, resTable, current, current + addition, globalGroups);
                 else jobs[i] = new GroupByJobMixListsBuckets(tmpHash, tmpComp, aggs, resTable, current, current + addition, globalGroups);
                 current += addition;

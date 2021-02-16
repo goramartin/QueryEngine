@@ -17,8 +17,8 @@ namespace QueryEngine
 
             // Create hashers and equality comparers.
             // The hashers receive also the equality comparer as cache.
-            CreateHashersAndComparers(out ExpressionEqualityComparer[] equalityComparers, out ExpressionHasher[] hashers);
-            return this.SingleThreadGroupBy(new RowHasher(hashers), new RowEqualityComparerGroupKey(resTable, equalityComparers), resTable);
+            CreateHashersAndComparers(out ExpressionComparer[] comparers, out ExpressionHasher[] hashers);
+            return this.SingleThreadGroupBy(new RowHasher(hashers), RowEqualityComparerGroupKey.Factory(resTable, comparers, true), resTable);
         }
 
         /// <summary>
@@ -31,8 +31,7 @@ namespace QueryEngine
         private GroupByResults SingleThreadGroupBy(RowHasher hasher, RowEqualityComparerGroupKey equalityComparer, ITableResults resTable)
         {
             #region DECL
-            equalityComparer.SetCache(hasher);
-            hasher.SetCache(equalityComparer.Comparers);
+            hasher.SetCache(equalityComparer.comparers);
             var aggResults = AggregateListResults.CreateListResults(this.aggregates);
             var groups = new Dictionary<GroupDictKey, int>(equalityComparer);
             int position;

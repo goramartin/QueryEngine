@@ -20,13 +20,13 @@ namespace QueryEngine
         public override GroupByResults Group(ITableResults resTable)
         {
             // Create hashers and equality comparers.
-            CreateHashersAndComparers(out ExpressionEqualityComparer[] equalityComparers, out ExpressionHasher[] hashers);
-            return ParallelGroupBy(resTable, equalityComparers, hashers);
+            CreateHashersAndComparers(out ExpressionComparer[] comparers, out ExpressionHasher[] hashers);
+            return ParallelGroupBy(resTable, comparers, hashers);
         }
 
-        private GroupByResults ParallelGroupBy(ITableResults resTable, ExpressionEqualityComparer[] equalityComparers, ExpressionHasher[] hashers)
+        private GroupByResults ParallelGroupBy(ITableResults resTable, ExpressionComparer[] comparers, ExpressionHasher[] hashers)
         {
-            GroupByJob[] jobs = CreateJobs(resTable, this.aggregates, equalityComparers, hashers);
+            GroupByJob[] jobs = CreateJobs(resTable, this.aggregates, comparers, hashers);
             ParallelGroupByWork(jobs, 0, ThreadCount, this.BucketStorage);
             return CreateGroupByResults(jobs[0]);
         }
@@ -39,7 +39,7 @@ namespace QueryEngine
         /// Note that they are all copies, because they contain a private stete (hasher contains reference to the equality comparers to enable caching when computing the hash.
         /// The comparers and hashers build in the constructor of this class are given to the last job, just like the aggregates passed to the construtor.
         /// </summary>
-        private GroupByJob[] CreateJobs(ITableResults resTable, Aggregate[] aggs, ExpressionEqualityComparer[] equalityComparers, ExpressionHasher[] hashers)
+        private GroupByJob[] CreateJobs(ITableResults resTable, Aggregate[] aggs, ExpressionComparer[] comparers, ExpressionHasher[] hashers)
         {
             GroupByJob[] jobs = new GroupByJob[this.ThreadCount];
             int current = 0;
@@ -48,17 +48,15 @@ namespace QueryEngine
                 throw new ArgumentException($"{this.GetType()}, a range for a thread cannot be 0.");
              
             // Set their internal cache.
-            var lastComp = new RowEqualityComparerGroupKey(resTable, equalityComparers);
+            var lastComp = RowEqualityComparerGroupKey.Factory(resTable, comparers, true);
             var lastHasher = new RowHasher(hashers);
-            lastComp.SetCache(lastHasher);
-            lastHasher.SetCache(lastComp.Comparers);
+            lastHasher.SetCache(lastComp.comparers);
 
             for (int i = 0; i < jobs.Length - 1; i++)
             {
-                var tmpComp = lastComp.Clone(); 
+                var tmpComp = lastComp.Clone(cacheResults: true); 
                 var tmpHash = lastHasher.Clone();
-                tmpComp.SetCache(tmpHash); 
-                tmpHash.SetCache(tmpComp.Comparers);
+                tmpHash.SetCache(tmpComp.comparers);
                 if (!this.BucketStorage) jobs[i] = new GroupByJobLists(tmpHash, tmpComp, aggs, resTable, current, current + addition);
                 else jobs[i] = new GroupByJobBuckets(tmpHash, tmpComp, aggs, resTable, current, current + addition);
                 current += addition;

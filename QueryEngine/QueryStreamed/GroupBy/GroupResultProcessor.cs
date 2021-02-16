@@ -25,23 +25,31 @@ namespace QueryEngine
             this.ColumnCount = columnCount;
         }
 
-        protected void CreateHashersAndComparers(out ExpressionEqualityComparer[] comparers, out ExpressionHasher[] hashers)
+        /// <summary>
+        /// Creates a list of hashers and comparers.
+        /// Notice that the number of comparers is equal to the number of hashers.
+        /// Also, they must be of the same generic type.
+        /// </summary>
+        protected void CreateHashersAndComparers(out ExpressionComparer[] comparers, out ExpressionHasher[] hashers)
         {
-            comparers = new ExpressionEqualityComparer[this.hashes.Length];
+            comparers = new ExpressionComparer[this.hashes.Length];
             hashers = new ExpressionHasher[this.hashes.Length];
             for (int i = 0; i < this.hashes.Length; i++)
             {
-                comparers[i] = (ExpressionEqualityComparer.Factory(this.hashes[i], this.hashes[i].ExpressionType));
-                hashers[i] = (ExpressionHasher.Factory(this.hashes[i], this.hashes[i].ExpressionType));
+                comparers[i] = (ExpressionComparer.Factory(this.hashes[i], true, false)); // hash, ascending, no cache.
+                hashers[i] = (ExpressionHasher.Factory(this.hashes[i]));
             }
         }
 
+
+        /// <summary>
+        /// Cache is on.
+        /// </summary>
         protected static void CloneHasherAndComparer(RowEqualityComparerGroupKey comparer, RowHasher hasher, out RowEqualityComparerGroupKey retComparer, out RowHasher retHasher)
         {
-            retComparer = comparer.Clone();
+            retComparer = comparer.Clone(cacheResults: true);
             retHasher = hasher.Clone();
-            retComparer.SetCache(retHasher);
-            retHasher.SetCache(retComparer.Comparers);
+            retHasher.SetCache(retComparer.comparers);
         }
 
 

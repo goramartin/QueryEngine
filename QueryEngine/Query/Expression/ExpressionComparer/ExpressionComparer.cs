@@ -16,7 +16,7 @@ namespace QueryEngine
     {
         protected ExpressionHolder expressionHolder;
         protected int[] usedVars;
-        public readonly bool isAscending;
+        public readonly bool isAscending = true;
         public readonly bool cacheResults;
         
         /// <summary>

@@ -9,17 +9,19 @@ namespace QueryEngine
     /// </summary>
     class RowEqualityComparerGroupDickKeyFull : IEqualityComparer<GroupDictKeyFull>
     {
-        public ExpressionEqualityComparer[] Comparers { get; }
+        public ExpressionComparer[] comparers;
+        public readonly bool cacheResults;
 
-        public RowEqualityComparerGroupDickKeyFull(ExpressionEqualityComparer[] comparers)
+        private RowEqualityComparerGroupDickKeyFull(ExpressionComparer[] comparers, bool cacheResults)
         {
-            this.Comparers = comparers;
+            this.comparers = comparers;
+            this.cacheResults = cacheResults;
         }
 
         public bool Equals(GroupDictKeyFull x, GroupDictKeyFull y)
         {
-            for (int i = 0; i < this.Comparers.Length; i++)
-                if (!this.Comparers[i].Equals(x.row, y.row)) return false;
+            for (int i = 0; i < this.comparers.Length; i++)
+                if (this.comparers[i].Compare(x.row, y.row) != 0) return false;
 
             return true;
         }
@@ -27,6 +29,11 @@ namespace QueryEngine
         public int GetHashCode(GroupDictKeyFull obj)
         {
            return obj.hash;
+        }
+
+        public static RowEqualityComparerGroupDickKeyFull Factory(ExpressionComparer[] comparers, bool cacheResults)
+        {
+            return new RowEqualityComparerGroupDickKeyFull(comparers.CloneHard(cacheResults), cacheResults);
         }
     }
 }

@@ -36,14 +36,14 @@ namespace QueryEngine
         /// Notice that the number of comparers is equal to the number of hashers.
         /// Also, they must be of the same generic type.
         /// </summary>
-        protected virtual void CreateHashersAndComparers(out ExpressionEqualityComparer[] comparers, out ExpressionHasher[] hashers)
+        protected virtual void CreateHashersAndComparers(out ExpressionComparer[] comparers, out ExpressionHasher[] hashers)
         {
-            comparers = new ExpressionEqualityComparer[this.hashes.Length];
+            comparers = new ExpressionComparer[this.hashes.Length];
             hashers = new ExpressionHasher[this.hashes.Length];
             for (int i = 0; i < this.hashes.Length; i++)
             {
-                comparers[i] = (ExpressionEqualityComparer.Factory(this.hashes[i], this.hashes[i].ExpressionType));
-                hashers[i] = (ExpressionHasher.Factory(this.hashes[i], this.hashes[i].ExpressionType));
+                comparers[i] = (ExpressionComparer.Factory(this.hashes[i], true, false)); // hash, ascending, no cache.
+                hashers[i] = (ExpressionHasher.Factory(this.hashes[i]));
             }
         }
 

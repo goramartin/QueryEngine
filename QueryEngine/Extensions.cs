@@ -30,6 +30,14 @@ namespace QueryEngine
                 arr[i] = i;
         }
 
+
+        public static ExpressionComparer[] CloneHard(this ExpressionComparer[] comparers, bool cacheResults)
+        {
+            var newComparers = new ExpressionComparer[comparers.Length];
+            for (int i = 0; i < newComparers.Length; i++)
+                newComparers[i] = comparers[i].Clone(cacheResults);
+            return newComparers;
+        }
     }
 
 }

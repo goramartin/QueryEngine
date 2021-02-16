@@ -80,10 +80,7 @@ namespace QueryEngine
         /// <param name="cacheResults"> Whether to cache results of the comparison. </param>
         public static RowComparer Factory(ExpressionComparer[] comparers, bool cacheResults)
         {
-            var newComparers = new ExpressionComparer[comparers.Length];
-            for (int i = 0; i < newComparers.Length; i++)
-                newComparers[i] = comparers[i].Clone(cacheResults);
-           return new RowComparer(newComparers, cacheResults);
+           return new RowComparer(comparers.CloneHard(cacheResults), cacheResults);
         }
 
     }

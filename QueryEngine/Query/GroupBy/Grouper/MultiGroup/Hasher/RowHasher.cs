@@ -41,9 +41,6 @@ namespace QueryEngine
             }
         }
 
-        /// <summary>
-        /// Creates a shallow copy of the row hasher.
-        /// </summary>
         public RowHasher Clone()
         {
             var tmp = new ExpressionHasher[this.Hashers.Length];
@@ -53,7 +50,7 @@ namespace QueryEngine
             return new RowHasher(tmp);
         }
 
-        public void SetCache(ExpressionEqualityComparer[] caches)
+        public void SetCache(ExpressionComparer[] caches)
         {
             for (int i = 0; i < this.Hashers.Length; i++)
                 this.Hashers[i].SetCache(caches[i]);

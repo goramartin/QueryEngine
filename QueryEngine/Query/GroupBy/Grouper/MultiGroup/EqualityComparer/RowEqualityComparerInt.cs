@@ -11,57 +11,41 @@ namespace QueryEngine
     /// </summary>
     internal class RowEqualityComparerInt : IEqualityComparer<int>
     {
-        public ITableResults ResTable { get; }
-        public ExpressionEqualityComparer[] Comparers { get; }
-        public RowHasher Hasher { get; }
+        public ITableResults resTable;
+        public ExpressionComparer[] Comparers;
+        public RowHasher hasher;
+        public readonly bool cacheResults;
 
-        /// <summary>
-        /// Construst equality comparer.
-        /// </summary>
-        /// <param name="CacheOn"> The cache signals, whether the given hasher should cache results for the comparers.</param>
-        public RowEqualityComparerInt(ITableResults resTable, ExpressionEqualityComparer[] comparers, RowHasher hasher, bool CacheOn)
+        private RowEqualityComparerInt(ITableResults resTable, ExpressionComparer[] comparers, RowHasher hasher, bool cacheResults)
         {
-            this.ResTable = resTable;
+            this.resTable = resTable;
             this.Comparers = comparers;
-            this.Hasher = hasher;
-
-            // Just in case, set the cache to null.
-            if (CacheOn)
-            {
-                this.SetCache();
-                this.Hasher.SetCache(this.Comparers);
-            }
-            else
-            {
-                this.UnsetCache();
-                this.Hasher.UnsetCache();
-            }
+            this.hasher = hasher;
+            this.cacheResults = cacheResults;
         }
 
         public bool Equals(int x, int y)
         {
             for (int i = 0; i < this.Comparers.Length; i++)
-                if (!this.Comparers[i].Equals(this.ResTable[x], this.ResTable[y])) return false;
+                if (this.Comparers[i].Compare(this.resTable[x], this.resTable[y]) != 0) return false;
 
             return true;
         }
 
         public int GetHashCode(int obj)
         {
-            return this.Hasher.Hash(this.ResTable[obj]);
+            return this.hasher.Hash(this.resTable[obj]);
         }
 
-        private void SetCache()
+        public static RowEqualityComparerInt Factory(ITableResults resTable, ExpressionComparer[] comparers, RowHasher hasher, bool cacheResults)
         {
-            for (int i = 0; i < this.Comparers.Length; i++)
-                this.Comparers[i].SetCache(this.Hasher.Hashers[i]);
-        }
+            var newComparers = comparers.CloneHard(cacheResults);
+            
+            var newHasher = hasher.Clone();
+            if (cacheResults) newHasher.SetCache(newComparers);
+            else newHasher.UnsetCache();
 
-        private void UnsetCache()
-        {
-            for (int i = 0; i < this.Comparers.Length; i++)
-                this.Comparers[i].SetCache(null);
+            return new RowEqualityComparerInt(resTable, newComparers, newHasher, cacheResults);
         }
-
     }
 }

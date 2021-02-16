@@ -26,11 +26,10 @@ namespace QueryEngine
             this.groupJobs = new GroupJob[this.executionHelper.ThreadCount];
 
             // Create initial job, comps and hashers
-            this.CreateHashersAndComparers(out ExpressionEqualityComparer[] equalityComparers, out ExpressionHasher[] hashers);
-            var firstComp = new RowEqualityComparerGroupKey(null, equalityComparers);
+            this.CreateHashersAndComparers(out ExpressionComparer[] comparers, out ExpressionHasher[] hashers);
+            var firstComp = RowEqualityComparerGroupKey.Factory(null, comparers, true);
             var firstHasher = new RowHasher(hashers);
-            firstComp.SetCache(firstHasher);
-            firstHasher.SetCache(firstComp.Comparers);
+            firstHasher.SetCache(firstComp.comparers);
 
             this.groupJobs[0] = new GroupJob(firstComp, firstHasher, new TableResults(this.ColumnCount, this.executionHelper.FixedArraySize));
             for (int i = 1; i < this.executionHelper.ThreadCount; i++)
@@ -39,7 +38,7 @@ namespace QueryEngine
                 groupJobs[i] = new GroupJob(newComp, newHasher, new TableResults(this.ColumnCount, this.executionHelper.FixedArraySize));
             }
 
-            this.globalGroups = new ConcurrentDictionary<GroupDictKeyFull, AggregateBucketResult[]>(new RowEqualityComparerGroupDickKeyFull(firstComp.Clone().Comparers));
+            this.globalGroups = new ConcurrentDictionary<GroupDictKeyFull, AggregateBucketResult[]>(RowEqualityComparerGroupDickKeyFull.Factory(comparers, false));
         }
 
         public override void Process(int matcherID, Element[] result)
@@ -113,7 +112,7 @@ namespace QueryEngine
             public GroupJob(RowEqualityComparerGroupKey comparer, RowHasher hasher, ITableResults resTable)
             {
                 this.resTable = resTable;
-                comparer.ResTable = this.resTable;
+                comparer.resTable = this.resTable;
                 this.groups = new Dictionary<GroupDictKey, AggregateBucketResult[]>(comparer);
                 this.hasher = hasher;
             }

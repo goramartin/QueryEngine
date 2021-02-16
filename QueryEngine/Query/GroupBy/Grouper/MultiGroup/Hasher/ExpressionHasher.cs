@@ -27,13 +27,13 @@ namespace QueryEngine
 
         public abstract int Hash(in TableResults.RowProxy row);
 
-        public static ExpressionHasher Factory(ExpressionHolder expressionHolder, Type type)
+        public static ExpressionHasher Factory(ExpressionHolder expressionHolder)
         {
-            if (type == typeof(int)) 
+            if (expressionHolder.ExpressionType == typeof(int)) 
                 return new ExpressionHasher<int>(expressionHolder);
-            else if (type == typeof(string)) 
+            else if (expressionHolder.ExpressionType == typeof(string)) 
                 return new ExpressionHasher<string>(expressionHolder);
-            else throw new ArgumentException($"Expression hasher factory, trying to create hasher with unknown type = {type}.");
+            else throw new ArgumentException($"Expression hasher factory, trying to create hasher with unknown type = {expressionHolder.ExpressionType}.");
         }
 
         /// <summary>
@@ -41,13 +41,13 @@ namespace QueryEngine
         /// Expects that the cache is different than the containing one in (this).
         /// </summary>
         public abstract ExpressionHasher Clone();
-        public abstract void SetCache(ExpressionEqualityComparer cache);
+        public abstract void SetCache(ExpressionComparer cache);
     }
 
     internal class ExpressionHasher<T> : ExpressionHasher
     {
         protected ExpressionReturnValue<T> expr;
-        protected ExpressionEqualityComparer<T> cache;
+        protected ExpressionComparer<T> cache;
 
         public ExpressionHasher(ExpressionHolder expressionHolder) : base(expressionHolder)
         {
@@ -69,9 +69,11 @@ namespace QueryEngine
 
         private int CachedHash(in TableResults.RowProxy row)
         {
-            this.cache.lastYSuccess = this.expr.TryEvaluate(in row, out this.cache.lastYValue);
-            this.cache.lastYRow = row.index;
-            if (this.cache.lastYSuccess) return this.cache.lastYValue.GetHashCode();
+            bool ySuccess = this.expr.TryEvaluate(in row, out T yValue);
+            int yRow = row.index;
+            this.cache.SetYCache(ySuccess, yRow, yValue);
+
+            if (ySuccess) return yValue.GetHashCode();
             else return 0;
         }
 
@@ -80,10 +82,10 @@ namespace QueryEngine
             return new ExpressionHasher<T>(this.expressionHolder);
         }
 
-        public override void SetCache(ExpressionEqualityComparer cache)
+        public override void SetCache(ExpressionComparer cache)
         {
             if (cache == null) this.cache = null;
-            else this.cache = (ExpressionEqualityComparer<T>)cache;
+            else this.cache = (ExpressionComparer<T>)cache;
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace QueryEngine
 {
@@ -16,20 +17,24 @@ namespace QueryEngine
     /// </summary>
     internal class RowEqualityComparerGroupKey : IEqualityComparer<GroupDictKey>
     {
-        public ITableResults ResTable { get; set; }
-        public ExpressionEqualityComparer[] Comparers { get; }
-        public bool CacheOn { get; private set; }
+        public ITableResults resTable;
+        public ExpressionComparer[] comparers;
+        public readonly bool cacheResults;
         
-        public RowEqualityComparerGroupKey(ITableResults resTable, ExpressionEqualityComparer[] comparers)
+        private RowEqualityComparerGroupKey(ITableResults resTable, ExpressionComparer[] expressionComparers, bool cacheResults)
         {
-            this.ResTable = resTable;
-            this.Comparers = comparers;
+            if (expressionComparers == null || expressionComparers.Length == 0)
+                throw new ArgumentException($"{this.GetType()}, trying to assign null to a constructor.");
+
+            this.resTable = resTable;
+            this.comparers = expressionComparers;
+            this.cacheResults = cacheResults;
         }
 
         public bool Equals(GroupDictKey x, GroupDictKey y)
         {
-            for (int i = 0; i < this.Comparers.Length; i++)
-                if (!this.Comparers[i].Equals(this.ResTable[x.position], this.ResTable[y.position])) return false;
+            for (int i = 0; i < this.comparers.Length; i++)
+                if (this.comparers[i].Compare(this.resTable[x.position], this.resTable[y.position]) != 0) return false;
 
             return true;
         }
@@ -40,30 +45,16 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Clone the entire equality comparer.
-        /// It clones also the comparers because they contain cache.
+        /// Create by cloning comparers
         /// </summary>
-        public RowEqualityComparerGroupKey Clone()
+        public static RowEqualityComparerGroupKey Factory(ITableResults resTable, ExpressionComparer[] comparers, bool cacheResults)
         {
-            var tmp = new ExpressionEqualityComparer[this.Comparers.Length];
-            for (int i = 0; i < this.Comparers.Length; i++)
-                tmp[i] = (this.Comparers[i].Clone());
-
-            return new RowEqualityComparerGroupKey(this.ResTable, tmp);
+            return new RowEqualityComparerGroupKey(resTable, comparers.CloneHard(cacheResults), cacheResults);
         }
 
-        public void SetCache(RowHasher hasher)
+        public RowEqualityComparerGroupKey Clone(bool cacheResults)
         {
-            this.CacheOn = true;
-            for (int i = 0; i < this.Comparers.Length; i++)
-                this.Comparers[i].SetCache(hasher.Hashers[i]);
-        }
-
-        public void UnsetCache()
-        {
-            this.CacheOn = false ;
-            for (int i = 0; i < this.Comparers.Length; i++)
-                this.Comparers[i].SetCache(null);
+            return new RowEqualityComparerGroupKey(this.resTable, comparers.CloneHard(cacheResults), cacheResults);
         }
     }
 }

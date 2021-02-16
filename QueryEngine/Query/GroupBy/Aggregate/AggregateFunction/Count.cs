@@ -29,12 +29,12 @@ namespace QueryEngine
             return "count";
         }
 
-        public static void IncBy(int value, AggregateBucketResult bucket)
+        public void IncBy(int value, AggregateBucketResult bucket)
         {
             var tmpBucket = (AggregateBucketResult<int>)bucket;
             tmpBucket.aggResult += value;
         }
-        public static void IncByThreadSafe(int value, AggregateBucketResult bucket)
+        public void IncByThreadSafe(int value, AggregateBucketResult bucket)
         {
             var tmpBucket = (AggregateBucketResult<int>)bucket;
             Interlocked.Add(ref tmpBucket.aggResult, value);
