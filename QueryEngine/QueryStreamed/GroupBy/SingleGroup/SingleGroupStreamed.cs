@@ -18,31 +18,30 @@ namespace QueryEngine
         private AggregateBucketResult[] finalResults;
         private int numberOfMatchedElements;
         private int matchersFinished;
-        private bool ContainsNonAsterix;
+        private Aggregate[] nonAsterixAggregates;
+        private AggregateBucketResult[] nonAsterixResults;
+        private bool containsAst = false;
 
         public SingleGroupResultProcessorStreamed(QueryExpressionInfo expressionInfo, IGroupByExecutionHelper executionHelper, int columnCount) : base(expressionInfo, executionHelper, columnCount)
         {
             this.finalResults = AggregateBucketResult.CreateBucketResults(this.aggregates);
-            for (int i = 0; i < this.aggregates.Length; i++)
-                if (!this.aggregates[i].IsAstCount) this.ContainsNonAsterix = true;
+            Aggregate.ExtractNonAstAggsAndResults(this.aggregates, this.finalResults, out nonAsterixAggregates, out nonAsterixResults);
+            if (this.finalResults.Length != this.nonAsterixResults.Length) this.containsAst = true;
         }
+        
 
         /// <summary>
         /// If the given result is not null, the aggregates for the calling matcher are computed.
-        /// If the given result is null, the aggregates are merged onto the field finalResults.
-        /// The result == null means that the mather finished it is search.
+        /// The result == null means that the mather finished it's search.
         /// </summary>
         public override void Process(int matcherID, Element[] result)
         {
             if (result != null)
             {
-                Interlocked.Increment(ref this.numberOfMatchedElements);
-                if (this.ContainsNonAsterix)
-                {
-                    for (int i = 0; i < this.aggregates.Length; i++)
-                        if (!this.aggregates[i].IsAstCount) this.aggregates[i].ApplyThreadSafe(result, finalResults[i]);
-                        else continue;
-                }
+                for (int i = 0; i < this.aggregates.Length; i++)
+                        this.aggregates[i].ApplyThreadSafe(result, finalResults[i]);
+                if (this.containsAst) Interlocked.Increment(ref this.numberOfMatchedElements);
+                else { }
             } else
             {
                 // Signal that the matcher has finished.
@@ -50,8 +49,13 @@ namespace QueryEngine
                 // The last finished matcher stores the number of matched elements.
                 if (tmp == this.executionHelper.ThreadCount)
                 {
-                    for (int i = 0; i < this.aggregates.Length; i++)
-                        if (this.aggregates[i].IsAstCount) ((Count<int>)this.aggregates[i]).IncBy(this.numberOfMatchedElements, this.finalResults[i]);
+                    // Fill the Count(*) if presents.
+                    if (this.containsAst)
+                    {
+                        for (int i = 0; i < this.aggregates.Length; i++)
+                            if (this.aggregates[i].IsAstCount) ((Count<int>)this.aggregates[i]).IncBy(this.numberOfMatchedElements, this.finalResults[i]);
+                    }
+                    // The final results will contain all the results.
                 }
             }
         }

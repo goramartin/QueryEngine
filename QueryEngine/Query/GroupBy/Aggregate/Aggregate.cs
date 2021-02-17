@@ -23,6 +23,7 @@ Notice that the aggregate function compute the values only if the evaluated expr
 is not null.
  */
 using System;
+using System.Collections.Generic;
 
 namespace QueryEngine
 {
@@ -80,6 +81,25 @@ namespace QueryEngine
                 else return false;
             }
         }
+
+        public static void ExtractNonAstAggsAndResults(Aggregate[] aggregates, AggregateBucketResult[] results, out Aggregate[] nonAsterixAggregates, out AggregateBucketResult[] nonAstResults)
+        {
+            List<Aggregate> tmpAggs = new List<Aggregate>();
+            List<AggregateBucketResult> tmpResults = new List<AggregateBucketResult>();
+            for (int i = 0; i < aggregates.Length; i++)
+            {
+                if (!aggregates[i].IsAstCount)
+                {
+                    tmpAggs.Add(aggregates[i]);
+                    tmpResults.Add(results[i]);
+                }
+                else continue;
+            }
+            nonAsterixAggregates = tmpAggs.ToArray();
+            nonAstResults = tmpResults.ToArray();
+        }
+
+
         public abstract Type GetAggregateReturnType();
         public abstract string GetFuncName();
        

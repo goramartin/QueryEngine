@@ -76,12 +76,19 @@ namespace QueryEngine
         /// </summary>
         public static ResultProcessor Factory(QueryExpressionInfo expressionInfo, IGroupByExecutionHelper executionHelper, int columnCount)
         {
-            if (executionHelper.GrouperAlias == "singleHS") return new SingleGroupResultProcessorHalfStreamed(expressionInfo, executionHelper, columnCount);
-            else if (executionHelper.GrouperAlias == "singleS") return new SingleGroupResultProcessorStreamed(expressionInfo, executionHelper, columnCount);
-            else if (executionHelper.GrouperAlias == "globalS") return new GlobalGroupStreamed(expressionInfo, executionHelper, columnCount);
-            else if (executionHelper.GrouperAlias == "twowayHSB") return new LocalGroupGlobalMergeHalfStreamedBucket(expressionInfo, executionHelper, columnCount);
-            else if (executionHelper.GrouperAlias == "twowayHSL") return new LocalGroupGlobalMergeHalfStreamedListBucket(expressionInfo, executionHelper, columnCount);
-            else throw new ArgumentException("Group by result processor, trying to create an unknown grouper.");
+            if (executionHelper.IsSetSingleGroupGroupBy)
+            {
+                if (executionHelper.GrouperAlias == "singleHS") return new SingleGroupResultProcessorHalfStreamed(expressionInfo, executionHelper, columnCount);
+                else /*if (executionHelper.GrouperAlias == "singleS")*/ return new SingleGroupResultProcessorStreamed(expressionInfo, executionHelper, columnCount);
+            }
+            else
+            {
+                if (executionHelper.GrouperAlias == "globalS") return new GlobalGroupStreamed(expressionInfo, executionHelper, columnCount);
+                else if (executionHelper.GrouperAlias == "twowayHSB") return new LocalGroupGlobalMergeHalfStreamedBucket(expressionInfo, executionHelper, columnCount);
+                else if (executionHelper.GrouperAlias == "twowayHSL") return new LocalGroupGlobalMergeHalfStreamedListBucket(expressionInfo, executionHelper, columnCount);
+                else throw new ArgumentException("Group by result processor, trying to create an unknown grouper.");
+            }
+
         }
     }
 }
