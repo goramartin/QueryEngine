@@ -21,7 +21,6 @@ namespace QueryEngine
             this.aggregates = aggregates;
             this.keysCount = hashes.Length;
             this.factories = new BucketKeyFactory[hashes.Length];
-            this.keysCount = hashes.Length;
             for (int i = 0; i < hashes.Length; i++)
                 this.factories[i] = BucketKeyFactory.Factory(hashes[i]);
         }
@@ -40,7 +39,10 @@ namespace QueryEngine
                 this.lastBucketsKeyValue = new AggregateBucketResult[this.keysCount + this.aggregates.Length];
                 // Init the aggregation funcs. storages
                 for (int i = this.keysCount; i < this.keysCount + this.aggregates.Length; i++)
-                    this.lastBucketsKeyValue[i] = AggregateBucketResult.Factory(this.aggregates[i].GetAggregateReturnType(), this.aggregates[i].GetFuncName());
+                {
+                    var agg = this.aggregates[i - this.keysCount];
+                    this.lastBucketsKeyValue[i] = AggregateBucketResult.Factory(agg.GetAggregateReturnType(), agg.GetFuncName());
+                }
             }
 
             for (int i = 0; i < keysCount; i++)
@@ -54,12 +56,11 @@ namespace QueryEngine
         {
             abstract public AggregateBucketResult Create(bool lastWasInserted, Element[] result); 
 
-            public static BucketKeyFactory Factory(ExpressionHolder holder)
+            public static BucketKeyFactory Factory(ExpressionHolder expressionHolder)
             {
-                var exprType = holder.GetExpressionType();
-                if (exprType == typeof(int)) return new BucketKeyFactory<int>(holder);
-                else if (exprType == typeof(string)) return new BucketKeyFactory<string>(holder);
-                else throw new ArgumentException($"Bucket key factory, unknown type of bucket factory. Type = {exprType}.");
+                if (expressionHolder.ExpressionType == typeof(int)) return new BucketKeyFactory<int>(expressionHolder);
+                else if (expressionHolder.ExpressionType == typeof(string)) return new BucketKeyFactory<string>(expressionHolder);
+                else throw new ArgumentException($"Bucket key factory, unknown type of bucket factory. Type = {expressionHolder.ExpressionType}.");
             }
         }
 
@@ -84,10 +85,12 @@ namespace QueryEngine
                 if (lastWasInserted) this.lastCreatedBucket = new AggregateBucketResultStreamed<T>();
                 else 
                 {   
+                    // Reset internal values.
                     this.lastCreatedBucket.aggResult = default;
                     this.lastCreatedBucket.isSet = false;
                 }
 
+                // Try init values with the provided result.
                 if (this.expr.TryEvaluate(result, out T returnValue))
                 {
                     this.lastCreatedBucket.aggResult = returnValue;

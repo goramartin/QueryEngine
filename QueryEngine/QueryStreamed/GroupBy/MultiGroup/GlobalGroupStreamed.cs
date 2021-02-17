@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace QueryEngine
@@ -22,6 +23,7 @@ namespace QueryEngine
             this.matcherBucketFactories = new BucketsKeyValueFactory[this.executionHelper.ThreadCount];
             for (int i = 0; i < this.executionHelper.ThreadCount; i++)
                 this.matcherBucketFactories[i] = new BucketsKeyValueFactory(this.aggregates, this.hashes);
+            
             var comparer = new RowEqualityComparerAggregateBucketResult(this.hashes.Length, this.hashes);
             if (this.executionHelper.InParallel) this.parGroups = new ConcurrentDictionary<AggregateBucketResult[], AggregateBucketResult[]>(comparer);
             else this.stGroups = new Dictionary<AggregateBucketResult[], AggregateBucketResult[]>(comparer);
