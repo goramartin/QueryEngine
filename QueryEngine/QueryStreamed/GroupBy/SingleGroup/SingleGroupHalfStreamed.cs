@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System;
+using System.Threading;
 
 namespace QueryEngine 
 {
@@ -12,28 +14,35 @@ namespace QueryEngine
     /// </summary>
     internal class SingleGroupResultProcessorHalfStreamed : GroupResultProcessor
     {
+        private Aggregate[] nonAsterixAggregates;
+        private int[] numberOfMatchedElements;
+        
         /// <summary>
         /// Each indes array[i] represents one matcher result storage.
         /// The index also represents matcherID.
         /// </summary>
-        private AggregateBucketResult[][] matcherResults;
-        private int[] numberOfMatchedElements;
+        private AggregateBucketResult[][] matcherNonAsterixResults;
         /// <summary>
         /// When matcher finishes, the results are merged onto this property.
         /// </summary>
         private AggregateBucketResult[] finalResults;
-        private bool ContainsNonAstrix;
+        /// <summary>
+        /// Contains final results from "finalResults" field without count(*).
+        /// Note that updating this field updates also the appropriate field in the "finalResuls".
+        /// </summary>
+        private AggregateBucketResult[] finalNonAsterixResults;
+        private bool containsAst;
 
         public SingleGroupResultProcessorHalfStreamed(QueryExpressionInfo expressionInfo, IGroupByExecutionHelper helper, int columnCount): base(expressionInfo, helper, columnCount)
         {
-            this.matcherResults = new AggregateBucketResult[helper.ThreadCount][];
-            this.numberOfMatchedElements = new int[helper.ThreadCount];
+            this.matcherNonAsterixResults = new AggregateBucketResult[this.executionHelper.ThreadCount][];
             this.finalResults = AggregateBucketResult.CreateBucketResults(this.aggregates);
+            Aggregate.ExtractNonAstAggsAndResults(this.aggregates, this.finalResults, out nonAsterixAggregates, out finalNonAsterixResults);
+            if (this.finalResults.Length != this.finalNonAsterixResults.Length) this.containsAst = true;
 
-            for (int i = 0; i < this.matcherResults.Length; i++)
-                this.matcherResults[i] = AggregateBucketResult.CreateBucketResults(this.aggregates);
-            for (int i = 0; i < this.aggregates.Length; i++)
-                if (!this.aggregates[i].IsAstCount) this.ContainsNonAstrix = true;
+            this.numberOfMatchedElements = new int[this.executionHelper.ThreadCount];
+            for (int i = 0; i < this.matcherNonAsterixResults.Length; i++)
+                this.matcherNonAsterixResults[i] = AggregateBucketResult.CreateBucketResults(this.nonAsterixAggregates);
         }
 
         /// <summary>
@@ -43,24 +52,32 @@ namespace QueryEngine
         /// </summary>
         public override void Process(int matcherID, Element[] result)
         {
-            var tmpRes = this.matcherResults[matcherID];
+            var matcherResults = this.matcherNonAsterixResults[matcherID];
             if (result != null)
             {
-                this.numberOfMatchedElements[matcherID]++;
-                if (this.ContainsNonAstrix)
-                {
-                    for (int i = 0; i < this.aggregates.Length; i++)
-                    {
-                        if (!this.aggregates[i].IsAstCount) this.aggregates[i].Apply(result, tmpRes[i]);
-                        else continue;
-                    }
-                }
+                for (int i = 0; i < this.nonAsterixAggregates.Length; i++)
+                    this.nonAsterixAggregates[i].Apply(result, matcherResults[i]);
+                if (this.containsAst) this.numberOfMatchedElements[matcherID]++;
+                else { }
             } else
             {
-                for (int i = 0; i < this.aggregates.Length; i++)
+                // Merge into non ast results.
+                for (int i = 0; i < this.nonAsterixAggregates.Length; i++)
                 {
-                    if (!this.aggregates[i].IsAstCount) this.aggregates[i].MergeThreadSafe(this.finalResults[i], tmpRes[i]);
-                    else ((Count<int>)this.aggregates[i]).IncByThreadSafe(this.numberOfMatchedElements[matcherID], finalResults[i]);
+                    if (this.executionHelper.InParallel) 
+                        this.nonAsterixAggregates[i].MergeThreadSafe(this.finalNonAsterixResults[i], matcherResults[i]);
+                    else this.nonAsterixAggregates[i].Merge(this.finalNonAsterixResults[i], matcherResults[i]);
+                }
+                    
+                if (this.containsAst)
+                {
+                    // Merge the number of matched elements.
+                    for (int i = 0; i < this.aggregates.Length; i++)
+                        if (this.aggregates[i].IsAstCount)
+                        {
+                            if (this.executionHelper.InParallel) ((Count<int>)this.aggregates[i]).IncByThreadSafe(this.numberOfMatchedElements[matcherID], finalResults[i]);
+                            else ((Count<int>)this.aggregates[i]).IncBy(this.numberOfMatchedElements[matcherID], finalResults[i]);
+                        }
                 }
             }
         }
