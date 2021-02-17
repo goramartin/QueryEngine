@@ -74,6 +74,10 @@ namespace QueryEngine
         /// processes the expression can pick which one to process.</returns>
         static public Dictionary<string, Node> Parse(List<Token> tokens)
         {
+            if (tokens.Count == 0)
+                ThrowError("Parser", "the inputted query is empty", 0, tokens);
+
+
             var parsedParts = new Dictionary<string, Node>();
 
             int position = 0;
@@ -117,7 +121,7 @@ namespace QueryEngine
         /// <param name="tokens"> Parsed tokens. </param>
         private static void ThrowError(string parserType, string message, int position, List<Token> tokens)
         {
-            string msg = parserType + ": " + message + " At " + position + " | Tokens:";
+            string msg = parserType + ": " + message + ". Token position: " + position + " Tokens:";
 
             for (int i = 0; i < tokens.Count; i++)
             {

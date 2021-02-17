@@ -138,7 +138,7 @@ namespace QueryEngine
         {
             this.graph = graph;
             this.variableMap = new VariableMap();
-            this.qEhelper = new QueryExecutionHelper(threadCount, printer, formater, verticesPerThread, 5_000_000, fileName, "DFSParallelStreamed", "DFSSingleThreadStreamed", "SIMPLE", "twowayHSB", "abtreeHS");
+            this.qEhelper = new QueryExecutionHelper(threadCount, printer, formater, verticesPerThread, 4_194_304, fileName, "DFSParallelStreamed", "DFSSingleThreadStreamed", "SIMPLE", "twowayHSL", "abtreeHS");
 
             // Parse input query.
             var parsedClauses = Parser.Parse(tokens);
