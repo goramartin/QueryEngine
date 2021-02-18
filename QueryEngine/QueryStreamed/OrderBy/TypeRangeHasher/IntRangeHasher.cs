@@ -18,32 +18,14 @@ namespace QueryEngine
     {
         private uint rangeSize;
         /// <summary>
-        /// Represents values - 2 147 483 648 (Int32.MinValue)
+        /// Represents values -2_147_483_648 (Int32.MinValue)
         /// </summary>
         private uint negativeRange = UInt32.MaxValue / 2 + 1;
-
-
-        /*
-        /// <summary>
-        ///  A point that devides the range into the buckets containing +1 range size from the rest.
-        /// </summary>
-        private uint distributionPoint;
-        /// <summary>
-        /// A number of buckets until the distribution point.
-        /// </summary>
-        private uint distributionBuckets;
-         */
 
         public IntRangeHasher(int threadCount) : base(threadCount)
         {
             this.BucketCount = threadCount * threadCount;
             this.rangeSize = (UInt32.MaxValue / (uint)this.BucketCount);
-
-            /*
-            var unDistributedValues = (UInt32.MaxValue % (uint)this.BucketCount);
-            this.distributionPoint = (rangeSize * (unDistributedValues)) + unDistributedValues;
-            this.distributionBuckets = (unDistributedValues);
-             */
         }
 
         public override int Hash(int value)
@@ -57,17 +39,15 @@ namespace QueryEngine
                 else
                     tmpValue = this.negativeRange + (uint)value;
 
-                return (int)(tmpValue / this.rangeSize);
-                /*
-                // Until distributionPoint, buckets have +1 on range.
-                if (tmpValue <= distributionPoint)
-                    return (int)(tmpValue / (this.rangeSize + 1));
-                else 
-                    return (int)((this.distributionBuckets) + (( tmpValue - distributionPoint) / this.rangeSize));
-                 */
+                var retVal = (int)(tmpValue / this.rangeSize);
+                // Because the unassigned values (UInt32.MaxValue mod (uint)this.BucketCount) fall into the bucket after the last.
+                // This can be done because the range is always larger than the unassigned values. So it always generates max +1 bucket.
+                if (retVal == this.BucketCount) return retVal - 1;
+                else return retVal;
             }
         }
     }
+
 
 
 }

@@ -29,7 +29,7 @@ namespace QueryEngine
 
         protected TypeRangeHasher(int threadCount) 
         {
-            if (threadCount > 32)
+            if (threadCount > 64)
                 throw new ArgumentException($"{this.GetType()}, exceeded the maximum number of threads.");
             this.threadCount = threadCount;
         }

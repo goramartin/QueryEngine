@@ -68,7 +68,7 @@ namespace QueryEngine
                         if (this.mergeJob.jobsToMerge.Length >= 2)
                         {
                             this.sortJobs = null;
-                            this.MergeResuls();
+                            this.mergedResults = this.MergeResuls();
                         }
                         else if (this.mergeJob.jobsToMerge.Length == 1) this.sortJobs = this.mergeJob.jobsToMerge;
                         else this.sortJobs = new SortJob[] { this.sortJobs[0] }; 
@@ -77,14 +77,10 @@ namespace QueryEngine
             }
         }
 
-        private void MergeResuls() 
+        private TableResults.RowProxy[] MergeResuls() 
         {
-            this.mergedResults = this.mergeJob.Merge();
+            return this.mergeJob.Merge();
         } 
-
-        /// <summary>
-        /// Class represents information about merging.
-        /// </summary>
 
         public override void RetrieveResults(out ITableResults resTable, out GroupByResults groupByResults)
         {

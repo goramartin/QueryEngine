@@ -25,7 +25,6 @@ namespace QueryEngine
             executionHelper.IsSetOrderBy = true;
             this.comparers = comps.ToArray();
             this.ColumnCount = columnCount;
-
         }
 
         /// <summary>

@@ -74,13 +74,14 @@ namespace QueryEngine
                 if (evalSuccess)
                     bucketIndex = this.firstKeyHasher.Hash(resValue);
 
-                lock (this.rangeBuckets[bucketIndex])
+                var bucket = this.rangeBuckets[bucketIndex];
+                var comp = this.firstKeyComparers[bucketIndex];
+                lock (bucket)
                 {
-                    var bucket = this.rangeBuckets[bucketIndex];
                     bucket.resTable.StoreRow(result);
 
                     // Set the Y cache since the internal impl. uses the right param when comparing.
-                    this.firstKeyComparers[bucketIndex].SetYCache(evalSuccess, bucket.resTable.RowCount - 1, resValue);
+                    comp.SetYCache(evalSuccess, bucket.resTable.RowCount - 1, resValue);
                     bucket.tree.Insert(bucket.resTable.RowCount - 1);
                 }
             } else
