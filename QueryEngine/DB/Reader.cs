@@ -81,8 +81,8 @@ namespace QueryEngine
             //peek next character
             while ((characterPeeked = this.fileReader.Peek()) != -1)
             {
-                if (characterPeeked < 128)
-                    throw new ArgumentException($"{this.GetType()}, the data file contains characters that are not ASCII (0-127).");
+                if (characterPeeked >= 128)
+                    throw new ArgumentException($"{this.GetType()}, the data file contains characters that are not ASCII (0-127). {characterPeeked}");
 
                 //the character is delimeter
                 if (this.delimeters.Contains((char)characterPeeked))
