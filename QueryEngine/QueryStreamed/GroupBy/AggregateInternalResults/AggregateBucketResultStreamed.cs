@@ -58,7 +58,7 @@ namespace QueryEngine
         }
         public static bool Equals(AggregateBucketResultStreamed<string> x, AggregateBucketResultStreamed<string> y)
         {
-            if (x.isSet && y.isSet) return x.aggResult == y.aggResult;
+            if (x.isSet && y.isSet) return String.Equals(x.aggResult, y.aggResult, StringComparison.Ordinal);
             if (!x.isSet && !y.isSet) return true;
             else return false;
         }

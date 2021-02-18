@@ -2,7 +2,7 @@
 This file contains definition of a min and max function.
 The min/max functions can be specialised on any type.
  */
-
+using System;
 using System.Threading;
 
 namespace QueryEngine
@@ -219,8 +219,6 @@ namespace QueryEngine
         }
     }
 
-    
-
 
 
     internal abstract class Min<T> : MinMaxBase<T>
@@ -260,7 +258,7 @@ namespace QueryEngine
 
         protected override bool Compare(string x, string y)
         {
-            return (x.CompareTo(y) > 0);
+            return (String.Compare(x, y, StringComparison.Ordinal) > 0);
         }
 
         protected override bool CompareExchangeInternal(ref string value, string applied, string initial)
@@ -306,7 +304,7 @@ namespace QueryEngine
 
         protected override bool Compare(string x, string y)
         {
-            return (x.CompareTo(y) < 0);
+            return (String.Compare(x, y, StringComparison.Ordinal) < 0);
         }
 
         protected override bool CompareExchangeInternal(ref string value, string applied, string initial)

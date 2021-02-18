@@ -170,7 +170,7 @@ namespace QueryEngine
         { }
         protected override int CompareValues(string xValue, string yValue)
         {
-            return xValue.CompareTo(yValue);
+            return String.Compare(xValue, yValue, StringComparison.Ordinal);
         }
 
         public override ExpressionComparer Clone(bool cacheResults)
