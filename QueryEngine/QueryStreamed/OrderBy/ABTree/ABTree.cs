@@ -175,50 +175,52 @@ namespace QueryEngine
         {
             ABTreeNode<T> node = root;
             int branchIndex = -1;
-
-            while (true)
+            if (node != null)
             {
-                // Leaf.
-                if (node.children == null)
+                while (true)
                 {
-                    // Return all keys.
-                    for (int i = 0; i < node.keys.Count; i++)
-                        yield return node.keys[i];
-
-                    if (node.parent == null) break;
-                    else {
-                        // Return to the parent.
-                        branchIndex = node.index;
-                        node = node.parent;
-                    }
-                }
-                else
-                // Internal Node -> must have children.
-                {
-                    // If this is the first time in this node.
-                    // Go to the left most subtree.
-                    if (branchIndex == -1) node = node.children[0];
-                    // If you returned from the right most subtree.
-                    // Return to the parent node.
-                    else if (branchIndex >= node.keys.Count)
+                    // Leaf.
+                    if (node.children == null)
                     {
+                        // Return all keys.
+                        for (int i = 0; i < node.keys.Count; i++)
+                            yield return node.keys[i];
+
                         if (node.parent == null) break;
-                        else
-                        {
+                        else {
+                            // Return to the parent.
                             branchIndex = node.index;
                             node = node.parent;
                         }
                     }
                     else
-                    // It returned from the subtree and there are more subtrees in the node.
+                    // Internal Node -> must have children.
                     {
-                        yield return node.keys[branchIndex];
-                        // Go to the next subtree
-                        node = node.children[branchIndex + 1];
-                        branchIndex = -1;
+                        // If this is the first time in this node.
+                        // Go to the left most subtree.
+                        if (branchIndex == -1) node = node.children[0];
+                        // If you returned from the right most subtree.
+                        // Return to the parent node.
+                        else if (branchIndex >= node.keys.Count)
+                        {
+                            if (node.parent == null) break;
+                            else
+                            {
+                                branchIndex = node.index;
+                                node = node.parent;
+                            }
+                        }
+                        else
+                        // It returned from the subtree and there are more subtrees in the node.
+                        {
+                            yield return node.keys[branchIndex];
+                            // Go to the next subtree
+                            node = node.children[branchIndex + 1];
+                            branchIndex = -1;
+                        }
                     }
                 }
-            }
+            } 
         }
 
         IEnumerator IEnumerable.GetEnumerator()

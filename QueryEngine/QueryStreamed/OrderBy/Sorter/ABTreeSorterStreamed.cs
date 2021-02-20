@@ -43,9 +43,7 @@ namespace QueryEngine
         /// </summary>
         private TypeRangeHasher<T> firstKeyHasher;
         
-
-        public ABTreeStreamedSorter(Graph graph, VariableMap variableMap, IOrderByExecutionHelper executionHelper, OrderByNode orderByNode, QueryExpressionInfo exprInfo, int columnCount)
-            : base(graph, variableMap, executionHelper, orderByNode, exprInfo, columnCount)
+        public ABTreeStreamedSorter(ExpressionComparer[] comparers, IOrderByExecutionHelper executionHelper, int columnCount): base(comparers, executionHelper, columnCount)
         {
             this.firstKeyHasher = (TypeRangeHasher<T>)TypeRangeHasher.Factory(this.executionHelper.ThreadCount, typeof(T));
             this.firstKeyExpressionHolder = this.comparers[0].GetExpressionHolder();
@@ -64,10 +62,11 @@ namespace QueryEngine
 
         public override void Process(int matcherID, Element[] result)
         {
+            if (result == null) return;
+            
             // Compute the correct placement (range) of the computed value.
             // Else it will be placed into the first bucket since the value is null.
             int bucketIndex = 0;
-            
             if (this.executionHelper.InParallel)
             {
                 bool evalSuccess = this.firstKeyExpression.TryEvaluate(result, out T resValue);

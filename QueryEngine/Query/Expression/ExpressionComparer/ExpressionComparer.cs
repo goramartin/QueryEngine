@@ -168,9 +168,16 @@ namespace QueryEngine
     {
         public ExpressionStringComparer(ExpressionHolder expressionHolder, bool ascending, bool cacheResults) : base(expressionHolder, ascending, cacheResults)
         { }
+
         protected override int CompareValues(string xValue, string yValue)
         {
-            return String.Compare(xValue, yValue, StringComparison.Ordinal);
+            int retVal =  String.Compare(xValue, yValue, StringComparison.Ordinal);
+            
+            // This is done because the ordinal comparison returns numbers other than -1/1/0.
+            // But the order is kept.
+            if (retVal < 0) return -1;
+            else if (retVal > 0) return 1;
+            else return 0;
         }
 
         public override ExpressionComparer Clone(bool cacheResults)

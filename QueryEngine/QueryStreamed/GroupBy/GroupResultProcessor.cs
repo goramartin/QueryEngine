@@ -41,7 +41,6 @@ namespace QueryEngine
             }
         }
 
-
         /// <summary>
         /// Cache is on.
         /// </summary>
