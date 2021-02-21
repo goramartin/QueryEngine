@@ -26,7 +26,7 @@ namespace QueryEngine
     /// </summary>
     internal sealed class DFSParallelPatternMatcher : DFSParallelPatternMatcherBase
     {
-        private MatchInternalFixedResults results;
+        private MatchFixedResults results;
         private ISingleThreadPatternMatcher[] matchers;
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace QueryEngine
         /// <param name="graph"> Graph to search on.</param>
         /// <param name="results"> Where to store results. </param>
         /// <param name="executionHelper"> Query execution helper. </param>
-        public DFSParallelPatternMatcher(DFSPattern pattern, Graph graph, MatchInternalFixedResults results, IMatchExecutionHelper executionHelper): base(graph, executionHelper)
+        public DFSParallelPatternMatcher(DFSPattern pattern, Graph graph, MatchFixedResults results, IMatchExecutionHelper executionHelper): base(graph, executionHelper)
         {
             if (pattern == null || results == null)
                 throw new ArgumentNullException($"{this.GetType()}, passed a null to a construtor.");
@@ -254,9 +254,9 @@ namespace QueryEngine
         /// </summary>
         private class ParallelMergeColumnJob
         {
-            public MatchInternalFixedResults matcherResults;
+            public MatchFixedResults matcherResults;
             public ColumnDistributor columnDistributor;
-            public ParallelMergeColumnJob(ColumnDistributor columnDistributor, MatchInternalFixedResults matcherResults)
+            public ParallelMergeColumnJob(ColumnDistributor columnDistributor, MatchFixedResults matcherResults)
             {
                 this.matcherResults = matcherResults;
                 this.columnDistributor = columnDistributor;

@@ -19,7 +19,7 @@ namespace QueryEngine
     /// </summary>
     internal sealed class MatchObject : MatchObjectBase
     {
-        private MatchInternalFixedResults queryResults;
+        private MatchFixedResults queryResults;
         private  IPatternMatcher matcher;
 
         /// <summary>
@@ -49,7 +49,7 @@ namespace QueryEngine
             
             // Now we have got enough information about results. 
             // After creating pattern the variable map is filled and we know extend of the results.
-            this.queryResults = new MatchInternalFixedResults(this.helper.FixedArraySize, variableMap.GetCount(), executionHelper.ThreadCount);
+            this.queryResults = new MatchFixedResults(this.helper.FixedArraySize, variableMap.GetCount(), executionHelper.ThreadCount);
 
             this.matcher = MatchFactory.CreateMatcher(helper.ParallelPatternMatcherName, pattern, graph, this.queryResults, executionHelper);
         }
@@ -73,6 +73,11 @@ namespace QueryEngine
         {
             this.matcher.Search();
             return new TableResults(this.queryResults.FinalMerged, this.queryResults.NumberOfMatchedElements, this.queryResults.FixedArraySize, this.helper.IsStoringResult);
+        }
+
+        public override void PassStoringVariables(int[] vars)
+        {
+            this.queryResults.PassStoringVariables(vars);
         }
     }
 }

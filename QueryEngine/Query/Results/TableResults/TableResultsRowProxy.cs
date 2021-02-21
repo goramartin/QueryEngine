@@ -64,7 +64,11 @@ namespace QueryEngine
             {
                 string tmpString =  "Row: " + this.index + " result: ";
                 for (int i = 0; i < this.resTable.resTable.Length; i++)
-                    tmpString += " " + this[i].ID.ToString();  
+                {
+                    if (this.resTable.resTable[i] != null)
+                        tmpString += " " + this[i].ID.ToString();
+                    else tmpString += " " + "null";
+                }
             
                 return tmpString;
             }

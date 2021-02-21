@@ -208,7 +208,6 @@ namespace QueryEngine
             for (int i = 0; i < this.Exprs.Count; i++)
             {
                 this.Exprs[i].CollectUsedVars(ref  vs);
-                vs.AddRange(vs);
             }
             return vs.Distinct().ToArray();
         }

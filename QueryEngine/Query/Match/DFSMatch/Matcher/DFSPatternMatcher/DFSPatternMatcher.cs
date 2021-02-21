@@ -7,7 +7,7 @@ namespace QueryEngine
     /// </summary>
     internal class DFSPatternMatcher : DFSPatternMatcherBase
     {
-        private MatchInternalFixedResults.MatcherFixedResults results;
+        private MatchFixedResults.MatcherFixedResultsInternal results;
 
         /// <summary>
         /// Sets results storage for the matcher instance. 
@@ -16,7 +16,7 @@ namespace QueryEngine
         /// <param name="pat"> The pattern to find.</param>
         /// <param name="gr"> The graph to search. </param>
         /// <param name="res"> The object to store found results. </param>
-        public DFSPatternMatcher(IDFSPattern pat, Graph gr, MatchInternalFixedResults.MatcherFixedResults res) : base(pat, gr)
+        public DFSPatternMatcher(IDFSPattern pat, Graph gr, MatchFixedResults.MatcherFixedResultsInternal res) : base(pat, gr)
         {
             if (res == null)
                 throw new ArgumentException($"{this.GetType()}, passed null to a constructor.");

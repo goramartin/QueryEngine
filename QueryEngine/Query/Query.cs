@@ -113,15 +113,13 @@ namespace QueryEngine
                 query.AddToEnd(orderBy);
             }
 
-            var tmp =  this.exprInfo.CollectUsedVariables();
-
-
             // If the single group by is set, add GroupBy object to the execution chain.
             if (this.qEhelper.IsSetSingleGroupGroupBy && !this.qEhelper.IsSetGroupBy)
                 groupBy = QueryObject.Factory(typeof(GroupByObject), null, qEhelper, null, null, exprInfo);
 
             if (groupBy != null) query.AddToEnd(groupBy);
             query.AddToEnd(match);
+            query.PassStoringVariables(this.exprInfo.CollectUsedVariables());
         }
 
         /// <summary>

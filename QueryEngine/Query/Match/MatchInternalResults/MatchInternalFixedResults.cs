@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace QueryEngine
 {
@@ -9,9 +10,11 @@ namespace QueryEngine
     /// sizes that do not need a resizing when the result table is full.
     /// This way, we can also omit memory/speed inefficient merging of the separate result tables.
     /// </summary>
-    internal class MatchInternalFixedResults
+    internal class MatchFixedResults
     {
-        private MatcherFixedResults[] matcherResults;
+        private MatcherFixedResultsInternal[] matcherResults;
+        private int[] usedVars;
+
         /// <summary>
         /// A number of variable in the query.
         /// </summary>
@@ -30,11 +33,11 @@ namespace QueryEngine
         /// </summary>
         public List<Element[]>[] FinalMerged { get; private set; }
 
-        public MatchInternalFixedResults(int arraySize, int columnCount, int threadCount)
+        public MatchFixedResults(int arraySize, int columnCount, int threadCount)
         {
-            this.matcherResults = new MatcherFixedResults[threadCount];
+            this.matcherResults = new MatcherFixedResultsInternal[threadCount];
             for (int i = 0; i < threadCount; i++)
-                this.matcherResults[i] = new MatcherFixedResults(arraySize, columnCount);
+                this.matcherResults[i] = new MatcherFixedResultsInternal(arraySize, columnCount);
 
             this.ColumnCount = columnCount;
             this.FixedArraySize = arraySize;
@@ -42,7 +45,7 @@ namespace QueryEngine
             this.FinalMerged = new List<Element[]>[this.ColumnCount];
         }
 
-        public MatcherFixedResults GetMatcherResultsStorage(int i)
+        public MatcherFixedResultsInternal GetMatcherResultsStorage(int i)
         {
             return this.matcherResults[i];
         }
@@ -56,6 +59,15 @@ namespace QueryEngine
                 this.MergeColumn(i);
         }
 
+        public void PassStoringVariables(int[] vars)
+        {
+            if (vars == null || vars.Length == 0)
+                throw new ArgumentException($"{this.GetType()}, cannot pass empty variable list.");
+            this.usedVars = vars;
+            for (int i = 0; i < this.matcherResults.Length; i++)
+                this.matcherResults[i].usedVars = vars;
+        }
+
         /// <summary>
         /// Merges a column from every matcher into one.
         /// It splits the blocks into blocks that are full and that are non full.
@@ -66,6 +78,9 @@ namespace QueryEngine
         /// </summary>
         public void MergeColumn(int columnIndex)
         {
+            // If the column is not stored at all.
+            if (Array.IndexOf(usedVars, columnIndex) < 0) return;
+
             SplitToFullNonFull(columnIndex, out List<Element[]> columnBlocks, out List<Tuple<Element[], int>> lastColumnBlocks);
             // Sort the blocks according to their capacity in ascending order.
             
@@ -118,15 +133,15 @@ namespace QueryEngine
             // Split the blocks into full/non full.
             for (int i = 0; i < this.matcherResults.Length; i++)
             {
-                var rTable = this.matcherResults[i].resTable;
-                for (int j = 0; j < this.matcherResults[i].resTable.Count; j++)
+                var rTable = this.matcherResults[i].ResTable;
+                for (int j = 0; j < this.matcherResults[i].ResTable.Count; j++)
                 {
                     // Only last blocks can be non full.
-                    if (j + 1 == rTable.Count && this.FixedArraySize != this.matcherResults[i].currentPosition)
+                    if (j + 1 == rTable.Count && this.FixedArraySize != this.matcherResults[i].CurrentPosition)
                     {
                         // Because the currentPosition represents the first empty block, the block is empty with 0, or can be half full.
-                        if (this.matcherResults[i].currentPosition == 0) continue;
-                        else lastColumnBlocks.Add(Tuple.Create<Element[], int>(rTable[j][columnIndex], this.matcherResults[i].currentPosition));
+                        if (this.matcherResults[i].CurrentPosition == 0) continue;
+                        else lastColumnBlocks.Add(Tuple.Create<Element[], int>(rTable[j][columnIndex], this.matcherResults[i].CurrentPosition));
                     }
                     else columnBlocks.Add(rTable[j][columnIndex]);
                 }
@@ -193,28 +208,30 @@ namespace QueryEngine
         /// Class that stores results of the matcher in a fixed sized arrays, instead of using simple List that 
         /// needs resizing everytime it exceeds the maximum capacity.
         /// </summary>
-         public class MatcherFixedResults
-        {
-            public List<Element[][]> resTable;
+         public class MatcherFixedResultsInternal
+         {
+            public int[] usedVars { get; set; }
+
+            public List<Element[][]> ResTable { get; private set; }
             /// <summary>
             /// [x = column][y = row]
             /// </summary>
-            public Element[][] lastBlock;
+            public Element[][] LastBlock { get; private set; }
             /// <summary>
             /// Servers as a index of the current free position.
             /// </summary>
-            public int currentPosition;
+            public int CurrentPosition { get; private set; }
             /// <summary>
             /// A size of the array to store results.
             /// </summary>
-            public int fixedArraySize;
-            public int columnCount;
+            public int FixedArraySize { get; private set; }
+            public int ColumnCount { get; private set; }
 
-            public MatcherFixedResults(int arraySize, int columnCount)
+            public MatcherFixedResultsInternal(int arraySize, int columnCount)
             {
-                this.resTable = new List<Element[][]>();
-                this.fixedArraySize = arraySize;
-                this.columnCount = columnCount;
+                this.ResTable = new List<Element[][]>();
+                this.FixedArraySize = arraySize;
+                this.ColumnCount = columnCount;
             }
 
             /// <summary>
@@ -224,22 +241,32 @@ namespace QueryEngine
             public void AddRow(Element[] row)
             {
                 // Enlarge
-                if ((this.currentPosition) % this.fixedArraySize == 0)
+                if ((this.CurrentPosition) % this.FixedArraySize == 0)
                 {
-                    Element[][] newBlock = new Element[this.columnCount][];
-                    for (int i = 0; i < this.columnCount; i++)
-                        newBlock[i] = new Element[this.fixedArraySize];
-                    this.lastBlock = newBlock;
-                    this.resTable.Add(newBlock);
-                    this.currentPosition = 0;
+                    InitNewBlock();
                 }
 
                 // Insert
-                for (int i = 0; i < this.columnCount; i++)
-                    this.lastBlock[i][this.currentPosition] = row[i];
-                this.currentPosition++;
+                for (int i = 0; i < this.usedVars.Length; i++)
+                {
+                    var column = this.usedVars[i];
+                    this.LastBlock[column][this.CurrentPosition] = row[column];
+                }
+                this.CurrentPosition++;
             }
-        }
+
+            private void InitNewBlock()
+            {
+                Element[][] newBlock = new Element[this.ColumnCount][];
+                for (int i = 0; i < this.usedVars.Length; i++)
+                {
+                    newBlock[this.usedVars[i]] = new Element[this.FixedArraySize];
+                }
+                this.LastBlock = newBlock;
+                this.ResTable.Add(newBlock);
+                this.CurrentPosition = 0;
+            }
+         }
 
     }
 }

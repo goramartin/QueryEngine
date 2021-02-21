@@ -43,5 +43,11 @@ namespace QueryEngine
             if (this.next == null) this.next = queryObject;
             else this.next.AddToEnd(queryObject);
         }
+
+        public virtual void PassStoringVariables(int[] vars)
+        {
+            if (this.next != null) this.next.PassStoringVariables(vars);
+        }
+
     }
 }
