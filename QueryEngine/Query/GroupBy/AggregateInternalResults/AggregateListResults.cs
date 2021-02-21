@@ -26,10 +26,11 @@ namespace QueryEngine
 
         public static AggregateListResults Factory(Type type, string funcName)
         {
-            if (type == typeof(int) && funcName == "avg") return new AggregateListAvgIntResults();
+            if (type == typeof(int) && funcName == "avg") return new AggregateListAvgLongResults();
             else if (type == typeof(int) && (funcName == "min" || funcName == "max")) return new AggregateListResultsWithSetFlag<int>();
             else if (type == typeof(string) && (funcName == "min" || funcName == "max")) return new AggregateListResultsWithSetFlag<string>();
             else if (funcName == "count") return new AggregateListResults<int>();
+            else if (funcName == "sum") return new AggregateListResults<long>();
             else if (type == typeof(int)) return new AggregateListResults<int>();
             else if (type == typeof(string)) return new AggregateListResults<string>();
             else throw new ArgumentException($"Aggregate list results factory, cannot create a results holder with the type {type} for function {funcName}.");
@@ -68,7 +69,7 @@ namespace QueryEngine
     /// The classes that will work with the class, know in advance that the returning type is double, thus,
     /// they will never access the class via the IGetFinal with type of int.
     /// </summary>
-    internal sealed class AggregateListAvgIntResults : AggregateListAvgResults<int>, IGetFinal<double>
+    internal sealed class AggregateListAvgLongResults : AggregateListAvgResults<long>, IGetFinal<double>
     {
         double IGetFinal<double>.GetFinal(int position)
         {

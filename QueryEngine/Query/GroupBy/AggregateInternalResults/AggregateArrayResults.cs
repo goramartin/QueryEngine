@@ -31,10 +31,11 @@ namespace QueryEngine
 
         public static AggregateArrayResults Factory(Type type, string funcName)
         {
-            if (type == typeof(int) && funcName == "avg") return new AggregateArrayAvgResults<int>();
+            if (type == typeof(int) && funcName == "avg") return new AggregateArrayAvgResults<long>();
             else if (type == typeof(int) && (funcName == "min" || funcName == "max")) return new AggregateArrayResultsWithSetFlag<int>();
             else if (type == typeof(string) && (funcName == "min" || funcName == "max")) return new AggregateArrayResultsWithSetFlag<string>();
             else if (funcName == "count") return new AggregateArrayResults<int>();
+            else if (funcName == "sum") return new AggregateArrayResults<long>();
             else if (type == typeof(int)) return new AggregateArrayResults<int>();
             else if (type == typeof(string)) return new AggregateArrayResults<string>();
             else throw new ArgumentException($"Aggregate bucket results factory, cannot create a results holder with the type {type} for function {funcName}.");
@@ -72,6 +73,20 @@ namespace QueryEngine
     /// Mainly it is used during computing average.
     /// The class must rememeber the number of added elements to the computed average.
     /// </summary>
+    internal class AggregateArrayResultsWithSetFlag<T> : AggregateArrayResults<T>
+    {
+        public bool[] isSet = new bool[InitSize];
+        public override void DoubleSize(int position)
+        {
+            Array.Resize<bool>(ref this.isSet, (position + (position % 2)) * 2);
+            base.DoubleSize(position);
+        }
+    }
+
+    /// <summary>
+    /// Mainly it is used during computing average.
+    /// The class must rememeber the number of added elements to the computed average.
+    /// </summary>
     internal class AggregateArrayAvgResults<T> : AggregateArrayResults<T>
     {
         public int[] eltsUsed = new int[InitSize];
@@ -84,25 +99,11 @@ namespace QueryEngine
         }
     }
 
-    internal class AggregateArrayAvgResults : AggregateArrayAvgResults<int>, IGetFinal<double>
+    internal class AggregateArrayAvgResults : AggregateArrayAvgResults<long>, IGetFinal<double>
     {
         double IGetFinal<double>.GetFinal(int position)
         {
             return (double)this.aggResults[position] / this.eltsUsed[position];
-        }
-    }
-
-    /// <summary>
-    /// Mainly it is used during computing average.
-    /// The class must rememeber the number of added elements to the computed average.
-    /// </summary>
-    internal class AggregateArrayResultsWithSetFlag<T> : AggregateArrayResults<T>
-    {
-        public bool[] isSet = new bool[InitSize];
-        public override void DoubleSize(int position)
-        {
-            Array.Resize<bool>(ref this.isSet, (position + (position % 2)) * 2);
-            base.DoubleSize(position);
         }
     }
 }

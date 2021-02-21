@@ -26,45 +26,45 @@ namespace QueryEngine
         public override void Apply(in TableResults.RowProxy row, AggregateBucketResult bucket)
         {
             if (this.expr.TryEvaluate(in row, out int returnValue))
-                AddInternal(ref ((AggregateBucketResult<int>)bucket).aggResult, returnValue);
+                AddInternal(ref ((AggregateBucketResult<long>)bucket).aggResult, returnValue);
         }
         public override void ApplyThreadSafe(in TableResults.RowProxy row, AggregateBucketResult bucket)
         {
             if (this.expr.TryEvaluate(in row, out int returnValue))
-                AddThreadSafeInternal(ref ((AggregateBucketResult<int>)bucket).aggResult, returnValue);
+                AddThreadSafeInternal(ref ((AggregateBucketResult<long>)bucket).aggResult, returnValue);
         }
         public override void Apply(in Element[] row, AggregateBucketResult bucket)
         {
             if (this.expr.TryEvaluate(in row, out int returnValue))
-                AddInternal(ref ((AggregateBucketResult<int>)bucket).aggResult, returnValue);
+                AddInternal(ref ((AggregateBucketResult<long>)bucket).aggResult, returnValue);
         }
         public override void ApplyThreadSafe(in Element[] row, AggregateBucketResult bucket)
         {
             if (this.expr.TryEvaluate(in row, out int returnValue))
-                AddThreadSafeInternal(ref ((AggregateBucketResult<int>)bucket).aggResult, returnValue);
+                AddThreadSafeInternal(ref ((AggregateBucketResult<long>)bucket).aggResult, returnValue);
         }
 
         public override void Merge(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
         {
-            AddInternal(ref ((AggregateBucketResult<int>)bucket1).aggResult, ((AggregateBucketResult<int>)bucket2).aggResult);
+            AddInternal(ref ((AggregateBucketResult<long>)bucket1).aggResult, ((AggregateBucketResult<long>)bucket2).aggResult);
         }
         public override void MergeThreadSafe(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
         {
-            AddThreadSafeInternal(ref ((AggregateBucketResult<int>)bucket1).aggResult, ((AggregateBucketResult<int>)bucket2).aggResult);
+            AddThreadSafeInternal(ref ((AggregateBucketResult<long>)bucket1).aggResult, ((AggregateBucketResult<long>)bucket2).aggResult);
         }
         public override void Merge(AggregateBucketResult bucket, AggregateListResults list, int position)
         {
-            AddInternal(ref ((AggregateBucketResult<int>)bucket).aggResult, ((AggregateListResults<int>)list).aggResults[position]);
+            AddInternal(ref ((AggregateBucketResult<long>)bucket).aggResult, ((AggregateListResults<long>)list).aggResults[position]);
         }
         public override void MergeThreadSafe(AggregateBucketResult bucket, AggregateListResults list, int position)
         {
-            AddThreadSafeInternal(ref ((AggregateBucketResult<int>)bucket).aggResult, ((AggregateListResults<int>)list).aggResults[position]);
+            AddThreadSafeInternal(ref ((AggregateBucketResult<long>)bucket).aggResult, ((AggregateListResults<long>)list).aggResults[position]);
         }
 
         // Lists
         public override void Apply(in TableResults.RowProxy row, AggregateListResults list, int position)
         {
-            var tmpList = (AggregateListResults<int>)list;
+            var tmpList = (AggregateListResults<long>)list;
             if (position == tmpList.aggResults.Count) 
                 tmpList.aggResults.Add(default);
             
@@ -73,8 +73,8 @@ namespace QueryEngine
         }
         public override void Merge(AggregateListResults list1, int into, AggregateListResults list2, int from)
         {
-            var tmpList1 = (AggregateListResults<int>)list1;
-            var tmpList2 = (AggregateListResults<int>)list2;
+            var tmpList1 = (AggregateListResults<long>)list1;
+            var tmpList2 = (AggregateListResults<long>)list2;
 
             if (into == tmpList1.aggResults.Count) tmpList1.aggResults.Add(tmpList2.aggResults[from]);
             else tmpList1.aggResults[into] += tmpList2.aggResults[from];
@@ -84,15 +84,15 @@ namespace QueryEngine
         public override void ApplyThreadSafe(in TableResults.RowProxy row, AggregateArrayResults array, int position)
         {
             if (this.expr.TryEvaluate(in row, out int returnValue))
-                AddThreadSafeInternal(ref ((AggregateArrayResults<int>)array).aggResults[position], returnValue);
+                AddThreadSafeInternal(ref ((AggregateArrayResults<long>)array).aggResults[position], returnValue);
         }
 
 
-        private static void AddInternal(ref int placement, int value)
+        private static void AddInternal(ref long placement, long value)
         {
             placement += value;
         }
-        private static void AddThreadSafeInternal(ref int placement, int value)
+        private static void AddThreadSafeInternal(ref long placement, long value)
         {
             Interlocked.Add(ref placement, value);
         }

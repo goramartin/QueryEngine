@@ -22,10 +22,11 @@ namespace QueryEngine
 
         public static AggregateBucketResult Factory(Type type, string funcName)
         {
-            if (type == typeof(int) && funcName == "avg") return new AggregateBucketAvgIntResult();
+            if (type == typeof(int) && funcName == "avg") return new AggregateBucketAvgLongResult();
             else if (type == typeof(int) && (funcName == "min" || funcName == "max")) return new AggregateBucketResultWithSetFlag<int>();
             else if (type == typeof(string) && (funcName == "min" || funcName == "max")) return new AggregateBucketResultWithSetFlag<string>();
             else if (funcName == "count") return new AggregateBucketResult<int>();
+            else if (funcName == "sum") return new AggregateBucketResult<long>();
             else if (type == typeof(int)) return new AggregateBucketResult<int>();
             else if (type == typeof(string)) return new AggregateBucketResult<string>();
             else throw new ArgumentException($"Aggregate bucket result factory, cannot create a results holder with the type {type} for function {funcName}.");
@@ -44,6 +45,17 @@ namespace QueryEngine
     }
 
     /// <summary>
+    /// Mainly its purpose is to initialise first values of the bucket, for example,
+    /// a min/max aggregates must be initialised first otherwise they could compare new values with the
+    /// default values from the constructor.
+    /// </summary>
+    /// <typeparam name="T"> A return type of the aggregation function. </typeparam>
+    internal class AggregateBucketResultWithSetFlag<T> : AggregateBucketResult<T>
+    {
+        public bool isSet = false;
+    }
+
+    /// <summary>
     /// Mainly it is used during computing average.
     /// The class must rememeber the number of added elements to the computed average.
     /// </summary>
@@ -53,25 +65,12 @@ namespace QueryEngine
         public int eltsUsed = 0;
     }
 
-    internal sealed class AggregateBucketAvgIntResult : AggregateBucketAvgResult<int>, IGetFinal<double>
+    internal sealed class AggregateBucketAvgLongResult : AggregateBucketAvgResult<long>, IGetFinal<double>
     {
         double IGetFinal<double>.GetFinal(int position)
         {
             return (double)this.aggResult / this.eltsUsed;
         }
-    }
-
-
-
-    /// <summary>
-    /// Mainly its purpose is to initialise first values of the bucket, for example,
-    /// a min/max aggregates must be initialised first otherwise they could compare new values with the
-    /// default values from the constructor.
-    /// </summary>
-    /// <typeparam name="T"> A return type of the aggregation function. </typeparam>
-    internal class AggregateBucketResultWithSetFlag<T> : AggregateBucketResult<T>
-    {
-        public bool isSet = false;
     }
 
 }

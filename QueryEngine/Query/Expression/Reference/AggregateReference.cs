@@ -136,6 +136,7 @@ namespace QueryEngine
         {
             if (type == typeof(int)) return new AggregateReference<int>(position, keyCount, aggr);
             else if (type == typeof(string)) return new AggregateReference<string>(position, keyCount, aggr);
+            else if (type == typeof(long)) return new AggregateReference<long>(position, keyCount, aggr);
             else if (type == typeof(double)) return new AggregateReference<double>(position, keyCount, aggr);
             else throw new ArgumentException($"AggregateReferenceFactory, trying to create unsupported type = {type}.");
         }

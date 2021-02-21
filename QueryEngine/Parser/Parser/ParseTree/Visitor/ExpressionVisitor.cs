@@ -114,6 +114,7 @@ namespace QueryEngine
             int aggPos = this.exprInfo.AddAggregate(aggregate);
             if (node.funcName.ToLower() == "avg") this.expr = AggregateReferenceFactory.Create(typeof(double), aggPos, this.exprInfo.GroupByhashExprs.Count, this.exprInfo.Aggregates[aggPos]);
             else if (node.funcName.ToLower() == "count") this.expr = AggregateReferenceFactory.Create(typeof(int), aggPos, this.exprInfo.GroupByhashExprs.Count, this.exprInfo.Aggregates[aggPos]);
+            else if (node.funcName.ToLower() == "sum") this.expr = AggregateReferenceFactory.Create(typeof(long), aggPos, this.exprInfo.GroupByhashExprs.Count, this.exprInfo.Aggregates[aggPos]);
             else this.expr = AggregateReferenceFactory.Create(aggType, aggPos, this.exprInfo.GroupByhashExprs.Count, this.exprInfo.Aggregates[aggPos]);
         }
 

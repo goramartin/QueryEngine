@@ -58,6 +58,8 @@ namespace QueryEngine
                 return new ExpressionToStringWrapper<string>(expressionHolder);
             else if (typeofPrintVariable == typeof(double))
                 return new ExpressionToStringWrapper<double>(expressionHolder);
+            else if (typeofPrintVariable == typeof(long))
+                return new ExpressionToStringWrapper<long>(expressionHolder);
             else throw new ArgumentException($"PrintVariable factory, unknown type passed to a print variable factory. Type = {typeofPrintVariable}.");
         }
     }

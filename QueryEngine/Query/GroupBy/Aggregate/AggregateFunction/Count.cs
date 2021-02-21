@@ -18,6 +18,7 @@ namespace QueryEngine
         {
             if (expressionHolder == null) this.IsAstCount = true;
         }
+
         public override string ToString()
         {
             if (this.IsAstCount) return "Count(*)";
