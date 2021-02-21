@@ -1,9 +1,22 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace QueryEngine
 {
     internal abstract class OrderByResultProcessor : ResultProcessor
     {
+        public static HashSet<string> StreamedAliases { get; }
+        public static HashSet<string> HalfStreamedAliases { get; }
+
+        static OrderByResultProcessor()
+        {
+            StreamedAliases = new HashSet<string>();
+            HalfStreamedAliases = new HashSet<string>();
+
+            HalfStreamedAliases.Add("abtreeHS");
+            StreamedAliases.Add("abtreeS");
+        }
+
         protected ExpressionComparer[] comparers;
         protected IOrderByExecutionHelper executionHelper;
         /// <summary>

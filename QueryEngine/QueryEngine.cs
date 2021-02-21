@@ -1,17 +1,10 @@
-﻿/*! \file
-    This file is an entry point of a program.
-    Contains static class of a query engine and provides a simple api for user defined queries.
- */
-
-using System;
+﻿using System;
 using System.Threading;
 using System.IO;
 using System.Diagnostics;
 
 namespace QueryEngine
 {
-    
-
     /// <summary>
     /// Entry point of a program.
     /// Class represents main algorithm loop where user inputs queries and subsequently they are computed
@@ -29,6 +22,22 @@ namespace QueryEngine
         }
 
         #region ParseProgramArgs
+
+        /// <summary>
+        /// Parses argument that expects to be a thread count.
+        /// </summary>
+        /// <param name="param"> Application argument. </param>
+        /// <returns> Thread count.</returns>
+        private static int GetFixedArraySize(string param)
+        {
+            if (!Int32.TryParse(param, out int arrSize))
+                throw new ArgumentException("Failed to parse array size.");
+            else if (arrSize <= 0)
+                throw new ArgumentException("Array size cannot be negative.");
+            else return arrSize;
+        }
+
+
         /// <summary>
         /// Parses argument that expects to be a thread count.
         /// </summary>
@@ -50,7 +59,6 @@ namespace QueryEngine
         /// <returns> Printer type. </returns>
         private static string GetPrinter(string param)
         {
-
             if (!Printer.Printers.Contains(param))
                 throw new ArgumentException("Inputed printer that does not exists.");
             else return param;
@@ -77,9 +85,9 @@ namespace QueryEngine
         private static int GetVerticesPerhread(int threadCount, string[] args)
         {
             if (threadCount == 1) return 1;
-            else if (args.Length < 4)
+            else if (args.Length < 8)
                 throw new ArgumentException("Missing number of vertices per thread in the argument list.");
-            else if (!Int32.TryParse(args[3], out int verticesPerThread))
+            else if (!Int32.TryParse(args[7], out int verticesPerThread))
                 throw new ArgumentException("Failed to parse vertices per thread.");
             else if (verticesPerThread <= 0)
                 throw new ArgumentException("Vertices per thread cannot be negative.");
@@ -98,8 +106,8 @@ namespace QueryEngine
             // If it runs in parallel, the number of vertices precedes the file name
             if (printer == "file")
             {
-                if (threadCount == 1 && args.Length == 4) return args[3];
-                else if (args.Length == 5) return args[4];
+                if (threadCount == 1 && args.Length == 8) return args[7];
+                else if (args.Length == 9) return args[8];
                 else throw new ArgumentException("Missing file name.");
             }
             else return null; 
@@ -132,14 +140,19 @@ namespace QueryEngine
     /// <param name="reader"> Reader from which to read input.</param>
     private static void Run(string[] args, TextReader reader)
         {
-            if (args.Length < 3) throw new ArgumentException("Wrong number of program parameters.");
+            if (args.Length < 7) throw new ArgumentException("Wrong number of program parameters.");
 
-            int ThreadCount = GetThreadCount(args[0]);
-            string Printer = GetPrinter(args[1]);
-            string Formater = GetFormater(args[2]);
+            string mode = args[0];
+            string gAlias = args[1];
+            string sAlias = args[2];
+            int fixedArraySize = GetFixedArraySize(args[3]);
+            Query.CheckAliases(gAlias, sAlias, mode);
+
+            int ThreadCount = GetThreadCount(args[4]);
+            string Printer = GetPrinter(args[5]);
+            string Formater = GetFormater(args[6]);
             int VerticesPerThread = GetVerticesPerhread(ThreadCount, args);
             string FileName = GetFileName(ThreadCount, Printer, args);
-
 
             // Set only if on a desktop machine
             using (Process p = Process.GetCurrentProcess())
@@ -163,8 +176,7 @@ namespace QueryEngine
                 try
                 {
                     Console.WriteLine();
-                    //Query query = Query.Create(reader, graph, ThreadCount, Printer, Formater, VerticesPerThread, FileName);
-                    Query query = Query.CreateStreamed(reader, graph, ThreadCount, Printer, Formater, VerticesPerThread, FileName);
+                    Query query = Query.Create(mode, reader, graph, ThreadCount, Printer, Formater, VerticesPerThread, FileName, gAlias, sAlias, fixedArraySize);
                     Console.WriteLine();
                     query.Compute();
                    

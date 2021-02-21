@@ -71,11 +71,11 @@ namespace QueryEngine
         /// <param name="formater"> A formater to use by printer. </param>
         /// <param name="verticesPerThread"> A number of vertices distributed to threads during parallel computation of the query.</param>
         /// <param name="fileName"> A file to store results into if set, otherwise null. </param>
-        private Query(List<Token> tokens, Graph graph, int threadCount, string printer, string formater, int verticesPerThread, string fileName)
+        private Query(List<Token> tokens, Graph graph, int threadCount, string printer, string formater, int verticesPerThread, string fileName, string grouperAlias, string sorterAlias, int fixedArraySize)
         {
             this.graph = graph;
             this.variableMap = new VariableMap(); 
-            this.qEhelper = new QueryExecutionHelper(threadCount, printer, formater, verticesPerThread, 4_194_304, fileName, "DFSParallel", "DFSSingleThread", "SIMPLE", "refL", "mergeSort");
+            this.qEhelper = new QueryExecutionHelper(threadCount, printer, formater, verticesPerThread, fixedArraySize, fileName, "DFSParallel", "DFSSingleThread", "SIMPLE", grouperAlias, sorterAlias);
 
             // Parse input query.
             var parsedClauses = Parser.Parse(tokens);
@@ -135,11 +135,11 @@ namespace QueryEngine
         /// <param name="verticesPerThread"> A number of vertices distributed to threads during parallel computation of the query.</param>
         /// <param name="fileName">  A file to store results into if set, otherwise null. </param>
         /// <param name="isStreamed"> A flag to distinguish a normal construtor from streamed constructor.</param>
-        private Query(List<Token> tokens, Graph graph, int threadCount, string printer, string formater, int verticesPerThread, string fileName, bool isStreamed)
+        private Query(List<Token> tokens, Graph graph, int threadCount, string printer, string formater, int verticesPerThread, string fileName, string grouperAlias, string sorterAlias, int fixedArraySize, bool isStreamed)
         {
             this.graph = graph;
             this.variableMap = new VariableMap();
-            this.qEhelper = new QueryExecutionHelper(threadCount, printer, formater, verticesPerThread, 4_194_304, fileName, "DFSParallelStreamed", "DFSSingleThreadStreamed", "SIMPLE", "globalS", "abtreeHS");
+            this.qEhelper = new QueryExecutionHelper(threadCount, printer, formater, verticesPerThread, fixedArraySize, fileName, "DFSParallelStreamed", "DFSSingleThreadStreamed", "SIMPLE", grouperAlias, sorterAlias);
 
             // Parse input query.
             var parsedClauses = Parser.Parse(tokens);
@@ -173,9 +173,9 @@ namespace QueryEngine
             } else
             {
                 // Check if the query is aggregation and not a simple query.
-                var groupByProc = GroupResultProcessor.Factory(exprInfo, qEhelper, variableMap.GetCount(), this.exprInfo.CollectUsedVariables());
                 if ((this.exprInfo.Aggregates.Count == 0 && this.qEhelper.IsSetSingleGroupGroupBy) || (!this.qEhelper.IsSetSingleGroupGroupBy && !parsedClauses.ContainsKey("groupby")))
-                throw new ArgumentException($"{this.GetType()}, no grouping was specified. The streamed version allows to compute only aggregations.");
+                throw new ArgumentException($"{this.GetType()}, no grouping was specified. The group by streamed version allows to compute only aggregations.");
+                var groupByProc = GroupResultProcessor.Factory(exprInfo, qEhelper, variableMap.GetCount(), this.exprInfo.CollectUsedVariables(), isStreamed);
                 
                 match.PassResultProcessor(groupByProc);
             }
@@ -217,74 +217,29 @@ namespace QueryEngine
             }
         }
 
-        /// <summary>
-        /// Builds a query from an input string.
-        /// </summary>
-        /// <param name="inputQuery"> An input query. </param>
-        /// <param name="graph"> A graph to compute the query on. </param>
-        /// <param name="threadCount"> Maximum number of threads available to use. </param>
-        /// <param name="printer"> A printer to use. </param>
-        /// <param name="formater"> A formater to use by printer. </param>
-        /// <param name="verticesPerThread"> A number of vertices distributed to threads during parallel computation of the query.</param>
-        /// <param name="fileName"> A file to store results into. </param>
-        public static Query Create(string inputQuery, Graph graph, int threadCount, string printer, string formater, int verticesPerThread, string fileName)
+        public static Query Create(string mode, string inputQuery, Graph graph, int threadCount, string printer, string formater, int verticesPerThread, string fileName, string grouperAlias, string sorterAlias, int fixedArraySize)
         {
-            CheckArgs(inputQuery, graph, threadCount, printer, formater, verticesPerThread, fileName);
-            return new Query(Tokenizer.Tokenize(inputQuery), graph, threadCount, printer, formater, verticesPerThread, fileName);
-        }
-        /// <summary>
-        /// Builds a query from an input stream.
-        /// </summary>
-        /// <param name="inputQuery"> An input query. </param>
-        /// <param name="graph"> A graph to compute the query on. </param>
-        /// <param name="threadCount"> Maximum number of threads available to use. </param>
-        /// <param name="printer"> A printer to use. </param>
-        /// <param name="formater"> A formater to use by printer. </param>
-        /// <param name="verticesPerThread"> A number of vertices distributed to threads during parallel computation of the query.</param>
-        /// <param name="fileName"> A file to store results into. </param>
-        public static Query Create(TextReader inputQuery, Graph graph, int threadCount, string printer, string formater, int verticesPerThread, string fileName)
-        {
-            CheckArgs(inputQuery, graph, threadCount, printer, formater, verticesPerThread, fileName);
-            return new Query(Tokenizer.Tokenize(inputQuery), graph, threadCount, printer, formater, verticesPerThread, fileName);
+            return CreateInternalL(mode, Tokenizer.Tokenize(inputQuery), graph, threadCount, printer, formater, verticesPerThread, fileName, grouperAlias, sorterAlias, fixedArraySize);
         }
 
-
-        /// <summary>
-        /// Builds a streamed version of a query from an input string.
-        /// </summary>
-        /// <param name="inputQuery"> An input query. </param>
-        /// <param name="graph"> A graph to compute the query on. </param>
-        /// <param name="threadCount"> Maximum number of threads available to use. </param>
-        /// <param name="printer"> A printer to use. </param>
-        /// <param name="formater"> A formater to use by printer. </param>
-        /// <param name="verticesPerThread"> A number of vertices distributed to threads during parallel computation of the query.</param>
-        /// <param name="fileName"> A file to store results into. </param>
-        public static Query CreateStreamed(string inputQuery, Graph graph, int threadCount, string printer, string formater, int verticesPerThread, string fileName)
+        public static Query Create(string mode, TextReader inputQuery, Graph graph, int threadCount, string printer, string formater, int verticesPerThread, string fileName, string grouperAlias, string sorterAlias, int fixedArraySize)
         {
-            CheckArgs(inputQuery, graph, threadCount, printer, formater, verticesPerThread, fileName);
-            return new Query(Tokenizer.Tokenize(inputQuery), graph, threadCount, printer, formater, verticesPerThread, fileName, true);
-        }
-        /// <summary>
-        /// Builds a streamed version of a query from an input stream.
-        /// </summary>
-        /// <param name="inputQuery"> An input query. </param>
-        /// <param name="graph"> A graph to compute the query on. </param>
-        /// <param name="threadCount"> Maximum number of threads available to use. </param>
-        /// <param name="printer"> A printer to use. </param>
-        /// <param name="formater"> A formater to use by printer. </param>
-        /// <param name="verticesPerThread"> A number of vertices distributed to threads during parallel computation of the query.</param>
-        /// <param name="fileName"> A file to store results into. </param>
-        public static Query CreateStreamed(TextReader inputQuery, Graph graph, int threadCount, string printer, string formater, int verticesPerThread, string fileName)
-        {
-            CheckArgs(inputQuery, graph, threadCount, printer, formater, verticesPerThread, fileName);
-            return new Query(Tokenizer.Tokenize(inputQuery), graph, threadCount, printer, formater, verticesPerThread, fileName, true);
+            return CreateInternalL(mode, Tokenizer.Tokenize(inputQuery), graph, threadCount, printer, formater, verticesPerThread, fileName, grouperAlias, sorterAlias, fixedArraySize);
         }
 
-        /// <summary>
-        /// Checks arguments of constructors.
-        /// Called from static create method.
-        /// </summary>
-        private static void CheckArgs(Object inputQuery, Graph graph, int threadCount, string printer, string formater, int verticesPerThread, string fileName)
+        private static Query CreateInternalL(string mode, List<Token> tokens, Graph graph, int threadCount, string printer, string formater, int verticesPerThread, string fileName, string grouperAlias, string sorterAlias, int fixedArraySize) 
+        {
+            CheckArgs(tokens, graph, threadCount, printer, formater, verticesPerThread, fileName, fixedArraySize);
+            CheckAliases(grouperAlias, sorterAlias, mode);
+
+            if (mode == "hs")
+                return new Query(tokens, graph, threadCount, printer, formater, verticesPerThread, fileName, grouperAlias, sorterAlias, fixedArraySize, false);
+            else if (mode == "s" ) 
+                return new Query(tokens, graph, threadCount, printer, formater, verticesPerThread, fileName, grouperAlias, sorterAlias, fixedArraySize, true);
+            else return new Query(tokens, graph, threadCount, printer, formater, verticesPerThread, fileName, grouperAlias, sorterAlias, fixedArraySize);
+        }
+
+        private static void CheckArgs(Object inputQuery, Graph graph, int threadCount, string printer, string formater, int verticesPerThread, string fileName, int fixedArraySize)
         {
             if (inputQuery == null || graph == null)
                 throw new ArgumentException("Query, input query or graph cannot be null.");
@@ -292,7 +247,39 @@ namespace QueryEngine
                 throw new ArgumentException("Query, thread count and vertices per thread cannot be <= 0.");
             else if (!Printer.Printers.Contains(printer) || !Formater.Formaters.Contains(formater))
                 throw new ArgumentException("Query, invalid printer or formater.");
+            else if (fixedArraySize <= 0)
+                throw new ArgumentException("Query, invalid number of fixed array size.");
             else return;
+        }
+
+
+        public static void CheckAliases(string grouperAlias, string sorterAlias, string mode)
+        {
+            if (mode == "hs")
+            {
+                if (!GroupResultProcessor.HalfStreamedAliases.Contains(grouperAlias))
+                    throw new ArgumentException("Query HS, invalid grouper alias.");
+                else if (!OrderByResultProcessor.HalfStreamedAliases.Contains(sorterAlias))
+                    throw new ArgumentException("Query HS, invalid sorter alias.");
+                else { }
+            }
+            else if (mode == "s")
+            {
+                if (!GroupResultProcessor.StreamedAliases.Contains(grouperAlias))
+                    throw new ArgumentException("Query S, invalid grouper alias.");
+                else if (!OrderByResultProcessor.StreamedAliases.Contains(sorterAlias))
+                    throw new ArgumentException("Query S, invalid sorter alias.");
+                else { }
+            }
+            else if (mode == "n")
+            {
+                if (!GroupByObject.Aliases.Contains(grouperAlias))
+                    throw new ArgumentException("Query N, invalid grouper alias.");
+                else if (!OrderByObject.Aliases.Contains(sorterAlias))
+                    throw new ArgumentException("Query N, invalid sorter alias.");
+                else { }
+            }
+            else throw new ArgumentException("Query, invalid mode type.");
         }
     }
 

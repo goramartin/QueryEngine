@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+
 
 namespace QueryEngine
 {
@@ -9,6 +11,19 @@ namespace QueryEngine
     /// </summary>
     internal abstract class GroupResultProcessor : ResultProcessor
     {
+        public static HashSet<string> StreamedAliases { get; }
+        public static HashSet<string> HalfStreamedAliases { get; }
+
+        static GroupResultProcessor()
+        {
+            StreamedAliases = new HashSet<string>();
+            HalfStreamedAliases = new HashSet<string>();
+
+            StreamedAliases.Add("globalS");
+            HalfStreamedAliases.Add("twowayHSB");
+            HalfStreamedAliases.Add("twowayHSL");
+        }
+
         protected Aggregate[] aggregates;
         protected ExpressionHolder[] hashes;
         protected IGroupByExecutionHelper executionHelper;
@@ -75,12 +90,12 @@ namespace QueryEngine
         /// The suffix HS stands for Half Streamed solution, whereas the S stands for Full Streamed solution.
         /// The additional suffices B and L stand for the type of result storages. B is for buckets and L is for Lists.
         /// </summary>
-        public static ResultProcessor Factory(QueryExpressionInfo expressionInfo, IGroupByExecutionHelper executionHelper, int columnCount, int[] usedVars)
+        public static ResultProcessor Factory(QueryExpressionInfo expressionInfo, IGroupByExecutionHelper executionHelper, int columnCount, int[] usedVars, bool isStreamed)
         {
             if (executionHelper.IsSetSingleGroupGroupBy)
             {
-                if (executionHelper.GrouperAlias == "singleHS") return new SingleGroupResultProcessorHalfStreamed(expressionInfo, executionHelper, columnCount, usedVars);
-                else /*if (executionHelper.GrouperAlias == "singleS")*/ return new SingleGroupResultProcessorStreamed(expressionInfo, executionHelper, columnCount, usedVars);
+                if (!isStreamed) return new SingleGroupResultProcessorHalfStreamed(expressionInfo, executionHelper, columnCount, usedVars);
+                else return new SingleGroupResultProcessorStreamed(expressionInfo, executionHelper, columnCount, usedVars);
             }
             else
             {

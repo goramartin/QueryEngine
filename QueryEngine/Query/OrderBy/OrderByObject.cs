@@ -15,6 +15,7 @@ compared instead. It saves a lot of time because moving rows in a table is very 
 
 
 using System;
+using System.Collections.Generic;
 
 namespace QueryEngine
 {
@@ -24,6 +25,15 @@ namespace QueryEngine
     /// </summary>
     internal sealed class OrderByObject : QueryObject
     {
+        public static HashSet<String> Aliases { get; }
+
+        static OrderByObject()
+        {
+            Aliases = new HashSet<string>();
+            Aliases.Add("mergeSort");
+        }
+
+
         private ExpressionComparer[] comparers;
         private IOrderByExecutionHelper helper;
 

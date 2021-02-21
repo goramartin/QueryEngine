@@ -24,6 +24,21 @@ namespace QueryEngine
 {
     internal sealed class GroupByObject : QueryObject
     {
+        public static HashSet<string> Aliases { get; }
+
+        static GroupByObject()
+        {
+            Aliases = new HashSet<string>();
+            Aliases.Add("refB");
+            Aliases.Add("refL");
+            Aliases.Add("globalB");
+            Aliases.Add("globalL");
+            Aliases.Add("localB");
+            Aliases.Add("localL");
+            Aliases.Add("twowayB");
+            Aliases.Add("twowayL");
+        }
+
         private IGroupByExecutionHelper helper;
         private ExpressionHolder[] hashes;
         private List<Aggregate> aggregates;
