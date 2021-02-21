@@ -33,6 +33,12 @@ namespace QueryEngine
     internal partial class TableResults : ITableResults
     {
         /// <summary>
+        /// A flag whether new elements can be added into the table.
+        /// If the elements are added, it can cause undefined behaviour.
+        /// </summary>
+        public readonly bool isStatic = false;
+
+        /// <summary>
         /// [column][block][position in block]
         /// </summary>
         private List<Element[]>[] resTable;
@@ -57,17 +63,20 @@ namespace QueryEngine
         /// Note that it should not be used if there is order set.
         /// </summary>
         public Element[] temporaryRow { get; set; } = null;
-
         public int FixedArraySize { get; private set; }
-        
+        public int[] usedVars { get; private set; }
+
         /// <summary>
         /// Empty constructor for passing into group by results for streamed grouping.
+        /// Flags for static.
         /// </summary>
-        public TableResults() { }
+        public TableResults() { 
+        }
 
         /// <summary>
         /// Gets results from a merged matcher results.
         /// If the constructor runs the temporary row cannot be used.
+        /// Flags for dynamic.
         /// </summary>
         /// <param name="elements"> Merged matcher results. </param>
         /// <param name="count"> Number of matched elements even though they might not be stored in the table. </param>
@@ -85,21 +94,29 @@ namespace QueryEngine
                 this.NumberOfMatchedElements = count;
                 this.FixedArraySize = fixedArraySize;
                 if (wasStoringResults) this.RowCount = count;
+                this.isStatic = true;
             }
         }
 
         /// <summary>
         /// Creates an empty instance with the specified number of columns.
+        /// Flags for dynamic.
         /// </summary>
-        public TableResults(int columnCount, int fixedArraySize)
+        public TableResults(int columnCount, int fixedArraySize, int[] usedVars)
         {
             if (columnCount < 1 || fixedArraySize < 1)
                 throw new ArgumentException($"{this.GetType()}, number of columns or array size, cannot be <= 0. columns == {columnCount}, array size == {fixedArraySize}.");
-
-            this.FixedArraySize = fixedArraySize;
-            this.resTable = new List<Element[]>[columnCount];
-            for (int i = 0; i < columnCount; i++)
-                this.resTable[i] = new List<Element[]>();
+            else if (usedVars == null || usedVars.Length == 0)
+                throw new ArgumentException($"{this.GetType()}, cannot pass empty variable list.");
+            else
+            {
+                this.usedVars = usedVars;
+                this.FixedArraySize = fixedArraySize;
+                this.resTable = new List<Element[]>[columnCount];
+                // Unused columns will be set to null.
+                for (int i = 0; i < this.usedVars.Length; i++)
+                    this.resTable[this.usedVars[i]] = new List<Element[]>();
+            }
         }
 
         public void StoreRow(Element[] row)
@@ -110,12 +127,21 @@ namespace QueryEngine
             // Add a new block to each column.
             if (posInBlock == 0)
             {
-                for (int i = 0; i < this.ColumnCount; i++)
-                    this.resTable[i].Add(new Element[this.FixedArraySize]);
+                this.InitNewBlock();
             }
-            for (int i = 0; i < this.ColumnCount; i++)
-                this.resTable[i][block][posInBlock] = row[i];
+            
+            for (int i = 0; i < this.usedVars.Length; i++)
+            {
+                var column = this.usedVars[i];
+                this.resTable[column][block][posInBlock] = row[column];
+            }
             this.RowCount++;
+        }
+
+        private void InitNewBlock()
+        {
+            for (int i = 0; i < this.usedVars.Length; i++)
+                this.resTable[this.usedVars[i]].Add(new Element[this.FixedArraySize]);
         }
 
         public void StoreTemporaryRow()

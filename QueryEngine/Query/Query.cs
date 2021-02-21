@@ -139,7 +139,7 @@ namespace QueryEngine
         {
             this.graph = graph;
             this.variableMap = new VariableMap();
-            this.qEhelper = new QueryExecutionHelper(threadCount, printer, formater, verticesPerThread, 4_194_304, fileName, "DFSParallelStreamed", "DFSSingleThreadStreamed", "SIMPLE", "globalS", "abtreeS");
+            this.qEhelper = new QueryExecutionHelper(threadCount, printer, formater, verticesPerThread, 4_194_304, fileName, "DFSParallelStreamed", "DFSSingleThreadStreamed", "SIMPLE", "globalS", "abtreeHS");
 
             // Parse input query.
             var parsedClauses = Parser.Parse(tokens);
@@ -166,13 +166,14 @@ namespace QueryEngine
 
             // ORDER BY
             if (parsedClauses.ContainsKey("orderby"))
-            {
-                var orderByProc = OrderByResultProcessor.Factory(graph, variableMap, qEhelper, (OrderByNode)parsedClauses["orderby"], exprInfo, variableMap.GetCount());
+            { 
+                var comps = OrderByResultProcessor.ParseOrderBy(graph, variableMap, qEhelper, (OrderByNode)parsedClauses["orderby"], exprInfo, variableMap.GetCount());
+                var orderByProc = OrderByResultProcessor.Factory(this.exprInfo, comps, qEhelper,variableMap.GetCount(), this.exprInfo.CollectUsedVariables());
                 match.PassResultProcessor(orderByProc);
             } else
             {
                 // Check if the query is aggregation and not a simple query.
-                var groupByProc = GroupResultProcessor.Factory(exprInfo, qEhelper, variableMap.GetCount());
+                var groupByProc = GroupResultProcessor.Factory(exprInfo, qEhelper, variableMap.GetCount(), this.exprInfo.CollectUsedVariables());
                 if ((this.exprInfo.Aggregates.Count == 0 && this.qEhelper.IsSetSingleGroupGroupBy) || (!this.qEhelper.IsSetSingleGroupGroupBy && !parsedClauses.ContainsKey("groupby")))
                 throw new ArgumentException($"{this.GetType()}, no grouping was specified. The streamed version allows to compute only aggregations.");
                 

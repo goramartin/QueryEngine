@@ -33,7 +33,7 @@ namespace QueryEngine
         private AggregateBucketResult[] finalNonAsterixResults;
         private bool containsAst;
 
-        public SingleGroupResultProcessorHalfStreamed(QueryExpressionInfo expressionInfo, IGroupByExecutionHelper helper, int columnCount): base(expressionInfo, helper, columnCount)
+        public SingleGroupResultProcessorHalfStreamed(QueryExpressionInfo expressionInfo, IGroupByExecutionHelper helper, int columnCount, int[] usedVars): base(expressionInfo, helper, columnCount, usedVars)
         {
             this.matcherNonAsterixResults = new AggregateBucketResult[this.executionHelper.ThreadCount][];
             this.finalResults = AggregateBucketResult.CreateBucketResults(this.aggregates);

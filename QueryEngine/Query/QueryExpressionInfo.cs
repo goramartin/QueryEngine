@@ -209,6 +209,8 @@ namespace QueryEngine
             {
                 this.Exprs[i].CollectUsedVars(ref  vs);
             }
+            
+            vs.Sort();
             return vs.Distinct().ToArray();
         }
     }

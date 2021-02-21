@@ -22,7 +22,7 @@ namespace QueryEngine
         private AggregateBucketResult[] nonAsterixResults;
         private bool containsAst = false;
         
-        public SingleGroupResultProcessorStreamed(QueryExpressionInfo expressionInfo, IGroupByExecutionHelper executionHelper, int columnCount) : base(expressionInfo, executionHelper, columnCount)
+        public SingleGroupResultProcessorStreamed(QueryExpressionInfo expressionInfo, IGroupByExecutionHelper executionHelper, int columnCount, int[] usedVars) : base(expressionInfo, executionHelper, columnCount, usedVars)
         {
             this.finalResults = AggregateBucketResult.CreateBucketResults(this.aggregates);
             Aggregate.ExtractNonAstAggsAndResults(this.aggregates, this.finalResults, out nonAsterixAggregates, out nonAsterixResults);

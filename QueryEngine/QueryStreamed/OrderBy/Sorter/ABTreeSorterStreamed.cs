@@ -43,7 +43,7 @@ namespace QueryEngine
         /// </summary>
         private TypeRangeHasher<T> firstKeyHasher;
         
-        public ABTreeStreamedSorter(ExpressionComparer[] comparers, IOrderByExecutionHelper executionHelper, int columnCount): base(comparers, executionHelper, columnCount)
+        public ABTreeStreamedSorter(ExpressionComparer[] comparers, IOrderByExecutionHelper executionHelper, int columnCount, int[] usedVars): base(comparers, executionHelper, columnCount, usedVars)
         {
             this.firstKeyHasher = (TypeRangeHasher<T>)TypeRangeHasher.Factory(this.executionHelper.ThreadCount, typeof(T));
             this.firstKeyExpressionHolder = this.comparers[0].GetExpressionHolder();
@@ -53,7 +53,7 @@ namespace QueryEngine
             this.firstKeyComparers = new ExpressionComparer<T>[this.rangeBuckets.Length];
             for (int i = 0; i < this.rangeBuckets.Length; i++)
             {
-                var results = new TableResults(this.ColumnCount, this.executionHelper.FixedArraySize);
+                var results = new TableResults(this.ColumnCount, this.executionHelper.FixedArraySize, this.usedVars);
                 var tmpRowComparer = RowComparer.Factory(this.comparers, true);
                 this.firstKeyComparers[i] = (ExpressionComparer<T>)tmpRowComparer.comparers[0];
                 this.rangeBuckets[i] = new RangeBucket(new IndexToRowProxyComparer(tmpRowComparer, results, false), results);

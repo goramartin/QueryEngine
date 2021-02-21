@@ -18,7 +18,7 @@ namespace QueryEngine
         private Dictionary<AggregateBucketResult[], AggregateBucketResult[]> stGroups = null;
         private BucketsKeyValueFactory[] matcherBucketFactories;
 
-        public GlobalGroupStreamed(QueryExpressionInfo expressionInfo, IGroupByExecutionHelper executionHelper, int columnCount) : base(expressionInfo, executionHelper, columnCount)
+        public GlobalGroupStreamed(QueryExpressionInfo expressionInfo, IGroupByExecutionHelper executionHelper, int columnCount, int[] usedVars) : base(expressionInfo, executionHelper, columnCount, usedVars)
         {
             this.matcherBucketFactories = new BucketsKeyValueFactory[this.executionHelper.ThreadCount];
             for (int i = 0; i < this.executionHelper.ThreadCount; i++)

@@ -31,13 +31,13 @@ namespace QueryEngine
         /// </summary>
         private TableResults.RowProxy[] mergedResults;
 
-        public ABTreeHalfStreamedSorter(Graph graph, VariableMap variableMap, IOrderByExecutionHelper executionHelper, OrderByNode orderByNode, QueryExpressionInfo exprInfo, int columnCount) 
-            : base(graph, variableMap, executionHelper, orderByNode, exprInfo, columnCount) 
+        public ABTreeHalfStreamedSorter(ExpressionComparer[] comparers, IOrderByExecutionHelper executionHelper, int columnCount, int[] usedVars) 
+            : base(comparers, executionHelper, columnCount, usedVars) 
         {
             this.sortJobs = new SortJob[this.executionHelper.ThreadCount];
             for (int i = 0; i < sortJobs.Length; i++)
             {
-                var results = new TableResults(this.ColumnCount, this.executionHelper.FixedArraySize);
+                var results = new TableResults(this.ColumnCount, this.executionHelper.FixedArraySize, this.usedVars);
                 this.sortJobs[i] = new SortJob(new IndexToRowProxyComparer(RowComparer.Factory(this.comparers, true), results, false), results);
             }
         } 

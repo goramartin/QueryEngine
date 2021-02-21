@@ -21,7 +21,7 @@ namespace QueryEngine
         private GroupJob[] groupJobs;
         private ConcurrentDictionary<GroupDictKeyFull, AggregateBucketResult[]> globalGroups;
 
-        public LocalGroupGlobalMergeHalfStreamedListBucket(QueryExpressionInfo expressionInfo, IGroupByExecutionHelper executionHelper, int columnCount) : base(expressionInfo, executionHelper, columnCount)
+        public LocalGroupGlobalMergeHalfStreamedListBucket(QueryExpressionInfo expressionInfo, IGroupByExecutionHelper executionHelper, int columnCount, int[] usedVars) : base(expressionInfo, executionHelper, columnCount, usedVars)
         {
             this.groupJobs = new GroupJob[this.executionHelper.ThreadCount];
            
@@ -31,11 +31,11 @@ namespace QueryEngine
             var firstHasher = new RowHasher(hashers);
             firstHasher.SetCache(firstComp.comparers);
             
-            this.groupJobs[0] = new GroupJob(this.aggregates, firstComp, firstHasher, AggregateBucketResult.CreateBucketResults(this.aggregates), new TableResults(this.ColumnCount, this.executionHelper.FixedArraySize));
+            this.groupJobs[0] = new GroupJob(this.aggregates, firstComp, firstHasher, AggregateBucketResult.CreateBucketResults(this.aggregates), new TableResults(this.ColumnCount, this.executionHelper.FixedArraySize, this.usedVars));
             for (int i = 1; i < this.executionHelper.ThreadCount; i++)
             {
                 CloneHasherAndComparer(firstComp, firstHasher, out RowEqualityComparerGroupKey newComp, out RowHasher newHasher);
-                groupJobs[i] = new GroupJob(this.aggregates, newComp, newHasher, AggregateBucketResult.CreateBucketResults(this.aggregates), new TableResults(this.ColumnCount, this.executionHelper.FixedArraySize));
+                groupJobs[i] = new GroupJob(this.aggregates, newComp, newHasher, AggregateBucketResult.CreateBucketResults(this.aggregates), new TableResults(this.ColumnCount, this.executionHelper.FixedArraySize, this.usedVars));
             }
 
             this.globalGroups = new ConcurrentDictionary<GroupDictKeyFull, AggregateBucketResult[]>( RowEqualityComparerGroupDickKeyFull.Factory(comparers, false));

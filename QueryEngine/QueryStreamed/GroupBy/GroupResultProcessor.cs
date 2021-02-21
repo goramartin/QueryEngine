@@ -16,13 +16,15 @@ namespace QueryEngine
         /// Represents a number of variables defined in the match clause of the query.
         /// </summary>
         protected int ColumnCount { get; }
+        protected int[] usedVars;
 
-        protected GroupResultProcessor(QueryExpressionInfo expressionInfo, IGroupByExecutionHelper executionHelper, int columnCount)
+        protected GroupResultProcessor(QueryExpressionInfo expressionInfo, IGroupByExecutionHelper executionHelper, int columnCount, int[] usedVars)
         {
             this.aggregates = expressionInfo.Aggregates.ToArray();
             this.hashes = expressionInfo.GroupByhashExprs.ToArray();
             this.executionHelper = executionHelper;
             this.ColumnCount = columnCount;
+            this.usedVars = usedVars;
         }
 
         /// <summary>
@@ -73,18 +75,18 @@ namespace QueryEngine
         /// The suffix HS stands for Half Streamed solution, whereas the S stands for Full Streamed solution.
         /// The additional suffices B and L stand for the type of result storages. B is for buckets and L is for Lists.
         /// </summary>
-        public static ResultProcessor Factory(QueryExpressionInfo expressionInfo, IGroupByExecutionHelper executionHelper, int columnCount)
+        public static ResultProcessor Factory(QueryExpressionInfo expressionInfo, IGroupByExecutionHelper executionHelper, int columnCount, int[] usedVars)
         {
             if (executionHelper.IsSetSingleGroupGroupBy)
             {
-                if (executionHelper.GrouperAlias == "singleHS") return new SingleGroupResultProcessorHalfStreamed(expressionInfo, executionHelper, columnCount);
-                else /*if (executionHelper.GrouperAlias == "singleS")*/ return new SingleGroupResultProcessorStreamed(expressionInfo, executionHelper, columnCount);
+                if (executionHelper.GrouperAlias == "singleHS") return new SingleGroupResultProcessorHalfStreamed(expressionInfo, executionHelper, columnCount, usedVars);
+                else /*if (executionHelper.GrouperAlias == "singleS")*/ return new SingleGroupResultProcessorStreamed(expressionInfo, executionHelper, columnCount, usedVars);
             }
             else
             {
-                if (executionHelper.GrouperAlias == "globalS") return new GlobalGroupStreamed(expressionInfo, executionHelper, columnCount);
-                else if (executionHelper.GrouperAlias == "twowayHSB") return new LocalGroupGlobalMergeHalfStreamedBucket(expressionInfo, executionHelper, columnCount);
-                else if (executionHelper.GrouperAlias == "twowayHSL") return new LocalGroupGlobalMergeHalfStreamedListBucket(expressionInfo, executionHelper, columnCount);
+                if (executionHelper.GrouperAlias == "globalS") return new GlobalGroupStreamed(expressionInfo, executionHelper, columnCount, usedVars);
+                else if (executionHelper.GrouperAlias == "twowayHSB") return new LocalGroupGlobalMergeHalfStreamedBucket(expressionInfo, executionHelper, columnCount, usedVars);
+                else if (executionHelper.GrouperAlias == "twowayHSL") return new LocalGroupGlobalMergeHalfStreamedListBucket(expressionInfo, executionHelper, columnCount, usedVars);
                 else throw new ArgumentException("Group by result processor, trying to create an unknown grouper.");
             }
 
