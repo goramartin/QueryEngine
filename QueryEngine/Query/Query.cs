@@ -112,7 +112,10 @@ namespace QueryEngine
                 orderBy = QueryObject.Factory(typeof(OrderByObject), graph, qEhelper, variableMap, parsedClauses["orderby"], exprInfo);
                 query.AddToEnd(orderBy);
             }
-            
+
+            var tmp =  this.exprInfo.CollectUsedVariables();
+
+
             // If the single group by is set, add GroupBy object to the execution chain.
             if (this.qEhelper.IsSetSingleGroupGroupBy && !this.qEhelper.IsSetGroupBy)
                 groupBy = QueryObject.Factory(typeof(GroupByObject), null, qEhelper, null, null, exprInfo);

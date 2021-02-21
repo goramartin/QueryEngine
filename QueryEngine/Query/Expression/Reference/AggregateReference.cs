@@ -49,9 +49,10 @@ namespace QueryEngine
         }
 
 
-        public override List<int> CollectUsedVars(List<int> vars)
+        public override void CollectUsedVars(ref List<int> vars)
         {
-            return vars;
+            var tmpExpr = this.Aggr.GetExpression();
+            if (tmpExpr != null) tmpExpr.CollectUsedVars(ref vars);
         }
 
         public override bool ContainsAggregate()

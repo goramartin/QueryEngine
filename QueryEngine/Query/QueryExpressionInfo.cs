@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace QueryEngine
 {
@@ -196,6 +197,20 @@ namespace QueryEngine
         {
             if (aggregate == null)
                 throw new ArgumentNullException($"Query expression info, cannot store null expressions.");
+        }
+
+        /// <summary>
+        /// Returns indeces of variables used across the query.
+        /// </summary>
+        public int[] CollectUsedVariables()
+        {
+            List<int> vs = new List<int>();
+            for (int i = 0; i < this.Exprs.Count; i++)
+            {
+                this.Exprs[i].CollectUsedVars(ref  vs);
+                vs.AddRange(vs);
+            }
+            return vs.Distinct().ToArray();
         }
     }
 }

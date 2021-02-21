@@ -99,7 +99,7 @@ namespace QueryEngine
             nonAstResults = tmpResults.ToArray();
         }
 
-
+        public ExpressionHolder GetExpression() => this.expressionHolder;
         public abstract Type GetAggregateReturnType();
         public abstract string GetFuncName();
        

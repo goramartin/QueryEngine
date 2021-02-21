@@ -48,10 +48,9 @@ namespace QueryEngine
         /// </summary>
         /// <param name="vars"> A list of already collected variables. </param>
         /// <returns> A list of collected variables, the same list as the one in func parameters.</returns>
-        public override List<int> CollectUsedVars(List<int> vars)
+        public override void CollectUsedVars(ref List<int> vars)
         {
             if (!vars.Contains(this.VariableIndex)) vars.Add(this.VariableIndex);
-            return vars;
         }
 
         public override string ToString()

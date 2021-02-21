@@ -46,8 +46,7 @@ namespace QueryEngine
         /// If the variable is already inside the list, the variable is not included.
         /// </summary>
         /// <param name="vars"> A list of already collected variables. </param>
-        /// <returns> A list of collected variables, the same list as the one in func parameters.</returns>
-        public abstract List<int> CollectUsedVars(List<int> vars);
+        public abstract void CollectUsedVars(ref List<int> vars);
 
         /// <summary>
         /// Returns whether the expression is an aggregate reference. 

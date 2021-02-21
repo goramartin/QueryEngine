@@ -33,7 +33,10 @@ namespace QueryEngine
             this.expressionHolder = expressionHolder;
             this.isAscending = ascending;
             this.cacheResults = cacheResults;
-            this.usedVars = expressionHolder.CollectUsedVars(new List<int>()).ToArray();
+
+            var tmp = new List<int>();
+            expressionHolder.CollectUsedVars(ref tmp);
+            this.usedVars = tmp.ToArray();
         }
 
         public abstract int Compare(in TableResults.RowProxy x, in TableResults.RowProxy y);
