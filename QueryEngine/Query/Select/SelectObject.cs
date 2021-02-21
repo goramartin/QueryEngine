@@ -15,6 +15,11 @@ The results are always printed in a form of a table. A header of the table is cr
 by calling ToString() method on the list of expressions.
  */
 
+
+// Comment to omit printing of the results.
+#define PRINT
+
+
 using System;
 using System.Collections.Generic;
 
@@ -60,7 +65,12 @@ namespace QueryEngine
             {
                 this.next.Compute(out resTable, out groupByResults);
                 this.next = null;
+
+#if PRINT
+
                 this.Print(resTable, groupByResults);
+#endif 
+
             }
             else throw new NullReferenceException($"{this.GetType()}, next is set to null."); 
         }
