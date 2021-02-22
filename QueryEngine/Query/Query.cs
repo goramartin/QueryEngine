@@ -256,8 +256,6 @@ namespace QueryEngine
                 throw new ArgumentException("Query, input query or graph cannot be null.");
             else if (threadCount <= 0 || verticesPerThread <= 0)
                 throw new ArgumentException("Query, thread count and vertices per thread cannot be <= 0.");
-            //else if (!Printer.Printers.Contains(printer) || !Formater.Formaters.Contains(formater))
-            //    throw new ArgumentException("Query, invalid printer or formater.");
             else if (fixedArraySize <= 0)
                 throw new ArgumentException("Query, invalid number of fixed array size.");
             else return;

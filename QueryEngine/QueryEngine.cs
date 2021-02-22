@@ -23,7 +23,6 @@ namespace QueryEngine
 
         #region ParseProgramArgs
 
-
         private static QueryMode GetMode(string arg)
         {
             if (arg == "s") return QueryMode.Streamed;
