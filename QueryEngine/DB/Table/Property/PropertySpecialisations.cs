@@ -15,7 +15,7 @@ namespace QueryEngine
     /// We create specialisations based on the type of T.
     /// Its functions are not visible from a table.
     /// </summary>
-    internal abstract class Property<T> : Property
+    public abstract class Property<T> : Property
     {
         public List<T> propHolder;
 
