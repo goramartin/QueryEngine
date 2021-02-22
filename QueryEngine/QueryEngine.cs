@@ -176,7 +176,7 @@ namespace QueryEngine
                 try
                 {
                     Console.WriteLine();
-                    Query query = Query.Create(mode, reader, graph, ThreadCount, Printer, Formater, VerticesPerThread, FileName, gAlias, sAlias, fixedArraySize);
+                    Query query = Query.Create(mode, reader, graph, ThreadCount, Printer, Formater, VerticesPerThread, FileName, gAlias, sAlias, fixedArraySize, true);
                     Console.WriteLine();
                     query.Compute();
                    

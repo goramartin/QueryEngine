@@ -17,7 +17,7 @@ by calling ToString() method on the list of expressions.
 
 
 // Comment to omit printing of the results.
-#define PRINT
+//#define NO_PRINT
 
 
 using System;
@@ -36,6 +36,7 @@ namespace QueryEngine
         /// </summary>
         private List<ExpressionToStringWrapper> rowFormat;
         private ISelectExecutionHelper helper;
+        public bool allowPrint;
         
         /// <summary>
         /// Creates Select object.
@@ -66,10 +67,8 @@ namespace QueryEngine
                 this.next.Compute(out resTable, out groupByResults);
                 this.next = null;
 
-#if PRINT
-                this.Print(resTable, groupByResults);
-#endif 
-
+                if (allowPrint)
+                    this.Print(resTable, groupByResults);
             }
             else throw new NullReferenceException($"{this.GetType()}, next is set to null."); 
         }
