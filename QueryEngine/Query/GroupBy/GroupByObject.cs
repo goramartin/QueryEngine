@@ -24,21 +24,6 @@ namespace QueryEngine
 {
     internal sealed class GroupByObject : QueryObject
     {
-        public static HashSet<string> Aliases { get; }
-
-        static GroupByObject()
-        {
-            Aliases = new HashSet<string>();
-            Aliases.Add("refB");
-            Aliases.Add("refL");
-            Aliases.Add("globalB");
-            Aliases.Add("globalL");
-            Aliases.Add("localB");
-            Aliases.Add("localL");
-            Aliases.Add("twowayB");
-            Aliases.Add("twowayL");
-        }
-
         private IGroupByExecutionHelper helper;
         private ExpressionHolder[] hashes;
         private List<Aggregate> aggregates;
@@ -104,7 +89,7 @@ namespace QueryEngine
                         // Use reference single thread solutions because the result table cannot be split equaly among threads.
                         // This also means that the result table is quite small.
                         if (resTable.NumberOfMatchedElements / helper.ThreadCount == 0)
-                            grouper = Grouper.Factory("refL", aggs, this.hashes, this.helper);
+                            grouper = Grouper.Factory(GrouperAlias.RefL, aggs, this.hashes, this.helper);
                         else grouper = Grouper.Factory(aggs, this.hashes, this.helper);
                     }
                     groupByResults = grouper.Group(resTable);

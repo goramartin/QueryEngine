@@ -47,16 +47,16 @@ namespace QueryEngine
             }
         }
 
-        public static Grouper Factory(string grouperAlias, Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper helper)
+        public static Grouper Factory(GrouperAlias grouperAlias, Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper helper)
         {
-            if (grouperAlias == "refB") return new GroupWithBuckets(aggs, hashes, helper);
-            else if (grouperAlias == "refL") return new GroupWithLists(aggs, hashes, helper);
-            else if (grouperAlias == "globalB") return new GlobalGroup(aggs, hashes, helper, true);
-            else if (grouperAlias == "globalL") return new GlobalGroup(aggs, hashes, helper, false);
-            else if (grouperAlias == "localB") return new LocalGroupLocalMerge(aggs, hashes, helper, true);
-            else if (grouperAlias == "localL") return new LocalGroupLocalMerge(aggs, hashes, helper, false);
-            else if (grouperAlias == "twowayB") return new LocalGroupGlobalMerge(aggs, hashes, helper, true);
-            else if (grouperAlias == "twowayL") return new LocalGroupGlobalMerge(aggs, hashes, helper, false);
+            if (grouperAlias == GrouperAlias.RefB) return new GroupWithBuckets(aggs, hashes, helper);
+            else if (grouperAlias == GrouperAlias.RefL) return new GroupWithLists(aggs, hashes, helper);
+            else if (grouperAlias == GrouperAlias.GlobalB) return new GlobalGroup(aggs, hashes, helper, true);
+            else if (grouperAlias == GrouperAlias.GlobalL) return new GlobalGroup(aggs, hashes, helper, false);
+            else if (grouperAlias == GrouperAlias.LocalB) return new LocalGroupLocalMerge(aggs, hashes, helper, true);
+            else if (grouperAlias == GrouperAlias.LocalL) return new LocalGroupLocalMerge(aggs, hashes, helper, false);
+            else if (grouperAlias == GrouperAlias.TwowayB) return new LocalGroupGlobalMerge(aggs, hashes, helper, true);
+            else if (grouperAlias == GrouperAlias.TwowayL) return new LocalGroupGlobalMerge(aggs, hashes, helper, false);
             else throw new ArgumentException("Grouper, trying to create an unknown grouper.");
         }
 

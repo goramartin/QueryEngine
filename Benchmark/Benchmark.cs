@@ -12,7 +12,7 @@ namespace Benchmark
     {
         public List<string> groupers = new List<string>();
         public List<string> sorters = new List<string>();
-        public string modeType;
+        public QueryMode modeType;
     }
 
     class Normal : Mode
@@ -29,7 +29,7 @@ namespace Benchmark
             groupers.Add("twowayL");
             sorters.Add("mergeSort");
 
-            modeType = 
+            modeType = QueryMode.Normal;
         }
     }
 
@@ -40,6 +40,8 @@ namespace Benchmark
             groupers.Add("twowayHSB");
             groupers.Add("twowayHSL");
             sorters.Add("abtreeHS");
+
+            modeType = QueryMode.HalfStreamed;
         }
     }
 
@@ -49,6 +51,7 @@ namespace Benchmark
         {
             groupers.Add("globalS");
             sorters.Add("abtreeS");
+            modeType = QueryMode.Streamed;
         }
     }
 

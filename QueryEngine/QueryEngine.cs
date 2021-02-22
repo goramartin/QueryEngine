@@ -24,12 +24,50 @@ namespace QueryEngine
         #region ParseProgramArgs
 
 
-        private static Query.Mode GetMode(string arg)
+        private static QueryMode GetMode(string arg)
         {
-            if (arg == "s") return Query.Mode.Streamed;
-            else if (arg == "hs") return Query.Mode.HalfStreamed;
-            else if (arg == "n") return Query.Mode.Normal;
+            if (arg == "s") return QueryMode.Streamed;
+            else if (arg == "hs") return QueryMode.HalfStreamed;
+            else if (arg == "n") return QueryMode.Normal;
             else throw new ArgumentException("Invalid engine mode.");
+        }
+
+        private static GrouperAlias GetGrouperAlias(string arg)
+        {
+            if (arg == "refB")
+                return GrouperAlias.RefB;
+            else if (arg == "refL")
+                return GrouperAlias.RefL;
+            else if (arg == "globalB")
+                return GrouperAlias.GlobalB;
+            else if (arg == "globalL")
+                return GrouperAlias.GlobalL;
+            else if (arg == "localB")
+                return GrouperAlias.LocalB;
+            else if (arg == "localL")
+                return GrouperAlias.LocalL;
+            else if (arg == "twowayB")
+                return GrouperAlias.TwowayB;
+            else if (arg == "twowayL")
+                return GrouperAlias.TwowayL;
+            else if (arg == "twowayHSB")
+                return GrouperAlias.TwowayHSB;
+            else if (arg == "twowayHSL")
+                return GrouperAlias.TwowayHSL;
+            else if (arg == "globalS")
+                return GrouperAlias.GlobalS;
+            else throw new ArgumentException("Invalid grouper alias.");
+        }
+
+        private static SorterAlias GetSorterAlias(string arg)
+        {
+           if (arg == "mergeSort")
+            return SorterAlias.MergeSort;
+           else if (arg == "abtreeHS")
+            return SorterAlias.AbtreeHS;
+           else if (arg == "abtreeS")
+                return SorterAlias.AbtreeS;
+            else throw new ArgumentException("Invalid sorter alias.");
         }
 
         /// <summary>
@@ -151,9 +189,9 @@ namespace QueryEngine
         {
             if (args.Length < 7) throw new ArgumentException("Wrong number of program parameters.");
 
-            Query.Mode mode = GetMode(args[0]);
-            string gAlias = args[1];
-            string sAlias = args[2];
+            QueryMode mode = GetMode(args[0]);
+            GrouperAlias gAlias = GetGrouperAlias(args[1]);
+            SorterAlias sAlias = GetSorterAlias(args[2]);
             int fixedArraySize = GetFixedArraySize(args[3]);
             Query.CheckAliases(gAlias, sAlias, mode);
 

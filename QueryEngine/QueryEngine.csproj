@@ -108,6 +108,7 @@
     <Compile Include="Query\Expression\IExpressionComparer.cs" />
     <Compile Include="Query\Expression\IExpressionHasher.cs" />
     <Compile Include="Query\Expression\IExpressionToString.cs" />
+    <Compile Include="Query\GrouperSorterAliases.cs" />
     <Compile Include="Query\Match\DFSMatch\Matcher\DFSParallelPatternMatcher\ColumnDistributor.cs" />
     <Compile Include="Query\Match\DFSMatch\Matcher\DFSParallelPatternMatcher\DFSParallelPatternMatcherBase.cs" />
     <Compile Include="Query\Match\DFSMatch\Matcher\DFSParallelPatternMatcher\VertexDistributor.cs" />

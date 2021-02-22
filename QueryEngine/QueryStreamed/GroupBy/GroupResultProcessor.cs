@@ -11,19 +11,6 @@ namespace QueryEngine
     /// </summary>
     internal abstract class GroupResultProcessor : ResultProcessor
     {
-        public static HashSet<string> StreamedAliases { get; }
-        public static HashSet<string> HalfStreamedAliases { get; }
-
-        static GroupResultProcessor()
-        {
-            StreamedAliases = new HashSet<string>();
-            HalfStreamedAliases = new HashSet<string>();
-
-            StreamedAliases.Add("globalS");
-            HalfStreamedAliases.Add("twowayHSB");
-            HalfStreamedAliases.Add("twowayHSL");
-        }
-
         protected Aggregate[] aggregates;
         protected ExpressionHolder[] hashes;
         protected IGroupByExecutionHelper executionHelper;
@@ -99,9 +86,9 @@ namespace QueryEngine
             }
             else
             {
-                if (executionHelper.GrouperAlias == "globalS") return new GlobalGroupStreamed(expressionInfo, executionHelper, columnCount, usedVars);
-                else if (executionHelper.GrouperAlias == "twowayHSB") return new LocalGroupGlobalMergeHalfStreamedBucket(expressionInfo, executionHelper, columnCount, usedVars);
-                else if (executionHelper.GrouperAlias == "twowayHSL") return new LocalGroupGlobalMergeHalfStreamedListBucket(expressionInfo, executionHelper, columnCount, usedVars);
+                if (executionHelper.GrouperAlias == GrouperAlias.GlobalS) return new GlobalGroupStreamed(expressionInfo, executionHelper, columnCount, usedVars);
+                else if (executionHelper.GrouperAlias == GrouperAlias.TwowayHSB) return new LocalGroupGlobalMergeHalfStreamedBucket(expressionInfo, executionHelper, columnCount, usedVars);
+                else if (executionHelper.GrouperAlias == GrouperAlias.TwowayHSL) return new LocalGroupGlobalMergeHalfStreamedListBucket(expressionInfo, executionHelper, columnCount, usedVars);
                 else throw new ArgumentException("Group by result processor, trying to create an unknown grouper.");
             }
 

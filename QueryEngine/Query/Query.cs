@@ -42,6 +42,7 @@ using System.IO;
 
 namespace QueryEngine
 {
+     public enum QueryMode { Normal, Streamed, HalfStreamed };
     /// <summary>
     /// Represents a pgql query.
     /// It tokenizes, parses and constructs simple execution chain.
@@ -49,8 +50,6 @@ namespace QueryEngine
     /// </summary>
     public sealed class Query
     {
-        public enum Mode { Normal, Streamed, HalfStreamed };
-
         private Graph graph;
         private VariableMap variableMap;
         /// <summary>
@@ -77,7 +76,7 @@ namespace QueryEngine
         /// <param name="fixedArraySize"> The size of the arrays used for storing results of the matcher.</param>
         /// <param name="grouperAlias"> A grouper to use when specifying group by.</param>
         /// <param name="sorterAlias"> A sorter to use when specifying order by.</param>
-        private Query(List<Token> tokens, Graph graph, bool allowPrint, int threadCount, PrinterType printer, FormaterType formater, int verticesPerThread, string fileName, string grouperAlias, string sorterAlias, int fixedArraySize)
+        private Query(List<Token> tokens, Graph graph, bool allowPrint, int threadCount, PrinterType printer, FormaterType formater, int verticesPerThread, string fileName, GrouperAlias grouperAlias, SorterAlias sorterAlias, int fixedArraySize)
         {
             this.graph = graph;
             this.variableMap = new VariableMap(); 
@@ -146,7 +145,7 @@ namespace QueryEngine
         /// <param name="fixedArraySize"> The size of the arrays used for storing results of the matcher.</param>
         /// <param name="grouperAlias"> A grouper to use when specifying group by.</param>
         /// <param name="sorterAlias"> A sorter to use when specifying order by.</param>
-        private Query(List<Token> tokens, Graph graph, bool allowPrint, int threadCount, PrinterType printer, FormaterType formater, int verticesPerThread, string fileName, string grouperAlias, string sorterAlias, int fixedArraySize, bool isStreamed)
+        private Query(List<Token> tokens, Graph graph, bool allowPrint, int threadCount, PrinterType printer, FormaterType formater, int verticesPerThread, string fileName, GrouperAlias grouperAlias, SorterAlias sorterAlias, int fixedArraySize, bool isStreamed)
         {
             this.graph = graph;
             this.variableMap = new VariableMap();
@@ -229,24 +228,24 @@ namespace QueryEngine
             }
         }
 
-        public static Query Create(Mode mode, string inputQuery, Graph graph, int threadCount, PrinterType printer, FormaterType formater, int verticesPerThread, string fileName, string grouperAlias, string sorterAlias, int fixedArraySize, bool allowPrint)
+        public static Query Create(QueryMode mode, string inputQuery, Graph graph, int threadCount, PrinterType printer, FormaterType formater, int verticesPerThread, string fileName, GrouperAlias grouperAlias, SorterAlias sorterAlias, int fixedArraySize, bool allowPrint)
         {
             return CreateInternalL(mode, Tokenizer.Tokenize(inputQuery), graph, threadCount, printer, formater, verticesPerThread, fileName, grouperAlias, sorterAlias, fixedArraySize, allowPrint);
         }
 
-        public static Query Create(Mode mode, TextReader inputQuery, Graph graph, int threadCount, PrinterType printer, FormaterType formater, int verticesPerThread, string fileName, string grouperAlias, string sorterAlias, int fixedArraySize, bool allowPrint)
+        public static Query Create(QueryMode mode, TextReader inputQuery, Graph graph, int threadCount, PrinterType printer, FormaterType formater, int verticesPerThread, string fileName, GrouperAlias grouperAlias, SorterAlias sorterAlias, int fixedArraySize, bool allowPrint)
         {
             return CreateInternalL(mode, Tokenizer.Tokenize(inputQuery), graph, threadCount, printer, formater, verticesPerThread, fileName, grouperAlias, sorterAlias, fixedArraySize, allowPrint);
         }
 
-        private static Query CreateInternalL(Mode mode, List<Token> tokens, Graph graph, int threadCount, PrinterType printer, FormaterType formater, int verticesPerThread, string fileName, string grouperAlias, string sorterAlias, int fixedArraySize, bool allowPrint) 
+        private static Query CreateInternalL(QueryMode mode, List<Token> tokens, Graph graph, int threadCount, PrinterType printer, FormaterType formater, int verticesPerThread, string fileName, GrouperAlias grouperAlias, SorterAlias sorterAlias, int fixedArraySize, bool allowPrint) 
         {
             CheckArgs(tokens, graph, threadCount, printer, formater, verticesPerThread, fileName, fixedArraySize);
             CheckAliases(grouperAlias, sorterAlias, mode);
 
-            if (mode == Mode.HalfStreamed)
+            if (mode == QueryMode.HalfStreamed)
                 return new Query(tokens, graph, allowPrint, threadCount, printer, formater, verticesPerThread, fileName, grouperAlias, sorterAlias, fixedArraySize, false);
-            else if (mode == Mode.Streamed) 
+            else if (mode == QueryMode.Streamed) 
                 return new Query(tokens, graph, allowPrint,threadCount, printer, formater, verticesPerThread, fileName, grouperAlias, sorterAlias, fixedArraySize, true);
             else return new Query(tokens, graph, allowPrint ,threadCount, printer, formater, verticesPerThread, fileName, grouperAlias, sorterAlias, fixedArraySize);
         }
@@ -264,30 +263,29 @@ namespace QueryEngine
             else return;
         }
 
-
-        public static void CheckAliases(string grouperAlias, string sorterAlias, Mode mode)
+        public static void CheckAliases(GrouperAlias grouperAlias, SorterAlias sorterAlias, QueryMode mode)
         {
-            if (mode == Mode.HalfStreamed)
+            if (mode == QueryMode.HalfStreamed)
             {
-                if (!GroupResultProcessor.HalfStreamedAliases.Contains(grouperAlias))
+                if (!Aliases.HalfStreamedGroupers.Contains(grouperAlias))
                     throw new ArgumentException("Query HS, invalid grouper alias.");
-                else if (!OrderByResultProcessor.HalfStreamedAliases.Contains(sorterAlias))
+                else if (!Aliases.HalfStreamedSorters.Contains(sorterAlias))
                     throw new ArgumentException("Query HS, invalid sorter alias.");
                 else { }
             }
-            else if (mode == Mode.Streamed)
+            else if (mode == QueryMode.Streamed)
             {
-                if (!GroupResultProcessor.StreamedAliases.Contains(grouperAlias))
+                if (!Aliases.StreamedGroupers.Contains(grouperAlias))
                     throw new ArgumentException("Query S, invalid grouper alias.");
-                else if (!OrderByResultProcessor.StreamedAliases.Contains(sorterAlias))
+                else if (!Aliases.StreamedSorters.Contains(sorterAlias))
                     throw new ArgumentException("Query S, invalid sorter alias.");
                 else { }
             }
-            else if (mode == Mode.Normal)
+            else if (mode == QueryMode.Normal)
             {
-                if (!GroupByObject.Aliases.Contains(grouperAlias))
+                if (!Aliases.NormalGroupers.Contains(grouperAlias))
                     throw new ArgumentException("Query N, invalid grouper alias.");
-                else if (!OrderByObject.Aliases.Contains(sorterAlias))
+                else if (!Aliases.NormalSorters.Contains(sorterAlias))
                     throw new ArgumentException("Query N, invalid sorter alias.");
                 else { }
             }

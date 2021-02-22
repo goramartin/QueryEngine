@@ -5,18 +5,6 @@ namespace QueryEngine
 {
     internal abstract class OrderByResultProcessor : ResultProcessor
     {
-        public static HashSet<string> StreamedAliases { get; }
-        public static HashSet<string> HalfStreamedAliases { get; }
-
-        static OrderByResultProcessor()
-        {
-            StreamedAliases = new HashSet<string>();
-            HalfStreamedAliases = new HashSet<string>();
-
-            HalfStreamedAliases.Add("abtreeHS");
-            StreamedAliases.Add("abtreeS");
-        }
-
         protected ExpressionComparer[] comparers;
         protected IOrderByExecutionHelper executionHelper;
         /// <summary>
@@ -52,8 +40,8 @@ namespace QueryEngine
         /// </summary>
         public static ResultProcessor Factory(QueryExpressionInfo exprInfo, ExpressionComparer[] comparers, IOrderByExecutionHelper executionHelper, int columnCount, int[] usedVars)
         {
-            if (executionHelper.SorterAlias == "abtreeHS") return new ABTreeHalfStreamedSorter(comparers, executionHelper, columnCount, usedVars);
-            else if (executionHelper.SorterAlias == "abtreeS")
+            if (executionHelper.SorterAlias == SorterAlias.AbtreeHS) return new ABTreeHalfStreamedSorter(comparers, executionHelper, columnCount, usedVars);
+            else if (executionHelper.SorterAlias == SorterAlias.AbtreeS)
             {
                 var typeOfFirstKey = exprInfo.OrderByComparerExprs[0].GetExpressionType();
                 if (typeOfFirstKey == typeof(int)) return new ABTreeStreamedSorter<int>(comparers, executionHelper, columnCount, usedVars);
