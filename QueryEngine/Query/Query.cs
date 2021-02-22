@@ -49,6 +49,8 @@ namespace QueryEngine
     /// </summary>
     public sealed class Query
     {
+        public enum Mode { Normal, Streamed, HalfStreamed };
+
         private Graph graph;
         private VariableMap variableMap;
         /// <summary>
@@ -75,7 +77,7 @@ namespace QueryEngine
         /// <param name="fixedArraySize"> The size of the arrays used for storing results of the matcher.</param>
         /// <param name="grouperAlias"> A grouper to use when specifying group by.</param>
         /// <param name="sorterAlias"> A sorter to use when specifying order by.</param>
-        private Query(List<Token> tokens, Graph graph, bool allowPrint, int threadCount, string printer, string formater, int verticesPerThread, string fileName, string grouperAlias, string sorterAlias, int fixedArraySize)
+        private Query(List<Token> tokens, Graph graph, bool allowPrint, int threadCount, PrinterType printer, FormaterType formater, int verticesPerThread, string fileName, string grouperAlias, string sorterAlias, int fixedArraySize)
         {
             this.graph = graph;
             this.variableMap = new VariableMap(); 
@@ -85,36 +87,36 @@ namespace QueryEngine
             var parsedClauses = Parser.Parse(tokens);
 
             // Create execution chain. 
-            if (parsedClauses.ContainsKey("groupby") && parsedClauses.ContainsKey("orderby"))
+            if (parsedClauses.ContainsKey(Parser.Clause.GroupBy) && parsedClauses.ContainsKey(Parser.Clause.OrderBy))
                 throw new ArgumentException($"{this.GetType()}, the query cannot contain both order by and group by");
             QueryObject groupBy = null;
             QueryObject orderBy = null;
             
             // MATCH is always leaf.
             QueryObject match = QueryObject.Factory
-                (typeof(MatchObject), graph, qEhelper, variableMap, parsedClauses["match"], null);
+                (typeof(MatchObject), graph, qEhelper, variableMap, parsedClauses[Parser.Clause.Match], null);
 
             // Second must be group by because it defines what can be in other clauses.
             // GROUP BY
-            if (parsedClauses.ContainsKey("groupby"))
+            if (parsedClauses.ContainsKey(Parser.Clause.GroupBy))
             {
                 this.exprInfo = new QueryExpressionInfo(true);
-                groupBy = QueryObject.Factory(typeof(GroupByObject), graph, qEhelper, variableMap, parsedClauses["groupby"], exprInfo);
+                groupBy = QueryObject.Factory(typeof(GroupByObject), graph, qEhelper, variableMap, parsedClauses[Parser.Clause.GroupBy], exprInfo);
             }
             else this.exprInfo = new QueryExpressionInfo(false);
 
             // SELECT is the last one to process the resuls.
             this.query = QueryObject.Factory
-                (typeof(SelectObject), graph, qEhelper, variableMap, parsedClauses["select"], exprInfo);
+                (typeof(SelectObject), graph, qEhelper, variableMap, parsedClauses[Parser.Clause.Select], exprInfo);
             ((SelectObject)this.query).allowPrint = allowPrint;
 
             // Check if the results are in a single group.
             this.SetSingleGroupFlags();
 
             // ORDER BY
-            if (parsedClauses.ContainsKey("orderby"))
+            if (parsedClauses.ContainsKey(Parser.Clause.OrderBy))
             {
-                orderBy = QueryObject.Factory(typeof(OrderByObject), graph, qEhelper, variableMap, parsedClauses["orderby"], exprInfo);
+                orderBy = QueryObject.Factory(typeof(OrderByObject), graph, qEhelper, variableMap, parsedClauses[Parser.Clause.OrderBy], exprInfo);
                 query.AddToEnd(orderBy);
             }
 
@@ -144,7 +146,7 @@ namespace QueryEngine
         /// <param name="fixedArraySize"> The size of the arrays used for storing results of the matcher.</param>
         /// <param name="grouperAlias"> A grouper to use when specifying group by.</param>
         /// <param name="sorterAlias"> A sorter to use when specifying order by.</param>
-        private Query(List<Token> tokens, Graph graph, bool allowPrint, int threadCount, string printer, string formater, int verticesPerThread, string fileName, string grouperAlias, string sorterAlias, int fixedArraySize, bool isStreamed)
+        private Query(List<Token> tokens, Graph graph, bool allowPrint, int threadCount, PrinterType printer, FormaterType formater, int verticesPerThread, string fileName, string grouperAlias, string sorterAlias, int fixedArraySize, bool isStreamed)
         {
             this.graph = graph;
             this.variableMap = new VariableMap();
@@ -152,38 +154,38 @@ namespace QueryEngine
 
             // Parse input query.
             var parsedClauses = Parser.Parse(tokens);
-            if (parsedClauses.ContainsKey("orderby") && parsedClauses.ContainsKey("groupby"))
+            if (parsedClauses.ContainsKey(Parser.Clause.OrderBy) && parsedClauses.ContainsKey(Parser.Clause.GroupBy))
                 throw new ArgumentException($"{this.GetType()}, the streamed version of the query cannot contain group by and order by at the same time.");
 
             // MATCH is always leaf.
             MatchObjectStreamed match = (MatchObjectStreamed)QueryObject.Factory
-                 (typeof(MatchObjectStreamed), graph, qEhelper, variableMap, parsedClauses["match"], null);
+                 (typeof(MatchObjectStreamed), graph, qEhelper, variableMap, parsedClauses[Parser.Clause.Match], null);
 
             // GROUP BY and obtain the aggregates and hashes -> the all necessary info is in the expressionInfo class. 
-            if (parsedClauses.ContainsKey("groupby"))
+            if (parsedClauses.ContainsKey(Parser.Clause.GroupBy))
             {
                 this.exprInfo = new QueryExpressionInfo(true);
-                GroupResultProcessor.ParseGroupBy(graph, variableMap, qEhelper, (GroupByNode)parsedClauses["groupby"], exprInfo);
+                GroupResultProcessor.ParseGroupBy(graph, variableMap, qEhelper, (GroupByNode)parsedClauses[Parser.Clause.GroupBy], exprInfo);
             }
             else this.exprInfo = new QueryExpressionInfo(false);
 
             // SELECT is the last one to process the resuls.
             this.query = QueryObject.Factory
-                (typeof(SelectObject), graph, qEhelper, variableMap, parsedClauses["select"], exprInfo);
+                (typeof(SelectObject), graph, qEhelper, variableMap, parsedClauses[Parser.Clause.Select], exprInfo);
             ((SelectObject)this.query).allowPrint = allowPrint;
 
             SetSingleGroupFlags();
 
             // ORDER BY
-            if (parsedClauses.ContainsKey("orderby"))
+            if (parsedClauses.ContainsKey(Parser.Clause.OrderBy))
             { 
-                var comps = OrderByResultProcessor.ParseOrderBy(graph, variableMap, qEhelper, (OrderByNode)parsedClauses["orderby"], exprInfo, variableMap.GetCount());
+                var comps = OrderByResultProcessor.ParseOrderBy(graph, variableMap, qEhelper, (OrderByNode)parsedClauses[Parser.Clause.OrderBy], exprInfo, variableMap.GetCount());
                 var orderByProc = OrderByResultProcessor.Factory(this.exprInfo, comps, qEhelper,variableMap.GetCount(), this.exprInfo.CollectUsedVariables());
                 match.PassResultProcessor(orderByProc);
             } else
             {
                 // Check if the query is aggregation and not a simple query.
-                if ((this.exprInfo.Aggregates.Count == 0 && this.qEhelper.IsSetSingleGroupGroupBy) || (!this.qEhelper.IsSetSingleGroupGroupBy && !parsedClauses.ContainsKey("groupby")))
+                if ((this.exprInfo.Aggregates.Count == 0 && this.qEhelper.IsSetSingleGroupGroupBy) || (!this.qEhelper.IsSetSingleGroupGroupBy && !parsedClauses.ContainsKey(Parser.Clause.GroupBy)))
                 throw new ArgumentException($"{this.GetType()}, no grouping was specified. The group by streamed version allows to compute only aggregations.");
                 var groupByProc = GroupResultProcessor.Factory(exprInfo, qEhelper, variableMap.GetCount(), this.exprInfo.CollectUsedVariables(), isStreamed);
                 
@@ -227,45 +229,45 @@ namespace QueryEngine
             }
         }
 
-        public static Query Create(string mode, string inputQuery, Graph graph, int threadCount, string printer, string formater, int verticesPerThread, string fileName, string grouperAlias, string sorterAlias, int fixedArraySize, bool allowPrint)
+        public static Query Create(Mode mode, string inputQuery, Graph graph, int threadCount, PrinterType printer, FormaterType formater, int verticesPerThread, string fileName, string grouperAlias, string sorterAlias, int fixedArraySize, bool allowPrint)
         {
             return CreateInternalL(mode, Tokenizer.Tokenize(inputQuery), graph, threadCount, printer, formater, verticesPerThread, fileName, grouperAlias, sorterAlias, fixedArraySize, allowPrint);
         }
 
-        public static Query Create(string mode, TextReader inputQuery, Graph graph, int threadCount, string printer, string formater, int verticesPerThread, string fileName, string grouperAlias, string sorterAlias, int fixedArraySize, bool allowPrint)
+        public static Query Create(Mode mode, TextReader inputQuery, Graph graph, int threadCount, PrinterType printer, FormaterType formater, int verticesPerThread, string fileName, string grouperAlias, string sorterAlias, int fixedArraySize, bool allowPrint)
         {
             return CreateInternalL(mode, Tokenizer.Tokenize(inputQuery), graph, threadCount, printer, formater, verticesPerThread, fileName, grouperAlias, sorterAlias, fixedArraySize, allowPrint);
         }
 
-        private static Query CreateInternalL(string mode, List<Token> tokens, Graph graph, int threadCount, string printer, string formater, int verticesPerThread, string fileName, string grouperAlias, string sorterAlias, int fixedArraySize, bool allowPrint) 
+        private static Query CreateInternalL(Mode mode, List<Token> tokens, Graph graph, int threadCount, PrinterType printer, FormaterType formater, int verticesPerThread, string fileName, string grouperAlias, string sorterAlias, int fixedArraySize, bool allowPrint) 
         {
             CheckArgs(tokens, graph, threadCount, printer, formater, verticesPerThread, fileName, fixedArraySize);
             CheckAliases(grouperAlias, sorterAlias, mode);
 
-            if (mode == "hs")
+            if (mode == Mode.HalfStreamed)
                 return new Query(tokens, graph, allowPrint, threadCount, printer, formater, verticesPerThread, fileName, grouperAlias, sorterAlias, fixedArraySize, false);
-            else if (mode == "s" ) 
+            else if (mode == Mode.Streamed) 
                 return new Query(tokens, graph, allowPrint,threadCount, printer, formater, verticesPerThread, fileName, grouperAlias, sorterAlias, fixedArraySize, true);
             else return new Query(tokens, graph, allowPrint ,threadCount, printer, formater, verticesPerThread, fileName, grouperAlias, sorterAlias, fixedArraySize);
         }
 
-        private static void CheckArgs(Object inputQuery, Graph graph, int threadCount, string printer, string formater, int verticesPerThread, string fileName, int fixedArraySize)
+        private static void CheckArgs(Object inputQuery, Graph graph, int threadCount, PrinterType printer, FormaterType formater, int verticesPerThread, string fileName, int fixedArraySize)
         {
             if (inputQuery == null || graph == null)
                 throw new ArgumentException("Query, input query or graph cannot be null.");
             else if (threadCount <= 0 || verticesPerThread <= 0)
                 throw new ArgumentException("Query, thread count and vertices per thread cannot be <= 0.");
-            else if (!Printer.Printers.Contains(printer) || !Formater.Formaters.Contains(formater))
-                throw new ArgumentException("Query, invalid printer or formater.");
+            //else if (!Printer.Printers.Contains(printer) || !Formater.Formaters.Contains(formater))
+            //    throw new ArgumentException("Query, invalid printer or formater.");
             else if (fixedArraySize <= 0)
                 throw new ArgumentException("Query, invalid number of fixed array size.");
             else return;
         }
 
 
-        public static void CheckAliases(string grouperAlias, string sorterAlias, string mode)
+        public static void CheckAliases(string grouperAlias, string sorterAlias, Mode mode)
         {
-            if (mode == "hs")
+            if (mode == Mode.HalfStreamed)
             {
                 if (!GroupResultProcessor.HalfStreamedAliases.Contains(grouperAlias))
                     throw new ArgumentException("Query HS, invalid grouper alias.");
@@ -273,7 +275,7 @@ namespace QueryEngine
                     throw new ArgumentException("Query HS, invalid sorter alias.");
                 else { }
             }
-            else if (mode == "s")
+            else if (mode == Mode.Streamed)
             {
                 if (!GroupResultProcessor.StreamedAliases.Contains(grouperAlias))
                     throw new ArgumentException("Query S, invalid grouper alias.");
@@ -281,7 +283,7 @@ namespace QueryEngine
                     throw new ArgumentException("Query S, invalid sorter alias.");
                 else { }
             }
-            else if (mode == "n")
+            else if (mode == Mode.Normal)
             {
                 if (!GroupByObject.Aliases.Contains(grouperAlias))
                     throw new ArgumentException("Query N, invalid grouper alias.");

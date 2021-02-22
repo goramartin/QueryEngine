@@ -74,12 +74,12 @@ namespace QueryEngine
         /// Type of printer for printing results.
         ///  Used inside print method for factory method of printer.
         /// </summary>
-        string Printer { get; }
+        PrinterType Printer { get; }
         /// <summary>
         /// Type of printing format.
         /// Used inside print method for factory method of formater.
         /// </summary>
-        string Formater { get; }
+        FormaterType Formater { get; }
 
         /// <summary>
         /// File name where to print results.
@@ -105,7 +105,7 @@ namespace QueryEngine
     /// </summary>
     internal class QueryExecutionHelper : IMatchExecutionHelper, ISelectExecutionHelper, IOrderByExecutionHelper, IGroupByExecutionHelper
     {
-        public QueryExecutionHelper(int threadCount, string printer, string formater, int verticesPerThread, int arraySize, string fileName, string ppmName, string stpmName, string patternName, string grouperName, string sorterName)
+        public QueryExecutionHelper(int threadCount, PrinterType printer, FormaterType formater, int verticesPerThread, int arraySize, string fileName, string ppmName, string stpmName, string patternName, string grouperName, string sorterName)
         {
             this.ThreadCount = threadCount;
             this.Printer = printer;
@@ -128,8 +128,8 @@ namespace QueryEngine
         public int VerticesPerThread { get; }
         public int FixedArraySize { get; }
         
-        public string Printer {get; }
-        public string Formater {get; }
+        public PrinterType Printer {get; }
+        public FormaterType Formater {get; }
         public string FileName {get; }
         
         public bool IsStoringResult { get; set; } = true;

@@ -11,6 +11,8 @@ using System.Text;
 
 namespace QueryEngine
 {
+
+    public enum FormaterType { Simple, MarkDown }
     /// <summary>
     /// Class defining how resulting table when printing results will look like.
     /// </summary>
@@ -19,12 +21,7 @@ namespace QueryEngine
         /// <summary>
         /// Endings of files based on format. 
         /// </summary>
-        public static Dictionary<string, string> FileEndings { get; }
-
-        /// <summary>
-        /// Contains valid Formaters.
-        /// </summary>
-        public static HashSet<string> Formaters { get;  }
+        public static Dictionary<FormaterType, string> FileEndings { get; }
 
         protected StringBuilder stringBuilder;
         protected int ColumnCount { get; }
@@ -46,13 +43,9 @@ namespace QueryEngine
         /// </summary>
         static Formater()
         {
-            FileEndings = new Dictionary<string, string>();
-            FileEndings.Add("simple", ".txt");
-            FileEndings.Add("markdown", ".md");
-
-            Formaters = new HashSet<string>();
-            Formaters.Add("simple");
-            Formaters.Add("markdown");
+            FileEndings = new Dictionary<FormaterType, string>();
+            FileEndings.Add(FormaterType.Simple, ".txt");
+            FileEndings.Add(FormaterType.MarkDown, ".md");
         }
 
         protected Formater()
@@ -96,7 +89,7 @@ namespace QueryEngine
         /// <param name="columnCount"> Number of columns in a printed table. </param>
         /// <param name="writer"> Output writer. </param>
         /// <returns> Formater instance. </returns>
-        public static Formater Factory(string formater, int columnCount, TextWriter writer)
+        public static Formater Factory(FormaterType formater, int columnCount, TextWriter writer)
         {
             if (writer == null) 
                 throw new ArgumentNullException($"Formater factory, was given writer as null.");
@@ -104,9 +97,9 @@ namespace QueryEngine
                 throw new ArgumentException($"Formater factory, was given invalid number of columns. Columns = {columnCount}.");
             else { }
 
-            if (formater == "simple")
+            if (formater == FormaterType.Simple)
                 return new SimpleFormater(columnCount, writer);
-            else if (formater == "markdown")
+            else if (formater == FormaterType.MarkDown)
                 return new MarkDownFormater(columnCount, writer);
             else throw new ArgumentException($"Formater factory, formater type does not exist. Formater = {formater}");
         }

@@ -10,15 +10,12 @@ using System.IO;
 
 namespace QueryEngine
 {
+    public enum PrinterType { File, Console }
     /// <summary>
     /// Abstract class for printing results.
     /// </summary>
     internal abstract class Printer : IDisposable, IRowPrinter
     {
-        /// <summary>
-        /// Contains valid printers.
-        /// </summary>
-        public static HashSet<string> Printers { get; }
 
         /// <summary>
         /// Variables that will compute values to be printed.
@@ -33,16 +30,6 @@ namespace QueryEngine
         /// Defines where the printing will be done.
         /// </summary>
         protected TextWriter writer;
-
-        /// <summary>
-        /// Inicialises static dictionary of printer types.
-        /// </summary>
-        static Printer()
-        {
-            Printers = new HashSet<string>();
-            Printers.Add("console");
-            Printers.Add("file");
-        }
 
         protected Printer()
         {
@@ -110,11 +97,11 @@ namespace QueryEngine
         /// <param name="formater"> Formater type. </param>
         /// <param name="fileName"> File name if defined file printer. </param>
         /// <returns> Printer instance. </returns>
-        public static Printer Factory(string printerType, List<ExpressionToStringWrapper> rowFormat, string formater, string fileName= null)
+        public static Printer Factory(PrinterType printerType, List<ExpressionToStringWrapper> rowFormat, FormaterType formater, string fileName= null)
         {
-            if (printerType == "console")
+            if (printerType == PrinterType.Console)
                 return new ConsolePrinter(rowFormat, formater);
-            else if (printerType == "file")
+            else if (printerType == PrinterType.File)
                 return new FilePrinter(rowFormat, formater, fileName);
             else throw new ArgumentException($"Printer factory, printer type does not exist. Printer = {printerType}.");
         }

@@ -25,7 +25,7 @@ namespace QueryEngine
         /// <param name="rowFormat"> Format of a columns. </param>
         /// <param name="formater"> Type of formater. </param>
         /// <param name="fileName"> File to print into. </param>
-        public FilePrinter(List<ExpressionToStringWrapper> rowFormat, string formater, string fileName) : base(rowFormat)
+        public FilePrinter(List<ExpressionToStringWrapper> rowFormat, FormaterType formater, string fileName) : base(rowFormat)
         {
             if (!Formater.FileEndings.TryGetValue(formater, out string ending))
                 throw new ArgumentException($"{this.GetType()}, file ending for given formater does not exist. Formater = {formater}");

@@ -23,6 +23,15 @@ namespace QueryEngine
 
         #region ParseProgramArgs
 
+
+        private static Query.Mode GetMode(string arg)
+        {
+            if (arg == "s") return Query.Mode.Streamed;
+            else if (arg == "hs") return Query.Mode.HalfStreamed;
+            else if (arg == "n") return Query.Mode.Normal;
+            else throw new ArgumentException("Invalid engine mode.");
+        }
+
         /// <summary>
         /// Parses argument that expects to be a thread count.
         /// </summary>
@@ -57,11 +66,11 @@ namespace QueryEngine
         /// </summary>
         /// <param name="param"> Application argument.</param>
         /// <returns> Printer type. </returns>
-        private static string GetPrinter(string param)
+        private static PrinterType GetPrinter(string param)
         {
-            if (!Printer.Printers.Contains(param))
-                throw new ArgumentException("Inputed printer that does not exists.");
-            else return param;
+            if (param == "console") return PrinterType.Console;
+            else if (param == "file") return PrinterType.File;
+            else  throw new ArgumentException("Inputed printer that does not exists.");
         }
 
         /// <summary>
@@ -69,11 +78,11 @@ namespace QueryEngine
         /// </summary>
         /// <param name="param"> Application argument.</param>
         /// <returns> Formater type. </returns>
-        private static string GetFormater(string param)
+        private static FormaterType GetFormater(string param)
         {
-            if (!Formater.Formaters.Contains(param))
-                throw new ArgumentException("Inputed printer that does not exists.");
-            else return param;
+            if (param == "simple") return FormaterType.Simple;
+            else if (param == "markdown") return FormaterType.MarkDown;
+            else throw new ArgumentException("Inputed formater that does not exists.");
         }
 
         /// <summary>
@@ -101,10 +110,10 @@ namespace QueryEngine
         /// <param name="printer"> The destination of printer. </param>
         /// <param name="args">Application arguments.</param>
         /// <returns> File name. </returns>
-        private static string GetFileName(int threadCount, string printer, string[] args)
+        private static string GetFileName(int threadCount, PrinterType printer, string[] args)
         {
             // If it runs in parallel, the number of vertices precedes the file name
-            if (printer == "file")
+            if (printer == PrinterType.File)
             {
                 if (threadCount == 1 && args.Length == 8) return args[7];
                 else if (args.Length == 9) return args[8];
@@ -142,15 +151,15 @@ namespace QueryEngine
         {
             if (args.Length < 7) throw new ArgumentException("Wrong number of program parameters.");
 
-            string mode = args[0];
+            Query.Mode mode = GetMode(args[0]);
             string gAlias = args[1];
             string sAlias = args[2];
             int fixedArraySize = GetFixedArraySize(args[3]);
             Query.CheckAliases(gAlias, sAlias, mode);
 
             int ThreadCount = GetThreadCount(args[4]);
-            string Printer = GetPrinter(args[5]);
-            string Formater = GetFormater(args[6]);
+            PrinterType Printer = GetPrinter(args[5]);
+            FormaterType Formater = GetFormater(args[6]);
             int VerticesPerThread = GetVerticesPerhread(ThreadCount, args);
             string FileName = GetFileName(ThreadCount, Printer, args);
 

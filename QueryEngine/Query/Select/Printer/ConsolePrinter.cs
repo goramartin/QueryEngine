@@ -19,7 +19,7 @@ namespace QueryEngine
         /// </summary>
         /// <param name="rowFormat"> Format of a columns. </param>
         /// <param name="formater"> Type of formater. </param>
-        public ConsolePrinter(List<ExpressionToStringWrapper> rowFormat, string formater) : base(rowFormat)
+        public ConsolePrinter(List<ExpressionToStringWrapper> rowFormat, FormaterType formater) : base(rowFormat)
         {
             try
             {

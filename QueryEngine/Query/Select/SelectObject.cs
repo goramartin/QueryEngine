@@ -49,7 +49,7 @@ namespace QueryEngine
         /// <param name="exprInfo"> A query expression information. </param>
         public SelectObject(Graph graph, VariableMap map, ISelectExecutionHelper executionHelper, SelectNode selectNode, QueryExpressionInfo exprInfo)
         {
-            if (executionHelper == null || selectNode == null || executionHelper.Printer == null || executionHelper.Formater == null || exprInfo == null)
+            if (executionHelper == null || selectNode == null || exprInfo == null)
                 throw new ArgumentNullException($"{this.GetType()}, passing null arguments to constructor. ");
 
             this.helper = executionHelper;

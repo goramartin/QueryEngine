@@ -54,14 +54,16 @@ namespace QueryEngine
     internal static partial class Parser
     {
         private delegate Node ParsePart(ref int p, List<Token> tokens);
-        private static List<Tuple<string, ParsePart>> parts;
+        private static List<Tuple<Clause, ParsePart>> parts;
+        public enum Clause { Select, Match, GroupBy, OrderBy }
+
 
         static Parser() {
-            parts = new List<Tuple<string, ParsePart>>();
-            parts.Add(Tuple.Create<string, ParsePart>("select", Parser.ParseSelect));
-            parts.Add(Tuple.Create<string, ParsePart>("match", Parser.ParseMatch));
-            parts.Add(Tuple.Create<string, ParsePart>("groupby", Parser.ParseGroupBy));
-            parts.Add(Tuple.Create<string, ParsePart>("orderby", Parser.ParseOrderBy));
+            parts = new List<Tuple<Clause, ParsePart>>();
+            parts.Add(Tuple.Create<Clause, ParsePart>(Clause.Select, Parser.ParseSelect));
+            parts.Add(Tuple.Create<Clause, ParsePart>(Clause.Match, Parser.ParseMatch));
+            parts.Add(Tuple.Create<Clause, ParsePart>(Clause.GroupBy, Parser.ParseGroupBy));
+            parts.Add(Tuple.Create<Clause, ParsePart>(Clause.OrderBy, Parser.ParseOrderBy));
         }
 
         /// <summary>
@@ -72,13 +74,13 @@ namespace QueryEngine
         /// <param name="tokens"> A list of tokens that were parsed from a string/console. </param>
         /// <returns> A dictionary of parsed query expressions with corresponding label. So that the class that 
         /// processes the expression can pick which one to process.</returns>
-        static public Dictionary<string, Node> Parse(List<Token> tokens)
+        static public Dictionary<Clause, Node> Parse(List<Token> tokens)
         {
             if (tokens.Count == 0)
                 ThrowError("Parser", "the inputted query is empty", 0, tokens);
 
 
-            var parsedParts = new Dictionary<string, Node>();
+            var parsedParts = new Dictionary<Clause, Node>();
 
             int position = 0;
             for (int i = 0; i < parts.Count; i++)
