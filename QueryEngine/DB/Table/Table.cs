@@ -27,7 +27,7 @@ namespace QueryEngine
      /// List IDs consists of added nodes into the table. Values of the elements can be found 
      /// on the same positions in the property lists.
      /// </summary>
-    internal sealed class Table
+    public sealed class Table
     {
         /// <summary>
         /// Name of the table (type of node)

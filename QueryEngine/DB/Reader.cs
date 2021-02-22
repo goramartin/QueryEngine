@@ -15,8 +15,7 @@ using System.IO;
 
 namespace QueryEngine
 {
-
-     /// <summary>
+    /// <summary>
     /// Interface for reading text files.
     /// </summary>
     internal interface IReader: IDisposable
@@ -41,10 +40,10 @@ namespace QueryEngine
     /// </summary>
     internal class DataFileReader : IWordReader
     {
-        StringBuilder wordBuilder;
-        StreamReader fileReader;
-        char[] delimeters = new char[] { '\r', '\n', '\t', ' ', '"', ',' };
-        bool end;
+        private StringBuilder wordBuilder;
+        private StreamReader fileReader;
+        private char[] delimeters = new char[] { '\r', '\n', '\t', ' ', '"', ',' };
+        private bool end;
 
         /// <summary>
         /// Creates reader and opens given file for reading.
@@ -151,17 +150,17 @@ namespace QueryEngine
         /// <summary>
         /// Builder for word striping.
         /// </summary>
-        StringBuilder wordBuilder;
+        private StringBuilder wordBuilder;
         
         /// <summary>
         /// File reader.
         /// </summary>
-        StreamReader fileReader;
+        private StreamReader fileReader;
         
         /// <summary>
         /// Specifies whether we reached end of file.
         /// </summary>
-        bool end;
+        private bool end;
 
         /// <summary>
         /// Creates reader. Tries to open file for reader.

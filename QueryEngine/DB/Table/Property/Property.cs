@@ -16,7 +16,7 @@ namespace QueryEngine
     /// Abstract property, holds only ID of a property (name).
     /// Its functions are visible to a table.
     /// </summary>
-    internal abstract class Property
+    public abstract class Property
     {
         public string IRI { get; protected set; }
 

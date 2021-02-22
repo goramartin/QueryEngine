@@ -18,7 +18,7 @@ namespace QueryEngine
     /// and the other encompasses inwards edges.
     /// If the vertex does not have any edges (in or out), then the corresponding positions (start and end) are set to -1.
     /// </summary>
-    internal sealed class Vertex : Element
+    public sealed class Vertex : Element
     {
         public int OutEdgesStartPosition { get; internal set; }
         public int OutEdgesEndPosition { get; internal set; }

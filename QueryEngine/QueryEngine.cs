@@ -10,7 +10,7 @@ namespace QueryEngine
     /// Class represents main algorithm loop where user inputs queries and subsequently they are computed
     /// and printed.
     /// </summary>
-    sealed class QueryEngine
+    public sealed class QueryEngine
     {
         public static Stopwatch stopwatch = new Stopwatch();
 
@@ -196,7 +196,7 @@ namespace QueryEngine
             }
         }
 
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             try
             {

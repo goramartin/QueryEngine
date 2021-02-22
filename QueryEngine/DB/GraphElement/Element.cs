@@ -21,7 +21,7 @@ namespace QueryEngine
     /// The element data are stored in the table as well.
     /// The position represents a position in a enclosing structure (In our case it is a List).
     /// </summary>
-    internal abstract class Element
+    public abstract class Element
     {
         public int ID { get; internal set; }
         public Table Table { get; internal set; }

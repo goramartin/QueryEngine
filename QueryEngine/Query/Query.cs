@@ -47,7 +47,7 @@ namespace QueryEngine
     /// It tokenizes, parses and constructs simple execution chain.
     /// Provides api to execute the query.
     /// </summary>
-    sealed class Query
+    public sealed class Query
     {
         private Graph graph;
         private VariableMap variableMap;

@@ -21,7 +21,7 @@ namespace QueryEngine
     /// The specialisations are used namely to differentiate the semantic meaning, because
     /// during searching of a graph, there is a difference whether an out or an in edge is picked.
     /// </summary>
-    internal abstract class Edge : Element
+    public abstract class Edge : Element
     {
         /// <summary>
         /// A vertex the edge points towards.
@@ -39,7 +39,7 @@ namespace QueryEngine
     /// <summary>
     /// In specialisation of an edge.
     /// </summary>
-    internal sealed class InEdge : Edge
+    public sealed class InEdge : Edge
     {
         public InEdge() : base()
         {
@@ -49,7 +49,7 @@ namespace QueryEngine
     /// <summary>
     /// Out specialisation of an edge.
     /// </summary>
-    internal sealed class OutEdge : Edge
+    public sealed class OutEdge : Edge
     {
         public OutEdge() : base() { }
     }

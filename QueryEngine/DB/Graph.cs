@@ -16,7 +16,7 @@ namespace QueryEngine
     /// The class serves only for holder purpose during creation inside Processor.
     /// It enables us to pass a all the the required graph lists from within one function.
     /// </summary>
-    internal class EdgeListHolder
+    public class EdgeListHolder
     {
         public List<OutEdge> outEdges;
         public List<InEdge> inEdges;
@@ -28,7 +28,7 @@ namespace QueryEngine
     /// Graph contains vertices, outgoing edges and inwards edges, also types of elements inside a graph.
     /// Also gives interface to a whole graph.
     /// </summary>
-    internal class Graph
+    public class Graph
     {
         public Dictionary<string, Table> nodeTables;
         public Dictionary<string, Table> edgeTables;
