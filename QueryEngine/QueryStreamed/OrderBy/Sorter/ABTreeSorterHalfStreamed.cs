@@ -178,7 +178,6 @@ namespace QueryEngine
                 return treeCount;
             }
             
-
             public TableResults.RowProxy[] Merge()
             {
                 this.MergeResultsParallel(0, this.jobsToMerge.Length, true);

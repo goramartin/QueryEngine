@@ -67,7 +67,6 @@ namespace QueryEngine
                 this.next = null;
 
 #if PRINT
-
                 this.Print(resTable, groupByResults);
 #endif 
 
@@ -92,7 +91,9 @@ namespace QueryEngine
             else
             {
                 foreach (var item in resTable)
+                {
                     printer.PrintRow(item);
+                }
             }
         }
 
