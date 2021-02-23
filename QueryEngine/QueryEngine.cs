@@ -211,6 +211,11 @@ namespace QueryEngine
 
             // Load the graph.
             Graph graph = new Graph();
+
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+
             Console.Clear();
 
             // Main loop of a program.
