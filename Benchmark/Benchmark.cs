@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using QueryEngine;
 using System.Diagnostics;
+using System.IO;
 
 namespace Benchmark
 {
@@ -18,6 +19,7 @@ namespace Benchmark
             new Streamed()
         };
         static Graph graph;
+        static string fileName = "results.txt";
 
         static List<string> matchQueries = new List<string>
         {
@@ -48,11 +50,11 @@ namespace Benchmark
         static void Main(string[] args)
         {
             Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.High;
-            if (threadCount == 1)
-            {
-                Process.GetCurrentProcess().ProcessorAffinity = new IntPtr(2);
-                Thread.CurrentThread.Priority = ThreadPriority.Highest;
-            }
+            //if (threadCount == 1)
+            //{
+            //    Process.GetCurrentProcess().ProcessorAffinity = new IntPtr(2);
+            //    Thread.CurrentThread.Priority = ThreadPriority.Highest;
+            //}
 
             graph = new Graph();
             CleanGC();
@@ -105,7 +107,7 @@ namespace Benchmark
             Console.WriteLine();
             Console.WriteLine($"Starting measurements for {mode} / {gA} / {sA} / {query} / {threadCount}.");
             
-            long[] times = new long[repetitions];
+            double[] times = new double[repetitions];
             for (int i = 0; i < repetitions; i++)
             {
                 CleanGC();
@@ -122,10 +124,7 @@ namespace Benchmark
                 Console.WriteLine($"Finished repetition {i} with {times[i]}");
             }
 
-            Console.WriteLine();
-            Console.WriteLine($"Starting processing of measurements for {mode} / {gA} / {sA} / {query} / {threadCount}.");
-            
-            ProcessResults(times);
+            ProcessResults(times, $"Measurements for {mode} / {gA} / {sA} / {query} / {threadCount}.");
         }
 
         static void WarmUp(QueryMode mode, GrouperAlias gA, SorterAlias sA, string query, int threadCount)
@@ -149,28 +148,33 @@ namespace Benchmark
             GC.Collect();
         }
 
-        static void ProcessResults(long[] items)
+        static void ProcessResults(double[] items, string messege)
         {
-            long max = items.Max();
-            long min = items.Min();
+            double max = items.Max();
+            double min = items.Min();
             double average = items.Average();
 
-            // Create average deviation.
-            double meanDeviation = CalculateMeanOfDeviations(items, average);
+            double meanDeviation = (items.Sum(t => Math.Abs(t - average)) / items.Length);
+            double relativeMeanDeviation = ((meanDeviation / average) * (100));
 
-            double relativeMeanDeviation = (meanDeviation / average) * (100);
+            double squareSum = items.Sum(t => (t - average) * (t - average));
+            double sampleStdDev = Math.Sqrt(squareSum / (items.Length - 1));
+            double stdDev = Math.Sqrt(squareSum / items.Length);
 
-            // The result is -> x = (average) +- (meanDeviation) with relative error relativeMeanDeviation (%).
-            // include max a min ve vypisu.
+            double nejistota = Math.Sqrt(squareSum / (items.Length * (items.Length - 1)));
+
+            // This text is always added, making the file longer over time
+            // if it is not deleted.
+            using (StreamWriter sw = File.AppendText(fileName))
+            {
+                sw.WriteLine(messege);
+                for (int i = 0; i < items.Length; i++)
+                    sw.WriteLine(items[i]);
+
+                sw.WriteLine($" min = {min}  max = {max}  avg = {average}  meanDev = {meanDeviation}  relativeMeanDev = {relativeMeanDeviation}");
+                sw.WriteLine($" sampleStdDev = {sampleStdDev}  stdDev = {stdDev}  nejistota = {nejistota} ");
+            }
         }
 
-        static double CalculateMeanOfDeviations(long[] items, double average)
-        {
-            double[] deviations = new double[items.Length];
-            for (int i = 0; i < items.Length; i++)
-                deviations[i] = average - (double)items[i];
-
-            return ( (deviations.Sum(t => Math.Abs(t))) / deviations.Length); 
-        }
     }
 }
