@@ -61,7 +61,7 @@ namespace QueryEngine
 
         public void PassStoringVariables(int[] vars)
         {
-            if (vars == null || vars.Length == 0)
+            if (vars == null)
                 throw new ArgumentException($"{this.GetType()}, cannot pass empty variable list.");
             this.usedVars = vars;
             for (int i = 0; i < this.matcherResults.Length; i++)

@@ -42,7 +42,7 @@ namespace QueryEngine
     {
         private StringBuilder wordBuilder;
         private StreamReader fileReader;
-        private char[] delimeters = new char[] { '\r', '\n', '\t', ' ', '"', ',' };
+        private char[] delimeters = new char[] { '\r', '\n', '\t', ' ' };
         private bool end;
 
         /// <summary>
