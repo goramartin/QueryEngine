@@ -21,23 +21,27 @@ namespace Benchmark
         static Graph graph;
         static string fileName = "results.txt";
 
+        // To measure solely search time + search time and result storing
         static List<string> matchQueries = new List<string>
         {
-
-
-
+            "select count(*) match (x) -> (y) -> (z);",
+            "select x match (x) -> (y) -> (z);",
+            "select x, y match (x) -> (y) -> (z);",
+            "select x, y, z match (x) -> (y) -> (z);",
         };
         static List<string> orderByQueries = new List<string>
         {
-
-
-
+            "select y match (x) -> (y) -> (z) order by y;",
+            "select y, x match (x) -> (y) -> (z) order by y, x;",
+            "select x.PropTwo match (x) -> (y) -> (z) order by x.PropTwo;",
+            "select x.PropThree match (x) -> (y) -> (z) order by x.PropThree;",
         };
         static List<string> groupByQueries = new List<string>
         {
-
-
-
+            "select min(y.PropOne), avg(y.PropOne) match (x) -> (y) -> (z);",
+            "select min(y.PropOne), avg(y.PropOne) match (x) -> (y) -> (z) group by y;",
+            "select min(y.PropOne), avg(y.PropOne) match (x) -> (y) -> (z) group by y, x;",
+            "select min(x.PropOne), avg(x.PropOne) match (x) -> (y) -> (z) group by x.PropTwo;"
         };
 
         static int warmUps = 5;
@@ -50,11 +54,11 @@ namespace Benchmark
         static void Main(string[] args)
         {
             Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.High;
-            //if (threadCount == 1)
-            //{
-            //    Process.GetCurrentProcess().ProcessorAffinity = new IntPtr(2);
-            //    Thread.CurrentThread.Priority = ThreadPriority.Highest;
-            //}
+            if (threadCount == 1)
+            {
+                Process.GetCurrentProcess().ProcessorAffinity = new IntPtr(2);
+                Thread.CurrentThread.Priority = ThreadPriority.Highest;
+            }
 
             graph = new Graph();
             CleanGC();
@@ -171,8 +175,8 @@ namespace Benchmark
                 for (int i = 0; i < items.Length; i++)
                     sw.WriteLine(items[i]);
 
-                sw.WriteLine($" min = {min}  max = {max}  avg = {average}  meanDev = {meanDeviation}  relativeMeanDev = {relativeMeanDeviation}");
-                sw.WriteLine($" sampleStdDev = {sampleStdDev}  stdDev = {stdDev}  nejistota = {nejistota} ");
+                sw.WriteLine($" min = {min}  max = {max}  avg = {average}  meanDev = {meanDeviation}  relativeMeanDev = {relativeMeanDeviation}  sampleStdDev = {sampleStdDev}  stdDev = {stdDev}  nejistota = {nejistota} ");
+                sw.WriteLine();
             }
         }
 

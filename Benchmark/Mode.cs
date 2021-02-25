@@ -24,7 +24,6 @@ namespace Benchmark
             sorters = Aliases.NormalSorters;
             modeType = QueryMode.Normal;
 
-
             baseGrouper = GrouperAlias.RefB;
             baseSorter = SorterAlias.MergeSort;
         }
