@@ -229,8 +229,11 @@ namespace QueryEngine
                     Console.WriteLine();
                     Query query = Query.Create(mode, reader, graph, ThreadCount, Printer, Formater, VerticesPerThread, FileName, gAlias, sAlias, fixedArraySize, true);
                     Console.WriteLine();
+
+                    stopwatch.Start();
+                    
                     query.Compute();
-                   
+
                     stopwatch.Stop();
                     PrintElapsedTime();
                     stopwatch.Reset();

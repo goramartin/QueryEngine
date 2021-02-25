@@ -72,15 +72,9 @@ namespace QueryEngine
         /// <returns> Sorted data. </returns>
         private ITableResults Sort(ITableResults resTable)
         {
-             Console.WriteLine("Order start");
              ISorter sorter = new MultiColumnTableSorter(resTable, this.comparers, this.helper.InParallel);
              var sortedResults =  sorter.Sort();
-
-             TimeSpan ts = QueryEngine.stopwatch.Elapsed;
-             string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-             Console.WriteLine("Sort time " + elapsedTime);
-
-            return sortedResults;
+             return sortedResults;
         }
     }
 }

@@ -120,7 +120,6 @@ namespace QueryEngine
                 throw new ArgumentException($"{this.GetType()}, vertices of the graph are empty. Filename = {filename}");
         }
 
-
         /// <summary>
         /// Loads all vetices from a file.
         /// </summary>

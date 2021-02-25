@@ -77,27 +77,15 @@ namespace QueryEngine
             if (!this.helper.InParallel) 
             { 
                 this.matchers[0].Search();
-                
-                Console.WriteLine("Finished Search:");
-                QueryEngine.PrintElapsedTime();
-                
                 this.results.MergeAllColumns();
             }
             else
             {
                 this.ParallelSearch();
-
-                Console.WriteLine("Finished Search:");
-                QueryEngine.PrintElapsedTime();
-
                 if (this.helper.IsStoringResult)
                     this.ParallelMergeThreadResults();
             }
             this.CollectCountFromMatchers();
-
-            Console.WriteLine("Finished Search Complete:");
-            QueryEngine.PrintElapsedTime();
-
         }
 
         public override void SetStoringResults(bool storeResults)

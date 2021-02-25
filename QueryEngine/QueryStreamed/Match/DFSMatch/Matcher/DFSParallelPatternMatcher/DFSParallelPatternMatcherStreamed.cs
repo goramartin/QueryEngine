@@ -43,8 +43,6 @@ namespace QueryEngine
         {
             this.SetStoringResults(this.helper.IsStoringResult);
 
-            QueryEngine.stopwatch.Start();
-
             if (!this.helper.InParallel)
             {
                 this.matchers[0].Search();
@@ -52,9 +50,6 @@ namespace QueryEngine
                 this.resultProcessor.Process(0, null);
             }
             else this.ParallelSearch();
-
-            Console.WriteLine("Finished Search:");
-            QueryEngine.PrintElapsedTime();
         } 
 
         public void PassResultProcessor(ResultProcessor resultProcessor)
