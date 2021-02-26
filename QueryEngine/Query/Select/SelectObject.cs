@@ -67,8 +67,12 @@ namespace QueryEngine
                 this.next.Compute(out resTable, out groupByResults);
                 this.next = null;
 
+
                 if (allowPrint)
+                {
+                    QueryEngine.PrintElapsedTime("Select start at");
                     this.Print(resTable, groupByResults);
+                }
             }
             else throw new NullReferenceException($"{this.GetType()}, next is set to null."); 
         }

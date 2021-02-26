@@ -14,11 +14,11 @@ namespace QueryEngine
     {
         public static Stopwatch stopwatch = new Stopwatch();
 
-        public static void PrintElapsedTime()
+        public static void PrintElapsedTime(string messege)
         {
             TimeSpan ts = QueryEngine.stopwatch.Elapsed;
             string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-            Console.WriteLine("Elapsed: " + elapsedTime);
+            Console.WriteLine(messege +" Elapsed: " + elapsedTime);
         }
 
         #region ParseProgramArgs
@@ -235,7 +235,7 @@ namespace QueryEngine
                     query.Compute();
 
                     stopwatch.Stop();
-                    PrintElapsedTime();
+                    PrintElapsedTime("Completed with");
                     stopwatch.Reset();
 
                     Console.WriteLine("Finished the computation of the query.");

@@ -47,9 +47,9 @@ namespace Benchmark
         static int warmUps = 5;
         static int repetitions = 15;
         static int fixedArraySize = 4194304;
-        static int threadCount = 1;
+        static int threadCount = 8;
         static int verticesPerThread = 512;
-        static bool timeMatching = true;
+        static bool timeMatching = false;
 
         static void Main(string[] args)
         {
@@ -89,10 +89,28 @@ namespace Benchmark
                 {
                     foreach (var grouper in mode.groupers)
                     {
+                        if (mode.GetType() == typeof(Normal))
+                        {
+                            if (threadCount == 1)
+                            {
+                                if (grouper != GrouperAlias.RefL && grouper != GrouperAlias.RefB)
+                                    continue;
+                            } else
+                            {
+                                if (grouper == GrouperAlias.RefB)
+                                    continue;
+                                if (grouper == GrouperAlias.RefL)
+                                    continue;
+                            }
+                        }
+
                         Measure(mode.modeType, grouper, mode.baseSorter, groupByQueries[i], threadCount);
                     }
                 }
+            }
 
+            foreach (var mode in modes)
+            {
                 // Order by 
                 for (int i = 0; i < orderByQueries.Count; i++)
                 {
