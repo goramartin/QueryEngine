@@ -71,6 +71,7 @@ namespace QueryEngine
             static NodeIDState instance =
              new NodeIDState();
 
+            int count;
             private NodeIDState() { }
 
             public static NodeIDState Instance
@@ -81,6 +82,11 @@ namespace QueryEngine
             public void Process(IProcessor<List<Vertex>> processor, string param)
             {
                 var proc = (VerticesListProcessor)processor;
+
+                // Just a test print.
+                count++;
+                if (count % 200000 == 0) Console.WriteLine(count);
+
 
                 if (param == null)
                 {

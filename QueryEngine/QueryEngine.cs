@@ -240,6 +240,10 @@ namespace QueryEngine
 
                     Console.WriteLine("Finished the computation of the query.");
                     if (!ContinueWithAnotherQuery()) return;
+
+                    GC.Collect();
+                    GC.WaitForPendingFinalizers();
+                    GC.Collect();
                 }
                 catch (Exception e)
                 {

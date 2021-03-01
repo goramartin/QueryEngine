@@ -129,7 +129,7 @@ namespace QueryEngine
             {
                 var proc = (EdgeListProcessor)processor;
 
-                // Just a test print
+                // Just a test print.
                 count++;
                 if (count % 200000 == 0) Console.WriteLine(count);
 
