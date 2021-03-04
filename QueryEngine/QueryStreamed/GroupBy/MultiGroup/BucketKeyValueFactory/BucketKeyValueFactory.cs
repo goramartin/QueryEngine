@@ -5,11 +5,18 @@ namespace QueryEngine
     /// <summary>
     /// Class servers as a creator of buckets that are inserted into a dictionary during 
     /// streamed version of the group by and the values are directly stored in the key/values, and not as row proxies.
-    /// The class creates an array of buckets where the first n buckets are used as keys in the dictionary while
+    /// The class creates an array of buckets where the first n buckets are used as keys, while
     /// the rest are used as values holders for the computed aggregate values.
+    /// 
+    /// The correct usage is that the flag lastWasInserted is set after each call of the Create method.
+    /// This is done to ensure that upon new call of the create it would not override already inserted values in the dictionary.
     /// </summary>
     internal class BucketsKeyValueFactory
     {
+        /// <summary>
+        /// True unpon next call of Create will create a new array.
+        /// Otherwise it will override values inside of the lastBucketsKeyValue field.
+        /// </summary>
         public bool lastWasInserted = true;
         private AggregateBucketResult[] lastBucketsKeyValue;
         private Aggregate[] aggregates;
@@ -37,7 +44,8 @@ namespace QueryEngine
             if (this.lastWasInserted)
             {
                 this.lastBucketsKeyValue = new AggregateBucketResult[this.keysCount + this.aggregates.Length];
-                // Init the aggregation funcs. storages
+                
+                // Init the aggregation funcs. result buckets
                 for (int i = this.keysCount; i < this.keysCount + this.aggregates.Length; i++)
                 {
                     var agg = this.aggregates[i - this.keysCount];
@@ -45,11 +53,11 @@ namespace QueryEngine
                 }
             }
 
+            // Init key buckets.
             for (int i = 0; i < keysCount; i++)
                 this.lastBucketsKeyValue[i] = factories[i].Create(this.lastWasInserted, result);
             return this.lastBucketsKeyValue;
         }
-
 
 
         private abstract class BucketKeyFactory

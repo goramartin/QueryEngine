@@ -11,6 +11,8 @@ namespace QueryEngine
     /// Note that the array contains directly the values and not row proxies.
     /// The first n buckets are used as a key inside the dictionary, while the rest are used as value holders for the computed
     /// aggregate function.
+    /// For single thread solution it uses Dictionary class and for the parallel solution it uses ConcurrentDictionary.
+    /// 
     /// </summary>
     internal class GlobalGroupStreamed : GroupResultProcessor
     {

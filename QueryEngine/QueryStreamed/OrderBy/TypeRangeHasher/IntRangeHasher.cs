@@ -7,12 +7,11 @@ using System.Threading.Tasks;
 namespace QueryEngine
 {
     /// <summary>
-    /// Range of Int32.MinValue ... Int32.MaxValue.
-    /// BucketCount = #thread * #thread 
-    /// rangeSize = UInt32.MaxValue / BucketCount  
+    /// Range of [Int32.MinValue, Int32.MaxValue].
+    /// BucketCount = #thread * #thread .
+    /// rangeSize = UInt32.MaxValue / BucketCount  .
     /// Notice that the content of the sticking bucket if (UInt32.MaxValue % BucketCount != 0) is fit into the last bucket.
-    /// Because the thread count is restricted, it assumes that range size is always > 0;
-    /// The
+    /// Because the thread count is restricted, it assumes that range size is always > 0.
     /// </summary>
     internal class IntRangeHasher : TypeRangeHasher<int>
     {

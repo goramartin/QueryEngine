@@ -11,8 +11,22 @@ using System.Text;
 
 namespace QueryEngine
 {
+    /// <summary>
+    /// A type of formater defines the format of the output.
+    /// </summary>
+    public enum FormaterType { 
+        
+        /// <summary>
+        /// Prints results in a form of a simple table where results are divided by spaces.
+        /// </summary>
+        Simple,
+        
+        /// <summary>
+        /// Prints results in a form of a mark down table.
+        /// </summary>
+        MarkDown }
 
-    public enum FormaterType { Simple, MarkDown }
+
     /// <summary>
     /// Class defining how resulting table when printing results will look like.
     /// </summary>

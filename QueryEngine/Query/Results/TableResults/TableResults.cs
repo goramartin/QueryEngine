@@ -9,7 +9,10 @@ That means, every column contains only the same variables (even types if they ar
 One result of the search can be seen as an array of those elements, where the number of elements in the 
 array is the number of columns. The specific row can be access with an index or an enumeration, on these actions,
 the RowProxy struct is returned, henceforward, it enables the user access row's columns.
+
+Note that if the the query does not contain the variable defined in the match clauses. It is not stored.
  */
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -26,7 +29,7 @@ namespace QueryEngine
     /// represents an index to the table. In other words, when we enumerate the class, the rows are returned based on 
     /// the indeces from the "order" array.
     /// The class enables to store a temporary row, that can be accessed via the row proxy, however
-    /// the temporary row can be used only if the table was created with the constructor without passed table.ws
+    /// the temporary row can be used only if the table was created with the constructor without passed table.
     /// Note that the results are stored by columns, that is to say, returning one row must be done through proxy class (RowProxy in another file).
     /// The table itself is implemented as a List of fixed sized arrays.
     /// </summary>
@@ -36,7 +39,7 @@ namespace QueryEngine
         /// A flag whether new elements can be added into the table.
         /// If the elements are added, it can cause undefined behaviour.
         /// </summary>
-        public readonly bool isStatic = false;
+        public bool IsStatic { get; } = false;
 
         /// <summary>
         /// [column][block][position in block]
@@ -64,6 +67,9 @@ namespace QueryEngine
         /// </summary>
         public Element[] temporaryRow { get; set; } = null;
         public int FixedArraySize { get; private set; }
+        /// <summary>
+        /// Array of indeces of variable that must be stored. The rest is omited.
+        /// </summary>
         public int[] usedVars { get; private set; }
 
         /// <summary>
@@ -94,7 +100,7 @@ namespace QueryEngine
                 this.NumberOfMatchedElements = count;
                 this.FixedArraySize = fixedArraySize;
                 if (wasStoringResults) this.RowCount = count;
-                this.isStatic = true;
+                this.IsStatic = true;
             }
         }
 

@@ -30,9 +30,21 @@ namespace QueryEngine
     /// </summary>
     public class Graph
     {
+        /// <summary>
+        /// Nodes schema.
+        /// </summary>
         public Dictionary<string, Table> nodeTables;
+        /// <summary>
+        /// Edges schema.
+        /// </summary>
         public Dictionary<string, Table> edgeTables;
+        /// <summary>
+        /// A map of all properties and their types.
+        /// string = Property IRI
+        /// Tuple(int,type) = (global property id, type of the property)
+        /// </summary>
         public Dictionary<string, Tuple<int, Type>> labels;
+        
         public List<Vertex> vertices;
         public List<OutEdge> outEdges;
         public List<InEdge> inEdges;

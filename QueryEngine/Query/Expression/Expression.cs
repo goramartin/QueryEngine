@@ -10,8 +10,6 @@ The "x", "y", "x.AGE" in select clause are expression that are evaluated for eve
 results of the query.
 
 Expressions work as follows.
-Accessing an expression is done via an expression holder, that lets the user evaluate the containing expression
-and return its value.
 Expression themself are forming a syntax tree. Where each node evaluates it self and returns information about
 evaluation to its predecessor.
 */

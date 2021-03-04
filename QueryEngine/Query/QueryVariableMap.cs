@@ -13,8 +13,8 @@ namespace QueryEngine
     /// the x variable and the second column represents the z variable. So the indeces for the variables of x and z are
     /// 0 and 1, because when accessing x variable the 0 th column is used and vice versa.
     /// 
-    /// Note that this pattern is very simple and in case the patterns are connected and shuffled, then the indeces might not be 
-    /// visible to the user.
+    /// Note that in this example the pattern is very simple and in case the patterns are connected and shuffled, then the indeces of variable might not be 
+    /// transparent to the user.
     /// Each variable is inserted only once despite possible multiple occurences of the same variable.
     /// </summary>
     internal class VariableMap : IEnumerable<KeyValuePair<string, Tuple<int, Table>>>
@@ -22,9 +22,9 @@ namespace QueryEngine
      
         /// <summary>
         /// A map with information about defined variables.
+        /// Tuple contains index of the variable and possibly it is type if it is stated in the query.
         /// </summary>
         private Dictionary<string, Tuple<int, Table>> variableMap;
-        
         
         public VariableMap() => this.variableMap = new Dictionary<string, Tuple<int, Table>>();
       

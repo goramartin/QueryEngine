@@ -24,6 +24,10 @@ namespace QueryEngine
         public int OutEdgesEndPosition { get; internal set; }
         public int InEdgesStartPosition { get; internal set; }
         public int InEdgesEndPosition { get; internal set; }
+        
+        /// <summary>
+        /// Constructs vertex with no edges.
+        /// </summary>
         public Vertex(int id, Table table)
         {
             if (id <= 0)
@@ -40,6 +44,9 @@ namespace QueryEngine
             this.PositionInList = -1;
         }
 
+        /// <summary>
+        /// Constructs empty vertex.
+        /// </summary>
         public Vertex()
         {
             this.ID = -1;

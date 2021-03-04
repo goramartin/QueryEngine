@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QueryEngine
 {
-
     /// <summary>
     /// A class representing multiple tables and an multiple tree indeces on the tables.
     /// The class is used by the streamed order by.
@@ -18,7 +14,7 @@ namespace QueryEngine
     {
         private TableResultsABTree[] resTables;
         private bool isAsc;
-
+        public bool IsStatic => true;
         public MultiTableResultsABTree(TableResultsABTree[] resTables, bool isAsc) 
         {
             if (resTables == null || resTables.Length == 0)

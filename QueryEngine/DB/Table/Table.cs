@@ -50,6 +50,9 @@ namespace QueryEngine
         /// </summary>
         public Dictionary<int,int> IDs { get; private set; }
 
+        /// <summary>
+        /// Returns a number of properties of the table.
+        /// </summary>
         public int PropertyCount => this.Properties.Count;  
        
             /// <summary>

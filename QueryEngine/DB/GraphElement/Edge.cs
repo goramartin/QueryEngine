@@ -28,6 +28,9 @@ namespace QueryEngine
         /// </summary>
         public Vertex EndVertex { get; internal set; }
 
+        /// <summary>
+        /// Constructs edge with default values.
+        /// </summary>
         public Edge()
         {
             this.ID = -1;
@@ -41,9 +44,11 @@ namespace QueryEngine
     /// </summary>
     public sealed class InEdge : Edge
     {
+        /// <summary>
+        /// Constructs empty edge.
+        /// </summary>
         public InEdge() : base()
-        {
-        }
+        { }
     }
 
     /// <summary>
@@ -51,6 +56,10 @@ namespace QueryEngine
     /// </summary>
     public sealed class OutEdge : Edge
     {
-        public OutEdge() : base() { }
+        /// <summary>
+        /// Constructs empty edge.
+        /// </summary>
+        public OutEdge() : base() 
+        { }
     }
 }

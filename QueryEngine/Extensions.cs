@@ -4,6 +4,9 @@ namespace QueryEngine
 {
     static class ExtensionArray
     {
+        /// <summary>
+        /// Debug print for matched elements during matching algorithm.
+        /// </summary>
         public static string Print(this Element[] tmp)
         {
             string tmpString = "Thread: " + Thread.CurrentThread.ManagedThreadId.ToString() + " result: ";
@@ -31,6 +34,9 @@ namespace QueryEngine
         }
 
 
+        /// <summary>
+        /// Creates copies of the given comparers.
+        /// </summary>
         public static ExpressionComparer[] CloneHard(this ExpressionComparer[] comparers, bool cacheResults)
         {
             var newComparers = new ExpressionComparer[comparers.Length];

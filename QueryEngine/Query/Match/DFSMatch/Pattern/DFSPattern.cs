@@ -122,6 +122,7 @@ namespace QueryEngine
         /// For example: (a) - (b) - (c) splited by var. b == (b) - (a) , (b) - (c)
         /// Note that (a) - (b) was reversed in order ( oriented edges are reversed as well )
         /// </summary>
+        /// <param name="final"> The constructed pattern will be stored in this list. Never null. </param>
         /// <param name="parsedPatterns"> Pattern created by Match Visitor </param>
         /// <param name="variableMap"> Query map of variables (empty) </param>
         private void CreatePattern(List<List<DFSBaseMatch>> final, List<ParsedPattern> parsedPatterns, VariableMap variableMap)

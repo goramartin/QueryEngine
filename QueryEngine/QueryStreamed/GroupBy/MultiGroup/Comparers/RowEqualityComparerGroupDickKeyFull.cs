@@ -4,8 +4,8 @@ namespace QueryEngine
 {
     /// <summary>
     /// A EqualityComparer that is used during half streamed group by.
-    /// The full key contains full row proxy and it is hash values.
-    /// The row proxies are comparer for the key equality.
+    /// The full key contains row proxy and it is hash value.
+    /// The row proxies are compared for the key equality.
     /// </summary>
     class RowEqualityComparerGroupDickKeyFull : IEqualityComparer<GroupDictKeyFull>
     {
@@ -31,6 +31,10 @@ namespace QueryEngine
            return obj.hash;
         }
 
+        /// <summary>
+        /// Creates a new instance.
+        /// The provided comparers are cloned with appropriately set cache flag.
+        /// </summary>
         public static RowEqualityComparerGroupDickKeyFull Factory(ExpressionComparer[] comparers, bool cacheResults)
         {
             return new RowEqualityComparerGroupDickKeyFull(comparers.CloneHard(cacheResults), cacheResults);

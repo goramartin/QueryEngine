@@ -13,6 +13,8 @@ namespace QueryEngine
         private ABTree<int> indexTree;
         private ITableResults resTable;
 
+        public bool IsStatic => false;
+
         public TableResults.RowProxy this[int rowIndex]
         {
             get {

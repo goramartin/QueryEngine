@@ -11,6 +11,9 @@ namespace QueryEngine
     /// The aggregate results will be stored for each matcher in it is separate slot.
     /// And when the matcher finishes it is result will be merged onto the field finalResults.
     /// Thus, when all thread finished the final results will be stored in this field.
+    /// 
+    /// The aggregate results are divided into aggregates that contain asterix and the rest.
+    /// This is done in order to omit call on the Count aggregate.
     /// </summary>
     internal class SingleGroupResultProcessorHalfStreamed : GroupResultProcessor
     {
@@ -45,11 +48,6 @@ namespace QueryEngine
                 this.matcherNonAsterixResults[i] = AggregateBucketResult.CreateBucketResults(this.nonAsterixAggregates);
         }
 
-        /// <summary>
-        /// If the given result is not null, the aggregates for the calling matcher are computed.
-        /// If the given result is null, the aggregates are merged onto the field finalResults.
-        /// The result == null means that the mather finished it is search.
-        /// </summary>
         public override void Process(int matcherID, Element[] result)
         {
             var matcherResults = this.matcherNonAsterixResults[matcherID];

@@ -10,7 +10,10 @@ namespace QueryEngine
     /// The keys on the nodes store the values directly.
     /// The used nodes contain parent pointers and indeces of their position in the parent's children array.
     /// This enables insertion without the need to remember the path, as well as the unumeration.
-    /// No duplicate values.
+    /// It does not store duplicate values.
+    /// 
+    /// The implementation is based on the lecture on Data Structures 1 (NTIN066) taught in the 2020/2021 winter semester, at Charles University
+    /// Mathematical and physical faculty.
     /// </summary>
     /// <typeparam name="T"> The type of keys stored in the nodes.</typeparam>
     internal class ABTree<T> : IEnumerable<T>
@@ -231,6 +234,7 @@ namespace QueryEngine
         /// <summary>
         /// A node of an (A, B) tree.
         /// Uses parent pointers and index of it's position in the parent's children array.
+        /// The childre array should be  inited only if the children are being inserted.
         /// </summary>
         /// <typeparam name="TT"> The type of keys stored in the node. </typeparam>
         private class ABTreeNode<TT>

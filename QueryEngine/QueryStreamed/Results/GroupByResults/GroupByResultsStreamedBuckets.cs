@@ -5,6 +5,11 @@ using System;
 
 namespace QueryEngine
 {
+
+    /// <summary>
+    /// Class representing group by results of the streamed group by.
+    /// The derived classes differ only in the dictionary used to store the final results.
+    /// </summary>
     internal abstract class GroupByResultsStreamedBucket : GroupByResults, IEnumerable<AggregateBucketResult[]>
     {
         public GroupByResultsStreamedBucket(int count, ITableResults resTable) : base(count, resTable)

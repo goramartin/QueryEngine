@@ -14,7 +14,7 @@ namespace QueryEngine
     /// Notice that the keys of the global dictionary contain row proxies, this enables
     /// to obtain a keys that stem from different tables.
     /// Notice that if it runs in single thread, the mergins does not happen. Thus we can use this class
-    /// as a reference solution for the half streamed version using buckets as a result storage.
+    /// as a single thread reference solution for the half streamed/streamed version using buckets as a result storage.
     /// </summary>
     internal class LocalGroupGlobalMergeHalfStreamedBucket : GroupResultProcessor
     {

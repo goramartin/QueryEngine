@@ -17,17 +17,29 @@ namespace QueryEngine
 {
     /// <summary>
     /// A base class every graph element.
-    /// The table represents the type of the element.
-    /// The element data are stored in the table as well.
-    /// The position represents a position in a enclosing structure (In our case it is a List).
+    /// Element data are stored in the Table.
+    /// It assumes that the elements are stored in a list.
     /// </summary>
     public abstract class Element
     {
+        /// <summary>
+        /// A unique ID in the entire graph.
+        /// </summary>
         public int ID { get; internal set; }
+        /// <summary>
+        /// A type of the element. Used to access it is properties.
+        /// </summary>
         public Table Table { get; internal set; }
 
+        /// <summary>
+        /// The position represents a position in a enclosing structure (In our case it is a List).
+        /// This enables to access bordering elements faster.
+        /// </summary>
         public int PositionInList { get; internal set; }
 
+        /// <summary>
+        /// Hash is based on the ID of the element.
+        /// </summary>
         public override int GetHashCode()
         {
             return this.ID;

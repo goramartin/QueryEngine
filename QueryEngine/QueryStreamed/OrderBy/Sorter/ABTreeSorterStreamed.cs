@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace QueryEngine
 {
@@ -11,7 +7,6 @@ namespace QueryEngine
     /// Note that single thread version of the full streamed order by is considered to be the same as
     /// the single thread solution of the half streamed order by since it maintains the sorted order for the 
     /// entire set of immediate results. 
-    /// This class should be used solely in the parallel enviroment.
     /// The class contains an array of objects (ab tree, table results), each object represents a 
     /// particular range from the universum of the first key that is used to sort the results.
     /// The key is computed for each incoming result and a hasher class is used to determine the correct range 

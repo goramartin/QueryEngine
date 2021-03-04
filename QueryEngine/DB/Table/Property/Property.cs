@@ -18,8 +18,16 @@ namespace QueryEngine
     /// </summary>
     public abstract class Property
     {
+        /// <summary>
+        /// An identifier of the property.
+        /// The identifiers are used globally in the entire graph.
+        /// Thus if two properties have the same IRI, they are also of the same type.
+        /// </summary>
         public string IRI { get; protected set; }
 
+        /// <summary>
+        /// Constructs empty Property.
+        /// </summary>
         public Property() { this.IRI = null; }
 
         /// <summary>

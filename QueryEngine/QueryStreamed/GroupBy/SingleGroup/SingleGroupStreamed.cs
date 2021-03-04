@@ -6,12 +6,17 @@ namespace QueryEngine
     /// <summary>
     /// Represents a result processor where there are used aggregate functions in the query intput 
     /// but no group by is set.
-    /// In that case result of the matchers doesnt have to be stored at all.
+    /// In that case result of the matchers does not have to be stored at all.
     /// The aggregate results of every matcher will be stored in the field finalResults (a global field).
-    /// The aggregate results are computed in a thread-safe manner.
-    /// This simulated full streamed version, where the aggregates in the field finalResults, contain
-    /// the newest values.
-    /// Notice that trying this algorithm makes sense only in the parallel enviroment.
+    /// The aggregate results if processed in parallel are computed in a thread-safe manner.
+    /// 
+    /// 
+    /// The aggregate results are divided into aggregates that contain asterix and the rest.
+    /// This is done in order to omit call on the Count aggregate.
+    /// The results stored in the nonAsterixResults are references are from the final results.
+    /// When all threads are finished, the last thread actulises the Count aggregate result.
+    /// 
+    /// Note that when the direction leaves the method process, the result of the processing is global (not local as in HS version).
     /// </summary>
     internal class SingleGroupResultProcessorStreamed : GroupResultProcessor
     {

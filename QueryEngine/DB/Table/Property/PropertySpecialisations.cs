@@ -17,8 +17,15 @@ namespace QueryEngine
     /// </summary>
     public abstract class Property<T> : Property
     {
+        /// <summary>
+        /// Contains values of the elements in the table.
+        /// </summary>
         public List<T> propHolder;
 
+        /// <summary>
+        /// Constructs property.
+        /// </summary>
+        /// <param name="propName"> An identifier of the property. </param>
         public Property(string propName)
         {
             if (propName == null)
@@ -30,6 +37,9 @@ namespace QueryEngine
             }
         }
 
+        /// <summary>
+        /// Clears all values of all the elements in the table.
+        /// </summary>
         public override void ClearProperty()
         {
             this.propHolder.Clear();

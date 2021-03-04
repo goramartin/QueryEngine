@@ -60,8 +60,8 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// The same method as above. It is copied since it is need for the HPCSharp library.
-        /// Because it doesnt allow to use the IComparer(T) interface.
+        /// The same method as above. It is copied since it is need for the HPCSharp library,
+        /// because it doesnt allow to use the IComparer(T) interface.
         /// </summary>
         public override int Compare(TableResults.RowProxy x, TableResults.RowProxy y)
         {
@@ -77,6 +77,7 @@ namespace QueryEngine
         /// <summary>
         /// Creates a new instance by cloning the comparers and seting appropriately the cache flag.
         /// </summary>
+        /// <param name="comparers"> Comparers to clone. </param>
         /// <param name="cacheResults"> Whether to cache results of the comparison. </param>
         public static RowComparer Factory(ExpressionComparer[] comparers, bool cacheResults)
         {

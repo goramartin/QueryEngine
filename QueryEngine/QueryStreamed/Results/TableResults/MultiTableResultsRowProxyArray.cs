@@ -4,7 +4,6 @@ using System.Collections.Generic;
 
 namespace QueryEngine
 {
-
     /// <summary>
     /// A class is a wrapper class that contains multiple result tables and their global index.
     /// </summary>
@@ -12,6 +11,7 @@ namespace QueryEngine
     {
         private List<ITableResults> resTables;
         private TableResults.RowProxy[] indexArray;
+        public bool IsStatic => true;
 
         public MultiTableResultsRowProxyArray(List<ITableResults> resTables, TableResults.RowProxy[] indexArray)
         {

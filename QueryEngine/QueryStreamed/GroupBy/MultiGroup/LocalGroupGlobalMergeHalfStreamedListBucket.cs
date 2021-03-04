@@ -13,8 +13,8 @@ namespace QueryEngine
     /// When matcher finishes, it merges its local results into a global groups.
     /// Notice that the keys of the global dictionary contain row proxies, this enables
     /// to obtain a keys that stem from different tables.
-    /// Notice that if it runs in single thread, the mergins does not happen. Thus we can use this class
-    /// as a reference solution for the half streamed version using lists as a result storage.
+    /// Notice that if it runs in single thread, the mergings do not happen. Thus we can use this class
+    /// as a single thread reference solution for the half streamed/streamed version using lists as a local result storage.
     /// </summary>
     internal class LocalGroupGlobalMergeHalfStreamedListBucket : GroupResultProcessor
     {

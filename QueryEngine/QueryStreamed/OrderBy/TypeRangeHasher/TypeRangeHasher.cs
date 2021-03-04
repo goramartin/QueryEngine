@@ -2,6 +2,9 @@
 
 namespace QueryEngine
 {
+    /// <summary>
+    /// For more information see TypeRangeHasher(T) information. 
+    /// </summary>
     internal class TypeRangeHasher
     {
         public static TypeRangeHasher Factory(int threadCount, Type type)
@@ -17,7 +20,8 @@ namespace QueryEngine
     /// For a given value it returns an index of the range the value belongs to.
     /// Each type should specify its own properties.
     /// The number of buckets and the size of the ranges depends on the number of threads that will access the buckets.
-    /// It is expected that the number of threads accessing the buckets is restricted in some sensible way. For now lets choose 32.
+    /// It is expected that the number of threads accessing the buckets is restricted in some sensible way.
+    /// Because of the restriction, range sizes in the derived classes will never be set to 0.
     /// </summary>
     /// <typeparam name="T"> A type of the universum. </typeparam>
     internal abstract class TypeRangeHasher<T> : TypeRangeHasher

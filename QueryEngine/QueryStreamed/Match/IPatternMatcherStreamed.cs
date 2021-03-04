@@ -1,9 +1,8 @@
 ﻿namespace QueryEngine 
 {
     /// <summary>
-    /// The interface enahces the base interface for a method that will enable to pass
-    /// result processor chain to matchers. This is done because the processor will be created 
-    /// after the actual matchers.
+    /// The interface enhances the base interface for a method that will enable to pass
+    /// result processor chain to matchers.
     /// </summary>
     interface IPatternMatcherStreamed : IPatternMatcher
     {

@@ -100,57 +100,10 @@ namespace QueryEngine
             }
         }
 
-        
-        /*
-        public static void Search(Graph g)
-        {
-
-
-            List<Token> tokens = Tokenizer.Tokenize(Console.In);
-
-            // Print parsed tokens
-            foreach (var item in tokens)
-            {
-                Console.WriteLine(item.type);
-                if (item.type == Token.TokenType.Identifier) Console.WriteLine(item.strValue);
-            }
-
-            Console.WriteLine();
-
-            Parser.ResetPosition();
-            var map = new VariableMap();
-
-            SelectNode selectNode = Parser.ParseSelect(tokens);
-            var match = new MatchObject(tokens, map, g, 2, 2);
-            var select = new SelectObject(g, map, selectNode, "console", "simple");
-            var order = OrderByObject.CreateOrderBy(tokens, g, map);
-
-            var tmp = match.Search();
-
-
-            Console.WriteLine("Results Ids");
-
-            foreach (var item in tmp)
-            {
-                Console.WriteLine(item.ToString());
-            }
-
-            //var tmp2 = order.Sort(tmp);
-
-            //select.Print(tmp2);
-
-            Console.ReadLine();
-
-        }
-        */
         public static void Dump()
         {
            Graph g = new Graph();
-
-            //just for testing
-            ///////////////////////////////////////
-
-            DumpGraphClass.DumpGraph(g);
+           DumpGraphClass.DumpGraph(g);
         }
     }
 }

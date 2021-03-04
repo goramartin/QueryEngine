@@ -13,11 +13,13 @@ namespace QueryEngine
     }
 
     /// <summary>
-    /// A hasher that hashes into buckets based on the first two characters based on their ordinal values.
-    /// Assuming that they are Asii (0 - 127).
-    /// It omits working the characters that are not printable (33 characters, codes 0 - 31 + 127).
+    /// A hasher that hashes into buckets based on the ordinal values of the first two characters.
+    /// Assuming that they are ASCII (0 - 127).
+    /// It omits working with the characters that are not printable (33 characters, codes [0, 31] + [127]).
     /// The entire range is 128 - 33 = 95, thus 95*95.
     /// The types of distribution are made into ints instead of uints unlike for int.
+    /// 
+    /// The class also handles undistribued values, see calculation of the distributionPoint and distributionBuckets.
     /// </summary>
     internal class AsciiStringRangeHasher : StringRangeHasher
     {

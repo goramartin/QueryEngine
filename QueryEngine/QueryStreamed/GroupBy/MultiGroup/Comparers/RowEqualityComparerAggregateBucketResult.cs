@@ -26,7 +26,7 @@ namespace QueryEngine
         /// Constructs comparer.
         /// </summary>
         /// <param name="keyCount">A number of keys used to hash the passed array.</param>
-        /// <param name="exprs"> Expressions that define types of the keys.</param>
+        /// <param name="expressionHolders"> Expressions that define types of the keys.</param>
         public RowEqualityComparerAggregateBucketResult(int keyCount, ExpressionHolder[] expressionHolders)
         {
             this.keyCount = keyCount;

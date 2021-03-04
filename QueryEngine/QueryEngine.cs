@@ -93,8 +93,8 @@ namespace QueryEngine
         {
             if (!Int32.TryParse(param, out int threadCount))
                 throw new ArgumentException("Failed to parse thread count.");
-            else if (threadCount <= 0) 
-                throw new ArgumentException("Thread count cannot be negative.");
+            else if (threadCount <= 0 || threadCount > 64) 
+                throw new ArgumentException("Thread count cannot be negative or greater than 64.");
                     else return threadCount;
         }
 

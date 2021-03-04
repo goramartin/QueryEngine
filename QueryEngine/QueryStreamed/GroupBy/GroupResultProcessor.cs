@@ -6,8 +6,7 @@ namespace QueryEngine
 {
     /// <summary>
     /// A base class for every group result processor.
-    /// When instantiating the class.
-    /// The users input query must be parsed before running constructors of any child class.
+    /// When instantiating the class, the users input query must be parsed before running constructors of any child class.
     /// </summary>
     internal abstract class GroupResultProcessor : ResultProcessor
     {
@@ -46,7 +45,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Cache is on.
+        /// Clones comparer and hasher. The cache is always set to true even for the hasher.
         /// </summary>
         protected static void CloneHasherAndComparer(RowEqualityComparerGroupKey comparer, RowHasher hasher, out RowEqualityComparerGroupKey retComparer, out RowHasher retHasher)
         {
@@ -59,7 +58,7 @@ namespace QueryEngine
         /// <summary>
         /// Parses Group by parse tree, the information is stored in the expression info class.
         /// The reason this method is separated from constructor is because it cannot guess whether the 
-        /// clause is a normal group by or a single group group by. And the group by must always be parsed
+        /// clause is a normal group by or a single group group by, thus the group by must always be parsed
         /// as the first clause after the Match clause.
         /// </summary>
         public static void ParseGroupBy(Graph graph, VariableMap variableMap, IGroupByExecutionHelper executionHelper, GroupByNode groupByNode, QueryExpressionInfo exprInfo)

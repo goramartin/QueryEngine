@@ -42,7 +42,27 @@ using System.IO;
 
 namespace QueryEngine
 {
-     public enum QueryMode { Normal, Streamed, HalfStreamed };
+    /// <summary>
+    /// Represent modes of the Query.
+    /// </summary>
+     public enum QueryMode {
+        
+        /// <summary>
+        /// Mode that stores results and then aggregates the values.
+        /// </summary>
+        Normal, 
+        
+        /// <summary>
+        /// Mode that aggregates globally the values during pattern matching.
+        /// </summary>
+        Streamed, 
+        
+        /// <summary>
+        /// Mode that aggregates locally the values during pattern matching. After the matching is finished they are merged globally.
+        /// </summary>
+        HalfStreamed };
+
+
     /// <summary>
     /// Represents a pgql query.
     /// It tokenizes, parses and constructs simple execution chain.
@@ -58,6 +78,10 @@ namespace QueryEngine
         private QueryObject query;
         private QueryExecutionHelper qEhelper;
         private QueryExpressionInfo exprInfo; 
+
+        /// <summary>
+        /// If set to True, calling compute will throw an exception.
+        /// </summary>
         public bool Finished { get; private set; }
 
         /// <summary>
