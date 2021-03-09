@@ -40,14 +40,16 @@ namespace Benchmark
             "select min(y.PropOne), avg(y.PropOne) match (x) -> (y) -> (z);",
             "select min(y.PropOne), avg(y.PropOne) match (x) -> (y) -> (z) group by y;",
             "select min(y.PropOne), avg(y.PropOne) match (x) -> (y) -> (z) group by y, x;",
-            "select min(x.PropOne), avg(x.PropOne) match (x) -> (y) -> (z) group by x.PropTwo;"
+            "select min(x.PropOne), avg(x.PropOne) match (x) -> (y) -> (z) group by x.PropTwo;",
+            "select min(x.PropOne), avg(x.PropOne) match (x) -> (y) -> (z) group by x;",
+            "select min(x.PropOne), avg(x.PropOne) match (x) -> (y) -> (z) group by x, y;"
         };
 
         static int warmUps = 5;
         static int repetitions = 15;
-        static int fixedArraySize = 4194304;
+        static int fixedArraySize = 4194304; //*2;
         static int threadCount = 8;
-        static int verticesPerThread = 512;
+        static int verticesPerThread = 512;//1024;
         static bool timeMatching = false;
 
         static void Main(string[] args)
@@ -102,7 +104,6 @@ namespace Benchmark
                                     continue;
                             }
                         }
-
                         Measure(mode.modeType, grouper, mode.baseSorter, groupByQueries[i], threadCount);
                     }
                 }
@@ -115,7 +116,7 @@ namespace Benchmark
                 {
                     foreach (var sorter in mode.sorters)
                     {
-                        Measure(mode.modeType, mode.baseGrouper, sorter, orderByQueries[i], threadCount);
+                       // Measure(mode.modeType, mode.baseGrouper, sorter, orderByQueries[i], threadCount);
                     }
                 }
             }
