@@ -42,14 +42,15 @@ namespace Benchmark
             "select min(y.PropOne), avg(y.PropOne) match (x) -> (y) -> (z) group by y, x;",
             "select min(x.PropOne), avg(x.PropOne) match (x) -> (y) -> (z) group by x.PropTwo;",
             "select min(x.PropOne), avg(x.PropOne) match (x) -> (y) -> (z) group by x;",
-            "select min(x.PropOne), avg(x.PropOne) match (x) -> (y) -> (z) group by x, y;"
+            "select min(x.PropOne), avg(x.PropOne) match (x) -> (y) -> (z) group by x, y;",
+            "select min(x.PropOne), avg(x.PropOne) match (x) -> (y) -> (z) group by x.PropOne;"
         };
 
         static int warmUps = 5;
         static int repetitions = 15;
-        static int fixedArraySize = 4194304; //*2;
+        static int fixedArraySize = 4194304 * 2;
         static int threadCount = 8;
-        static int verticesPerThread = 512;//1024;
+        static int verticesPerThread = 1024;
         static bool timeMatching = false;
 
         static void Main(string[] args)
@@ -83,9 +84,9 @@ namespace Benchmark
 
         static void MeasureAggregates()
         {
+            // Group by
             foreach (var mode in modes)
             {
-                // Group by
                 for (int i = 0; i < groupByQueries.Count; i++)
                 {
                     foreach (var grouper in mode.groupers)
@@ -109,14 +110,14 @@ namespace Benchmark
                 }
             }
 
+            // Order by 
             foreach (var mode in modes)
             {
-                // Order by 
                 for (int i = 0; i < orderByQueries.Count; i++)
                 {
                     foreach (var sorter in mode.sorters)
                     {
-                       // Measure(mode.modeType, mode.baseGrouper, sorter, orderByQueries[i], threadCount);
+                        Measure(mode.modeType, mode.baseGrouper, sorter, orderByQueries[i], threadCount);
                     }
                 }
             }

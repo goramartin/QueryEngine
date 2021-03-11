@@ -16,12 +16,12 @@ namespace QueryEngine
     /// Notice that if it runs in single thread, the mergins does not happen. Thus we can use this class
     /// as a single thread reference solution for the half streamed/streamed version using buckets as a result storage.
     /// </summary>
-    internal class LocalGroupGlobalMergeHalfStreamedBucket : GroupResultProcessor
+    internal class TwoStepHalfStreamedBucket : GroupByResultProcessor
     {
         private GroupJob[] groupJobs;
         private ConcurrentDictionary<GroupDictKeyFull, AggregateBucketResult[]> globalGroups;
 
-        public LocalGroupGlobalMergeHalfStreamedBucket(QueryExpressionInfo expressionInfo, IGroupByExecutionHelper executionHelper, int columnCount, int[] usedVars) : base(expressionInfo, executionHelper, columnCount, usedVars)
+        public TwoStepHalfStreamedBucket(QueryExpressionInfo expressionInfo, IGroupByExecutionHelper executionHelper, int columnCount, int[] usedVars) : base(expressionInfo, executionHelper, columnCount, usedVars)
         {
             this.groupJobs = new GroupJob[this.executionHelper.ThreadCount];
 

@@ -15,7 +15,7 @@ namespace QueryEngine
     /// The aggregate results are divided into aggregates that contain asterix and the rest.
     /// This is done in order to omit call on the Count aggregate.
     /// </summary>
-    internal class SingleGroupResultProcessorHalfStreamed : GroupResultProcessor
+    internal class SingleGroupGroupByHalfStreamed : GroupByResultProcessor
     {
         private Aggregate[] nonAsterixAggregates;
         private int[] numberOfMatchedElements;
@@ -36,7 +36,7 @@ namespace QueryEngine
         private AggregateBucketResult[] finalNonAsterixResults;
         private bool containsAst;
 
-        public SingleGroupResultProcessorHalfStreamed(QueryExpressionInfo expressionInfo, IGroupByExecutionHelper helper, int columnCount, int[] usedVars): base(expressionInfo, helper, columnCount, usedVars)
+        public SingleGroupGroupByHalfStreamed(QueryExpressionInfo expressionInfo, IGroupByExecutionHelper helper, int columnCount, int[] usedVars): base(expressionInfo, helper, columnCount, usedVars)
         {
             this.matcherNonAsterixResults = new AggregateBucketResult[this.executionHelper.ThreadCount][];
             this.finalResults = AggregateBucketResult.CreateBucketResults(this.aggregates);

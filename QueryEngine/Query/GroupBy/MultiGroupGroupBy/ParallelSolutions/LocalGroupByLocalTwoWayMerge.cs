@@ -12,9 +12,9 @@ namespace QueryEngine
     /// The threads then work independently on each other. When the threads finish, the results are merged.
     /// The results are merged in a form of a binary tree (similar to a merge sort).
     /// </summary>
-    internal class LocalGroupLocalMerge : Grouper
+    internal class LocalGroupByLocalTwoWayMerge : Grouper
     {
-        public LocalGroupLocalMerge(Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper helper, bool useBucketStorage) : base(aggs, hashes, helper, useBucketStorage) 
+        public LocalGroupByLocalTwoWayMerge(Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper helper, bool useBucketStorage) : base(aggs, hashes, helper, useBucketStorage) 
         { }
 
         public override GroupByResults Group(ITableResults resTable)
@@ -36,7 +36,7 @@ namespace QueryEngine
         /// Note that the last job in the array has the end set to the end of the result table.
         /// The addition must always be > 0.
         /// Each job will receive a range from result table, hasher, comparer and aggregates.
-        /// Note that they are all copies, because they contain a private stete (hasher contains reference to the equality comparers to enable caching when computing the hash.
+        /// Note that they are all copies, because they contain a private state (hasher contains reference to the equality comparers to enable caching when computing the hash).
         /// The comparers and hashers build in the constructor of this class are given to the last job, just like the aggregates passed to the construtor.
         /// </summary>
         private GroupByJob[] CreateJobs(ITableResults resTable, Aggregate[] aggs, ExpressionComparer[] comparers, ExpressionHasher[] hashers)
@@ -73,7 +73,7 @@ namespace QueryEngine
         /// And on the same level they are also merged.
         /// That means that the recursion never reaches the leaf level by itself but the leaves represent grouping computations started 
         /// from the last level before leaf level.
-        /// The results are merged on the jobs[0].
+        /// The results are merged onto the jobs[0].
         /// </summary>
         /// <param name="jobs"> Jobs for each thread. </param>
         /// <param name="start"> Starting index of a jobs to finish. </param>
@@ -132,12 +132,14 @@ namespace QueryEngine
 
 
         #region WithBuckets
-       
+
         /// <summary>
         /// Main work of a thread when merging with another threads groups.
-        /// And then for each entry from the other dictionary try to add it.
-        /// Merge only if there is already the given group.
+        /// Merge only if there is already the given group, otherwise the buckets
+        /// are inserted into the jobs1's dictionary.
         /// </summary>
+        /// <param name="job1"> A place to merge into. </param>
+        /// <param name="job2"> A place to merge from. </param>
         private static void SingleThreadMergeWorkWithBuckets(object job1, object job2)
         {
             #region DECL
@@ -206,8 +208,10 @@ namespace QueryEngine
         /// For each entry from the other dictionary a method MergeOn(...)
         /// is called, which either combines the results of the two groups or adds it to the end of the result list.
         /// Also, if both groups exists in the both jobs, they are combined.
-        /// Otherwise the new entry is added to the dictionary.
+        /// Otherwise the new entry is added to the job1's dictionary.
         /// </summary>
+        /// <param name="job1"> A place to merge into. </param>
+        /// <param name="job2"> A place to merge from. </param>
         private static void SingleThreadMergeWorkWithLists(object job1, object job2)
         {
             #region DECL

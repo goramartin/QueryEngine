@@ -3,12 +3,15 @@
 namespace QueryEngine
 {
     /// <summary>
-    ///  This class is a reference single thread solution to the LocalGroupLocalMerge solution.
-    ///  It works the same as LocalGroupLocalMerge solution, except, it uses solely integer key into the dictionary.
+    ///  This class is a reference single thread solution using Lists as the aggregate result storages.
+    ///  The results are grouped using Dictionary, the key is a struct containing a proxy to a row of the result table and its hash.
+    ///  The hash is stored inside the key, because the interface of the Dictionary does two accesses.
+    ///  Also, the hasher stores cache of the comparer in the Dictionary.
+    ///  The value for a group in the dictionary is an index. The index is a position of a group's values inside aggregate result storage.
     /// </summary>
-    internal class GroupWithLists : Grouper
+    internal class GroupByWithLists : Grouper
     {
-        public GroupWithLists(Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper helper) : base(aggs, hashes, helper, false)
+        public GroupByWithLists(Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper helper) : base(aggs, hashes, helper, false)
         {}
 
         public override GroupByResults Group(ITableResults resTable)
@@ -39,7 +42,6 @@ namespace QueryEngine
             GroupDictKey key;
             #endregion DECL
 
-            // Create groups and compute aggregates for each individual group.
             for (int i = 0; i < resTable.NumberOfMatchedElements; i++)
             {
                 row = resTable[i];

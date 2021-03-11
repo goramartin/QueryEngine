@@ -162,7 +162,7 @@ namespace QueryEngine
         public abstract void Apply(in TableResults.RowProxy row, AggregateListResults list, int position);
 
         /// <summary>
-        /// Is called during merging in LocalGroupLocalMerge grouping.
+        /// Is called during merging in LocalGroupByLocalTwoWayMerge grouping.
         /// It merges aggregates values from two different result holders and merges them into the
         /// first one on the "into" position.
         /// </summary>

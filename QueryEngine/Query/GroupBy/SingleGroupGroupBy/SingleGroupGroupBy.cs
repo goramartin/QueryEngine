@@ -7,10 +7,14 @@ namespace QueryEngine
     /// <summary>
     /// A class that groups results only into one group.
     /// Is used when an aggregation is placed in the input query but no group by is set.
+    /// It contains parallel solution and the single thread as well.
+    /// The parallel solution spits the result table into equal parts and the aggregations are
+    /// computed locally for each thread, subsequently, they are merged.
+    /// The holder of the aggregation values is a Bucket.
     /// </summary>
-    internal class SingleGroupGrouper : Grouper
+    internal class SingleGroupGroupBy : Grouper
     {
-        public SingleGroupGrouper(Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper helper) : base(aggs, hashes, helper, false)
+        public SingleGroupGroupBy(Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper helper) : base(aggs, hashes, helper, false)
         {}
 
         /// <summary>
@@ -53,7 +57,7 @@ namespace QueryEngine
 
         /// <summary>
         /// Computes groups in parallel. 
-        /// Each thread gets a fair share of results from the result table.
+        /// Each thread gets an equal portion of results from the result table.
         /// The passed list of aggregates resides on the last position in the jobs array.
         /// When the tasks are finished the results are merged single threaded onto the 
         /// last position in the jobs array.

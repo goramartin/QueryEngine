@@ -14,13 +14,13 @@ namespace QueryEngine
     /// For single thread solution it uses Dictionary class and for the parallel solution it uses ConcurrentDictionary.
     /// 
     /// </summary>
-    internal class GlobalGroupStreamed : GroupResultProcessor
+    internal class GlobalGroupByStreamed : GroupByResultProcessor
     {
         private ConcurrentDictionary<AggregateBucketResult[], AggregateBucketResult[]> parGroups = null;
         private Dictionary<AggregateBucketResult[], AggregateBucketResult[]> stGroups = null;
         private BucketsKeyValueFactory[] matcherBucketFactories;
 
-        public GlobalGroupStreamed(QueryExpressionInfo expressionInfo, IGroupByExecutionHelper executionHelper, int columnCount, int[] usedVars) : base(expressionInfo, executionHelper, columnCount, usedVars)
+        public GlobalGroupByStreamed(QueryExpressionInfo expressionInfo, IGroupByExecutionHelper executionHelper, int columnCount, int[] usedVars) : base(expressionInfo, executionHelper, columnCount, usedVars)
         {
             this.matcherBucketFactories = new BucketsKeyValueFactory[this.executionHelper.ThreadCount];
             for (int i = 0; i < this.executionHelper.ThreadCount; i++)

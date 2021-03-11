@@ -41,22 +41,22 @@ namespace QueryEngine
         /// <summary>
         /// A parallel solution grouping results locally and subsequently merging the results into global dictionary using Buckets.
         /// </summary>
-        TwowayB,
+        TwoStepB,
         /// <summary>
         /// A parallel solution grouping results locally and subsequently merging the results into global dictionary using Lists.
         /// </summary>
-        TwowayL,
+        TwoStepL,
 
         // HS
 
         /// <summary>
-        /// A half streamed version of the TwowayB version. Both parallel and single thread.
+        /// A half streamed version of the TwoStepB version. Both parallel and single thread.
         /// </summary>
-        TwowayHSB,
+        TwoStepHSB,
         /// <summary>
-        /// A half streamed version of the TwowayL version. Both parallel and single thread.
+        /// A half streamed version of the TwoStepL version. Both parallel and single thread.
         /// </summary>
-        TwowayHSL,
+        TwoStepHSL,
 
         // S
 
@@ -102,20 +102,20 @@ namespace QueryEngine
     {
         public static HashSet<GrouperAlias> NormalGroupers = new HashSet<GrouperAlias>
         {
-              GrouperAlias.TwowayB,
               GrouperAlias.RefB,
               GrouperAlias.RefL,
-              GrouperAlias.GlobalB,
-              GrouperAlias.GlobalL,
               GrouperAlias.LocalB,
               GrouperAlias.LocalL,
-              GrouperAlias.TwowayL,
+              GrouperAlias.TwoStepB,
+              GrouperAlias.TwoStepL,
+              GrouperAlias.GlobalB,
+              GrouperAlias.GlobalL,
         };
 
         public static HashSet<GrouperAlias> HalfStreamedGroupers = new HashSet<GrouperAlias>
         {
-            GrouperAlias.TwowayHSB,
-            GrouperAlias.TwowayHSL,
+            GrouperAlias.TwoStepHSB,
+            GrouperAlias.TwoStepHSL,
         };
 
         public static HashSet<GrouperAlias> StreamedGroupers = new HashSet<GrouperAlias>

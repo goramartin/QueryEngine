@@ -3,12 +3,16 @@
 namespace QueryEngine
 {
     /// <summary>
-    /// This class is a reference single thread solution to the GlobalGroup solution.
-    /// It works the same except it uses simple dictionary.
+    ///  This class is a reference single thread solution using Lists as the aggregate result storages.
+    ///  The results are grouped using Dictionary, the key is a struct containing a proxy to a row of the result table and its hash.
+    ///  The hash is stored inside the key, because the interface of the Dictionary does two accesses.
+    ///  Also, the hasher stores cache of the comparer in the Dictionary.
+    ///  The aggregate values of the groups are stored as values in the dictionary, unlike the GroupBy with lists.
+    ///  The value it self is an array of value holders.
     /// </summary>
-    internal class GroupWithBuckets : Grouper
+    internal class GroupByWithBuckets : Grouper
     {
-        public GroupWithBuckets(Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper helper) : base(aggs, hashes, helper, true)
+        public GroupByWithBuckets(Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper helper) : base(aggs, hashes, helper, true)
         {}
 
         public override GroupByResults Group(ITableResults resTable)

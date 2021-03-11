@@ -12,8 +12,6 @@ namespace QueryEngine
     /// It is done because during the computation of the hash the y parameter is then compared with the x n-times. 
     /// When inserting it into the dictionary, it will again trigger computation of the same value that the hash was calculated from.
     /// Thus, we want to avoid unneccessary computation of expressions again for the same row y.
-    /// 
-    /// Is used by LocalGroupLocalMerge.
     /// </summary>
     internal class RowEqualityComparerGroupKey : IEqualityComparer<GroupDictKey>
     {

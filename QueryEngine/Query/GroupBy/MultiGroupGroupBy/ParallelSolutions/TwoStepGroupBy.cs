@@ -8,14 +8,15 @@ namespace QueryEngine
     /// <summary>
     /// Class represents a grouping algorithm.
     /// The class should be used only as the parallel solution and not with thread count set to 1.
-    /// The algorithm is composed of a local group by and a global merge (two way group by)
-    /// The algorithm uses only aggregate bucket storages or a mix of lists and buckets.
-    /// Firstly, each thread receives a range from the results table, hasher and comparer and computes
-    /// localy its groups, afterwards, they insert the groups into a global dictionary and merge their results.
+    /// The algorithm is composed of a local group by and a global merge.
+    /// The algorithm uses only aggregate buckets or array like storages.
+    /// Note that the solution using array like storages uses the arrays in the first step, then it proceeds using buckets.
+    /// Firstly, each thread receives an equal range from the results table and then processes the results locally, afterwards, 
+    /// the thread merges the final groups into a global dictionary.
     /// </summary>
-    internal class LocalGroupGlobalMerge : Grouper
+    internal class TwoStepGroupBy : Grouper
     {
-        public LocalGroupGlobalMerge(Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper helper, bool useBucketStorage) : base(aggs, hashes, helper, useBucketStorage)
+        public TwoStepGroupBy(Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper helper, bool useBucketStorage) : base(aggs, hashes, helper, useBucketStorage)
         { }
 
         public override GroupByResults Group(ITableResults resTable)

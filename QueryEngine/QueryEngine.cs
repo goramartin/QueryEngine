@@ -45,14 +45,14 @@ namespace QueryEngine
                 return GrouperAlias.LocalB;
             else if (arg == "localL")
                 return GrouperAlias.LocalL;
-            else if (arg == "twowayB")
-                return GrouperAlias.TwowayB;
-            else if (arg == "twowayL")
-                return GrouperAlias.TwowayL;
-            else if (arg == "twowayHSB")
-                return GrouperAlias.TwowayHSB;
-            else if (arg == "twowayHSL")
-                return GrouperAlias.TwowayHSL;
+            else if (arg == "twostepB")
+                return GrouperAlias.TwoStepB;
+            else if (arg == "twostepL")
+                return GrouperAlias.TwoStepL;
+            else if (arg == "twostepHSB")
+                return GrouperAlias.TwoStepHSB;
+            else if (arg == "twostepHSL")
+                return GrouperAlias.TwoStepHSL;
             else if (arg == "globalS")
                 return GrouperAlias.GlobalS;
             else throw new ArgumentException("Invalid grouper alias.");

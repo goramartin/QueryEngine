@@ -49,14 +49,14 @@ namespace QueryEngine
 
         public static Grouper Factory(GrouperAlias grouperAlias, Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper helper)
         {
-            if (grouperAlias == GrouperAlias.RefB) return new GroupWithBuckets(aggs, hashes, helper);
-            else if (grouperAlias == GrouperAlias.RefL) return new GroupWithLists(aggs, hashes, helper);
-            else if (grouperAlias == GrouperAlias.GlobalB) return new GlobalGroup(aggs, hashes, helper, true);
-            else if (grouperAlias == GrouperAlias.GlobalL) return new GlobalGroup(aggs, hashes, helper, false);
-            else if (grouperAlias == GrouperAlias.LocalB) return new LocalGroupLocalMerge(aggs, hashes, helper, true);
-            else if (grouperAlias == GrouperAlias.LocalL) return new LocalGroupLocalMerge(aggs, hashes, helper, false);
-            else if (grouperAlias == GrouperAlias.TwowayB) return new LocalGroupGlobalMerge(aggs, hashes, helper, true);
-            else if (grouperAlias == GrouperAlias.TwowayL) return new LocalGroupGlobalMerge(aggs, hashes, helper, false);
+            if (grouperAlias == GrouperAlias.RefB) return new GroupByWithBuckets(aggs, hashes, helper);
+            else if (grouperAlias == GrouperAlias.RefL) return new GroupByWithLists(aggs, hashes, helper);
+            else if (grouperAlias == GrouperAlias.GlobalB) return new GlobalGroupBy(aggs, hashes, helper, true);
+            else if (grouperAlias == GrouperAlias.GlobalL) return new GlobalGroupBy(aggs, hashes, helper, false);
+            else if (grouperAlias == GrouperAlias.LocalB) return new LocalGroupByLocalTwoWayMerge(aggs, hashes, helper, true);
+            else if (grouperAlias == GrouperAlias.LocalL) return new LocalGroupByLocalTwoWayMerge(aggs, hashes, helper, false);
+            else if (grouperAlias == GrouperAlias.TwoStepB) return new TwoStepGroupBy(aggs, hashes, helper, true);
+            else if (grouperAlias == GrouperAlias.TwoStepL) return new TwoStepGroupBy(aggs, hashes, helper, false);
             else throw new ArgumentException("Grouper, trying to create an unknown grouper.");
         }
 

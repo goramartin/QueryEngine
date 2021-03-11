@@ -8,14 +8,13 @@ namespace QueryEngine
     /// <summary>
     /// A class represents a multi group grouping algorithm.
     /// The class should be used only as the parallel solution and not with thread count set to 1.
-    /// The class uses aggretation with buckets or arrays.
-    /// Each thread recieves a portion of the results from the result table.
-    /// Subsequently, the threads start to aggrgate the results with the help of 
-    /// a global ConcurrentDictionary.
+    /// The class uses aggretation with buckets or array like storage.
+    /// Each thread recieves an equal portion of the results from the result table.
+    /// Subsequently, the threads start to aggregate the results using ConcurrentDictionary.
     /// </summary>
-    internal class GlobalGroup : Grouper
+    internal class GlobalGroupBy : Grouper
     {
-        public GlobalGroup(Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper helper, bool useBucketStorage) : base(aggs, hashes, helper, useBucketStorage)
+        public GlobalGroupBy(Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper helper, bool useBucketStorage) : base(aggs, hashes, helper, useBucketStorage)
         { }
 
         public override GroupByResults Group(ITableResults resTable)
@@ -26,11 +25,6 @@ namespace QueryEngine
             return this.ParallelGroupBy(RowEqualityComparerInt.Factory(resTable, comparers, new RowHasher(hashers), false), resTable);
         }
 
-        /// <summary>
-        /// Computes aggregates and groups in parallel.
-        /// Each thread receives a portion from the result table and tries to add/get
-        /// the each row into the global dictionary and receives a group, subsequently computes aggregates for the group.
-        /// </summary>
         private GroupByResults ParallelGroupBy(RowEqualityComparerInt equalityComparer, ITableResults resTable)
         {
             var jobs = CreateJobs(equalityComparer, resTable);
@@ -53,9 +47,8 @@ namespace QueryEngine
         /// Creates jobs for the parallel group by.
         /// Note that the last job in the array has the end set to the end of the result table.
         /// The addition must always be > 0.
-        /// Each job will receive a range from result table, aggregates and a global place to store groups.
-        /// Note that everything is shared. Nothing is a hard copy. The equalityComparer, the aggregates, results and the concurernt dictionary, semaphore, are shared
-        /// among all threads. They hold no state.
+        /// Each job will receive a range from result table, aggregates and a global place to store groups and the aggregated values.
+        /// Note that there is a single comparer for the ConcurrentDictionary, thus no caching of the expression is done.
         /// </summary>
         private GroupByJob[] CreateJobs(RowEqualityComparerInt equalityComparer, ITableResults resTable)
         {
@@ -109,10 +102,10 @@ namespace QueryEngine
         /// <summary>
         /// Thread safe grouping using arrays.
         /// Firstly, a position is inserted into the dictionary, note that the constructor
-        /// runs outside of the synchronization, so it can happen that other thread inserted an element
-        /// in the meanwhile.
+        /// runs outside of the synchronization, so it can happen that other thread inserted an element in the meanwhile.
         /// Then, if the position does exceed the array lenght, it acquires entire semaphore and doubles the arrays.
         /// Otherwise, it acquires only one part of the semaphore, updates the aggregates on the given position and releases the semaphore's part.
+        /// The aggregate values corresponding to a group are stored on the index stored in the ConcurrentDictionary.
         /// </summary>
         /// <param name="job"> A group by job class. </param>
         private static void SingleThreadGroupByWorkWithArrays(object job)

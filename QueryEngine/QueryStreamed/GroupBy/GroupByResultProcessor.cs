@@ -8,7 +8,7 @@ namespace QueryEngine
     /// A base class for every group result processor.
     /// When instantiating the class, the users input query must be parsed before running constructors of any child class.
     /// </summary>
-    internal abstract class GroupResultProcessor : ResultProcessor
+    internal abstract class GroupByResultProcessor : ResultProcessor
     {
         protected Aggregate[] aggregates;
         protected ExpressionHolder[] hashes;
@@ -19,7 +19,7 @@ namespace QueryEngine
         protected int ColumnCount { get; }
         protected int[] usedVars;
 
-        protected GroupResultProcessor(QueryExpressionInfo expressionInfo, IGroupByExecutionHelper executionHelper, int columnCount, int[] usedVars)
+        protected GroupByResultProcessor(QueryExpressionInfo expressionInfo, IGroupByExecutionHelper executionHelper, int columnCount, int[] usedVars)
         {
             this.aggregates = expressionInfo.Aggregates.ToArray();
             this.hashes = expressionInfo.GroupByhashExprs.ToArray();
@@ -80,14 +80,14 @@ namespace QueryEngine
         {
             if (executionHelper.IsSetSingleGroupGroupBy)
             {
-                if (!isStreamed) return new SingleGroupResultProcessorHalfStreamed(expressionInfo, executionHelper, columnCount, usedVars);
-                else return new SingleGroupResultProcessorStreamed(expressionInfo, executionHelper, columnCount, usedVars);
+                if (!isStreamed) return new SingleGroupGroupByHalfStreamed(expressionInfo, executionHelper, columnCount, usedVars);
+                else return new SingleGroupGroupByStreamed(expressionInfo, executionHelper, columnCount, usedVars);
             }
             else
             {
-                if (executionHelper.GrouperAlias == GrouperAlias.GlobalS) return new GlobalGroupStreamed(expressionInfo, executionHelper, columnCount, usedVars);
-                else if (executionHelper.GrouperAlias == GrouperAlias.TwowayHSB) return new LocalGroupGlobalMergeHalfStreamedBucket(expressionInfo, executionHelper, columnCount, usedVars);
-                else if (executionHelper.GrouperAlias == GrouperAlias.TwowayHSL) return new LocalGroupGlobalMergeHalfStreamedListBucket(expressionInfo, executionHelper, columnCount, usedVars);
+                if (executionHelper.GrouperAlias == GrouperAlias.GlobalS) return new GlobalGroupByStreamed(expressionInfo, executionHelper, columnCount, usedVars);
+                else if (executionHelper.GrouperAlias == GrouperAlias.TwoStepHSB) return new TwoStepHalfStreamedBucket(expressionInfo, executionHelper, columnCount, usedVars);
+                else if (executionHelper.GrouperAlias == GrouperAlias.TwoStepHSL) return new TwoStepHalfStreamedListBucket(expressionInfo, executionHelper, columnCount, usedVars);
                 else throw new ArgumentException("Group by result processor, trying to create an unknown grouper.");
             }
 

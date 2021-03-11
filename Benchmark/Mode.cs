@@ -37,7 +37,7 @@ namespace Benchmark
             sorters = Aliases.HalfStreamedSorters;
             modeType = QueryMode.HalfStreamed;
 
-            baseGrouper = GrouperAlias.TwowayHSB;
+            baseGrouper = GrouperAlias.TwoStepHSB;
             baseSorter = SorterAlias.AbtreeHS;
         }
     }
