@@ -4,7 +4,6 @@ using System.Collections.Generic;
 
 namespace QueryEngine
 {
-
     /// <summary>
     /// A wrapper class of the results table with a tree index.
     /// </summary>
@@ -17,14 +16,9 @@ namespace QueryEngine
 
         public TableResults.RowProxy this[int rowIndex]
         {
-            get {
-                int i = 0;
-                foreach (var row in indexTree)
-                {
-                    if (i == rowIndex) return this.resTable[row];
-                    i++;
-                }
-                throw new IndexOutOfRangeException($"{this.GetType()}, index out of range.");
+            get 
+            {
+                throw new IndexOutOfRangeException($"{this.GetType()}, cannot access indexer on a tree index.");
             }
         }
 

@@ -20,25 +20,25 @@ namespace QueryEngine
         /// <summary>
         /// The universum of the first key split into ranges.
         /// </summary>
-        private RangeBucket[] rangeBuckets;
+        protected RangeBucket[] rangeBuckets;
         /// <summary>
         /// Comparers used inside the AB trees, so that after computing the first key.
         /// The comparer upon insert would otherwise compute it again.
         /// </summary>
-        private ExpressionComparer<T>[] firstKeyComparers;
+        protected ExpressionComparer<T>[] firstKeyComparers;
 
         /// <summary>
         /// Expression to compute the first key.
         /// </summary>
-        private ExpressionHolder firstKeyExpressionHolder;
-        private ExpressionReturnValue<T> firstKeyExpression;
+        protected ExpressionHolder firstKeyExpressionHolder;
+        protected ExpressionReturnValue<T> firstKeyExpression;
 
         /// <summary>
         /// Hasher that determines the correct bucket of the given value.
         /// </summary>
-        private TypeRangeHasher<T> firstKeyHasher;
+        protected TypeRangeHasher<T> firstKeyHasher;
         
-        public ABTreeStreamedSorter(ExpressionComparer[] comparers, IOrderByExecutionHelper executionHelper, int columnCount, int[] usedVars): base(comparers, executionHelper, columnCount, usedVars)
+        public ABTreeStreamedSorter(ExpressionComparer[] comparers, IOrderByExecutionHelper executionHelper, int columnCount, int[] usedVars, bool allowDup): base(comparers, executionHelper, columnCount, usedVars)
         {
             this.firstKeyHasher = (TypeRangeHasher<T>)TypeRangeHasher.Factory(this.executionHelper.ThreadCount, typeof(T));
             this.firstKeyExpressionHolder = this.comparers[0].GetExpressionHolder();
@@ -51,9 +51,10 @@ namespace QueryEngine
                 var results = new TableResults(this.ColumnCount, this.executionHelper.FixedArraySize, this.usedVars);
                 var tmpRowComparer = RowComparer.Factory(this.comparers, true);
                 this.firstKeyComparers[i] = (ExpressionComparer<T>)tmpRowComparer.comparers[0];
-                this.rangeBuckets[i] = new RangeBucket(new IndexToRowProxyComparer(tmpRowComparer, results, false), results);
+                this.rangeBuckets[i] = CreateBucket(new IndexToRowProxyComparer(tmpRowComparer, results, allowDup), results);
             }
         }
+        protected abstract RangeBucket CreateBucket(IComparer<int> comparer, ITableResults resTable);
 
         public override void Process(int matcherID, Element[] result)
         {
@@ -90,30 +91,10 @@ namespace QueryEngine
         /// A class that represents a certain range of results.
         /// What range it represents is confined in the enclosing class.
         /// </summary>
-        private class RangeBucket
+        protected class RangeBucket
         {
-            public ABTree<int> tree;
+            public IABTree<int> tree;
             public ITableResults resTable;
-
-            public RangeBucket(IComparer<int> comparer, ITableResults resTable)
-            {
-                this.tree = new ABTree<int>(256, comparer);
-                this.resTable = resTable;
-            }
-        }
-
-        public override void RetrieveResults(out ITableResults resTable, out GroupByResults groupByResults)
-        {
-            groupByResults = null;
-            if (this.executionHelper.ThreadCount == 1)
-                resTable = new TableResultsABTree(this.rangeBuckets[0].tree, this.rangeBuckets[0].resTable);
-            else
-            {
-                TableResultsABTree[] tmpResults = new TableResultsABTree[this.rangeBuckets.Length];
-                for (int i = 0; i < this.rangeBuckets.Length; i++)
-                    tmpResults[i] = (new TableResultsABTree(this.rangeBuckets[i].tree, this.rangeBuckets[i].resTable));
-                resTable = new MultiTableResultsABTree(tmpResults, this.firstKeyComparers[0].isAscending);
-            }
         }
     }
 }

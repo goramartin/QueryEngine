@@ -140,6 +140,7 @@ namespace QueryEngine
                 if (found)
                 {
                     node.accumulations[pos].Add(key);
+                    this.Count++;
                     return null;
                 }
                 // There is another subtree.
@@ -192,8 +193,6 @@ namespace QueryEngine
                 Console.Write(" " + accumulation[j]);
             }
             Console.WriteLine();
-
-
         }
 
         /// <summary>

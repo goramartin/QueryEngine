@@ -5,17 +5,17 @@ using System.Collections.Generic;
 namespace QueryEngine
 {
     /// <summary>
-    /// A class representing multiple tables and an multiple tree indeces on the tables.
+    /// A class representing multiple tables and their tree indeces.
     /// The class is used by the streamed order by.
-    /// The iteration over the tables/indeces is based on whether the indeces are supposed to be 
+    /// The enumeration over the tables/indeces is based on whether the indeces are supposed to be 
     /// read in the asc. or desc. order.
     /// </summary>
     internal class MultiTableResultsABTree : ITableResults
     {
-        private TableResultsABTree[] resTables;
+        private ITableResults[] resTables;
         private bool isAsc;
         public bool IsStatic => true;
-        public MultiTableResultsABTree(TableResultsABTree[] resTables, bool isAsc) 
+        public MultiTableResultsABTree(ITableResults[] resTables, bool isAsc) 
         {
             if (resTables == null || resTables.Length == 0)
                 throw new ArgumentNullException($"{this.GetType()}, trying to assign null to a constructor.");
@@ -60,6 +60,7 @@ namespace QueryEngine
                 }
             }
         }
+
         IEnumerator IEnumerable.GetEnumerator()
         {
             return this.GetEnumerator();
