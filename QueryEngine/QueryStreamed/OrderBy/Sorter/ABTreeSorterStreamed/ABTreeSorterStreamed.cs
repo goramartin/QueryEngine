@@ -15,7 +15,7 @@ namespace QueryEngine
     /// The generics of this class is to manipulate more easily with the type of the first key.
     /// </summary>
     /// <typeparam name="T"> A type of the first key that it sorts with. </typeparam>
-    internal class ABTreeStreamedSorter<T> : OrderByResultProcessor
+    internal abstract class ABTreeStreamedSorter<T> : OrderByResultProcessor
     {
         /// <summary>
         /// The universum of the first key split into ranges.

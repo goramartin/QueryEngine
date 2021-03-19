@@ -14,7 +14,7 @@ namespace QueryEngine
     /// Mathematical and physical faculty.
     /// </summary>
     /// <typeparam name="T"> The type of keys stored in the nodes.</typeparam>
-    internal class ABTree<T> : IEnumerable<T>
+    internal class ABTree<T> : IEnumerable<T>, IABTree<T>
     {
         public int Count { get; private set; } = 0;
 

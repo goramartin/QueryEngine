@@ -13,7 +13,7 @@ namespace QueryEngine
     /// No duplicate values.
     /// </summary>
     /// <typeparam name="T"> The type of keys stored in the nodes.</typeparam>
-    class ABTreeValueAccumulator<T> : IEnumerable<ValueAccumulation<T>>
+    class ABTreeValueAccumulator<T> : IEnumerable<ValueAccumulation<T>>, IABTree<T>
     {
         public int Count { get; private set; } = 0;
 

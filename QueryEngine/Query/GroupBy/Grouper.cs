@@ -51,12 +51,12 @@ namespace QueryEngine
         {
             if (grouperAlias == GrouperAlias.RefB) return new GroupByWithBuckets(aggs, hashes, helper);
             else if (grouperAlias == GrouperAlias.RefL) return new GroupByWithLists(aggs, hashes, helper);
-            else if (grouperAlias == GrouperAlias.GlobalB) return new GlobalGroupBy(aggs, hashes, helper, true);
-            else if (grouperAlias == GrouperAlias.GlobalL) return new GlobalGroupBy(aggs, hashes, helper, false);
-            else if (grouperAlias == GrouperAlias.LocalB) return new LocalGroupByLocalTwoWayMerge(aggs, hashes, helper, true);
-            else if (grouperAlias == GrouperAlias.LocalL) return new LocalGroupByLocalTwoWayMerge(aggs, hashes, helper, false);
-            else if (grouperAlias == GrouperAlias.TwoStepB) return new TwoStepGroupBy(aggs, hashes, helper, true);
-            else if (grouperAlias == GrouperAlias.TwoStepL) return new TwoStepGroupBy(aggs, hashes, helper, false);
+            else if (grouperAlias == GrouperAlias.GlobalB) return new GlobalGroupByBucket(aggs, hashes, helper, true);
+            else if (grouperAlias == GrouperAlias.GlobalL) return new GlobalGroupByArray(aggs, hashes, helper, false);
+            else if (grouperAlias == GrouperAlias.LocalB) return new LocalGroupByLocalTwoWayMergeBucket(aggs, hashes, helper, true);
+            else if (grouperAlias == GrouperAlias.LocalL) return new LocalGroupByLocalTwoWayMergeList(aggs, hashes, helper, false);
+            else if (grouperAlias == GrouperAlias.TwoStepB) return new TwoStepGroupByBucket(aggs, hashes, helper, true);
+            else if (grouperAlias == GrouperAlias.TwoStepL) return new TwoStepGroupByListBucket(aggs, hashes, helper, false);
             else throw new ArgumentException("Grouper, trying to create an unknown grouper.");
         }
 
