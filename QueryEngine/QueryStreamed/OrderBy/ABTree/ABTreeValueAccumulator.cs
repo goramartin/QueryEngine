@@ -10,11 +10,10 @@ namespace QueryEngine
     /// The keys on the nodes store the values directly.
     /// The used nodes contain parent pointers and indeces of their position in the parent's children array.
     /// This enables insertion without the need to remember the path, as well as the unumeration.
-    /// The implementation is based on the lecture on Data Structures 1 (NTIN066) taught in the 2020/2021 winter semester, at Charles University
-    /// Mathematical and physical faculty.
+    /// No duplicate values.
     /// </summary>
     /// <typeparam name="T"> The type of keys stored in the nodes.</typeparam>
-    internal class ABTree<T> : IEnumerable<T>
+    class ABTreeValueAccumulator<T> : IEnumerable<ValueAccumulation<T>>
     {
         public int Count { get; private set; } = 0;
 
@@ -23,17 +22,17 @@ namespace QueryEngine
         private int maxChildren;
         private int minChildren;
 
-        public ABTree(int B, IComparer<T> comparer)
+        public ABTreeValueAccumulator(int bValue, IComparer<T> comparer)
         {
-            if (B % 2 == 1)
+            if (bValue % 2 == 1)
                 throw new ArgumentException($"{this.GetType()}, passed non even B value as the max children count.");
             else if (comparer == null)
                 throw new ArgumentException($"{this.GetType()}, passed comparer as null.");
-            else if (B < 4)
-                throw new ArgumentException($"{this.GetType()}, passed 4 > B value. Choose a higher B value.");
+            else if (bValue < 4)
+                throw new ArgumentException($"{this.GetType()}, passed  4 > B value. Choose a higher B value.");
 
-            this.maxChildren = B;
-            this.minChildren = B / 2;
+            this.maxChildren = bValue;
+            this.minChildren = bValue / 2;
             this.comparer = comparer;
         }
 
@@ -41,6 +40,7 @@ namespace QueryEngine
         {
             root = new ABTreeNode<T>(this.maxChildren);
             root.keys.Add(key);
+            root.accumulations.Add(new List<T>());
             this.Count++;
         }
 
@@ -57,7 +57,10 @@ namespace QueryEngine
             else if ((node = FindLeafNode(key, out int pos)) == null) return;
             else
             {
+                // Notice that the first key is not inserted into the accumulation.
+                // Must be regarded during enumeration.
                 node.keys.Insert(pos, key);
+                node.accumulations.Insert(pos, new List<T>());
                 this.Count++;
                 SplitRoutine(node);
             }
@@ -76,12 +79,16 @@ namespace QueryEngine
                 ABTreeNode<T> rightNode = new ABTreeNode<T>(this.maxChildren);
                 int middleIndex = node.keys.Count / 2;
                 T middleKey = node.keys[middleIndex];
+                List<T> middleAccumulation = node.accumulations[middleIndex];
                 int rightStartIndex = middleIndex + 1;
 
                 // Move children from rightStart of the node to the rightNode.
                 node.MoveKeys(rightNode, rightStartIndex);
+                node.MoveAccumulations(rightNode, rightStartIndex);
+
                 // Remove the middle key, which must be at the end when the above finishes.
                 node.keys.RemoveAt(node.keys.Count - 1);
+                node.accumulations.RemoveAt(node.accumulations.Count - 1);
 
                 // If the node was internal node, move it's children as well.
                 if (node.children != null)
@@ -104,11 +111,12 @@ namespace QueryEngine
                     rightNode.index = 1;
                     // Key
                     root.keys.Add(middleKey);
+                    root.accumulations.Add(middleAccumulation);
                     return;
                 }
                 else
                 {   // Insert the middle value into the parent.
-                    node.parent.InsertBranch(node.index, middleKey, rightNode);
+                    node.parent.InsertBranch(node.index, middleKey, middleAccumulation, rightNode);
                     node = node.parent;
                 }
             }
@@ -128,8 +136,12 @@ namespace QueryEngine
             {
                 bool found = node.FindBranch(key, out pos, this.comparer);
 
-                // Key was found, thus no insertion.
-                if (found) return null;
+                // Key was found, insert into accumulation.
+                if (found)
+                {
+                    node.accumulations[pos].Add(key);
+                    return null;
+                }
                 // There is another subtree.
                 else if (!node.IsLeaf()) node = node.children[pos];
                 // It reached the Leaf level.
@@ -152,7 +164,10 @@ namespace QueryEngine
             {
                 // Leaf node prints only keys.
                 for (int i = 0; i < node.keys.Count; i++)
+                {
                     Console.WriteLine(node.keys[i]);
+                    PrintInternalAccumulation(node.accumulations[i]);
+                }
             }
             else
             {
@@ -160,9 +175,25 @@ namespace QueryEngine
                 for (int i = 0; i <= node.keys.Count; i++)
                 {
                     PrintInternal(node.children[i]);
-                    if (i != node.keys.Count) Console.WriteLine(node.keys[i]);
+                    if (i != node.keys.Count)
+                    {
+                        Console.WriteLine(node.keys[i]);
+                        PrintInternalAccumulation(node.accumulations[i]);
+                    }
                 }
             }
+        }
+
+        private void PrintInternalAccumulation(List<T> accumulation)
+        {
+            Console.Write($"Accumulation ({accumulation.Count}):");
+            for (int j = 0; j < accumulation.Count; j++)
+            {
+                Console.Write(" " + accumulation[j]);
+            }
+            Console.WriteLine();
+
+
         }
 
         /// <summary>
@@ -172,56 +203,50 @@ namespace QueryEngine
         /// The iteration uses parent pointers and children indeces in their parents children arrays.
         /// </summary>
         /// <returns> Keys of the tree in ascending order. </returns>
-        public IEnumerator<T> GetEnumerator()
+        public IEnumerator<ValueAccumulation<T>> GetEnumerator()
         {
             ABTreeNode<T> node = root;
             int branchIndex = -1;
-            if (node != null)
-            {
-                while (true)
-                {
-                    // Leaf.
-                    if (node.children == null)
-                    {
-                        // Return all keys.
-                        for (int i = 0; i < node.keys.Count; i++)
-                            yield return node.keys[i];
 
+            while (true)
+            {
+                // Leaf.
+                if (node.children == null)
+                {
+                    // Return all keys.
+                    for (int i = 0; i < node.keys.Count; i++)
+                        yield return new ValueAccumulation<T>(node.keys[i], node.accumulations[i]);
+                    // Return to the parent.
+                    branchIndex = node.index;
+                    node = node.parent;
+                }
+                else
+                // Internal Node -> must have children.
+                {
+                    // If this is the first time in this node.
+                    // Go to the left most subtree.
+                    if (branchIndex == -1) node = node.children[0];
+                    // If you returned from the right most subtree.
+                    // Return to the parent node.
+                    else if (branchIndex >= node.keys.Count)
+                    {
                         if (node.parent == null) break;
-                        else {
-                            // Return to the parent.
+                        else
+                        {
                             branchIndex = node.index;
                             node = node.parent;
                         }
                     }
                     else
-                    // Internal Node -> must have children.
+                    // It returned from the subtree and there are more subtrees in the node.
                     {
-                        // If this is the first time in this node.
-                        // Go to the left most subtree.
-                        if (branchIndex == -1) node = node.children[0];
-                        // If you returned from the right most subtree.
-                        // Return to the parent node.
-                        else if (branchIndex >= node.keys.Count)
-                        {
-                            if (node.parent == null) break;
-                            else
-                            {
-                                branchIndex = node.index;
-                                node = node.parent;
-                            }
-                        }
-                        else
-                        // It returned from the subtree and there are more subtrees in the node.
-                        {
-                            yield return node.keys[branchIndex];
-                            // Go to the next subtree
-                            node = node.children[branchIndex + 1];
-                            branchIndex = -1;
-                        }
+                        yield return new ValueAccumulation<T>(node.keys[branchIndex], node.accumulations[branchIndex]);
+                        // Go to the next subtree
+                        node = node.children[branchIndex + 1];
+                        branchIndex = -1;
                     }
                 }
-            } 
+            }
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -232,7 +257,6 @@ namespace QueryEngine
         /// <summary>
         /// A node of an (A, B) tree.
         /// Uses parent pointers and index of it's position in the parent's children array.
-        /// The childre array should be  inited only if the children are being inserted.
         /// </summary>
         /// <typeparam name="TT"> The type of keys stored in the node. </typeparam>
         private class ABTreeNode<TT>
@@ -242,6 +266,8 @@ namespace QueryEngine
             /// </summary>
             public int index;
             public List<TT> keys;
+            public List<List<TT>> accumulations;
+
             /// <summary>
             /// Empty if the node is leaf.
             /// </summary>
@@ -255,6 +281,7 @@ namespace QueryEngine
             {
                 //this.children = new List<ABTreeNode<TT>>(B + 1);
                 this.keys = new List<TT>(B);
+                this.accumulations = new List<List<TT>>(B);
             }
 
             /// <summary>
@@ -284,10 +311,11 @@ namespace QueryEngine
             /// Expects that this function is called only when adding new child to a parent after split occurs.
             /// Otherwise, it will throw null ptr exception.
             /// </summary>
-            public void InsertBranch(int i, TT value, ABTreeNode<TT> child)
+            public void InsertBranch(int i, TT value, List<TT> accs, ABTreeNode<TT> child)
             {
                 child.parent = this;
                 this.keys.Insert(i, value);
+                this.accumulations.Insert(i, accs);
 
                 this.children.Insert(i + 1, child);
                 // Reset the values of indeces inside.
@@ -304,6 +332,17 @@ namespace QueryEngine
                     right.keys.Add(this.keys[i]);
                 this.keys.RemoveRange(startIndex, this.keys.Count - startIndex);
             }
+
+            /// <summary>
+            /// Move accumulations to the empty right node when splitting.
+            /// </summary>
+            public void MoveAccumulations(ABTreeNode<TT> right, int startIndex)
+            {
+                for (int i = startIndex; i < this.accumulations.Count; i++)
+                    right.accumulations.Add(this.accumulations[i]);
+                this.accumulations.RemoveRange(startIndex, this.accumulations.Count - startIndex);
+            }
+
 
             /// <summary>
             /// Move children to the empty right node when spliting.
@@ -335,6 +374,18 @@ namespace QueryEngine
                 this.children = new List<ABTreeNode<TT>>(this.keys.Capacity + 1);
             }
         }
+
     }
 
+    public struct ValueAccumulation<TT>
+    {
+        public TT value;
+        public List<TT> accumulation;
+
+        public ValueAccumulation(TT value, List<TT> accumulation)
+        {
+            this.value = value;
+            this.accumulation = accumulation;
+        }
+    }
 }

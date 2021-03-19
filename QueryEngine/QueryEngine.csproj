@@ -92,6 +92,7 @@
     <Compile Include="QueryStreamed\Match\ISingleThreadPatternMatcherStreamed.cs" />
     <Compile Include="QueryStreamed\Match\MatchObjectStreamed.cs" />
     <Compile Include="QueryStreamed\OrderBy\ABTree\ABTree.cs" />
+    <Compile Include="QueryStreamed\OrderBy\ABTree\ABTreeValueAccumulator.cs" />
     <Compile Include="QueryStreamed\OrderBy\TypeRangeHasher\IntRangeHasher.cs" />
     <Compile Include="QueryStreamed\OrderBy\TypeRangeHasher\StringRangeHasher.cs" />
     <Compile Include="QueryStreamed\OrderBy\TypeRangeHasher\TypeRangeHasher.cs" />
