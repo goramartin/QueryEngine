@@ -23,7 +23,7 @@ namespace QueryEngine
             if (this.mergeJob.jobsToMerge.Length >= 2)
             {
                 this.sortJobs = null;
-                this.MergeResuls();
+                this.mergedResults = this.mergeJob.Merge();
             }
             else if (this.mergeJob.jobsToMerge.Length == 1) this.sortJobs = this.mergeJob.jobsToMerge;
             else this.sortJobs = new SortJob[] { this.sortJobs[0] };

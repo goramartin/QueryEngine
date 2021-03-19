@@ -48,6 +48,7 @@ namespace QueryEngine
             root.keys.Add(key);
             root.accumulations.Add(new List<T>());
             this.Count++;
+            this.CountWithAccum++;
         }
 
         /// <summary>

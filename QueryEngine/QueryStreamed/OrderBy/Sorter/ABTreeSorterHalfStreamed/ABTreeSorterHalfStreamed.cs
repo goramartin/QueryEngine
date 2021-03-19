@@ -113,11 +113,11 @@ namespace QueryEngine
                 return resTables;
             }
 
-            public int GetStartOfRange(int jobIndex)
+            protected int GetStartOfRange(int jobIndex)
             {
                 return this.startIndecesOfRanges[jobIndex];
             }
-            public int GetRange(int jobIndex)
+            protected int GetRange(int jobIndex)
             {
                 if (jobIndex + 1 == this.jobsToMerge.Length) return this.source.Length - this.GetStartOfRange(jobIndex);
                 else return this.GetStartOfRange(jobIndex + 1) - this.GetStartOfRange(jobIndex);
@@ -158,7 +158,7 @@ namespace QueryEngine
             /// should be merged into the destination or source array.
             /// True for source to destination, the opposite otherwise. </param>
             /// <returns> The length of the merged sequence.</returns>
-            public int MergeResultsParallel(int start, int end, bool srcToDest)
+            private int MergeResultsParallel(int start, int end, bool srcToDest)
             {
                 // Internal node.
                 if (end - start > 3)
