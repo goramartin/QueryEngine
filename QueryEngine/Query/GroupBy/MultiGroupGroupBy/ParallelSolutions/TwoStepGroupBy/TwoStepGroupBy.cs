@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 namespace QueryEngine
 {
     /// <summary>
-    /// Class represents a grouping algorithm.
+    /// A class represents a multi group grouping algorithm.
     /// The class should be used only as the parallel solution and not with thread count set to 1.
     /// The algorithm is composed of a local group by and a global merge.
     /// The algorithm uses only aggregate buckets or array like storages.
-    /// Note that the solution using array like storages uses the arrays in the first step, then it proceeds using buckets.
+    /// Note that the solution using array like storages uses the arrays in the first step, then it proceeds using buckets during merge.
     /// Firstly, each thread receives an equal range from the results table and then processes the results locally, afterwards, 
     /// the thread merges the final groups into a global dictionary.
     /// </summary>
@@ -52,7 +52,6 @@ namespace QueryEngine
         /// <summary>
         /// Creates jobs for the parallel group by.
         /// Note that the last job in the array has the end set to the end of the result table.
-        /// The addition must always be > 0.
         /// Each job will receive a range from result table, hasher, comparer and aggregates.
         /// Note that they are all copies, because they contain a private stete (hasher contains reference to the equality comparers to enable caching when computing the hash, aggregates
         /// contain references to storage arrays to avoid casting in a tight loop).

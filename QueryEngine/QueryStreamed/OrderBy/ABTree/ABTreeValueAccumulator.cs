@@ -15,7 +15,13 @@ namespace QueryEngine
     /// <typeparam name="T"> The type of keys stored in the nodes.</typeparam>
     class ABTreeValueAccumulator<T> : IEnumerable<ValueAccumulation<T>>, IABTree<T>
     {
+        /// <summary>
+        /// Only inserted elements in the tree nodes.
+        /// </summary>
         public int Count { get; private set; } = 0;
+        
+        // Elements in the accumulators + the count.
+        public int CountWithAccum { get; private set; } = 0;
 
         private IComparer<T> comparer;
         private ABTreeNode<T> root = null;
@@ -62,6 +68,7 @@ namespace QueryEngine
                 node.keys.Insert(pos, key);
                 node.accumulations.Insert(pos, new List<T>());
                 this.Count++;
+                this.CountWithAccum++;
                 SplitRoutine(node);
             }
         }
@@ -140,7 +147,7 @@ namespace QueryEngine
                 if (found)
                 {
                     node.accumulations[pos].Add(key);
-                    this.Count++;
+                    this.CountWithAccum++;
                     return null;
                 }
                 // There is another subtree.
@@ -381,10 +388,13 @@ namespace QueryEngine
 
     }
 
-    public struct ValueAccumulation<TT>
+    /// <summary>
+    /// Note that this struct will be used only for reading.
+    /// </summary>
+    public readonly struct ValueAccumulation<TT>
     {
-        public TT value;
-        public List<TT> accumulation;
+        public readonly TT value;
+        public readonly List<TT> accumulation;
 
         public ValueAccumulation(TT value, List<TT> accumulation)
         {

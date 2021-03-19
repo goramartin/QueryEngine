@@ -8,9 +8,10 @@ namespace QueryEngine
     /// The class represents multi group grouping algorithm.
     /// The class should be used only as the parallel solution and not with thread count set to 1.
     /// The class uses aggregations with array like storage or buckets.
-    /// Each thread receives an equality comparer, hasher, aggregates and range of vertices.
-    /// The threads then work independently on each other. When the threads finish, the results are merged.
-    /// The results are merged in a form of a binary tree (similar to a merge sort).
+    /// Each thread receives an equality comparer, hasher, aggregates and a range of vertices.
+    /// The threads then work independently on each other. 
+    /// When the threads finish, the results are merged.
+    /// The results are merged in a form of a binary tree (equivalent to a merge operation in a Mergesort alg.).
     /// </summary>
     internal abstract class LocalGroupByLocalTwoWayMerge : Grouper
     {
@@ -34,8 +35,7 @@ namespace QueryEngine
         /// <summary>
         /// Creates jobs for the parallel group by.
         /// Note that the last job in the array has the end set to the end of the result table.
-        /// The addition must always be > 0.
-        /// Each job will receive a range from result table, hasher, comparer and aggregates.
+        /// Each job will receive a range from result table, hasher, comparer (cache on) and aggregates.
         /// Note that they are all copies, because they contain a private state (hasher contains reference to the equality comparers to enable caching when computing the hash).
         /// The comparers and hashers build in the constructor of this class are given to the last job, just like the aggregates passed to the construtor.
         /// </summary>

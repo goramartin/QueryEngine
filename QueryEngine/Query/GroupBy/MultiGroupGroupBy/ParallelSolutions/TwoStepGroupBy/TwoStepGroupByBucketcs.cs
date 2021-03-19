@@ -9,9 +9,11 @@ namespace QueryEngine
         { }
 
         #region Buckets
+
         /// <summary>
         /// A main work of each thread when grouping.
-        /// For each result row, perform a local grouping with a simple dictionary.
+        /// The values are stored using arrays (an index corresponding to a group results is placed as a value on a key, the results can be then accessed via the stored index).
+        /// For each result row, perform a local grouping with a simple Dictionary.
         /// Afterwards merge the computed groups with the groups in the global dictionary.
         /// Notice that the local part is using hash cache with comparers when inserting into the dictionary
         /// and when inserting into the global dictionary, the hash values are stored in the groupDictKey.

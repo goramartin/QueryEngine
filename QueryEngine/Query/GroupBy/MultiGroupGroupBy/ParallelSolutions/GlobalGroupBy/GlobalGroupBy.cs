@@ -10,7 +10,7 @@ namespace QueryEngine
     /// The class should be used only as the parallel solution and not with thread count set to 1.
     /// The class uses aggretation with buckets or array like storage.
     /// Each thread recieves an equal portion of the results from the result table.
-    /// Subsequently, the threads start to aggregate the results using ConcurrentDictionary.
+    /// Subsequently, the threads start to aggregate the results using ConcurrentDictionary (hence the name global, since a global map is used).
     /// </summary>
     internal abstract class GlobalGroupBy : Grouper
     {
@@ -47,7 +47,6 @@ namespace QueryEngine
         /// <summary>
         /// Creates jobs for the parallel group by.
         /// Note that the last job in the array has the end set to the end of the result table.
-        /// The addition must always be > 0.
         /// Each job will receive a range from result table, aggregates and a global place to store groups and the aggregated values.
         /// Note that there is a single comparer for the ConcurrentDictionary, thus no caching of the expression is done.
         /// </summary>

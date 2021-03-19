@@ -14,7 +14,7 @@ namespace QueryEngine
         #region WithBuckets
 
         /// <summary>
-        /// Main work of a thread when merging with another threads groups.
+        /// Main work of a thread when merging with another thread's groups.
         /// Merge only if there is already the given group, otherwise the buckets
         /// are inserted into the jobs1's dictionary.
         /// </summary>
@@ -45,10 +45,10 @@ namespace QueryEngine
 
         /// <summary>
         /// Main work of a thread when grouping.
-        /// For each result row.
-        /// Try to add it to the dictionary and apply aggregate functions with the rows.
+        /// For each result row, try to add it to the dictionary and apply aggregate functions.
         /// Note that when the hash is computed. The comparer cache is set.
         /// So when the insertion happens, it does not have to compute the values for comparison.
+        /// Aggregate functions results are stored using Buckets (an array of value holders stored as a value on a key).
         /// </summary>
         protected override void SingleThreadGroupByWork(object job)
         {

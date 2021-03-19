@@ -7,40 +7,32 @@ namespace QueryEngine
 {
     /// <summary>
     /// Class represents a half streamed order by.
-    /// Each matcher/thread orders it is found results locally using AB tree.
+    /// Each matcher/thread orders it is found results locally using general AB tree.
     /// When the search is done, the results are merged using parallel Merge
     /// from the HPCsharp library. This is done in two steps, firstly the 
-    /// ordered sequences from the ab trees are copied into an array which is
+    /// ordered sequences from the ab trees are copied into an array which is then
     /// passed into the library functions. The merge function it self merges only two 
     /// sub arrays of the array. Thus the merging tree has the height O(log(n)) where 
     /// n is equal to the number of working threads/matchers.
     /// </summary>
-    internal class ABTreeHalfStreamedSorter : OrderByResultProcessor
+    internal abstract class ABTreeHalfStreamedSorter : OrderByResultProcessor
     {
         /// <summary>
         /// Each job has a local tree and a local result table.
         /// </summary>
-        private SortJob[] sortJobs;
-        private int sortJobsFinished = 0;
-        /// <summary>
-        /// If it runs in parallel, the class will merge non empty results of the sortJobs.
-        /// </summary>
-        private MergeObject mergeJob;
-        /// <summary>
-        /// If it runs in parallel, the final results will be stored inside.
-        /// </summary>
-        private TableResults.RowProxy[] mergedResults;
+        protected SortJob[] sortJobs;
+        protected int sortJobsFinished = 0;
 
-        public ABTreeHalfStreamedSorter(ExpressionComparer[] comparers, IOrderByExecutionHelper executionHelper, int columnCount, int[] usedVars) 
-            : base(comparers, executionHelper, columnCount, usedVars) 
+        public ABTreeHalfStreamedSorter(ExpressionComparer[] comparers, IOrderByExecutionHelper executionHelper, int columnCount, int[] usedVars, bool allowDup) : base(comparers, executionHelper, columnCount, usedVars) 
         {
             this.sortJobs = new SortJob[this.executionHelper.ThreadCount];
             for (int i = 0; i < sortJobs.Length; i++)
             {
                 var results = new TableResults(this.ColumnCount, this.executionHelper.FixedArraySize, this.usedVars);
-                this.sortJobs[i] = new SortJob(new IndexToRowProxyComparer(RowComparer.Factory(this.comparers, true), results, false), results);
+                this.sortJobs[i] = CreateJob(new IndexToRowProxyComparer(RowComparer.Factory(this.comparers, true), results, allowDup), results);
             }
-        } 
+        }
+        protected abstract SortJob CreateJob(IComparer<int> comparer, ITableResults resTable);
 
         /// <summary>
         /// Inserts result into a table and also to the ab tree.
@@ -64,32 +56,15 @@ namespace QueryEngine
                     // Last finished thread, inits merging of the results.
                     if (Interlocked.Increment(ref this.sortJobsFinished) == this.executionHelper.ThreadCount)
                     {
-                        this.mergeJob = new MergeObject(this.sortJobs, RowComparer.Factory(this.comparers, false));
-                        if (this.mergeJob.jobsToMerge.Length >= 2)
-                        {
-                            this.sortJobs = null;
-                            this.mergedResults = this.MergeResuls();
-                        }
-                        else if (this.mergeJob.jobsToMerge.Length == 1) this.sortJobs = this.mergeJob.jobsToMerge;
-                        else this.sortJobs = new SortJob[] { this.sortJobs[0] }; 
+                        this.MergeResuls(); 
                     }
                 }
             }
         }
 
-        private TableResults.RowProxy[] MergeResuls() 
-        {
-            return this.mergeJob.Merge();
-        } 
+        protected abstract void MergeResuls();
 
-        public override void RetrieveResults(out ITableResults resTable, out GroupByResults groupByResults)
-        {
-            groupByResults = null;
-            if (this.sortJobs != null) resTable = new TableResultsABTree(this.sortJobs[0].tree, this.sortJobs[0].resTable);
-            else resTable = new MultiTableResultsRowProxyArray(this.mergeJob.GetTablesOfSortedJobs(), this.mergedResults);
-        }
-
-        private class MergeObject
+        protected abstract class MergeObject<T>
         {
             /// <summary>
             /// SortJobs that have found at least one element during matching.
@@ -98,15 +73,15 @@ namespace QueryEngine
             /// <summary>
             /// Cache must be off.
             /// </summary>
-            public RowComparer comparer;
-            public TableResults.RowProxy[] source;
-            public TableResults.RowProxy[] destination;
+            public Comparer<T> comparer;
+            public T[] source;
+            public T[] destination;
             public int[] startIndecesOfRanges;
             
             /// <summary>
             /// Chooses only jobs that had non zero results during search.
             /// </summary>
-            public MergeObject(SortJob[] jobs, RowComparer comparer)
+            public MergeObject(SortJob[] jobs, Comparer<T> comparer)
             {
                 List<SortJob> mergeJobs = new List<SortJob>();
                 List<int> startRan = new List<int>();
@@ -124,8 +99,8 @@ namespace QueryEngine
                     }
                 }
 
-                this.source = new TableResults.RowProxy[count];
-                this.destination = new TableResults.RowProxy[count];
+                this.source = new T[count];
+                this.destination = new T[count];
                 this.startIndecesOfRanges = startRan.ToArray();
                 this.jobsToMerge = mergeJobs.ToArray();
             }
@@ -151,7 +126,7 @@ namespace QueryEngine
             /// <summary>
             /// Loses reference to the tree, so that it will not take memory during merging.
             /// </summary>
-            private void ClearTree(int jobIndex)
+            protected void ClearTree(int jobIndex)
             {
                 this.jobsToMerge[jobIndex].tree = null;
             }
@@ -163,22 +138,9 @@ namespace QueryEngine
             /// <param name="jobIndex"> Results to copy. </param>
             /// <param name="arr"> Array where to copy the elements. </param>
             /// <returns> A number of copied elements. </returns>
-            private int CopySortJobResultsAndClearTree(int jobIndex, TableResults.RowProxy[] arr)
-            {
-                var job = this.jobsToMerge[jobIndex];
+            protected abstract int CopySortJobResultsAndClearTree(int jobIndex, T[] arr);
 
-                int i = this.startIndecesOfRanges[jobIndex];
-                foreach (var item in job.tree)
-                {
-                    arr[i] = job.resTable[item];
-                    i++;
-                }
-                int treeCount = job.tree.Count;
-                this.ClearTree(jobIndex);
-                return treeCount;
-            }
-            
-            public TableResults.RowProxy[] Merge()
+            public T[] Merge()
             {
                 this.MergeResultsParallel(0, this.jobsToMerge.Length, true);
                 return this.destination; 
@@ -213,7 +175,7 @@ namespace QueryEngine
                     // Merge from source to destination.
                     if (srcToDest)
                     {
-                        HPCsharp.ParallelAlgorithm.MergePar<TableResults.RowProxy>(
+                        HPCsharp.ParallelAlgorithm.MergePar<T>(
                             this.source,                     // Merge from 
                             this.GetStartOfRange(start),     // Start of the left part
                             leftLength,                      // Left part length
@@ -226,7 +188,7 @@ namespace QueryEngine
                     // Merge from destination to source.
                     else
                     {
-                        HPCsharp.ParallelAlgorithm.MergePar<TableResults.RowProxy>(
+                        HPCsharp.ParallelAlgorithm.MergePar<T>(
                             this.destination,                 // Merge from 
                             this.GetStartOfRange(start),      // Start of the left part
                             leftLength,                       // Left part length
@@ -256,7 +218,7 @@ namespace QueryEngine
                         Parallel.Invoke(() => CopySortJobResultsAndClearTree(start, from),
                                         () => CopySortJobResultsAndClearTree(start + 1, from));
                         // Merge the two subarrays into the "to" array.
-                        HPCsharp.ParallelAlgorithm.MergePar<TableResults.RowProxy>(
+                        HPCsharp.ParallelAlgorithm.MergePar<T>(
                            from,                              // Merge from  
                            this.GetStartOfRange(start),       // Start of the left part 
                            this.GetRange(start),              // Left part length 
@@ -279,7 +241,7 @@ namespace QueryEngine
                                         () => CopySortJobResultsAndClearTree(start + 2, from));
 
                         // First merge  the first two from "to" to "from".
-                        HPCsharp.ParallelAlgorithm.MergePar<TableResults.RowProxy>(
+                        HPCsharp.ParallelAlgorithm.MergePar<T>(
                           to,                                    // Merge from 
                           this.GetStartOfRange(start),           // Start of the left part
                           this.GetRange(start),                  // Left part length
@@ -289,7 +251,7 @@ namespace QueryEngine
                           this.GetStartOfRange(start),           // Index of the merged result
                           this.comparer);                        // Comparer
                         // Then merge the result of the above two with the third one into the "to".
-                        HPCsharp.ParallelAlgorithm.MergePar<TableResults.RowProxy>(
+                        HPCsharp.ParallelAlgorithm.MergePar<T>(
                           from,                                             // Merge from 
                           this.GetStartOfRange(start),                      // Start of the left part
                           this.GetRange(start) + this.GetRange(start + 1),  // Left part length
@@ -306,16 +268,10 @@ namespace QueryEngine
             }
         }
 
-        private class SortJob
+        protected class SortJob
         {
-            public ABTree<int> tree;
+            public IABTree<int> tree;
             public ITableResults resTable;
-
-            public SortJob(IComparer<int> comparer, ITableResults resTable)
-            {
-                this.tree = new ABTree<int>(256, comparer);
-                this.resTable = resTable;
-            }
         }
     }
 }

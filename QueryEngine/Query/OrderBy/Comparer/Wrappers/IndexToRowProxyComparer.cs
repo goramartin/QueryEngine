@@ -5,9 +5,8 @@ namespace QueryEngine
 {
     /// <summary>
     /// A wrapper class for a row proxy comparer. 
-    /// This wrapper is given to the order algorithm.
-    /// During the ordering the order algorithm orders indeces of rows inside the result table 
-    /// instead of ordering rows explicitly.
+    /// Comparing two indeces results in comparing two rows inside a provided table.
+    /// This enables two sort only table indeces instead of entire columns.
     /// </summary>
     internal sealed class IndexToRowProxyComparer : Comparer<int>
     {

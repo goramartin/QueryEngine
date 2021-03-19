@@ -11,7 +11,7 @@ namespace QueryEngine
         /// A main work of each thread when grouping.
         /// For each result row, add/get a group in/from the global dictionary and compute the
         /// corresponding aggregate values for the group.
-        /// Computation results are stored using buckets.
+        /// Aggregate functions results are stored using Buckets (an array of value holders stored as a value on a key).
         /// </summary>
         /// <param name="job"> A group by job class. </param>
         protected override void SingleThreadGroupByWork(object job)

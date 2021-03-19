@@ -15,8 +15,7 @@ namespace QueryEngine
 
         /// <summary>
         /// Main work of a thread when merging with another threads groups.
-        /// For each entry from the other dictionary a method MergeOn(...)
-        /// is called, which either combines the results of the two groups or adds it to the end of the result list.
+        /// It either combines the results of the two groups or adds it to the end of the result List.
         /// Also, if both groups exists in the both jobs, they are combined.
         /// Otherwise the new entry is added to the job1's dictionary.
         /// </summary>
@@ -46,10 +45,10 @@ namespace QueryEngine
 
         /// <summary>
         /// Main work of a thread when grouping.
-        /// For each result row.
-        /// Try to add it to the dictionary and apply aggregate functions with the rows.
+        /// For each result row, try to add it to the dictionary and apply aggregate functions.
         /// Note that when the hash is computed. The comparer cache is set.
         /// So when the insertion happens, it does not have to compute the values for comparison.
+        /// The values are stored using Lists (an index corresponding to a group results is placed as a value on a key, the results can be then accessed via the stored index).
         /// </summary>
         protected override void SingleThreadGroupByWork(object job)
         {
