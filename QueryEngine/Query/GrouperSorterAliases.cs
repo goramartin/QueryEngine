@@ -86,13 +86,26 @@ namespace QueryEngine
         /// </summary>
         AbtreeHS,
 
+        /// <summary>
+        /// Both parallel and single thread.
+        /// Same as the AbtreeHS, except that instead of using general ab tree it accumulates values that are repetitive into a List intead of inserting it into the tree.
+        /// </summary>
+        AbtreeAccumHS,
+
         // S
 
         /// <summary>
         /// Both parallel and single thread.
         /// The first key of the sort is devided into ranges, each range represents a bucket. The results in the bucket are sorted using AB trees.
         /// </summary>
-        AbtreeS
+        AbtreeS,
+
+        /// <summary>
+        /// Both parallel and single thread.
+        /// Same as the AbtreeS, except that instead of using general ab tree it accumulates values that are repetitive into a List intead of inserting it into the tree.
+        /// </summary>
+        AbtreeAccumS
+
     }
 
     /// <summary>
@@ -109,13 +122,13 @@ namespace QueryEngine
               GrouperAlias.TwoStepB,
               GrouperAlias.TwoStepL,
               GrouperAlias.GlobalB,
-              GrouperAlias.GlobalL,
+              GrouperAlias.GlobalL
         };
 
         public static HashSet<GrouperAlias> HalfStreamedGroupers = new HashSet<GrouperAlias>
         {
             GrouperAlias.TwoStepHSB,
-            GrouperAlias.TwoStepHSL,
+            GrouperAlias.TwoStepHSL
         };
 
         public static HashSet<GrouperAlias> StreamedGroupers = new HashSet<GrouperAlias>
@@ -125,11 +138,14 @@ namespace QueryEngine
 
         public static HashSet<SorterAlias> StreamedSorters = new HashSet<SorterAlias>
         {
-            SorterAlias.AbtreeS
+            SorterAlias.AbtreeS,
+            SorterAlias.AbtreeAccumS
         };
         public static HashSet<SorterAlias> HalfStreamedSorters = new HashSet<SorterAlias>
         {
-            SorterAlias.AbtreeHS
+            SorterAlias.AbtreeHS,
+            SorterAlias.AbtreeAccumHS
+
         };
         public static HashSet<SorterAlias> NormalSorters = new HashSet<SorterAlias>
         {

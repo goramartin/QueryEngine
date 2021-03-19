@@ -41,11 +41,19 @@ namespace QueryEngine
         public static ResultProcessor Factory(QueryExpressionInfo exprInfo, ExpressionComparer[] comparers, IOrderByExecutionHelper executionHelper, int columnCount, int[] usedVars)
         {
             if (executionHelper.SorterAlias == SorterAlias.AbtreeHS) return new ABTreeHalfStreamedSorter(comparers, executionHelper, columnCount, usedVars);
+            else if (executionHelper.SorterAlias == SorterAlias.AbtreeAccumHS) throw new Exception();//return new ABTreeHalfStreamedSorter(comparers, executionHelper, columnCount, usedVars);
             else if (executionHelper.SorterAlias == SorterAlias.AbtreeS)
             {
                 var typeOfFirstKey = exprInfo.OrderByComparerExprs[0].GetExpressionType();
-                if (typeOfFirstKey == typeof(int)) return new ABTreeStreamedSorter<int>(comparers, executionHelper, columnCount, usedVars);
-                else if (typeOfFirstKey == typeof(string)) return new ABTreeStreamedSorter<string>(comparers, executionHelper, columnCount, usedVars);
+                if (typeOfFirstKey == typeof(int)) return new ABTreeGenSorterStreamed<int>(comparers, executionHelper, columnCount, usedVars);
+                else if (typeOfFirstKey == typeof(string)) return new ABTreeGenSorterStreamed<string>(comparers, executionHelper, columnCount, usedVars);
+                else throw new ArgumentException($"Order by result processor factory, trying to create an unknown type of the streamed sorted.");
+            }
+            else if (executionHelper.SorterAlias == SorterAlias.AbtreeAccumS)
+            {
+                var typeOfFirstKey = exprInfo.OrderByComparerExprs[0].GetExpressionType();
+                if (typeOfFirstKey == typeof(int)) return new ABTreeAccumSorterStreamed<int>(comparers, executionHelper, columnCount, usedVars);
+                else if (typeOfFirstKey == typeof(string)) return new ABTreeAccumSorterStreamed<string>(comparers, executionHelper, columnCount, usedVars);
                 else throw new ArgumentException($"Order by result processor factory, trying to create an unknown type of the streamed sorted.");
             }
             else throw new ArgumentException($"Order by result processor factory, trying to create an unknown sorter.");

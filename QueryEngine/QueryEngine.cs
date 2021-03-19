@@ -60,12 +60,16 @@ namespace QueryEngine
 
         private static SorterAlias GetSorterAlias(string arg)
         {
-           if (arg == "mergeSort")
-            return SorterAlias.MergeSort;
-           else if (arg == "abtreeHS")
-            return SorterAlias.AbtreeHS;
-           else if (arg == "abtreeS")
+            if (arg == "mergeSort")
+                return SorterAlias.MergeSort;
+            else if (arg == "abtreeHS")
+                return SorterAlias.AbtreeHS;
+            else if (arg == "abtreeAccumHS")
+                return SorterAlias.AbtreeAccumHS;
+            else if (arg == "abtreeS")
                 return SorterAlias.AbtreeS;
+            else if (arg == "abtreeAccumS")
+                return SorterAlias.AbtreeAccumS;
             else throw new ArgumentException("Invalid sorter alias.");
         }
 
