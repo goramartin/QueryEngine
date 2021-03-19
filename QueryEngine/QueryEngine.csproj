@@ -94,8 +94,8 @@
     <Compile Include="QueryStreamed\OrderBy\ABTree\ABTree.cs" />
     <Compile Include="QueryStreamed\OrderBy\ABTree\IABTree.cs" />
     <Compile Include="QueryStreamed\OrderBy\ABTree\ABTreeValueAccumulator.cs" />
-    <Compile Include="QueryStreamed\OrderBy\Sorter\ABTreeSorterHalfStreamed\ABTreeAccumHalfStreamed.cs" />
-    <Compile Include="QueryStreamed\OrderBy\Sorter\ABTreeSorterHalfStreamed\ABTreeGenHalfStreamed.cs" />
+    <Compile Include="QueryStreamed\OrderBy\Sorter\ABTreeSorterHalfStreamed\ABTreeAccumSorterHalfStreamed.cs" />
+    <Compile Include="QueryStreamed\OrderBy\Sorter\ABTreeSorterHalfStreamed\ABTreeGenSorterHalfStreamed.cs" />
     <Compile Include="QueryStreamed\OrderBy\Sorter\Comparer\Wrapper\RowProxyAccum.cs" />
     <Compile Include="QueryStreamed\OrderBy\Sorter\Comparer\Wrapper\RowProxyAccumToRowProxyComparer.cs" />
     <Compile Include="QueryStreamed\OrderBy\Sorter\ABTreeSorterStreamed\ABTreeGenSorterStreamed.cs" />

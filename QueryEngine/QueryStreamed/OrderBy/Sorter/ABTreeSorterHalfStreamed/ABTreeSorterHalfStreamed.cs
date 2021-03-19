@@ -15,7 +15,7 @@ namespace QueryEngine
     /// sub arrays of the array. Thus the merging tree has the height O(log(n)) where 
     /// n is equal to the number of working threads/matchers.
     /// </summary>
-    internal abstract class ABTreeHalfStreamedSorter : OrderByResultProcessor
+    internal abstract class ABTreeSorterHalfStreamed : OrderByResultProcessor
     {
         /// <summary>
         /// Each job has a local tree and a local result table.
@@ -23,7 +23,7 @@ namespace QueryEngine
         protected SortJob[] sortJobs;
         protected int sortJobsFinished = 0;
 
-        public ABTreeHalfStreamedSorter(ExpressionComparer[] comparers, IOrderByExecutionHelper executionHelper, int columnCount, int[] usedVars, bool allowDup) : base(comparers, executionHelper, columnCount, usedVars) 
+        public ABTreeSorterHalfStreamed(ExpressionComparer[] comparers, IOrderByExecutionHelper executionHelper, int columnCount, int[] usedVars, bool allowDup) : base(comparers, executionHelper, columnCount, usedVars) 
         {
             this.sortJobs = new SortJob[this.executionHelper.ThreadCount];
             for (int i = 0; i < sortJobs.Length; i++)

@@ -40,8 +40,8 @@ namespace QueryEngine
         /// </summary>
         public static ResultProcessor Factory(QueryExpressionInfo exprInfo, ExpressionComparer[] comparers, IOrderByExecutionHelper executionHelper, int columnCount, int[] usedVars)
         {
-            if (executionHelper.SorterAlias == SorterAlias.AbtreeHS) return new ABTreeHalfStreamedSorter(comparers, executionHelper, columnCount, usedVars);
-            else if (executionHelper.SorterAlias == SorterAlias.AbtreeAccumHS) throw new Exception();//return new ABTreeHalfStreamedSorter(comparers, executionHelper, columnCount, usedVars);
+            if (executionHelper.SorterAlias == SorterAlias.AbtreeHS) return new ABTreeGenSorterHalfStreamed(comparers, executionHelper, columnCount, usedVars);
+            else if (executionHelper.SorterAlias == SorterAlias.AbtreeAccumHS) return new ABTreeAccumSorterHalfStreamed(comparers, executionHelper, columnCount, usedVars);
             else if (executionHelper.SorterAlias == SorterAlias.AbtreeS)
             {
                 var typeOfFirstKey = exprInfo.OrderByComparerExprs[0].GetExpressionType();

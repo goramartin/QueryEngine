@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace QueryEngine
 {
-    internal sealed class ABTreeGenHalfStreamed : ABTreeHalfStreamedSorter
+    internal sealed class ABTreeGenSorterHalfStreamed : ABTreeSorterHalfStreamed
     {
         /// <summary>
         /// If it runs in parallel, the final results will be stored inside.
@@ -14,7 +14,7 @@ namespace QueryEngine
         private TableResults.RowProxy[] mergedResults;
         private MergeObjectRowProxy mergeJob;
 
-        public ABTreeGenHalfStreamed(ExpressionComparer[] comparers, IOrderByExecutionHelper executionHelper, int columnCount, int[] usedVars) : base(comparers, executionHelper, columnCount, usedVars, false)
+        public ABTreeGenSorterHalfStreamed(ExpressionComparer[] comparers, IOrderByExecutionHelper executionHelper, int columnCount, int[] usedVars) : base(comparers, executionHelper, columnCount, usedVars, false)
         { }
 
         protected override void MergeResuls()
