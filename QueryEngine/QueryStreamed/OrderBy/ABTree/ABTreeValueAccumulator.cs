@@ -10,7 +10,10 @@ namespace QueryEngine
     /// The keys on the nodes store the values directly.
     /// The used nodes contain parent pointers and indeces of their position in the parent's children array.
     /// This enables insertion without the need to remember the path, as well as the unumeration.
-    /// No duplicate values.
+    /// The implementation is based on the lecture on Data Structures 1 (NTIN066) taught in the 2020/2021 winter semester, at Charles University
+    /// Mathematical and physical faculty.
+    /// If inserting an item that is missing in the tree, then the item is inserted and a corresponding List is created for it.
+    /// When inserting an item that is already present in the tree, the item is inserted into the List belonging to it's value.
     /// </summary>
     /// <typeparam name="T"> The type of keys stored in the nodes.</typeparam>
     class ABTreeValueAccumulator<T> : IEnumerable<ValueAccumulation<T>>, IABTree<T>

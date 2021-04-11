@@ -12,6 +12,7 @@ namespace QueryEngine
     /// This enables insertion without the need to remember the path, as well as the unumeration.
     /// The implementation is based on the lecture on Data Structures 1 (NTIN066) taught in the 2020/2021 winter semester, at Charles University
     /// Mathematical and physical faculty.
+    /// No duplicate values.
     /// </summary>
     /// <typeparam name="T"> The type of keys stored in the nodes.</typeparam>
     internal class ABTree<T> : IEnumerable<T>, IABTree<T>

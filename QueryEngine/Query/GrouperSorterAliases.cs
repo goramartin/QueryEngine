@@ -12,7 +12,7 @@ namespace QueryEngine
     /// </summary>
     public enum GrouperAlias
     {
-        // N
+        // Normal
 
         /// <summary>
         /// Reference single thread solution using Buckets.
@@ -47,7 +47,7 @@ namespace QueryEngine
         /// </summary>
         TwoStepL,
 
-        // HS
+        // Half-Streamed
 
         /// <summary>
         /// A half streamed version of the TwoStepB version. Both parallel and single thread.
@@ -58,7 +58,7 @@ namespace QueryEngine
         /// </summary>
         TwoStepHSL,
 
-        // S
+        // Streamed
 
         /// <summary>
         /// A half streamed version of the GlobalB version. Both parallel and single thread.
@@ -71,14 +71,14 @@ namespace QueryEngine
     /// </summary>
     public enum SorterAlias
     {
-        // N
+        // Normal
 
         /// <summary>
         /// Both parallel and single thread.
         /// </summary>
         MergeSort,
 
-        // HS
+        // Half-Streamed
 
         /// <summary>
         /// Both parallel and single thread.
@@ -92,7 +92,7 @@ namespace QueryEngine
         /// </summary>
         AbtreeAccumHS,
 
-        // S
+        // Streamed
 
         /// <summary>
         /// Both parallel and single thread.

@@ -173,7 +173,7 @@ namespace QueryEngine
                             nextElement = null;
                             continue;
                         }
-                        // There is more patterns to fill.
+                        // There are more patterns to fill.
                         else return true;
                     }
                     pattern.PrepareNextNode();

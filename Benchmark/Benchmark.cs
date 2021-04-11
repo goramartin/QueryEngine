@@ -43,14 +43,22 @@ namespace Benchmark
             "select min(x.PropOne), avg(x.PropOne) match (x) -> (y) -> (z) group by x.PropTwo;",
             "select min(x.PropOne), avg(x.PropOne) match (x) -> (y) -> (z) group by x;",
             "select min(x.PropOne), avg(x.PropOne) match (x) -> (y) -> (z) group by x, y;",
-            "select min(x.PropOne), avg(x.PropOne) match (x) -> (y) -> (z) group by x.PropOne;"
+            "select min(x.PropOne), avg(x.PropOne) match (x) -> (y) -> (z) group by x.PropOne;",
+            "select min(x.PropOne), avg(x.PropOne) match (x) -> (y) -> (z) group by x.PropFour;",
+            "select y match (x) -> (y) -> (z) group by y;",
+            "select y match (x) -> (y) -> (z) group by y, x;",
+            "select x.PropTwo match (x) -> (y) -> (z) group by x.PropTwo;",
+            "select x match (x) -> (y) -> (z) group by x;",
+            "select x match (x) -> (y) -> (z) group by x, y;",
+            "select x.PropOne match (x) -> (y) -> (z) group by x.PropOne;",
+            "select x.PropFour match (x) -> (y) -> (z) group by x.PropFour;"
         };
 
         static int warmUps = 5;
         static int repetitions = 15;
-        static int fixedArraySize = 4194304 * 2;
-        static int threadCount = 8;
-        static int verticesPerThread = 1024;
+        static int fixedArraySize = 4194304; // * 2;
+        static int threadCount = 1;
+        static int verticesPerThread = 512;//1024;
         static bool timeMatching = false;
 
         static void Main(string[] args)
@@ -117,7 +125,7 @@ namespace Benchmark
                 {
                     foreach (var sorter in mode.sorters)
                     {
-                        Measure(mode.modeType, mode.baseGrouper, sorter, orderByQueries[i], threadCount);
+                       Measure(mode.modeType, mode.baseGrouper, sorter, orderByQueries[i], threadCount);
                     }
                 }
             }
