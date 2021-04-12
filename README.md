@@ -3,6 +3,8 @@ Is a query program for graphs. It gets four files, schemas for edges and vertice
 
 ## Input files
 
+The input files are expected to be inside "DataFiles" directory.
+
 ### NodeTypes.txt/EdgeTypes.txt [Json syntax]
 
 They consists only of an json array. Inside of the array, there are objects and each object represents one type ( a table ) of a node/an edge.
@@ -159,6 +161,18 @@ If ASC and DESC are ommited the ordering is implicitly set to ascending order.
 
     SELECT x, x.Age, y match (x) -> (y) order by x.Age ASC, x, y DESC; 
 
+### Group by 
+
+Group by is optional clause.
+Groups results based on the provided keys.
+The engine supports aggregation functions: min, max, count, sum and avg.
+Their inputs are expressions.
+If the Group by is used, then only keys and aggregation functions can be referenced from within other clauses.
+
+The engine supports single group Group by. 
+That is when the Group by is ommited but aggregation functions are used in the Select clause.
+In this mode, the count function can also use * as an input.
+
 ### Inputing a query
 1. Query must consists of SELECT expression with at least one variable refference to a variable in Match expression. Or an *. Also, the query must consists of a MATCH expression with at least one match expression.
 >Example:
@@ -187,22 +201,42 @@ There can not be a pattern with edge that has no specified end.
 
 6. Both SELECT and MATCH can not be empty or ommited. Other parts, such as Order by, are optional. 
 
+7. Order by and Group by can not be used togehter.
+
+
 ## Running the application
 
-Application is run with 5 arguments (noted below). The program has simple api. Upon start of the program a user is prompted to input a query. After inputting the query, the user must press an enter. Then the program evaluates the query and displays the results (file or console).
+Application is run with arguments noted below. The program has simple api. Upon start of the program a user is prompted to input a query. After inputting the query, the user must press an enter. Then the program evaluates the query and displays the results (file or console).
 After evaluation user will be prompted to press an enter again. Then the user will be asked if he wants to input another query or close the application by inputing "y" to continue or anything else for closing the application.
 
 ### Commandline arguments
 
-The application expects 5 arguments in a given order.
+The application expects arguments in a given order as presented in the table below.
 
 | Argument      | Description | Optional |
 | ----------- | ----------- | ----------- |
+| Mode | Defines used mode| No |
+| Group by solution | Defines Group by solution that will be used for the mode | No |
+| Order by solution | Defines Order by solution that will be used for the mode | No |
+| Fixed array size | Defines size of arrays that will store results from Match | No |
 | Thread number      | A number of threads for computation of queries.       | No |
-|  Printer   | Type of a printer.        | No |
-|  Formater  | Formating of a printing table.    | No |
+|  Printer   | Type of a printer. | No |
+|  Formater  | Formating of a printing table. | No |
 |  Vertices per Thread  | Defines the number of vertices that will be distributed to each thread. | Yes (Must be inputted if the thread number is greater than 1) |
 | File name | A name of a file only if printer is defined as a "file" printer | Yes (Must be inputted if the printer is set to "file".) |
+
+#### Mode 
+
+The modes are Normal "n", Streamed "s" and Half-Streamed "hs".
+Normal computes aggregates after Match finishes.
+Streamed and Half-Streamed computes during graph search.
+The difference is in parallel solution.
+The Streamed solutions aggregate globally, while Half-Streamed aggregates locally followed by merge.
+
+#### Solutions 
+
+Each mode has it's own possible solitions.
+For more information visit the file GrouperSorterAliases.cs. 
 
 #### Printer 
 
@@ -229,9 +263,9 @@ The user enters specified character from a displayed table.
 2 Person Lubomir Bulej 39
 3 Person Jarek Kaufman 21
 4 Person Pavel Mikulas 22
-5 Person Jiri Klepl 22
-6 Person Radek Ostruszka 25
-7 Person Ivana Kaufmanova 35
+5 Person Jiri Klepl 23
+6 Person Radek Ostruszka 26
+7 Person Ivana Kaufmanova 50
 ```
 NodeTypes.txt
 ```
@@ -268,24 +302,6 @@ EdgeTypes.txt
 ```
 
 ![](images/graph.png)
-
-SELECT x MATCH (x);
-
-SELECT x, y MATCH (x)->(y);
-
-SELECT * MATCH (x)->(y);
-
-SELECT x, x.Age, y, y.Age MATCH (x)->(y) ORDER BY x.Age DESC;
-
-SELECT x, y MATCH (x)->(y), (y)->(x);
-
-SELECT x MATCH (x)-[e]->(y)-[p]->(x);
-
-SELECT y MATCH (x)->(y), (y)->(k), (y)->(p);
-
-SELECT x MATCH (x)-[e]->(y), (x)-[r]->(p)-[t]->(z)-[o]->(y);
-
-SELECT x MATCH (x)<-[e]-(y), (x)<-[p]-(z); 
 
 ## Installation 
 
