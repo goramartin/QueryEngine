@@ -40,7 +40,8 @@ namespace QueryEngine
         public Dictionary<int, Property> Properties { get; private set; }
        
         /// <summary>
-        /// List of all property names in the table.
+        /// List of all property IDs in the table.
+        /// In the order of creation.
         /// </summary>
         public List<int> PropertyLabels {  get; private set; }
 
@@ -127,33 +128,11 @@ namespace QueryEngine
             }
         }
 
-
-        /// <summary>
-        /// Based on id of an element and property name, it reaches to the property 
-        /// and returns stored value as a string. 
-        /// </summary>
-        /// <param name="elementId"> Id of an element inside a table. </param>
-        /// <param name="propID"> The ID of the accessed property. </param>
-        /// <param name="retValue"> String holder to be returned. </param>
-        /// <returns> String value of value stored inside a property or null if property does not exists.</returns>
-        public bool TryGetElementValueAsString(int elementId, int propID, out string retValue)
-        {
-            if (!this.IDs.TryGetValue(elementId, out int elementPosition))
-                throw new ArgumentException($"{this.GetType()}, element id = {elementId} not found in table.");
-            else if (this.Properties.TryGetValue(propID, out Property property))
-            {
-                retValue = property.GetValueAsString(elementPosition);
-                return true;
-            }
-            else
-            {
-                retValue = null;
-                return false;
-            } 
-        }
-
         /// <summary>
         /// Tries to get a value of a property based on index and the property name.
+        /// Note that this method does not checks whether the id exists in the table.
+        /// The omission is done because the table is accessed via elements.
+        /// Thus, if the access was wrong, than the entire loaded graph is in bad format.
         /// </summary>
         /// <typeparam name="T"> Type of the accessed property. </typeparam>
         /// <param name="id"> Id of an element in the table. </param>
