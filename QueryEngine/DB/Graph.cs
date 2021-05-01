@@ -66,9 +66,8 @@ namespace QueryEngine
 
             this.LoadNodeTables("DataFiles\\NodeTypes.txt");
             this.LoadEdgeTables("DataFiles\\EdgeTypes.txt");
+            this.CheckDiscrepancyOfTablesNames();
             Console.WriteLine("Loading tables finished.");
-
-
 
             Console.WriteLine("Loading nodes...");
             this.LoadVertices("DataFiles\\Nodes.txt");
@@ -164,5 +163,16 @@ namespace QueryEngine
         public List<OutEdge> GetAllOutEdges() => this.outEdges;
         public List<InEdge> GetAllInEdges() => this.inEdges;
 
+        /// <summary>
+        /// Checks whether tables of nodes and tables of edges contain discrepant table definitions.
+        /// </summary>
+        private void CheckDiscrepancyOfTablesNames()
+        {
+            foreach (var item in this.nodeTables)
+            {
+                if (this.edgeTables.ContainsKey(item.Key))
+                    throw new Exception($"Loading of the tables failed. The schemas for nodes and edges contain the same table definition. Adjust the input schemas.");
+            }
+        }
     }
 }

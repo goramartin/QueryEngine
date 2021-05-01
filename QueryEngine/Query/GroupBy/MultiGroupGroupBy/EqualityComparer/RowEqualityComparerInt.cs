@@ -4,7 +4,7 @@ namespace QueryEngine
 {
     /// <summary>
     /// A class serves as a input for dictionary when performing multi group grouping.
-    /// This class does compute hash because its main purpose is in the GlobalMerge grouping, where
+    /// This class does compute hash because its main purpose is in the Global grouping, where
     /// there is no need for the GroupDictKey, because no merging is done and the value of the hash
     /// is not needed futher.
     /// Is used in GlobalMerge.
