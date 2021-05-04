@@ -90,7 +90,11 @@ namespace QueryEngine
         {
             this.verticesIndex = new Dictionary<int, int>();
             for (int i = 0; i < this.vertices.Count; i++)
-                this.verticesIndex.Add(this.vertices[i].ID, this.vertices[i].PositionInList);
+            {
+                if (this.verticesIndex.TryGetValue(this.vertices[i].ID, out int pos))
+                    throw new Exception($"Two Vertices have the same ID = {this.vertices[i].ID}. Adjust the input data files.");
+                else this.verticesIndex.Add(this.vertices[i].ID, this.vertices[i].PositionInList);
+            }
         }
 
         /// <summary>
