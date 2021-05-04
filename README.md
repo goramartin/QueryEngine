@@ -8,31 +8,42 @@ The input files are expected to be inside "DataFiles" directory.
 ### NodeTypes.txt/EdgeTypes.txt [Json syntax]
 
 They consists only of an json array. Inside of the array, there are objects and each object represents one type ( a table ) of a node/an edge.
-Each type must include at least one property, that is **Kind** with a value that is a name of the table.
-Afterwards, there are defined properties of the table. A name of the field determines a name of  the table, whereas the values contain their types.
+Each type must include at least one field, that is **Kind** with a value that is a name of the type.
+Afterwards, there are defined properties of the table.
+Let **(name, value)** pair be the field of a property.
+The **name** defines the name of the property and the **value** defines it is property type.
+Edges and Nodes cannot share the type, but they can share properties.
+However, the properties must have the same type.
 
-Available types:
+Available property types:
 
-| Inner Type      | Value of a Propery |
+| Inner Type      | Property type |
 | ----------- | ----------- |
 | string      | string       |
 | int (32)  | integer        |
 
+The inner type represents the property type inside the application.
 
 >Example 
 ``` 
-[
-{
+NodeTypes.txt:
+[{
 "Kind": "Person",
 "Name": "string",
 "LastName": "string",
 "Age": "integer"
-},
-{
+}]
+
+EdgeTypes.txt:
+[{
 "Kind": "Friend"
-}
-]
+}]
 ```
+The schema defines two types in the Property graph.
+The first one is type **Person**.
+The **Person** have three properties: **Name**, **LastName** and **Age**.
+The first two properties have the type string and the last one has the type integer.
+The second schema defines type **Friend**, but it does not have any properties defined. 
 
 ### Nodes.txt & Edges.txt
 
@@ -44,39 +55,39 @@ Stored data in files:
 
     ID Type Properties
 
-Ids must be sorted in ascending order.
 Properties go one after another as there are defined in the data scheme.
-Ids do not have to start from 0.  
+Ids do not have to start from 0 and do not have to be sorted.
+The ID must always be unique, even regarding edges.
 
 #### For edges:
 
     ID Type FromVertexID ToVertexID Properties 
 
-The same rule applies as for vertices, except the edges must be sorted according to the vertex IDs. That is, if there are three vertices with ids 1 2 3.
-After a double dot it expects edges that start with FromVertexID 1, then edges with FromVertexID 2 and so on.
-Edges IDs and Vertices IDs must be different. There can not be edge with id 1 and simultaneously vertex with id 1. The id must be unique
-in entire graph. 
+The same rule applies as for vertices, except the edges must be sorted according to the FromVertexID based on the order in the Nodes.txt file. 
+That is, if there are three vertices with IDs 1, 2 and 3 (in that order).
+The file Edges.txt must start with Edges that has FromVertexID = 1, then edges with FromVertexID = 2 and so on.
+Edges IDs and Vertices IDs must be different.
 
->Example
-
+>Example based on the schema above (the header must not be included)
 ```
-Nodes.txt
+Nodes.txt:
+ID Type Name LastName Age 
 0 Person Pavel Mikulas 21
 1 Person Patrik Peska 40
 2 Person Max Slev 20
-...
 
-Edges.txt
-4 BasicEdge 0 1
-5 BasicEdge 0 2
-6 BasicEdge 1 0
-7 BasicEdge 2 0
+Edges.txt:
+ID Type FromVertexID ToVertexID
+4 Friend 0 1
+5 Friend 0 2
+6 Friend 1 0
+7 Friend 2 0
 ...
 ```
 
 ## Query
 
-Queries must be inputted in a PGQL syntax. So far, only select, match, order by work.
+Queries must be inputted in a PGQL syntax. So far, only select, match, order by and group by work.
 General expressions used inside the query work only as variable references and property references. Query words (match, select, as ...) are case-insensitive but variable names, 
 property names and labels are case-sensitive.
 
@@ -84,6 +95,8 @@ property names and labels are case-sensitive.
 
 Inside the inputed query, there can be used expressions that will be evaluated for each individual result.
 The expression consists, so far, only of variable reference or property reference. In a select clause, expressions can be followed by "AS Label" which defines names of columns in the output.
+The select can also contain aggregation functions sum, min, max, count and avg.
+The function input is again an expression.
 
 >Example:
 
@@ -102,13 +115,13 @@ Types of referrences:
 |  x.Name  | Selects a specified property of a specified variable     |
 
 Inside the select expression can be either * or variable referrences. If the * is chosen, then all variables from a match expression are selected. Selecting a variable with its name will cause the same effect as if a function id(x) was called, so the results are the unique ids of the matched graph elements. When selecting a property of a variable, if the variable has defined type and the accessed property does not exist in the entire data schema it will throw an error, otherwise, if it is missing only in the variable table but exists in the graph, accessing the property will generete a null value.
-
 Each expression is comma separated.
+The select can define aggregation functions min(..), max(..), sum(..), avg(..) and count(..).
 
 >Example: 
     
-    SELECT x as xID, x.Age as xAge, y match (x)->(y);
-    SELECT * match (x) -[e]-> (y); <=> SELECT x, e, y match (x) -[e]-> (y);
+    select x as xID, x.Age as xAge, y match (x) -> (y);
+    select * match (x) -[e]-> (y); <=> select x, e, y match (x) -[e]-> (y);
 
 ### Match 
 Match expression starts with MATCH word and expects pattern to match. There can be more patterns separated by comma.
@@ -144,7 +157,7 @@ Every vertex is enveloped in () and every non-anonymous edge is enveloped in [].
 
 >Example: 
 
-    SELECT x MATCH (x:Person)->(y)->(x:Person); (correct) SELECT x MATCH (x:Person)->(y)->(x); (incorrect)
+    select x match (x:Person)->(y)->(x:Person); (correct) select x match (x:Person)->(y)->(x); (incorrect)
     SELECT x, y MATCH (x) -> (y), (y) -> (t:Person);
 
 ### Order by 
