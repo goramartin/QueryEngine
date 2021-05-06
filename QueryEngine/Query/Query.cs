@@ -209,7 +209,7 @@ namespace QueryEngine
             {
                 // Check if the query is aggregation and not a simple query.
                 if ((this.exprInfo.Aggregates.Count == 0 && this.qEhelper.IsSetSingleGroupGroupBy) || (!this.qEhelper.IsSetSingleGroupGroupBy && !parsedClauses.ContainsKey(Parser.Clause.GroupBy)))
-                throw new ArgumentException($"{this.GetType()}, no grouping was specified. The group by streamed version allows to compute only aggregations.");
+                throw new ArgumentException($"{this.GetType()}, no grouping or sorting was specified. The Streamed version allows to compute only aggregations. If you want to use only patter matching, please change to mode Normal.");
                 var groupByProc = GroupByResultProcessor.Factory(exprInfo, qEhelper, variableMap.GetCount(), this.exprInfo.CollectUsedVariables(), isStreamed);
                 
                 match.PassResultProcessor(groupByProc);
