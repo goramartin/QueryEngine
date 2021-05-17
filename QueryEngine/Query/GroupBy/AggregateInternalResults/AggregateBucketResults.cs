@@ -62,14 +62,14 @@ namespace QueryEngine
     /// <typeparam name="T"> A return type of the aggregation function. </typeparam>
     internal class AggregateBucketAvgResult<T> : AggregateBucketResult<T>
     {
-        public int eltsUsed = 0;
+        public int resultCount = 0;
     }
 
     internal sealed class AggregateBucketAvgLongResult : AggregateBucketAvgResult<long>, IGetFinal<double>
     {
         double IGetFinal<double>.GetFinal(int position)
         {
-            return (double)this.aggResult / this.eltsUsed;
+            return (double)this.aggResult / this.resultCount;
         }
     }
 

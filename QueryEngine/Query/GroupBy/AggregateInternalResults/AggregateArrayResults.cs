@@ -89,12 +89,12 @@ namespace QueryEngine
     /// </summary>
     internal class AggregateArrayAvgResults<T> : AggregateArrayResults<T>
     {
-        public int[] eltsUsed = new int[InitSize];
+        public int[] resultCount = new int[InitSize];
 
         public override void DoubleSize(int position)
         {
             int newSize = (position + (position % 2)) * 2;
-            Array.Resize<int>(ref this.eltsUsed, newSize);
+            Array.Resize<int>(ref this.resultCount, newSize);
             base.DoubleSize( position);
         }
     }
@@ -103,7 +103,7 @@ namespace QueryEngine
     {
         double IGetFinal<double>.GetFinal(int position)
         {
-            return (double)this.aggResults[position] / this.eltsUsed[position];
+            return (double)this.aggResults[position] / this.resultCount[position];
         }
     }
 }

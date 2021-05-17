@@ -28,7 +28,7 @@ namespace QueryEngine
             if (this.expr.TryEvaluate(in row, out int returnValue))
             {
                 var tmpBucket = ((AggregateBucketAvgResult<long>)bucket);
-                AddInternal(ref tmpBucket.aggResult, ref tmpBucket.eltsUsed, returnValue, 1);
+                AddInternal(ref tmpBucket.aggResult, ref tmpBucket.resultCount, returnValue, 1);
             }
         }
         public override void ApplyThreadSafe(in TableResults.RowProxy row, AggregateBucketResult bucket)
@@ -36,7 +36,7 @@ namespace QueryEngine
             if (this.expr.TryEvaluate(in row, out int returnValue))
             {
                 var tmpBucket = ((AggregateBucketAvgResult<long>)bucket);
-                AddThreadSafeInternal(ref tmpBucket.aggResult, ref tmpBucket.eltsUsed, returnValue, 1);
+                AddThreadSafeInternal(ref tmpBucket.aggResult, ref tmpBucket.resultCount, returnValue, 1);
             }
         }
         public override void Apply(in Element[] row, AggregateBucketResult bucket)
@@ -44,7 +44,7 @@ namespace QueryEngine
             if (this.expr.TryEvaluate(in row, out int returnValue))
             {
                 var tmpBucket = ((AggregateBucketAvgResult<long>)bucket);
-                AddInternal(ref tmpBucket.aggResult, ref tmpBucket.eltsUsed, returnValue, 1);
+                AddInternal(ref tmpBucket.aggResult, ref tmpBucket.resultCount, returnValue, 1);
             }
         }
         public override void ApplyThreadSafe(in Element[] row, AggregateBucketResult bucket)
@@ -52,7 +52,7 @@ namespace QueryEngine
             if (this.expr.TryEvaluate(in row, out int returnValue))
             {
                 var tmpBucket = ((AggregateBucketAvgResult<long>)bucket);
-                AddThreadSafeInternal(ref tmpBucket.aggResult, ref tmpBucket.eltsUsed, returnValue, 1);
+                AddThreadSafeInternal(ref tmpBucket.aggResult, ref tmpBucket.resultCount, returnValue, 1);
             }
         }
 
@@ -60,25 +60,25 @@ namespace QueryEngine
         {
             var tmpBucket1 = ((AggregateBucketAvgResult<long>)bucket1);
             var tmpBucket2 = ((AggregateBucketAvgResult<long>)bucket2);
-            AddInternal(ref tmpBucket1.aggResult, ref tmpBucket1.eltsUsed, tmpBucket2.aggResult, tmpBucket2.eltsUsed);
+            AddInternal(ref tmpBucket1.aggResult, ref tmpBucket1.resultCount, tmpBucket2.aggResult, tmpBucket2.resultCount);
         }
         public override void MergeThreadSafe(AggregateBucketResult bucket1, AggregateBucketResult bucket2)
         {
             var tmpBucket1 = ((AggregateBucketAvgResult<long>)bucket1);
             var tmpBucket2 = ((AggregateBucketAvgResult<long>)bucket2);
-            AddThreadSafeInternal(ref tmpBucket1.aggResult, ref tmpBucket1.eltsUsed, tmpBucket2.aggResult, tmpBucket2.eltsUsed);
+            AddThreadSafeInternal(ref tmpBucket1.aggResult, ref tmpBucket1.resultCount, tmpBucket2.aggResult, tmpBucket2.resultCount);
         }
         public override void Merge(AggregateBucketResult bucket, AggregateListResults list, int position)
         {
             var tmpBucket = ((AggregateBucketAvgResult<long>)bucket);
             var tmpList = ((AggregateListAvgResults<long>)list);
-            AddInternal(ref tmpBucket.aggResult, ref tmpBucket.eltsUsed, tmpList.aggResults[position], tmpList.eltsUsed[position]);
+            AddInternal(ref tmpBucket.aggResult, ref tmpBucket.resultCount, tmpList.aggResults[position], tmpList.resultCount[position]);
         }
         public override void MergeThreadSafe(AggregateBucketResult bucket, AggregateListResults list, int position)
         {
             var tmpBucket = ((AggregateBucketAvgResult<long>)bucket);
             var tmpList = ((AggregateListAvgResults<long>)list);
-            AddThreadSafeInternal(ref tmpBucket.aggResult, ref tmpBucket.eltsUsed, tmpList.aggResults[position], tmpList.eltsUsed[position]);
+            AddThreadSafeInternal(ref tmpBucket.aggResult, ref tmpBucket.resultCount, tmpList.aggResults[position], tmpList.resultCount[position]);
         }
 
         // Lists
@@ -88,13 +88,13 @@ namespace QueryEngine
             if (position == tmpList.aggResults.Count)
             {
                 tmpList.aggResults.Add(default);
-                tmpList.eltsUsed.Add(default);
+                tmpList.resultCount.Add(default);
             }
 
             if (this.expr.TryEvaluate(in row, out int returnValue))
             {
                 tmpList.aggResults[position] += returnValue;
-                tmpList.eltsUsed[position]++;
+                tmpList.resultCount[position]++;
             }
         }
         public override void Merge(AggregateListResults list1, int into, AggregateListResults list2, int from)
@@ -105,12 +105,12 @@ namespace QueryEngine
             if (into == tmpList1.aggResults.Count)
             {
                 tmpList1.aggResults.Add(tmpList2.aggResults[from]);
-                tmpList1.eltsUsed.Add(tmpList2.eltsUsed[from]);
+                tmpList1.resultCount.Add(tmpList2.resultCount[from]);
             }
             else
             {
                 tmpList1.aggResults[into] += tmpList2.aggResults[from];
-                tmpList1.eltsUsed[into] += tmpList2.eltsUsed[from];
+                tmpList1.resultCount[into] += tmpList2.resultCount[from];
             }
 
         }
@@ -121,7 +121,7 @@ namespace QueryEngine
             if (this.expr.TryEvaluate(in row, out int returnValue))
             {
                 var tmpArray = ((AggregateArrayAvgResults<long>)array);
-                AddThreadSafeInternal(ref tmpArray.aggResults[position], ref tmpArray.eltsUsed[position], returnValue , 1);
+                AddThreadSafeInternal(ref tmpArray.aggResults[position], ref tmpArray.resultCount[position], returnValue , 1);
             }
         }
 

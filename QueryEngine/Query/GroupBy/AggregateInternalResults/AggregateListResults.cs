@@ -61,7 +61,7 @@ namespace QueryEngine
     /// <typeparam name="T"> A return type of the aggregation function. </typeparam>
     internal class AggregateListAvgResults<T> : AggregateListResults<T>
     {
-        public List<int> eltsUsed = new List<int>();
+        public List<int> resultCount = new List<int>();
     }
 
     /// <summary>
@@ -73,7 +73,7 @@ namespace QueryEngine
     {
         double IGetFinal<double>.GetFinal(int position)
         {
-            return (double)this.aggResults[position] / this.eltsUsed[position];
+            return (double)this.aggResults[position] / this.resultCount[position];
         }
     }
 

@@ -1,6 +1,10 @@
 ﻿/*! \file
 This file contains definition of a count function.
 The count function can be specialised only on "number" type.
+The stored value and the expression returned values are different.
+The stored value is always of the type int, but the returned value of the expression is parametr T.
+This was done because the we need only the count of elements in the group.
+However, there is still need to evaluate the expression.
 
 The count function have multiple uses.
 1. count(*) - the function counts each row as a valid input.
