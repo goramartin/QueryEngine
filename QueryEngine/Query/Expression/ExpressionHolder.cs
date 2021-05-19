@@ -1,30 +1,26 @@
-﻿/*! \file
-This file includes definition of an expression holder.
-
-Expression holder serves as a wrapper around expression tree.
-It adds api that helps evaluation the expression.
-*/
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace QueryEngine
 {
     /// <summary>
-    /// Class holds entire expression.
-    /// Optionally label representing entire expression.
+    /// A class holds an entire expression.
     /// </summary>
     internal sealed class ExpressionHolder : ExpressionBase
     {
+        /// <summary>
+        /// A string representation of the expression.
+        /// If not set, then a recursive call of .ToString() on the expression node is made.
+        /// </summary>
         private string Label { get; }
         public ExpressionBase Expr { get; }
         public Type ExpressionType { get; }
 
         /// <summary>
-        /// Constructs expression holder.
+        /// Constructs an expression holder.
         /// </summary>
-        /// <param name="ex"> Expression base node. </param>
-        /// <param name="label"> Label of the expression. </param>
+        /// <param name="ex"> An expression base node. </param>
+        /// <param name="label"> A label of the expression. </param>
         public ExpressionHolder(ExpressionBase ex, string label = null)
         {
             if (ex == null)
@@ -36,7 +32,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Returns label representing entire expression or original expression as a string.
+        /// Returns a label representing the entire expression or the original expression as a string.
         /// </summary>
         public override string ToString()
         {
@@ -45,7 +41,7 @@ namespace QueryEngine
 
 
         /// <summary>
-        /// Returns type of containing expression.
+        /// Returns a type of the containing expression.
         /// </summary>
         public override Type GetExpressionType()
         {

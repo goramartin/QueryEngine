@@ -1,13 +1,4 @@
-﻿/*! \file
-This file includes definition of a file printer.
-The file printer prints results into a file.
-The file name is given in one of the program arguments.
-
-If multiple queries are computed during program runtime, the printer
-always appends results into the same file.
-*/
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -15,16 +6,16 @@ namespace QueryEngine
 {
 
     /// <summary>
-    /// Printer which prints results into a file.
+    /// A printer which prints results into a file.
     /// </summary>
     internal sealed class FilePrinter : Printer
     {
         /// <summary>
         /// Creates a file printer.
         /// </summary>
-        /// <param name="rowFormat"> Format of a columns. </param>
-        /// <param name="formater"> Type of formater. </param>
-        /// <param name="fileName"> File to print into. </param>
+        /// <param name="rowFormat"> A format of a columns. </param>
+        /// <param name="formater"> A type of formater. </param>
+        /// <param name="fileName"> A file to print into. </param>
         public FilePrinter(List<ExpressionToStringWrapper> rowFormat, FormaterType formater, string fileName) : base(rowFormat)
         {
             if (!Formater.FileEndings.TryGetValue(formater, out string ending))
@@ -43,7 +34,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Flushed formater buffer and releases resources of writer.
+        /// Flushed the formater buffer and releases resources of the writer.
         /// </summary>
         public override void Dispose()
         {

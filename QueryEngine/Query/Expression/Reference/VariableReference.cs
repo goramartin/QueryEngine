@@ -1,19 +1,12 @@
-﻿/*! \file 
-This file includes definitions of variable reference expression.
-These are the references to a variable or a property of a variable or an id of a variable.
-These expressions will evaluate based on a given element result.
-The references contain holder that includes information what part of a result they refer to.
-This file also includes a factory for references stated above.
- */
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace QueryEngine
 {
     /// <summary>
-    /// Base class for variable reference.
+    /// A base class for a variable reference.
     /// </summary>
-    /// <typeparam name="T"> Type of return value. </typeparam>
+    /// <typeparam name="T"> A type of the return value. </typeparam>
     internal abstract class VariableReference<T> : ExpressionReturnValue<T>
     {
         /// <summary>
@@ -22,15 +15,15 @@ namespace QueryEngine
         protected VariableReferenceNameHolder NameHolder { get; }
 
         /// <summary>
-        /// Index of a variable to be evaluated from a given result.
+        /// An index of a variable to be evaluated with a given result.
         /// </summary>
         protected int VariableIndex { get; }
 
         /// <summary>
         /// Creates a variable reference.
         /// </summary>
-        /// <param name="nHolder"> Holder of string representation of the name. </param>
-        /// <param name="varIndex"> Index of an element in a result during evaluation.</param>
+        /// <param name="nHolder"> A holder of string representation of the name. </param>
+        /// <param name="varIndex"> An index of an element in a result during evaluation.</param>
         protected VariableReference(VariableReferenceNameHolder nHolder, int varIndex)
         {
             if (nHolder == null)

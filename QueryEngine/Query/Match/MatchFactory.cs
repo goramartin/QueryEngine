@@ -11,18 +11,18 @@ namespace QueryEngine
 {
 
     /// <summary>
-    /// Class includes register of all the Matchers and their coresponding patterns.
-    ///  Enables to create instance of a Matcher/Pattern based on a string token.
+    /// A class includes register of all the Matchers and their coresponding patterns.
+    /// Enables to create instances of a Matcher/Pattern based on a string token.
     /// </summary>
     internal static class MatchFactory
     {
         /// <summary>
-        /// Register of valid matchers.
+        /// A register of valid matchers.
         /// </summary>
         static Dictionary<string, Type> matcherRegistry;
 
         /// <summary>
-        /// Register of valid patterns for a given matcher.
+        /// A register of valid patterns for a given matcher.
         /// </summary>
         static Dictionary<string, Dictionary<string, Type>> matcherPatternRegistry;
 
@@ -54,8 +54,8 @@ namespace QueryEngine
         /// <summary>
         /// Register a matcher type. Checks if the matcher exists and throws on this occasion.
         /// </summary>
-        /// <param name="matcher"> Matcher type. </param>
-        /// <param name="type"> Type to register matcher to. </param>
+        /// <param name="matcher"> A matcher name. </param>
+        /// <param name="type"> A type of  the matcher. </param>
         private static void RegisterMatcher(string matcher, Type type)
         {
             if (matcher == null || type == null)
@@ -69,9 +69,9 @@ namespace QueryEngine
         /// <summary>
         /// Registers a pattern to a given pattern.
         /// </summary>
-        /// <param name="matcher"> Matcher type. </param>
-        /// <param name="pattern"> Pattern type. </param>
-        /// <param name="patternType"> Petter type instante to register. </param>
+        /// <param name="matcher"> A matcher name. </param>
+        /// <param name="pattern"> A name of the pattern. </param>
+        /// <param name="patternType"> A type of the pattern. </param>
         private static void RegisterPatternToMatcher(string matcher, string pattern, Type patternType)
         {
             if (matcher == null || pattern == null || patternType == null)
@@ -93,10 +93,10 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Creates an instante of matcher based on a given matcher type.
+        /// Creates an instante of a matcher based on a given matcher type.
         /// </summary>
-        /// <param name="matcher"> Matcher type to craete.</param>
-        /// <param name="parameters"> Paramters for matcher constructor. </param>
+        /// <param name="matcher"> A matcher name.</param>
+        /// <param name="parameters"> Parameters for matcher constructor. </param>
         /// <returns></returns>
         public static IPatternMatcher CreateMatcher(string matcher, params object[] parameters) //IPattern pattern, Graph graph, QueryResults results, int resultIndex)
         {
@@ -111,8 +111,8 @@ namespace QueryEngine
         /// <summary>
         /// Creates a pattern type based on given matcher type and pattern type.
         /// </summary>
-        /// <param name="matcher"> Matcher type. </param>
-        /// <param name="pattern"> Pattern type. </param>
+        /// <param name="matcher"> A matcher name. </param>
+        /// <param name="pattern"> A pattern name. </param>
         /// <param name="parameters"> Parameters for pattern constructor. </param>
         /// <returns></returns>
         public static IPattern CreatePattern(string matcher, string pattern, params object[] parameters)

@@ -9,14 +9,12 @@ namespace QueryEngine
         #region GroupBy
 
         /// <summary>
-        /// Parses group by expression. 
+        /// Parses a group by expression. 
         /// Group by expression consists only of expressions separated by comma.
         /// GroupBy -> GROUP BY GroupByTerm (, GroupByTerm)*
         /// GroupByTerm -> Expression
         /// </summary>
-        /// <param name="tokens"> Token list to parse </param>
-        /// <param name="position"> Position of a token. </param>
-        /// <returns> Tree representation of a group by or null if the tokens are missing group token on its first position. </returns>
+        /// <returns> A tree representation of a group by or null if the tokens are missing group token on its first position. </returns>
         static public GroupByNode ParseGroupBy(ref int position, List<Token> tokens)
         {
             GroupByNode groupByNode = new GroupByNode();
@@ -41,12 +39,10 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Parses group by term. 
+        /// Parses a group by term. 
         /// Expression (, Expression)*
         /// </summary>
-        /// <param name="tokens"> Tokens to parse. </param>
-        /// <param name="position"> Position of a token. </param>
-        /// <returns> Group by term node. </returns>
+        /// <returns> A group by term node. </returns>
         private static Node ParseGroupByTerm(ref int position, List<Token> tokens)
         {
             GroupByTermNode groupByTermNode = new GroupByTermNode();

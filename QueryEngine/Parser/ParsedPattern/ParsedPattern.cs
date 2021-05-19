@@ -1,13 +1,9 @@
 ﻿/*! \file
-This file includes definitions of a parsed pattern that is later on used for creating pattern 
-that is, at the end, used in the search algorithm.
-PGQL syntax for match section is done via "chains" connected with commas.
-e.g. MATCH (x) - (y), (y) - (p)
-First chain is (x) - (y) and the second one is (y) - (p).
-Parsed pattern is class that encapsulated one chain that consists of the parsed pattern nodes and allows certain operations 
-to allow working with the pattern more easily. Such as splitting.
-Spliting is used to make search pattern linear (it matches only forward) and it helps connect interconnected patterns through out 
-all other chains.
+This file includes definitions of parsed patterns that are later on used for creating pattern.
+PGQL syntax for match section is done via "chains" connected with commas, e.g. MATCH (x) - (y), (y) - (p).
+The first chain is (x) - (y) and the second one is (y) - (p).
+The parsed pattern is a class that encapsulates one chain that consists of the parsed pattern nodes and allows certain operations, such as splitting.
+This allows us to work with the patterns more easily.
  */
 
 using System;
@@ -19,9 +15,10 @@ using System.Threading.Tasks;
 namespace QueryEngine
 {
     /// <summary>
-    /// Class used to shallow parsing of match expression from user inputted query.
-    /// Pattern contains single nodes with their corresponding attributes collected when parsed.
-    /// Can be splited by a split variable if set and creating two separate patterns.
+    /// A class used to shallow parsing of match expression from the query.
+    /// A pattern contains nodes with their corresponding attributes collected during parsing.
+    /// Can be splited by a split variable.
+    /// The split creates two separate patterns.
     /// </summary>
     internal sealed class ParsedPattern
     {
@@ -52,16 +49,16 @@ namespace QueryEngine
         /// Searches for the same variable inside two Parsed Patterns.
         /// </summary>
         /// <param name="other"> Parsed Pattern to be searched for similar variables. </param>
-        /// <param name="name"> Name of the first same variable. </param>
-        /// <returns> True if found, False when not found the same variable. Returns the first found variable.</returns>
+        /// <param name="name"> A name of the first same variable. </param>
+        /// <returns> True if found, false when not found the same variable. Returns the first found variable.</returns>
         public bool TryFindEqualVariable(ParsedPattern other, out string name)
         {
-            // For each variable in current pattern check equality for variables in the other pattern
+            // For each variable in current pattern check equality for variables in the other pattern.
             for (int k = 0; k < this.pattern.Count; k++)
             {
                 for (int l = 0; l < other.pattern.Count; l++)
                 {
-                    // Found matching variable
+                    // Found matching variable.
                     if (this.pattern[k].Equals(other.pattern[l]))
                     {
                         name = this.pattern[k].Name;
@@ -74,14 +71,14 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Splits ParsedPattern node into two ParsedPatterns. 
-        /// Instance on which we split, the pattern is reduced from the beginning.
-        /// The new build pattern (the nodes taken into account from the reduction from the instance) is build in a reversed order.
-        /// For example: (a) - (b) - (c) splited by var. b == (b) - (a) , (b) - (c).
+        /// Splits a ParsedPattern node into two ParsedPatterns. 
+        /// An instance on which we split, the pattern is reduced from the beginning.
+        /// The newly build pattern is build in a reversed order.
+        /// For example: (a) - (b) - (c) splited by var. b results in two patterns (b) - (a) , (b) - (c).
         /// Split is done only if the splitVariable is not located on the first index of the pattern.
         /// If the variable is located in the end of the pattern, the pattern is only reversed in place.
         /// </summary>
-        /// <returns> Returns the part before split variable (reverse order) or null if it is the first one. </returns>
+        /// <returns> Returns the part before split variable in reverse order or null if the split variable is the first one in the pattern. </returns>
         public ParsedPattern TrySplitParsedPattern()
         {
             int i = this.FindIndexOfSplitVariable();
@@ -100,7 +97,7 @@ namespace QueryEngine
         /// Note we are removing former nodes from the end of the list, and add the reversed ones to the end.
         /// The size of array after one iteration stays the same as before calling the method.
         /// </summary>
-        /// <param name="lastNodeinPatternIndex"> Index of split variable which is last node in pattern. </param>
+        /// <param name="lastNodeinPatternIndex"> An index of split variable which is the last node in the pattern. </param>
         /// <returns> The same instance as the caller. </returns>
         private ParsedPattern ReverseInPlace(int lastNodeinPatternIndex)
         {
@@ -124,8 +121,8 @@ namespace QueryEngine
         /// For parsed pattern: (x) -o (z) o- (p) - () where the split variable is p. The result looks:
         /// The first part = (p) -o (z) o- (x), the second part = (p) - () 
         /// </summary>
-        /// <param name="splitVariableIndex"> Index of split variable </param>
-        /// <returns> New instance of Parsed Pattern </returns>
+        /// <param name="splitVariableIndex"> An index of split variable </param>
+        /// <returns> A new instance of Parsed Pattern </returns>
         private ParsedPattern SplitIntoTwo(int splitVariableIndex)
         {
             var firstPart = new List<ParsedPatternNode>();
@@ -140,14 +137,14 @@ namespace QueryEngine
 
 
         /// <summary>
-        /// Finds index of a split variable. The split variable is used to split the pattern into two parts.
+        /// Finds an index of a split variable.
         /// </summary>
-        /// <returns> Index of the split variable, -1 for not containing any split variable.</returns>
+        /// <returns> An index of the split variable, -1 if there is not one. </returns>
         private int FindIndexOfSplitVariable()
         {
             if (this.splitBy == null) return -1;
            
-            //Find index of splitVariable
+            // Find an index of splitVariable.
             for (int i = 0; i < this.GetCount(); i++)
                 if (this.splitBy == this.pattern[i].Name) return i;
             

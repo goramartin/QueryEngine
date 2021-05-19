@@ -7,12 +7,13 @@ namespace QueryEngine
 {
     /// <summary>
     /// A class represents a multi group grouping algorithm.
+    /// The algorithm works in two steps.
+    /// In the first step each threads computes the groups locally.
+    /// When a thread is finished it does not wait for other threads to finish but immediately starts merging its results into a global concurrent dictionary.
     /// The class should be used only as the parallel solution and not with thread count set to 1.
     /// The algorithm is composed of a local group by and a global merge.
     /// The algorithm uses only aggregate buckets or array like storages.
     /// Note that the solution using array like storages uses the arrays in the first step, then it proceeds using buckets during merge.
-    /// Firstly, each thread receives an equal range from the results table and then processes the results locally, afterwards, 
-    /// the thread merges the final groups into a global dictionary.
     /// </summary>
     internal abstract class TwoStepGroupBy : Grouper
     {

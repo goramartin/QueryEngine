@@ -1,5 +1,5 @@
 ﻿/*! \file
-This file contains definition of a group by object.
+This file contains a definition of a group by object.
 A group by can be conducted multiple ways.
 Firstly, based on IsParallel flag in the execution helper.
 
@@ -28,12 +28,12 @@ namespace QueryEngine
         private ExpressionHolder[] hashes;
         private List<Aggregate> aggregates;
         /// <summary>
-        /// Creates group by object for multigroup results.
+        /// Creates a group by object for multigroup group by (defined group by clause).
         /// </summary>
-        /// <param name="graph"> Property graph. </param>
-        /// <param name="variableMap"> Variable map. </param>
-        /// <param name="executionHelper"> Select execution helper. </param>
-        /// <param name="groupByNode"> Parsed tree of select expression. </param>
+        /// <param name="graph"> A property graph. </param>
+        /// <param name="variableMap"> A variable map. </param>
+        /// <param name="executionHelper"> A group by execution helper. </param>
+        /// <param name="groupByNode"> A parsed tree of group by expression. </param>
         /// <param name="exprInfo"> A query expression information. </param>
         public GroupByObject(Graph graph, VariableMap variableMap, IGroupByExecutionHelper executionHelper, GroupByNode groupByNode, QueryExpressionInfo exprInfo)
         {
@@ -51,10 +51,10 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Creates group by object for single group result.
+        /// Creates a group by object for a single group group by (not defined group by clause but only aggregations in select).
         /// Assumes that the executionHelper.IsSetSingleGroupGroupBy is set to true.
         /// </summary>
-        /// <param name="executionHelper"> Select execution helper. </param>
+        /// <param name="executionHelper"> A group by execution helper. </param>
         /// <param name="exprInfo"> A query expression information. </param>
         public GroupByObject(IGroupByExecutionHelper executionHelper, QueryExpressionInfo exprInfo)
         {

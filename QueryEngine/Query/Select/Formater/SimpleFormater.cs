@@ -1,26 +1,19 @@
-﻿/*! \file
-This file includes definition of a simple formater which is used by a printer.
-Simple formater formats output columns only with defined number od spaces.
-Header and values are separated only by a line of dashes.
- */
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 
 namespace QueryEngine
 {
     /// <summary>
     /// Simple formater prints output with normalised length of a one column in a row.
-    /// No table and separators are only spaces.
     /// </summary>
     internal sealed class SimpleFormater : Formater
     {
         public SimpleFormater(int columnCount, TextWriter writer) : base(columnCount, writer) { }
 
         /// <summary>
-        /// Adds word to a format and separates it with a space character. 
+        /// Adds a word to a format and separates it with space characters. 
         /// </summary>
-        /// <param name="word"> Word to add to a format. </param>
+        /// <param name="word"> A word to format. </param>
         public override void AddToFormat(string word)
         {
             this.stringBuilder.Append(word);
@@ -35,7 +28,7 @@ namespace QueryEngine
         /// Each column is printed and below is printed a dash delimeter to separate
         /// header and results.
         /// </summary>
-        /// <param name="variables"> Header format. </param>
+        /// <param name="variables"> A header format. </param>
         public override void FormatHeader(List<ExpressionToStringWrapper> variables)
         {
             for (int i = 0; i < variables.Count; i++)
@@ -55,7 +48,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Flushed string builder and prepares for printing next row.
+        /// Flushed the string builder and prepares printing of the next row.
         /// </summary>
         public override void Flush()
         {
@@ -65,10 +58,10 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Adds given number of character to a string builder.
+        /// Adds a given number of character to a string builder.
         /// </summary>
-        /// <param name="count"> Number of characters. </param>
-        /// <param name="c"> Character to add. </param>
+        /// <param name="count"> A number of characters. </param>
+        /// <param name="c"> A character to add. </param>
         private void PadWithChar(int count, char c)
         {
             if (count <= 0) return;

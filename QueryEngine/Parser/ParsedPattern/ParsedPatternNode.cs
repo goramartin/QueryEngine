@@ -17,14 +17,18 @@ using System.Threading.Tasks;
 namespace QueryEngine
 {
     /// <summary>
-    /// Represents single Node when parsing match expression.
-    /// There is no need to create another type just for edge type as those will be created later.
-    /// Caries information about match node. 
+    /// Represents a single element to match when parsing match expression.
     /// </summary>
     internal abstract class ParsedPatternNode
     {
         public bool IsAnonymous { get; set; }
+        /// <summary>
+        /// A type of the element from the Labeled-property graph..
+        /// </summary>
         public Table Table { get; set; }
+        /// <summary>
+        /// If is set, then this node represents a variable.
+        /// </summary>
         public string Name { get; set; }
 
         public ParsedPatternNode()
@@ -35,9 +39,8 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Creates copy of instance, reverses edges.
+        /// Creates a copy of an instance with reversed edges.
         /// </summary>
-        /// <returns> Copy of this instance. </returns>
         public ParsedPatternNode CloneReverse()
         {
             ParsedPatternNode clone = ParsedPatternNode.ParsedPatternNodeFactoryReverse(this.GetType());
@@ -69,8 +72,8 @@ namespace QueryEngine
         /// Create a parsed pattern node with reversed edges. Other nodes are let same as before.
         /// Used only during clone reverse method.
         /// </summary>
-        /// <param name="type"> Type of parsed pattern node to create reverse of. </param>
-        /// <returns> Reverse clone of parsed pattern node. </returns>
+        /// <param name="type"> A type of the parsed pattern node. </param>
+        /// <returns> A reverse clone of the passed type. </returns>
         private static ParsedPatternNode ParsedPatternNodeFactoryReverse(Type type)
         {
             if (type == typeof(VertexParsedPatternNode)) return new VertexParsedPatternNode();
@@ -81,10 +84,10 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Factory method for parsed pattern nodes.
+        /// A factory method for parsed pattern nodes.
         /// </summary>
-        /// <param name="type"> Type of parsed pattern node to create reverse of.</param>
-        /// <returns> Parsed pattern node based on specified type. </returns>
+        /// <param name="type"> A type of a parsed pattern node to create reverse of.</param>
+        /// <returns> A parsed pattern node based on specified type. </returns>
         public static ParsedPatternNode ParsedPatternNodeFactory(Type type)
         {
             if (type == typeof(VertexParsedPatternNode)) return new VertexParsedPatternNode();

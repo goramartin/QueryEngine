@@ -1,7 +1,7 @@
 ﻿namespace QueryEngine
 {
     /// <summary>
-    /// Class that will sort table results.
+    /// An interface that provides sorting method for ITableResults interface.
     /// </summary>
     internal abstract class ISorter
     {

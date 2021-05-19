@@ -43,7 +43,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Create by cloning comparers
+        /// Factory method that creates the comparer by cloning the provided comparers.
         /// </summary>
         public static RowEqualityComparerGroupKey Factory(ITableResults resTable, ExpressionComparer[] comparers, bool cacheResults)
         {

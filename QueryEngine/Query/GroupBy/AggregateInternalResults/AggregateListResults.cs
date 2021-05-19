@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace QueryEngine 
 {
     /// <summary>
-    /// Class represents a result holder for a group aggregated values during grouping.
+    /// A class represents a result holder for a group aggregated values during grouping.
     /// For each aggregate, a holder containing a list of value. The list is a holder for the aggregate 
     /// value for each individual group (index represents a group and its aggregate value).
     /// This approach can save a lot of memory because it does not have to allocate additional classes for every

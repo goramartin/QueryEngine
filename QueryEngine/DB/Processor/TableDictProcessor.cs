@@ -1,10 +1,10 @@
 ﻿/*! \file 
-File includes definition of a table dictionary processor.
+The file includes a definition of a table dictionary processor.
 
 The processor creates a table from a JSON input file.
-Json array is expected to be an array of objects. 
-The objects are expected to contain a first property "Kind" with defines name of the table.
-Subsequently there are expected to be a properties that define name of a table property and the type of the property.
+A JSON array is expected to be an array of objects. 
+The objects are expected to contain property "Kind" witch defines a name of the table.
+Subsequently there are expected to be properties that define a name of a property and a type of the property.
 
 Example:
 
@@ -27,7 +27,7 @@ using System.Collections.Generic;
 namespace QueryEngine
 {
     /// <summary>
-    /// Creates a distionary/map of a data types in the graph from a json schema.
+    /// Creates a distionary/map of a data types in the graph from a JSON schema.
     /// The processing is done in states, where each state represents a string from the json schema. (even the [, { ... characters)
     /// Firstly, the new table is created with the name specified in the "Kind" property in the JSON schema.
     /// Subsequnetly, properties are parsed and added to the table.
@@ -79,7 +79,7 @@ namespace QueryEngine
 
 
         /// <summary>
-        /// Begining of the JSON array which contains the definitions of the tables.
+        /// The begining of the JSON array which contains the definitions of the tables.
         /// </summary>
         sealed class TableDictLeftSquareBraceState : IProcessorState<Dictionary<string, Table>>
         {
@@ -103,7 +103,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Start of the table object in the JSON schama.
+        /// The start of the table object in the JSON schama.
         /// </summary>
         sealed class TableDictLeftBracketState : IProcessorState<Dictionary<string, Table>>
         {
@@ -241,7 +241,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Processes name of the table. 
+        /// Processes a name of the table. 
         /// Creates a new table with the given name.
         /// </summary>
         sealed class TableDictNameState : IProcessorState<Dictionary<string, Table>>
@@ -271,7 +271,7 @@ namespace QueryEngine
 
         /// <summary>
         /// After a property value, there can be either a comma which signals another property definition,
-        /// or a bracket, which signal that there might be another comma == a new table object or end of the json array..
+        /// or a bracket, which signals that there might be another comma which is equivalent to  a new table object or end of the json array.
         /// </summary>
         sealed class TableDictCommaAfterPropState : IProcessorState<Dictionary<string, Table>>
         {
@@ -296,7 +296,7 @@ namespace QueryEngine
 
         /// <summary>
         /// After a bracket, there can be a comma which can signal beginning of a new table object.
-        /// Or there is end of the json array (end of a schema).
+        /// Or there is the end of the json array (end of a schema).
         /// </summary>
         sealed class TableDictCommaAfterBracketState : IProcessorState<Dictionary<string, Table>>
         {
@@ -349,7 +349,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Processes property type.
+        /// Processes a property type.
         /// Creates a new proprty based on type with a property name stored beforehand.
         /// </summary>
         sealed class TableDictPropTypeState : IProcessorState<Dictionary<string, Table>>
@@ -367,7 +367,7 @@ namespace QueryEngine
             public void Process(IProcessor<Dictionary<string, Table>> processor, string param)
             {
                 var proc = (TableDictProcessor)processor;
-                // to do add creation of new indes into labels map
+                // To do add creation of new indeces into the labels map.
                 Property newProp = PropertyFactory.CreateProperty(param, proc.newPropName);
 
                 if (proc.labels.TryGetValue(newProp.IRI, out Tuple<int, Type> tuple))

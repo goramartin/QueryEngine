@@ -1,11 +1,11 @@
 ﻿/*! \file 
 This file contains definition of a tokenizer.
-Tokenizer tokenizes the inputed query.
-It creates a list of tokens that are subsequently parsed.
-Tokenizer has set ending character of a query.
+The tokenizer tokenizes the inputed query.
+It creates a List of tokens that are subsequently parsed.
+The tokenizer has set ending character of a query.
 
-Tokenizer reads input by single character and stops when it reaches a character that signals the end of 
-user input. When it reads the character if firstly tries to find a token from the registry (a single
+The tokenizer reads input by single characters and stops when it reaches a character that signals the end of 
+user input. When it reads the character it firstly tries to find a token from the registry (a single
 character token) otherwise it expects a string that is either a token or an identifier (which is also a token).
 
 Notice that only inputted identifiers are considered case sensitive (e.g. names of variables).
@@ -19,14 +19,18 @@ namespace QueryEngine
 {
    
     /// <summary>
-    /// Class takes console input and creates tokens based on their string representation.
+    /// A class takes console input and creates tokens based on their string representation.
     /// </summary>
     internal static class Tokenizer
     {
-        // Dict of possible tokens.
+        /// <summary>
+        /// A dictionary of all possible tokens.
+        /// </summary>
         private static Dictionary<string, Token.TokenType> tokenTypes;
-        private // Character ending query.
-        static char EndOfQueryCharacter => ';';
+        /// <summary>
+        /// A character that signals and of the query.
+        /// </summary>
+        private static char EndOfQueryCharacter => ';';
         static Tokenizer()
         {
             tokenTypes = new Dictionary<string, Token.TokenType>();
@@ -34,7 +38,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Generates stream from a string.
+        /// Generates a stream from a string.
         /// Be careful with the encoding.
         /// </summary>
         /// <param name="input"> An input string. </param>
@@ -74,7 +78,7 @@ namespace QueryEngine
         /// <returns> A list of parsed tokens </returns>
         public static List<Token> Tokenize(TextReader reader)
         {
-            // Result
+            // A result storage.
             List<Token> tokens = new List<Token>();
             int ch = 0;
 
@@ -84,13 +88,13 @@ namespace QueryEngine
                 ch = reader.Read();
                 if (ch == EndOfQueryCharacter) break;
 
-                // Is one symbol token? Case when one character is token.
-                // This token does not have a string value only logical value.
+                // Is one symbol a token?
+                // This token does not have a string value only semantic value.
                 if (tokenTypes.TryGetValue(((char)ch).ToString(), out Token.TokenType token))
                 {
                     tokens.Add(new Token(null, token));
                 }
-                // Skip reading whitespace characters
+                // Skip reading whitespace characters.
                 else if (char.IsWhiteSpace((char)ch))
                 {
                     continue;
@@ -98,17 +102,17 @@ namespace QueryEngine
                 // If the character is a normal letter, we parse the whole consecutive word.
                 else if (Char.IsLetter((char)ch))
                 {
-                    // Get identifier value.
+                    // Get an identifier value.
                     string ident = GetIdentifier((char)ch, reader);
 
-                    // Try whether it is a Query word.
+                    // Try whether it is a query word.
                     // Query words are always considered in lower case.
                     // Query word is a SELECT, MATCH ...
                     if (tokenTypes.TryGetValue(ident.ToLower(), out Token.TokenType tok))
                     {
                         tokens.Add(new Token(null, tok));
                     }
-                    // Else it is identifier that has got a string value.
+                    // Else it is an identifier that has got a string value.
                     // Identifiers are case sensitive.
                     else { tokens.Add(new Token(ident, Token.TokenType.Identifier)); }
                 }
@@ -120,11 +124,11 @@ namespace QueryEngine
 
 
         /// <summary>
-        /// Reads single word from an input.
+        /// Reads a single word from an input.
         /// </summary>
-        /// <param name="ch"> First consumed character. </param>
-        /// <param name="reader"> Console reader </param>
-        /// <returns> Word from input starting with character from parameters. </returns>
+        /// <param name="ch"> The first already consumed character. </param>
+        /// <param name="reader"> A console reader. </param>
+        /// <returns> A word from input starting with the character from parameters. </returns>
         private static string GetIdentifier(char ch, TextReader reader)
         {
             string strValue = "";
@@ -147,10 +151,10 @@ namespace QueryEngine
 
 
         /// <summary>
-        /// Inserts token with its input representaion into token registry.
+        /// Inserts a token with its input representaion into the token registry.
         /// </summary>
-        /// <param name="str"> String representation in input.</param>
-        /// <param name="type"> Token type </param>
+        /// <param name="str"> A string representation in input.</param>
+        /// <param name="type"> A token type. </param>
         private static void RegisterToken(string str, Token.TokenType type)
         {
 

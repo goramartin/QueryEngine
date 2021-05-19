@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace QueryEngine
 {
     /// <summary>
-    /// Base class for expression value comparing.
+    /// A base class for expression value comparing.
     /// Each class contains an expression that will be evaluated with given rows.
     /// Then the values are compared with templated compare method.
     /// The child classes can cache the left argument in the compare function.
@@ -20,9 +20,9 @@ namespace QueryEngine
         public readonly bool cacheResults;
         
         /// <summary>
-        /// Constructs expression comparer.
+        /// Constructs an expression comparer.
         /// </summary>
-        /// <param name="expressionHolder"> Expression to be evaluated during comparing. </param>
+        /// <param name="expressionHolder"> An expression to be evaluated during comparing. </param>
         /// <param name="ascending"> Whether to use asc or desc order. </param>
         /// <param name="cacheResults"> Whether to cache results of the computed expressions. </param>
         protected ExpressionComparer(ExpressionHolder expressionHolder, bool ascending, bool cacheResults)
@@ -42,13 +42,13 @@ namespace QueryEngine
         public abstract int Compare(in TableResults.RowProxy x, in TableResults.RowProxy y);
 
         /// <summary>
-        /// Expression comparer factory.
+        /// A factory method.
         /// Creates a templated expression comparers based on a given type.
         /// </summary>
-        /// <param name="expressionHolder"> Expression to be evaluated. </param>
+        /// <param name="expressionHolder"> An expression to be evaluated. </param>
         /// <param name="isAscending"> Whether to use ascending order or descending. </param>
         /// <param name="cacheResults"> Whether to cache results of the computed expressions. </param>
-        /// <returns> Specialised comparer. </returns>
+        /// <returns> A specialised comparer. </returns>
         public static ExpressionComparer Factory(ExpressionHolder expressionHolder, bool isAscending, bool cacheResults)
         {
             if (expressionHolder.ExpressionType == typeof(int))
@@ -80,12 +80,12 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Tries to evaluate containing expression with given rows.
+        /// Tries to evaluate the containing expression with given rows.
         /// Values are compared always in ascending order and switched to descending order if neccessary.
         /// The cached campare is called only if the computation is not done in parallel.
         /// </summary>
-        /// <param name="x"> First row. </param>
-        /// <param name="y"> Second row. </param>
+        /// <param name="x"> The first row. </param>
+        /// <param name="y"> The second row. </param>
         /// <returns> Less than zero x precedes y in the sort order.
         /// Zero x occurs in the same position as y in the sort order.
         /// Greater than zero x follows y in the sort order.</returns>

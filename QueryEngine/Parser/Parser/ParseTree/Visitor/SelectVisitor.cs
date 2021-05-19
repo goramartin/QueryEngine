@@ -26,9 +26,9 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Root node of the parse tree.
-        /// Jump to the next node under root.
-        /// There must be at least one variable to be displyed.
+        /// The root node of the parse tree.
+        /// Jumps to the next node under the root.
+        /// There must be at least one variable node.
         /// </summary>
         public void Visit(SelectNode node)
         {
@@ -38,8 +38,8 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Parses print term node.
-        /// Expects that there is expression node and possibly next print term node.
+        /// Parses a print term node.
+        /// Expects that there is an expression node and possibly next print term node.
         /// Together it creates a chain of print expressions.
         /// </summary>
         public void Visit(SelectPrintTermNode node)
@@ -54,7 +54,7 @@ namespace QueryEngine
         /// <summary>
         /// Expects "Expression as label"
         /// Parses expression nodes and tries to get a label for the expression.
-        /// At the end, it creates a expression holder.
+        /// At the end, it creates an expression holder.
         /// It returns from here because there is no other node to visit.
         /// </summary>
         public void Visit(ExpressionNode node)

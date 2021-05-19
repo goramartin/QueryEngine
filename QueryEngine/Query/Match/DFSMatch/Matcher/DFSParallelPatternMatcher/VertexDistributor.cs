@@ -5,7 +5,7 @@ using System.Threading;
 namespace QueryEngine
 {
     /// <summary>
-    /// Classes serves as a distributor of vertices from graph to threads.
+    /// A class serves as a distributor of vertices from graph to threads.
     /// Each thread that calls this method will be given certain amount of vertices to process.
     /// Working with this class is critical section where multiple threads can meet.
     /// </summary>
@@ -13,7 +13,7 @@ namespace QueryEngine
     {
         List<Vertex> vertices;
         /// <summary>
-        /// Number of vertices to give during vertex distribution method call.
+        /// A number of vertices to give during vertex distribution method call.
         /// </summary>
         readonly int verticesPerRound;
         /// <summary>
@@ -25,7 +25,7 @@ namespace QueryEngine
         /// Creates a vertex distributor.
         /// </summary>
         /// <param name="vertices"> All vertices from a graph. </param>
-        /// <param name="verticesPerRound"> Number of vertices to distribute to a thread on demand.</param>
+        /// <param name="verticesPerRound"> A number of vertices to distribute to a thread on demand.</param>
         public VertexDistributor(List<Vertex> vertices, int verticesPerRound)
         {
             if (vertices == null || vertices.Count == 0 || verticesPerRound <= 0)
@@ -39,8 +39,8 @@ namespace QueryEngine
 
 
         /// <summary>
-        /// Method is called from within Work inside each thread.
-        /// Always returns range of graph vertices.
+        /// The method is called from within Work inside each thread.
+        /// Always returns a range of graph vertices.
         /// To omit locking, there is an atomic operation.
         /// On call the it receives end index of the returned range.
         /// The value is then substracted to obtain the start of the range.
@@ -48,13 +48,13 @@ namespace QueryEngine
         /// whether to continue in the search or not.
         /// The search ends if the range exceeds the count of vertices in the graph.
         /// </summary>
-        /// <returns> Starting index and ending index of a round or start/end set to -1 for no more vertices to be distribute.</returns>
+        /// <returns> A starting index and an ending index of a round or start/end set to -1 for no more vertices to be distribute.</returns>
         public void DistributeVertices(ref int start, ref int end)
         {
             int tmpEndOfRound = Interlocked.Add(ref this.nextFreeIndex, this.verticesPerRound);
             int tmpStartOfRound = tmpEndOfRound - this.verticesPerRound;
 
-            // First index is beyond the size of the array of vertices -> no more vertices to distribute.
+            // The first index is beyond the size of the array of vertices -> no more vertices to distribute.
             if (tmpStartOfRound >= this.vertices.Count)
             {
                 start = -1;
@@ -67,7 +67,7 @@ namespace QueryEngine
                 start = tmpStartOfRound;
                 end = this.vertices.Count;
 
-            } // Return normal size range.
+            } // Return a normal size range.
             else
             {
                 start = tmpStartOfRound;

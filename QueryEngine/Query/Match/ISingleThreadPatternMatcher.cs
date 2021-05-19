@@ -2,7 +2,7 @@
 {
     /// <summary>
     /// Single threaded matcher is used by a parallel matcher.
-    /// Represents one thread within a matcher.
+    /// Represents one thread within a parallel matcher.
     /// </summary>
     internal interface ISingleThreadPatternMatcher : IPatternMatcher
     {

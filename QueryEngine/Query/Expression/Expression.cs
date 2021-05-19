@@ -1,17 +1,14 @@
 ﻿/*! \file
 This file includes a base class for all expression nodes.
 Each node has evaluation method that tries to evaluate the expression that returns bool and a value.
-If the evaluation fails (missing property value on an element) it returns false, otherwise the value
-can be found in the "out" argument.
+If the evaluation fails (missing property value on an element) it returns false, otherwise the value can be found in the "out" argument.
 
 Expressions are part of the pgql expressions, such as SELECT, ORDER BY, GROUP BY...
 For example SELECT x, y, x.AGE MATCH (x) - (y);
-The "x", "y", "x.AGE" in select clause are expression that are evaluated for every individual 
-results of the query.
+The "x", "y", "x.AGE" in select clause are expression that are evaluated for every individual results of the query.
 
 Expressions work as follows.
-Expression themself are forming a syntax tree. Where each node evaluates it self and returns information about
-evaluation to its predecessor.
+Expressions themself are forming a syntax tree. Where each node evaluates it self and returns information about evaluation to its predecessor.
 */
 
 using System;
@@ -20,7 +17,7 @@ using System.Collections.Generic;
 namespace QueryEngine
 {
     /// <summary>
-    /// Base class for every expression node.
+    /// A base class for every expression node.
     /// Serves only as a holder.
     /// </summary>
     internal abstract class ExpressionBase
@@ -34,9 +31,8 @@ namespace QueryEngine
         {}
         
         /// <summary>
-        /// Gets expression type.
+        /// Returns an expression return type.
         /// </summary>
-        /// <returns> Type of expression. </returns>
         public abstract Type GetExpressionType();
 
         /// <summary>
@@ -61,7 +57,7 @@ namespace QueryEngine
     /// Each expression node will implement this interface.
     /// It provides methods for individual type of result classes.
     /// </summary>
-    /// <typeparam name="T"> Type of return value.</typeparam>
+    /// <typeparam name="T"> A type of the return value.</typeparam>
     internal abstract class ExpressionReturnValue<T> : ExpressionBase
     {
         public abstract bool TryEvaluate(in TableResults.RowProxy elements, out T returnValue);

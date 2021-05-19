@@ -19,7 +19,8 @@ using System.Threading.Tasks;
 namespace QueryEngine
 {
     /// <summary>
-    /// Serves as a paraller searcher. Contains threads and matchers.
+    /// Serves as a paraller matcher. 
+    /// Contains threads and matchers.
     /// Class contains definitions of jobs for threads.
     /// If only one thread is used for matching the single thread variant is used otherwise the multithread variant is used.
     /// If the parallel version is used, the results are merged into one table. at the end of the search.
@@ -33,10 +34,10 @@ namespace QueryEngine
         /// Creates a parallel matchers.
         /// Inits arrays of threads and matchers based on thread count.
         /// </summary>
-        /// <param name="pattern"> Pattern to match. </param>
-        /// <param name="graph"> Graph to search on.</param>
+        /// <param name="pattern"> A pattern to match. </param>
+        /// <param name="graph"> A graph to search on.</param>
         /// <param name="results"> Where to store results. </param>
-        /// <param name="executionHelper"> Query execution helper. </param>
+        /// <param name="executionHelper"> A query execution helper. </param>
         public DFSParallelPatternMatcher(DFSPattern pattern, Graph graph, MatchFixedResults results, IMatchExecutionHelper executionHelper): base(graph, executionHelper)
         {
             if (pattern == null || results == null)
@@ -139,7 +140,7 @@ namespace QueryEngine
         /// A thread asks for a new starting vertices for his matcher from a vertex distributor.
         /// If there are no more vertices the method ends.
         /// </summary>
-        /// <param name="o"> Class containing matcher and distributor and synchrinizer for the main thread. </param>
+        /// <param name="o"> A class containing a matcher and a distributor for the main thread. </param>
         private static void WorkMultiThreadSearch(object o)
         {
             JobMultiThreadSearch job = (JobMultiThreadSearch)o;
@@ -221,7 +222,7 @@ namespace QueryEngine
         /// Tries to get a free column index and on successful retrieval of the index.
         /// The column is merged.
         /// </summary>
-        /// <param name="o"> Merge Job.</param>
+        /// <param name="o"> A merge Job.</param>
         private static void ParallelMergeColumnWork(object o)
         {
             ParallelMergeColumnJob job = (ParallelMergeColumnJob)o;

@@ -6,7 +6,9 @@ using System.Threading;
 namespace QueryEngine
 {
     /// <summary>
-    /// A class represents a multi group grouping algorithm.
+    /// A class represents a multigroup grouping algorithm.
+    /// The grouping is done using ConcurrentDictionary.
+    /// The groups are computed globally.
     /// The class should be used only as the parallel solution and not with thread count set to 1.
     /// The class uses aggretation with buckets or array like storage.
     /// Each thread recieves an equal portion of the results from the result table.

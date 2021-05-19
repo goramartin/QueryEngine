@@ -1,10 +1,4 @@
-﻿/*! \file
-  This file includes definitions of match visitor used to collect data from created parsed tree.
-  It implements visits to a classes used inside a match parsed tree.
-  Visitor creates a list of Parsed Patterns that are later used to creat a pattern used during matching algorithm.
-*/
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace QueryEngine
@@ -35,12 +29,11 @@ namespace QueryEngine
         /// <summary>
         /// A root node of the parse tree.
         /// Jumps to the node under the root.
-        /// All patterns must have at least one match.
-        /// There is always at least one ParsedPattern.
+        /// All patterns must have at least one match node.
+        /// There is always at least one pattern.
         /// </summary>
         public void Visit(MatchNode node)
         {
-            //Create new pattern and start its parsing.
             result.Add(currentPattern);
             node.next.Accept(this);
 
@@ -52,7 +45,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Try to jump to variable inside vertex or continue to the edge.
+        /// Try to jump to a variable node inside the vertex or continue to the edge.
         /// </summary>
         public void Visit(VertexNode node)
         {
@@ -66,7 +59,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Tries to jump to variable node inside edge or to the next vertex.
+        /// Tries to jump to a variable node inside an edge or to the next vertex.
         /// </summary>
         public void Visit(InEdgeNode node)
         {
@@ -82,7 +75,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Tries to jump to variable node inside edge or to the next vertex.
+        /// Tries to jump to a variable node inside edge or to the next vertex.
         /// </summary>
         public void Visit(OutEdgeNode node)
         {
@@ -99,7 +92,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Tries to jump to variable node inside edge or to the next vertex.
+        /// Tries to jump to a variable node inside edge or to the next vertex.
         /// </summary>
         public void Visit(AnyEdgeNode node)
         {
@@ -115,17 +108,17 @@ namespace QueryEngine
         }
         
         /// <summary>
-        /// Always jumps to identifier node where Name and type is processed.
+        /// Always jumps to a identifier node where name and type is processed.
         /// </summary>
         public void Visit(MatchVariableNode node)
         {
             readingName = true;
-            //It is not anonnymous field.
+            // It is not an anonnymous field.
             if (node.variableName != null)
             {
                 node.variableName.Accept(this);
             }
-            //It has set type.
+            // It has set type.
             if (node.variableType != null)
             {
                 readingName = false;
@@ -134,7 +127,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Either assigns name of a variable to the last ParsedPatternNode or there is a table pertaining to the node. 
+        /// Either assigns a name of a variable to the last ParsedPatternNode or there is a table pertaining to the node. 
         /// It returns from here because there is no other node to visit.
         /// </summary>
         public void Visit(IdentifierNode node)
@@ -156,9 +149,9 @@ namespace QueryEngine
         /// <summary>
         /// Tries to find a table based on the indentifier node value and assign it to the parsed node.
         /// </summary>
-        /// <param name="node"> Identifier node from Visiting indetifier node.</param>
-        /// <param name="d"> Dictionary of tables from edges/vertices. </param>
-        /// <param name="n"> ParsedPatternNode from within Visiting identifier node.</param>
+        /// <param name="node"> An identifier node from Visiting indetifier node.</param>
+        /// <param name="d"> A dictionary of tables from edges/vertices. </param>
+        /// <param name="n"> A ParsedPatternNode from within Visiting identifier node.</param>
         private void ProcessType(IdentifierNode node, Dictionary<string, Table> d, ParsedPatternNode n)
         {
             //Try find the table of the variable, it has to be always valid table name.

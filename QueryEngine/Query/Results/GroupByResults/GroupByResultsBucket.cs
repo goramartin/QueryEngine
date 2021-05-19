@@ -12,7 +12,6 @@ namespace QueryEngine
     /// </summary>
     internal abstract class GroupByResultsBucket : GroupByResults, IEnumerable<GroupByResultsBucket.GroupProxyBucket>
     {
-        // To do make divided.
         public GroupByResultsBucket(int count, ITableResults resTable) : base(count, resTable)
         {}
 

@@ -4,7 +4,7 @@ namespace QueryEngine
 {
     /// <summary>
     /// A base class for every query clause. Such as match, select...
-    /// Enables to process query as a chain that contains processing units.
+    /// Enables to process a query as a chain that contains processing units.
     /// Each unit calls Compute on the next and awaits results in the out parameter of the Compute method.
     /// The chain is built so that units that do compute sooner are at the end of the chain.
     /// This enables to get rid of the processing unit after it completes the task.
@@ -12,7 +12,7 @@ namespace QueryEngine
     internal abstract class QueryObject
     {
         /// <summary>
-        /// Processing unit that needs to finish before this one.
+        /// A processing unit that needs to finish before this instance.
         /// </summary>
         protected QueryObject next;
 

@@ -8,10 +8,10 @@ namespace QueryEngine
     internal sealed class VariableIDReference : VariableReference<int>
     {
         /// <summary>
-        /// Constructs id reference.
+        /// Constructs an id reference.
         /// </summary>
-        /// <param name="nHolder">Holder of string representation of the name.</param>
-        /// <param name="varIndex"> Index in a result during evaluation.</param>
+        /// <param name="nHolder"> A holder of string representation of the name.</param>
+        /// <param name="varIndex"> An index in a result during evaluation.</param>
         public VariableIDReference(VariableReferenceNameHolder nHolder, int varIndex) : base(nHolder, varIndex) 
         { }
 
@@ -21,7 +21,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Returns type of this expression.
+        /// Returns a type of this expression.
         /// </summary>
         public override Type GetExpressionType()
         {
@@ -29,11 +29,11 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Accesses id of an element. This always succedes.
+        /// Accesses an id of an element. This is always successful.
         /// </summary>
-        /// <param name="elements"> Result from a match query. </param>
-        /// <param name="returnValue">Return value of this expression node. </param>
-        /// <returns> True on successful evaluation otherwise false. </returns>
+        /// <param name="elements"> A result from a match query. </param>
+        /// <param name="returnValue"> A placeholder for the returned ID value. </param>
+        /// <returns> Always true because the ID access can never fail. </returns>
         public override bool TryEvaluate(in TableResults.RowProxy elements, out int returnValue)
         {
             returnValue = elements[this.VariableIndex].ID;

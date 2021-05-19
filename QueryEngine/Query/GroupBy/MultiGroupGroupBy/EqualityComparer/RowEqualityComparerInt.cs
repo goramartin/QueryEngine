@@ -7,7 +7,7 @@ namespace QueryEngine
     /// This class does compute hash because its main purpose is in the Global grouping, where
     /// there is no need for the GroupDictKey, because no merging is done and the value of the hash
     /// is not needed futher.
-    /// Is used in GlobalMerge.
+    /// Is used in Global group by.
     /// </summary>
     internal class RowEqualityComparerInt : IEqualityComparer<int>
     {

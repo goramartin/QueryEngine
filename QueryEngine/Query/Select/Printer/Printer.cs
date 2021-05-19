@@ -12,7 +12,7 @@ namespace QueryEngine
 {
     public enum PrinterType { File, Console }
     /// <summary>
-    /// Abstract class for printing results.
+    /// An abstract class for printing results.
     /// </summary>
     internal abstract class Printer : IDisposable, IRowPrinter
     {
@@ -22,9 +22,6 @@ namespace QueryEngine
         /// </summary>
         protected List<ExpressionToStringWrapper> rowFormat;
 
-        /// <summary>
-        /// Defines what resulting table will look like.
-        /// </summary>
         protected Formater formater;
         /// <summary>
         /// Defines where the printing will be done.
@@ -47,10 +44,6 @@ namespace QueryEngine
         }
 
 
-        /// <summary>
-        /// Prints row for one result.
-        /// </summary>
-        /// <param name="elements"> A one result from query search. </param>
         public void PrintRow(in TableResults.RowProxy elements)
         {
             for (int i = 0; i < this.rowFormat.Count; i++)
@@ -90,13 +83,13 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Factory for printer class.
+        /// A factory method.
         /// </summary>
-        /// <param name="printerType"> Printer type. </param>
-        /// <param name="rowFormat"> Format of a columns. </param>
-        /// <param name="formater"> Formater type. </param>
-        /// <param name="fileName"> File name if defined file printer. </param>
-        /// <returns> Printer instance. </returns>
+        /// <param name="printerType"> A printer type. </param>
+        /// <param name="rowFormat"> A format of a columns. </param>
+        /// <param name="formater"> A formater type. </param>
+        /// <param name="fileName"> A file name if defined the file printer. </param>
+        /// <returns> A printer instance. </returns>
         public static Printer Factory(PrinterType printerType, List<ExpressionToStringWrapper> rowFormat, FormaterType formater, string fileName= null)
         {
             if (printerType == PrinterType.Console)

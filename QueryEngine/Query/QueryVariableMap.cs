@@ -22,7 +22,7 @@ namespace QueryEngine
      
         /// <summary>
         /// A map with information about defined variables.
-        /// Tuple contains index of the variable and possibly it is type if it is stated in the query.
+        /// Tuple contains an index of the variable and possibly it's type if it is stated in the query.
         /// </summary>
         private Dictionary<string, Tuple<int, Table>> variableMap;
         
@@ -31,19 +31,19 @@ namespace QueryEngine
         /// <summary>
         /// Indexer to ease access with string keys to a map.
         /// </summary>
-        /// <param name="str"> Name of variable. </param>
-        /// <returns> Tuple with position of variable in result and its type. </returns>
+        /// <param name="str"> A name of a variable. </param>
+        /// <returns> A tuple witha  position of a variable in the result and its type. </returns>
         public Tuple<int, Table> this[string str]
         {
             get { return this.variableMap[str]; }
         }
 
         /// <summary>
-        /// Adds variable to the dictionary.
+        /// Adds a variable to the map.
         /// </summary>
-        /// <param name="varName"> Name of variable to insert </param>
-        /// <param name="position"> Position in flattened pattern </param>
-        /// <param name="table"> Type of inserted variable </param>
+        /// <param name="varName"> A name of a variable to insert. </param>
+        /// <param name="position"> A position in the flattened pattern. </param>
+        /// <param name="table"> Type of inserted variable. </param>
         public void AddVariable(string varName, int position, Table table)
         {
             if (this.variableMap.ContainsKey(varName))
@@ -52,29 +52,21 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Returns positon of variable based on the name of the variable.
+        /// Returns a positon of a variable based on the name of the variable.
         /// </summary>
-        /// <param name="name"> Variable to be searched for in Dictionary. </param>
-        /// <returns> Position of variable in flattened pattern </returns>
+        /// <param name="name"> A variable to be searched for in the map. </param>
+        /// <returns> A position of a variable in the flattened pattern. </returns>
         public int GetVariablePosition(string name)
         {
             if (this.variableMap.TryGetValue(name, out var tuple)) return tuple.Item1;
             else return -1;
         }
 
-
-        /// <summary>
-        /// Copy of Dictionary method TryGetValue
-        /// </summary>
-        /// <param name="name"> Key </param>
-        /// <param name="tuple"> Value </param>
-        /// <returns> True on retrieval of value </returns>
         public bool TryGetValue(string name, out Tuple<int, Table> tuple)
         {
             return this.variableMap.TryGetValue(name, out tuple);
         }
 
-        /// <returns> Count of variables. </returns>
         public int GetCount() => this.variableMap.Count;
 
         public IEnumerator<KeyValuePair<string, Tuple<int,Table>>> GetEnumerator()
@@ -82,9 +74,6 @@ namespace QueryEngine
             return this.variableMap.GetEnumerator();
         }
 
-        /// <summary>
-        /// Calls generic method of get enumerator.
-        /// </summary>
         IEnumerator IEnumerable.GetEnumerator()
         {
             return this.GetEnumerator();

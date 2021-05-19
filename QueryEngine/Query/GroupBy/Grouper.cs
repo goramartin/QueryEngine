@@ -3,7 +3,7 @@
 namespace QueryEngine
 {
     /// <summary>
-    /// Class is a base class for each grouper.
+    /// A class is a base class for each grouper.
     /// A grouper is a class that groups results from the search query into groups.
     /// There are two groupers. A single group grouper which represents a grouping when an aggregate is used
     /// in the query but no group by is set.S
@@ -47,6 +47,10 @@ namespace QueryEngine
             }
         }
 
+        /// <summary>
+        /// A factory method.
+        /// Creates an appropriate group by solution based on the provided alias.
+        /// </summary>
         public static Grouper Factory(GrouperAlias grouperAlias, Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper helper)
         {
             if (grouperAlias == GrouperAlias.RefB) return new GroupByWithBuckets(aggs, hashes, helper);
@@ -60,6 +64,10 @@ namespace QueryEngine
             else throw new ArgumentException("Grouper, trying to create an unknown grouper.");
         }
 
+        /// <summary>
+        /// A factory method.
+        /// Creates an appropriate group by solution based on the alias inside the provided helper.
+        /// </summary>
         public static Grouper Factory(Aggregate[] aggs, ExpressionHolder[] hashes, IGroupByExecutionHelper helper)
         {
             return Factory(helper.GrouperAlias, aggs, hashes, helper);

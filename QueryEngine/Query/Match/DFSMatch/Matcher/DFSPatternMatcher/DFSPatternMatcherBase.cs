@@ -25,8 +25,8 @@ namespace QueryEngine
         /// <summary>
         /// Starting vertices are implicitly set to entire graph.
         /// </summary>
-        /// <param name="pat"> The pattern to find.</param>
-        /// <param name="gr"> The graph to search. </param>
+        /// <param name="pat"> A pattern to find.</param>
+        /// <param name="gr"> A graph to search. </param>
         protected DFSPatternMatcherBase(IDFSPattern pat, Graph gr)
         {
             if (gr == null || pat == null)

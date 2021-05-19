@@ -1,5 +1,5 @@
 ﻿/*! \file
-This file contains definition of an abstract aggregate function.
+This file contains a definition of an abstract aggregate function.
 Each agg. function processes passed result row in its own way.
 The aggregate contains expression holder to enable computation of the desired values.
 The property IsAstCount serves as a helper to avoid unneccessary passing of rows into
@@ -206,7 +206,7 @@ namespace QueryEngine
     /// <summary>
     /// An aggregate fucntion base class.
     /// </summary>
-    /// <typeparam name="T"> A return type of the aggregate function. </typeparam>
+    /// <typeparam name="T"> A return type of the evaluated expression. </typeparam>
     internal abstract class Aggregate<T> : Aggregate
     {
         protected ExpressionReturnValue<T> expr;

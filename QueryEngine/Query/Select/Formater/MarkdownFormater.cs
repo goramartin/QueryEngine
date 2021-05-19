@@ -1,16 +1,11 @@
-﻿/*! \file 
-This file includes definition of a mark down formater.
-Prints header and values into a markd down table format.
-*/
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 
 namespace QueryEngine 
 { 
 
     /// <summary>
-    /// Format is printed as a markdown table.
+    /// A format is printed as a markdown table.
     /// </summary>
     internal sealed class MarkDownFormater : Formater
     {
@@ -18,9 +13,9 @@ namespace QueryEngine
 
 
         /// <summary>
-        /// Adds word to a format and separates it with a | character to end a column in markdown syntax.. 
+        /// Adds a word to a format and separates it with a | character to end a column in markdown syntax.. 
         /// </summary>
-        /// <param name="word"> Word to add to a format. </param>
+        /// <param name="word"> A word to format. </param>
         public override void AddToFormat(string word)
         {
             if (this.ColumnsFilled == 0) this.stringBuilder.Append('|');
@@ -35,9 +30,9 @@ namespace QueryEngine
         /// <summary>
         /// Formates a given header.
         /// Each column is printed and below is printed a dash delimeter to separate
-        /// header and results. Columns are also | separated on sides.
+        /// the header and the results. Columns are also | separated on sides.
         /// </summary>
-        /// <param name="variables"> Header format. </param>
+        /// <param name="variables"> A header format. </param>
         public override void FormatHeader(List<ExpressionToStringWrapper> variables)
         {
             this.stringBuilder.Append('|');
@@ -57,7 +52,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Flushed string builder and prepares for printing next row.
+        /// Flushed the string builder and prepares printing of the next row.
         /// </summary>
         public override void Flush()
         {

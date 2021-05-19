@@ -1,9 +1,4 @@
-﻿/*! \file
-    This file includes definition of a console printer.
-    The file printer prints results into a console.
-*/
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -17,8 +12,8 @@ namespace QueryEngine
         /// <summary>
         /// Creates a console printer.
         /// </summary>
-        /// <param name="rowFormat"> Format of a columns. </param>
-        /// <param name="formater"> Type of formater. </param>
+        /// <param name="rowFormat"> A format of a columns. </param>
+        /// <param name="formater"> A type of formater. </param>
         public ConsolePrinter(List<ExpressionToStringWrapper> rowFormat, FormaterType formater) : base(rowFormat)
         {
             try
@@ -34,7 +29,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Flushed formater buffer and releases resources of writer.
+        /// Flushed the formater buffer and releases resources of the writer.
         /// </summary>
         public override void Dispose()
         {

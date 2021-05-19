@@ -2,14 +2,13 @@
 {
 
     /// <summary>
-    /// Struct serves as a type for the key that is put into the dictionary when multi
-    /// group grouping is performed.
+    /// Struct serves as a type for the key that is put into the dictionary when multigroup grouping is performed.
     /// </summary>
     internal readonly struct GroupDictKey
     {
         public readonly int hash;
         /// <summary>
-        /// Position of the result row equivalent to the group representant.
+        /// A position of the result row equivalent to the group representant.
         /// </summary>
         public readonly int position;
 

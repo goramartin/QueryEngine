@@ -1,5 +1,5 @@
 ﻿/*! \file
-This file includes a class that hold results from query matcher. 
+This file includes a class that holds results from query matcher. 
   
 Each result consists of certain number of elements, those are variables defined in PGQL match section.
 The number of elements in the result defines the number of columns. (Each variable is stored inside its 
@@ -48,16 +48,16 @@ namespace QueryEngine
         private int[] order;
 
         /// <summary>
-        /// Number of columns.
+        /// A number of columns.
         /// </summary>
         public int ColumnCount => this.resTable.Length;
         /// <summary>
-        /// Number of rows in the table. Might be zero even if the matched elements are set.
+        /// A number of rows in the table. Might be zero even if the matched elements are set.
         /// </summary>
         public int RowCount { get; private set; }
 
         /// <summary>
-        /// Number of elements that actually were matched, if the query needs only count and not results explicitly.
+        /// A number of elements that actually were matched, if the query needs only count and not results explicitly.
         /// </summary>
         public int NumberOfMatchedElements { get; private set; }
 
@@ -68,13 +68,13 @@ namespace QueryEngine
         public Element[] temporaryRow { get; set; } = null;
         public int FixedArraySize { get; private set; }
         /// <summary>
-        /// Array of indeces of variable that must be stored. The rest is omited.
+        /// An array of indeces of variable that must be stored. The rest is omited.
         /// </summary>
         public int[] usedVars { get; private set; }
 
         /// <summary>
-        /// Empty constructor for passing into group by results for streamed grouping.
-        /// Flags for static.
+        /// An empty constructor for passing into group by results for streamed grouping.
+        /// Flags static as true.
         /// </summary>
         public TableResults() { 
         }
@@ -85,8 +85,8 @@ namespace QueryEngine
         /// Flags for dynamic.
         /// </summary>
         /// <param name="elements"> Merged matcher results. </param>
-        /// <param name="count"> Number of matched elements even though they might not be stored in the table. </param>
-        /// <param name="fixedArraySize"> Size of blocks that store the results. </param>
+        /// <param name="count"> A number of matched elements even though they might not be stored in the table. </param>
+        /// <param name="fixedArraySize"> A size of blocks that store the results. </param>
         /// <param name="wasStoringResults"> A flag whether the count is equal to the number of elements in the tables.</param>
         public  TableResults(List<Element[]>[] elements, int count, int fixedArraySize, bool wasStoringResults)
         {
@@ -106,7 +106,7 @@ namespace QueryEngine
 
         /// <summary>
         /// Creates an empty instance with the specified number of columns.
-        /// Flags for dynamic.
+        /// Flags static as false.
         /// </summary>
         public TableResults(int columnCount, int fixedArraySize, int[] usedVars)
         {
@@ -156,10 +156,10 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Accesses table of results.
+        /// Accesses a table of results.
         /// </summary>
-        /// <param name="rowIndex"> Row of a table. </param>
-        /// <returns> Element on a given position based on an index if the order is not defined. 
+        /// <param name="rowIndex"> A row of a table. </param>
+        /// <returns> An element on a given position based on an index if the order is not defined. 
         /// Otherwise, the appropriate index placed in the order array on the provided index is taken.</returns>
         public RowProxy this[int rowIndex]
         {
@@ -188,7 +188,7 @@ namespace QueryEngine
         /// <summary>
         /// Adds order to the table.
         /// </summary>
-        /// <param name="order"> Array containing integers as indeces to the enclosed result table. </param>
+        /// <param name="order"> An array containing integers as indeces to the enclosed result table. </param>
         public void AddOrder(int[] order)
         {
             if (order == null)

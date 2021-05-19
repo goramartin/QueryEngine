@@ -5,7 +5,7 @@ using System.Linq;
 namespace QueryEngine
 {
     /// <summary>
-    /// Class serves as a information collector of used expressions in a query.
+    /// A class serves as an information collector of used expressions in a query.
     /// 
     /// If the group by clause is defined. In the query, there can be referenced only
     /// the same expressions as in the group clause or an aggregate functions.
@@ -64,7 +64,7 @@ namespace QueryEngine
         /// So far called only from Select clause parser.
         /// </summary>
         /// <param name="expressionHolder"> An expression. </param>
-        /// <returns> Returns position of the passed expression in the main expression list.  </returns>
+        /// <returns> Returns a position of the passed expression in the main expression list.  </returns>
         public int AddExpression(ExpressionHolder expressionHolder)
         {
             CheckNullExpression(expressionHolder);
@@ -96,7 +96,7 @@ namespace QueryEngine
         /// This does not throw because aggregates can be scattered across multiple clauses.
         /// </summary>
         /// <param name="aggregate"> An aggregate function. </param>
-        /// <returns> Returns position where it was added or the position of the aggregate that has been already added.</returns>
+        /// <returns> Returns a position where it was added or the position of the aggregate that has been already added.</returns>
         public int AddAggregate(Aggregate aggregate)
         {
             CheckAggregateNull(aggregate);
@@ -111,14 +111,14 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Adds hash expression for group by.
+        /// Adds a hash expression for group by.
         /// Cannot contain aggregations.
         /// Each hash can be added only once.
         /// Note that this method is called only when the group by keys are created.
         /// Thus, hashes and expr have the same count.
         /// </summary>
         /// <param name="expressionHolder"> An expression to hash with. </param>
-        /// <returns> Returns position of the passed expression in the main expression list. </returns>
+        /// <returns> Returns a position of the passed expression in the main expression list. </returns>
         public int AddGroupByHash(ExpressionHolder expressionHolder)
         {
             CheckNullExpression(expressionHolder);
@@ -136,11 +136,11 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Adds comparer expression for order by.
-        /// Cannot contain multiple occurrences of the same comparer expression.
+        /// Adds a expression for order by.
+        /// Cannot contain multiple occurrences of the same expression.
         /// </summary>
         /// <param name="expressionHolder"> An expression to sort with. </param>
-        /// <returns> Returns position of the passed expression in the main expression list. </returns>
+        /// <returns> Returns a position of the passed expression in the main expression list. </returns>
         public int AddOrderByComp(ExpressionHolder expressionHolder)
         {
             CheckNullExpression(expressionHolder);
@@ -160,7 +160,7 @@ namespace QueryEngine
         /// <summary>
         /// Checks whether a simple expression was used in the query.
         /// </summary>
-        /// <returns> True if contains simple exp, otherwise false. </returns>
+        /// <returns> True if contains a simple exp, otherwise false. </returns>
         private bool ContainsSimpleExpr()
         {
             for (int i = 0; i < this.Exprs.Count; i++)

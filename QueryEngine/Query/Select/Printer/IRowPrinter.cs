@@ -1,7 +1,7 @@
 ﻿namespace QueryEngine
 {
     /// <summary>
-    /// A base interface for printers. It defines the neccessary functions, that will be handle by the printer.
+    /// A base interface for printers.
     /// </summary>
     interface IRowPrinter
     {

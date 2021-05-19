@@ -20,10 +20,10 @@ namespace QueryEngine
             public readonly int index;
 
             /// <summary>
-            /// Constructs proxy row.
+            /// Constructs a proxy row.
             /// </summary>
-            /// <param name="results"> Result table. </param>
-            /// <param name="index"> Index of a row in the given result table.</param>
+            /// <param name="results"> A result table. </param>
+            /// <param name="index"> An index of a row in the given result table.</param>
             public RowProxy(TableResults results, int index)
             {
                 this.index = index;
@@ -35,8 +35,8 @@ namespace QueryEngine
             /// If the index points to beyond the table lists, then
             /// it assumes that the row is stored in the temporary field.
             /// </summary>
-            /// <param name="column"> Index of a column. </param>
-            /// <returns> Element in the given column.</returns>
+            /// <param name="column"> An index of a column. </param>
+            /// <returns> An element in the given column.</returns>
             public Element this[int column]
             {
                 get
@@ -58,7 +58,7 @@ namespace QueryEngine
 
 
             /// <summary>
-            /// Returns string containing the index of the row and IDs of elements in the row.
+            /// Returns a string containing the index of the row and IDs of elements in the row.
             /// </summary>
             public override string ToString()
             {
@@ -78,8 +78,8 @@ namespace QueryEngine
             /// In case there are the same, the expression should give the same 
             /// result.
             /// </summary>
-            /// <param name="x"> First row. </param>
-            /// <param name="y"> Second row.</param>
+            /// <param name="x"> The first row. </param>
+            /// <param name="y"> The second row.</param>
             /// <param name="usedVars"> Variables to compare. </param>
             /// <returns> True if all used variables are the same. </returns>
             public static bool AreIdenticalVars(in TableResults.RowProxy x, in TableResults.RowProxy y, int[] usedVars)

@@ -15,11 +15,11 @@ namespace QueryEngine
         // Normal
 
         /// <summary>
-        /// Reference single thread solution using Buckets.
+        /// A reference single thread solution using Buckets.
         /// </summary>
         RefB,
         /// <summary>
-        /// Reference Single thread solution using Lists.
+        /// A reference Single thread solution using Lists.
         /// </summary>
         RefL,
         /// <summary>

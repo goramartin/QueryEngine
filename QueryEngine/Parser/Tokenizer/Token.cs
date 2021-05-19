@@ -1,12 +1,12 @@
 ﻿/*! \file 
-This file contains definition of a token.
-Token is used during tokenisation of an input query.
+This file contains a definition of a token.
+The token is used during tokenisation of an input query.
 */
 
 namespace QueryEngine
 {
     /// <summary>
-    /// Represents single token when parsing. Token type is a type of the token.
+    /// Represents a single token when tokenizing the input query.
     /// </summary>
     internal struct Token
     {

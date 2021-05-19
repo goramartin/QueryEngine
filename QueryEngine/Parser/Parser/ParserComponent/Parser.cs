@@ -2,41 +2,44 @@
 This file contains definitions of a Parser.
 (Sometimes in comments there are used "o-" instead of "<-" because it destroys xml formatting)
   
-Parsing is done via Deep descend parsing (Top to bottom).
-The whole query expression forms a single tree. Each parser method (ParseSelect, ParseMatch)
-parses only the part corresponding to the query word and returns a parse tree of that expression.
+Parsing is done via deep descend parsing (Top to bottom).
+Each parser method (ParseSelect, ParseMatch) parses only a part corresponding to the query word and returns it's parse tree.
 Visitors then create structures that are used to create query objects.
 
-Grammar:
-Query -> Select Match (OrderBy)? ;
+Grammar (capital are terminals, using regular expressions to make it more readable):
+Query: Select Match Optional
+Optional: OrderBy | GroupBy
   
-Select -> SELECT (\*|(SelectPrintTerm (, SelectPrintTerm)*)
-SelectPrintTerm -> Expression
+Select: SELECT (\* | (SelectPrintTerm (, SelectPrintTerm)*)
+SelectPrintTerm: Expression
 
-Match -> MATCH MatchTerm (, MatchTerm)*
-MatchTerm -> Vertex (Edge Vertex)*
-Vertex -> (MatchVariable)
-Edge -> (EmptyAnyEdge|EmptyOutEdge|EmptyInEdge|AnyEdge|InEdge|OutEdge) 
-EmptyAnyEdge -> -
-EmptyOutEdge -> <-
-EmptyInEdge -> ->
-AnyEdge -> -[MatchVariable]-
-InEdge -> <-[MatchVariable]-
-OutEdge -> -[MatchVariable]->
-MatchVariable -> (VariableNameReference)?(:TableType)?
-TableType -> IDENTIFIER
+Match: MATCH MatchTerm (, MatchTerm)*
+MatchTerm: Vertex (Edge Vertex)*
+Vertex: (MatchVariable)
+Edge: (EmptyAnyEdge|EmptyOutEdge|EmptyInEdge|AnyEdge|InEdge|OutEdge) 
+EmptyAnyEdge: -
+EmptyOutEdge: <-
+EmptyInEdge: ->
+AnyEdge: -\[MatchVariable\]-
+InEdge: <-\[MatchVariable\]-
+OutEdge: -\[MatchVariable\]->
+MatchVariable: | VariableNameReference | :TableType | VariableNameReference:TableType
+TableType: IDENTIFIER
+VariableNameReference: IDENTIFIER
  
-OrderBy -> ORDER BY OrderTerm (, OrderTerm)*
-OrderTerm -> Expression (ASC|DESC)?
+OrderBy: ORDER BY OrderTerm (, OrderTerm)*
+OrderTerm: Expression (ASC | DESC)?
 
-GroupBy -> GroupByTerm (, GroupByTerm)*
-GroupByTerm -> Expression
+GroupBy: GroupByTerm (, GroupByTerm)*
+GroupByTerm: Expression
 
-Expression -> VariableNameReference(.VariablePropertyReference)? AS Label
+Expression -> ExpressionTerm AS Label
+ExpressionTerm -> AggregateFunc|VarReference
+AggregateFunc -> IDENTIFIER \( VarReference \)
+VarReference -> ReferenceName(.ReferenceName)?
 Label -> IDENTIFIER
-VariableNameReference -> IDENTIFIER
-VariablePropertyReference -> IDENTIFIER
- */
+ReferenceName -> IDENTIFIER
+*/
 
 using System;
 using System.Collections.Generic;
@@ -96,12 +99,8 @@ namespace QueryEngine
 
 
         /// <summary>
-        /// Check for token on position given.
+        /// Check for a token on the given position given.
         /// </summary>
-        /// <param name="p"> Position in list of tokens </param>
-        /// <param name="type"> Type of token to be checked against </param>
-        /// <param name="tokens"> List of parse tokens </param>
-        /// <returns></returns>
         static private bool CheckToken(int p, Token.TokenType type, List<Token> tokens)
         {
             if (p < tokens.Count && tokens[p].type == type)
@@ -113,11 +112,10 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Builds error message.
-        /// Each parser type passes it is own type and a message.
-        /// Afterwards tokens are printed.
+        /// Builds an error message.
+        /// Each parser type passes has it is own type and a message.
         /// </summary>
-        /// <param name="parserType"> Type of parser. </param>
+        /// <param name="parserType"> A type of parser. </param>
         /// <param name="message"> A message to print. </param>
         /// <param name="position"> A position of error. </param>
         /// <param name="tokens"> Parsed tokens. </param>

@@ -5,7 +5,7 @@ These readers are used for loading a graph.
 There are two readers, one reader is used for parsing edges and vertices from a file.
 The second one is used for parsing a JSON schema for table definitions.
 
-The difference is that reader for the schema must not omit certain special characters.
+The difference is that the reader for the schema must not omit certain special characters.
  */
 
 using System;
@@ -16,14 +16,14 @@ using System.IO;
 namespace QueryEngine
 {
     /// <summary>
-    /// Interface for reading text files.
+    /// An interface for reading text files.
     /// </summary>
     internal interface IReader: IDisposable
     {
         string Read();
     }
     /// <summary>
-    /// Interface to reader entire words from a file.
+    /// An interface to the reader which reads entire words from a file.
     /// </summary>
     internal interface IWordReader :IReader
     {
@@ -31,7 +31,7 @@ namespace QueryEngine
     } 
 
     /// <summary>
-    /// Class for reading text files.
+    /// A class for reading text files.
     /// Gets one file and pulls each word from the file.
     /// If it is at the end of file, it returns null.
     /// Delimeters can be set.
@@ -46,9 +46,9 @@ namespace QueryEngine
         private bool end;
 
         /// <summary>
-        /// Creates reader and opens given file for reading.
+        /// Creates a reader and opens a given file for reading.
         /// </summary>
-        /// <param name="fileName"> File name to open. </param>
+        /// <param name="fileName"> A file name of to open. </param>
         public DataFileReader(string fileName)
         {
             this.wordBuilder = new StringBuilder();
@@ -68,7 +68,7 @@ namespace QueryEngine
         /// Stripes words from a stream.
         /// Omits whitespaces.
         /// </summary>
-        /// <returns> Words from a stream. </returns>
+        /// <returns> Words from the stream. </returns>
         public string GetWord()
         {
             int character = 0;
@@ -77,56 +77,52 @@ namespace QueryEngine
             if (this.end) return null;
             this.wordBuilder.Clear();
 
-            //peek next character
+            // Peek the next character.
             while ((characterPeeked = this.fileReader.Peek()) != -1)
             {
                 if (characterPeeked >= 128)
                     throw new ArgumentException($"{this.GetType()}, the data file contains characters that are not ASCII (0-127). {characterPeeked}");
 
-                //the character is delimeter
+                // The character is delimeter.
                 if (this.delimeters.Contains((char)characterPeeked))
                 {
-                    //any chars yet, consume the whitespace
+                    // No chars yet, consume the whitespace.
                     if (this.wordBuilder.Length == 0)
                     {
                         character = this.fileReader.Read();
                     }
-                    //read a first whitespace after reading a word, return the word
+                    // Read the first whitespace after reading a word and return the word.
                     else return this.wordBuilder.ToString();
                 }
-                //the character is normal letter
+                // The character is a normal letter.
                 else
                 {
-                    //add the letter to stringBuilder
+                    // Add the letter to a string builder.
                     character = this.fileReader.Read();
                     this.wordBuilder.Append((char)character);
                 }
 
             }
-            //not returned last word
+            // The not returned last word.
             if (this.wordBuilder.Length > 0)
             {
                 this.end = true;
                 return this.wordBuilder.ToString();
             }
-            //finished reading
+            // Finished reading.
             else
             {
                 return null;
             }
         }
 
-        /// <summary>
-        /// Calls get words method on this class.
-        /// </summary>
-        /// <returns>Returns a word.</returns>
         public string Read()
         {
             return this.GetWord();
         }
 
         /// <summary>
-        /// Flushes reader.
+        /// Flushes the reader.
         /// </summary>
         public void Dispose()
         {
@@ -148,25 +144,24 @@ namespace QueryEngine
     {
 
         /// <summary>
-        /// Builder for word striping.
+        /// A builder for word striping.
         /// </summary>
         private StringBuilder wordBuilder;
         
         /// <summary>
-        /// File reader.
+        /// The file reader.
         /// </summary>
         private StreamReader fileReader;
         
         /// <summary>
-        /// Specifies whether we reached end of file.
+        /// Specifies whether we reached the end of file.
         /// </summary>
         private bool end;
 
         /// <summary>
-        /// Creates reader. Tries to open file for reader.
-        /// Throw io exception. 
+        /// Creates a reader. Tries to open a file for the reader.
         /// </summary>
-        /// <param name="fileName"> File to open for reading. </param>
+        /// <param name="fileName"> A file name of a file to open. </param>
         public TableFileReader(string fileName)
         {
             this.wordBuilder = new StringBuilder();
@@ -193,20 +188,19 @@ namespace QueryEngine
         /// Either reads a single word or a special non letter character.
         /// Skipps whitespaces.
         /// </summary>
-        /// <returns></returns>
         public string Read()
         {
             int characterPeeked = 0;
 
             if (this.end) return null;
 
-            // Peek a character
+            // Peek a character.
             while ((characterPeeked = fileReader.Peek()) != -1)
             {
                 // Skip whitespace character.
                 if (char.IsWhiteSpace((char)characterPeeked))
                     fileReader.Read();
-                // If letter found strip entire word
+                // If letter found strip entire word.
                 else if (char.IsLetter((char)characterPeeked))
                     return GetWord((char)characterPeeked);
                 else
@@ -221,10 +215,10 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Stripes entire word from a stream.
+        /// Stripes the entire word from a stream.
         /// </summary>
-        /// <param name="ch"> First consumed character from the stream. </param>
-        /// <returns> Word from a stream. </returns>
+        /// <param name="ch"> The first consumed character from the stream. </param>
+        /// <returns> A word from a stream. </returns>
         private string GetWord(char ch)
         {
             fileReader.Read();
@@ -246,8 +240,5 @@ namespace QueryEngine
             return wordBuilder.ToString();
 
         }
-
-
     }
-
 }

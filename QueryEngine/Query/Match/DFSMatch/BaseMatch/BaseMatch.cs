@@ -13,7 +13,7 @@ using System;
 namespace QueryEngine
 {
     /// <summary>
-    /// Class representing single step in search algorithm.
+    /// A class representing single step in search algorithm.
     /// Every step, an element is tried to be applied through the apply method.
     /// Method apply returns true if the element can be added to final result.
     /// Descendants share certain conditions when applying such as Type, Variable name, Edge type...
@@ -29,7 +29,7 @@ namespace QueryEngine
         /// </summary>
         readonly bool isFirstAppereance;
         /// <summary>
-        /// Represents index in scope if it is not anonymous. 
+        /// Represents an index in scope if it is not anonymous. 
         /// </summary>
         readonly int positionOfRepeatedField;
         /// <summary>
@@ -37,7 +37,7 @@ namespace QueryEngine
         /// </summary>
         readonly Table table;
         /// <summary>
-        /// Type of graph element to be matched. Its faster to store the information directly then call virtual methods.
+        /// A type of graph element to be matched. Its faster to store the information directly then call virtual methods.
         /// The pattern is never really long, so the memory overhead is negligible.
         /// </summary>
         readonly Type matchingType;
@@ -53,10 +53,10 @@ namespace QueryEngine
         /// <summary>
         /// Constructor for each DFS Match object.
         /// </summary>
-        /// <param name="node"> Node containing data of the match object. </param>
-        /// <param name="indexInMap"> Index in the map of variables. (-1 if the the variable is anonymous.) </param>
+        /// <param name="node"> A node containing data of the match object. </param>
+        /// <param name="indexInMap"> An index in the map of variables. (-1 if the the variable is anonymous.) </param>
         /// <param name="isFirst"> Indicates whether its first appearance of the variable. </param>
-        /// <param name="matchingType"> Type of matching graph element. </param>
+        /// <param name="matchingType"> A type of matching graph element. </param>
         protected DFSBaseMatch(ParsedPatternNode node, int indexInMap, bool isFirst, Type matchingType)
         {
             this.matchingType = matchingType;
@@ -75,8 +75,8 @@ namespace QueryEngine
         /// or just sets the element to be the variable.
         /// Note: The element is never null and always the correct type. => must be ensured by matcher.
         /// </summary>
-        /// <param name="element"> Elemented to be tested. </param>
-        /// <param name="map"> Scope of variables in search context.</param>
+        /// <param name="element"> An elemented to be tested. </param>
+        /// <param name="map"> A scope of variables in search context.</param>
         /// <returns>True if element can be aplicable or false on refusal.</returns>
         public bool Apply(Element element, Element[] map)
         {
@@ -103,11 +103,11 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Unsets variable from scope.
+        /// Unsets a variable from scope.
         /// It checks for anonoymous to avoid uneccessary dict access,
         /// and it checks for first appearance to avoid unseting variable while it is still used.
         /// </summary>
-        /// <param name="map"> Scope of the search algorithm. </param>
+        /// <param name="map"> A scope of the search algorithm. </param>
         public void UnsetVariable(Element[] map)
         {
             if (!this.isAnonnymous && this.isFirstAppereance)
@@ -115,11 +115,11 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Gets element corresponding to this match object.
+        /// Gets an element corresponding to this match object.
         /// If the match node is anonymous, it cannot access any variable.
         /// This 
         /// </summary>
-        /// <param name="map"> Scope of the search algorithm. </param>
+        /// <param name="map"> A scope of the search algorithm. </param>
         /// <returns> Null if no element is used, else element of this match object. </returns>
         public Element GetVariable(Element[] map)
         {
@@ -140,12 +140,12 @@ namespace QueryEngine
 
 
         /// <summary>
-        /// Factory for base matches
+        /// Factory for base matches.
         /// </summary>
-        /// <param name="node"> Prototype of the node </param>
-        /// <param name="indexInMap"> Index of its variable in scope </param>
+        /// <param name="node"> A prototype of the node </param>
+        /// <param name="indexInMap"> An index of its variable in scope </param>
         /// <param name="isFirst"> If the match node represents variable that appears for the first time.</param>
-        /// <returns> Base match node. </returns>
+        /// <returns> A base match node based on the prototype node. </returns>
         public static DFSBaseMatch DFSBaseMatchFactory(ParsedPatternNode node, int indexInMap, bool isFirst)
         {
             Type nodeType = node.GetType();

@@ -1,29 +1,28 @@
 ﻿namespace QueryEngine 
 {
     /// <summary>
-    /// Basic interface for each pattern.
+    /// A vasic interface for each pattern.
     /// </summary>
     internal interface IPattern
     {
         /// <summary>
-        /// Try to match given element.
+        /// Try to match the given element.
         /// </summary>
-        /// <param name="element"></param>
         /// <returns> True if it can be matched otherwise false. </returns>
         bool Apply(Element element);
 
         /// <summary>
-        /// Prepares next pattern chain when moving to the next pattern chain from the last match node of the current pattern chain.
+        /// Prepares the next pattern chain when moving to the next pattern chain from the last match node of the current pattern chain.
         /// </summary>
         void PrepareNextSubPattern();
 
         /// <summary>
-        /// Prepares previous pattern chain when returning from the first match node of current pattern chain.
+        /// Prepares the previous pattern chain when returning from the first match node of the current pattern chain.
         /// </summary>
         void PreparePreviousSubPattern();
 
         /// <summary>
-        /// Prepares a next node for DFS forward recursion.
+        /// Prepares the next node for DFS forward recursion.
         /// </summary>
         void PrepareNextNode();
         /// <summary>
@@ -32,24 +31,24 @@
         void PreparePreviousNode();
 
         /// <summary>
-        /// Returns if there are more match nodes in the current pattern chain.
+        /// Returns false if the current node in the pattern is not the last one.
         /// </summary>
         bool IsLastNodeInCurrentPattern();
         /// <summary>
-        /// Retusn whether there are more pattern chains left.
+        /// Returns false if the current pattern is not the last one.
         /// </summary>
         bool IsLastPattern();
 
         /// <summary>
-        /// Returns current index of currently processed pattern chain.
+        /// Returns a current index of the currently processed pattern chain.
         /// </summary>
         int CurrentPatternIndex { get; }
         /// <summary>
-        /// Returns current match node position with refference to the current pattern.
+        /// Returns a current match node position with refference to the current pattern.
         /// </summary>
         int CurrentMatchNodeIndex { get; }
         /// <summary>
-        /// Returns current position with refference to the entire pattern.
+        /// Returns a current position with refference to the entire pattern.
         /// </summary>
         int OverAllIndex { get; }
 

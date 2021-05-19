@@ -1,11 +1,11 @@
 ﻿/*! \file 
-This file includes definition of a order by object.
-His purpose is to contain information about sorting of results from a query.
+This file includes a definition of a order by object.
+It's purpose is to contain information about sorting of results from a query.
 It contains a list of comparers that will be used during sorting.
 
 Sorting is done with the help of HPC sharp library Merge sort in both parallel and single thread cases.
 Merge sort is chosen because it does the least amount of comparisons. The comparisons are really expensive
-because the database need to be accessed and expression must be computed in order to compare the results rows.
+because the database needs to be accessed and expressions must be computed in order to compare the results rows.
 
 The ordering works as follows.
 Firstly, the array of integers is created where each index represents a index to the results table (just like pointers).
@@ -20,7 +20,7 @@ using System.Collections.Generic;
 namespace QueryEngine
 {
     /// <summary>
-    /// Class represents order by part of a query.
+    /// A class represents order by part of a query.
     /// It sorts given results with defined comparers.
     /// </summary>
     internal sealed class OrderByObject : QueryObject
@@ -31,10 +31,10 @@ namespace QueryEngine
         /// <summary>
         /// Creates an order by object.
         /// </summary>
-        /// <param name="graph"> Graph the query is computed on. </param>
-        /// <param name="variableMap"> Map of query variables. </param>
-        /// <param name="executionHelper"> Orderby execution helper. </param>
-        /// <param name="orderByNode"> Parse tree of order by expression. </param>
+        /// <param name="graph"> A graph the query is computed on. </param>
+        /// <param name="variableMap"> A map of query variables. </param>
+        /// <param name="executionHelper"> An order by execution helper. </param>
+        /// <param name="orderByNode"> A parse tree of order by expression. </param>
         /// <param name="exprInfo"> A query expression information. </param>
         public OrderByObject(Graph graph, VariableMap variableMap, IOrderByExecutionHelper executionHelper, OrderByNode orderByNode, QueryExpressionInfo exprInfo)
         {
@@ -69,7 +69,7 @@ namespace QueryEngine
         /// Sorts given data.
         /// </summary>
         /// <param name="resTable"> Query reults to be sorted. </param>
-        /// <returns> Sorted data. </returns>
+        /// <returns> The sorted data. </returns>
         private ITableResults Sort(ITableResults resTable)
         {
              ISorter sorter = new MultiColumnTableSorter(resTable, this.comparers, this.helper.InParallel);

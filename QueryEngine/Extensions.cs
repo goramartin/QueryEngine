@@ -35,7 +35,7 @@ namespace QueryEngine
 
 
         /// <summary>
-        /// Creates copies of the given comparers.
+        /// Creates copies of the given comparers (the internal expressions are not copies).
         /// </summary>
         public static ExpressionComparer[] CloneHard(this ExpressionComparer[] comparers, bool cacheResults)
         {

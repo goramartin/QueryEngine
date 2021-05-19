@@ -4,11 +4,9 @@ using System.Collections.Generic;
 namespace QueryEngine
 {
     /// <summary>
-    /// Visitor used to parse expressions.
+    /// A visitor used to parse expressions.
     /// So far there are implemented only variable references and aggregation references.
-    /// There can be only either the var or agg ref. that means that the Expr variable
-    /// contains only variantions of these two classes.
-    /// Note that during parsing, the aggregation it self are created.
+    /// There can be only either the variable reference or aggregation reference.
     /// </summary>
     internal sealed class ExpressionVisitor : IVisitor<ExpressionBase>
     {
@@ -63,7 +61,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Sets only name of the variable and the name of accessed property.
+        /// Sets only a name of the variable and the name of accessed property.
         /// </summary>
         public void Visit(IdentifierNode node)
         {
@@ -74,7 +72,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Visits aggregation node.
+        /// Visits an aggregation node.
         /// Creates a new aggregation function based on the provided name.
         /// And initilises parsing of the aggregation argument.
         /// </summary>
@@ -98,7 +96,7 @@ namespace QueryEngine
                 }  
                 else
                 {
-                    // Every other aggregation
+                    // Every other aggregation.
                     // The only possibility is that the next node is VariableNode.
                     // So the argument will be created in this.Expr, from this expr the holder must be created.
                     // After the holder is created the aggregation is created with the expression.

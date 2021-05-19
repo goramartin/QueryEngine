@@ -2,15 +2,15 @@
 This file includes definitions of nodes used to create a parse tree of the query.
 Nodes are used by a Parser to create the parse tree.
 
-Each query clause has its root node. Such as select, match...
+Each query clause has its root node (clause is select, match ...).
 Grammars are defined in Parser files.
+
  */
 
 namespace QueryEngine { 
    
     /// <summary>
-    /// Parent to every parse tree node.
-    /// Gives Visit method.
+    /// A parent to every parse tree node.
     /// </summary>
     internal abstract class Node
     {
@@ -18,8 +18,7 @@ namespace QueryEngine {
     }
 
     /// <summary>
-    /// Certain nodes can form a chain. E.g variable node or vertex/edge node.
-    /// Gives property next.
+    /// Certain nodes can form a chain, e.g variable node or vertex/edge node and the tree in this case contains a chain of defined variables.
     /// </summary>
     internal abstract class NodeChain : Node
     {
@@ -32,10 +31,6 @@ namespace QueryEngine {
 
     #region RootNodes
 
-    /// <summary>
-    /// Match and Select Nodes are only roots of subtrees when parsing. From them the parsing
-    /// of query word starts.
-    /// </summary>
     internal class MatchNode : NodeChain
     {
         public MatchNode() { }
@@ -98,7 +93,7 @@ namespace QueryEngine {
     #region MatchNodes
     /// <summary>
     /// Only vertices and edges inherit from this class.
-    /// Gives varible node property to the edges and vertices.
+    /// The edge node and the vertex node represents vertex and edge in the parsing tree. 
     /// </summary>
     internal abstract class CommomMatchNode : NodeChain
     {
@@ -111,11 +106,6 @@ namespace QueryEngine {
     }
 
     internal abstract class EdgeNode : CommomMatchNode { }
-
-    /// <summary>
-    /// Edge node and Vertex node represents vertex and edge in the parsing tree. 
-    /// They hold next property that leads to a next vertex/edge or match divider.
-    /// </summary>
 
     internal class InEdgeNode : EdgeNode
     {
@@ -214,8 +204,7 @@ namespace QueryEngine {
 
     /// <summary>
     /// Node representing one ordering.
-    /// Contains information whether it is ascending order or descending and 
-    /// expression to evaluate against.
+    /// Contains information whether it is ascending order or descending and expression to evaluate against.
     /// </summary>
     internal class OrderTermNode : NodeChain
     {
@@ -243,6 +232,9 @@ namespace QueryEngine {
 
     #region ExprNodes
 
+    /// <summary>
+    /// The root node of an expression.
+    /// </summary>
     internal class ExpressionNode : Node
     {
         public Node exp;
@@ -266,7 +258,7 @@ namespace QueryEngine {
     }
 
     /// <summary>
-    /// Varible node serves as a holder for Name of varibles and possibly selection of their properties.
+    /// Varible node serves as a holder for names of varibles and possibly selection of their properties.
     /// Identifier node hold the real value of variable.
     /// </summary>
     internal class VariableNode : Node
@@ -298,9 +290,6 @@ namespace QueryEngine {
         }
     }
 
-    /// <summary>
-    /// Stores a indetifier as a string.
-    /// </summary>
     internal class IdentifierNode : Node
     {
         public string value { get; private set; }

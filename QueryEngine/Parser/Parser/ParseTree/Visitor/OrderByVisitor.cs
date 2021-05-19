@@ -38,7 +38,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Expects expression and possibly next order term node.
+        /// Expects an expression node and possibly next order term node.
         /// </summary>
         public void Visit(OrderTermNode node)
         {

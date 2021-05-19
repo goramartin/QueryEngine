@@ -9,14 +9,12 @@ namespace QueryEngine
         #region SELECT
 
         /// <summary>
-        /// Parses select query part.
+        /// Parses a select query part.
         /// Select is only parsing expressions separated by comma.
         /// Select -> SELECT (*|(SelectPrintTerm (, SelectPrintTerm)*)
         /// SelectPrintTerm -> Expression
         /// </summary>
-        /// <param name="tokens"> Token list to parse. </param>
-        /// <param name="position"> Position of a token. </param>
-        /// <returns> Tree representation of a SELECT query part. </returns>
+        /// <returns> A tree representation of a SELECT query part. </returns>
         static public SelectNode ParseSelect(ref int position, List<Token> tokens)
         {
             SelectNode selectNode = new SelectNode();
@@ -37,12 +35,10 @@ namespace QueryEngine
 
 
         /// <summary>
-        /// Parses list of variables that is Name.Prop, Name2, *, Name3.Prop3 
+        /// Parses a list of variables - Name.Prop, Name2, *, Name3.Prop3 
         /// There can be either only * or variable references.
         /// </summary>
-        /// <param name="tokens"> Tokens to parse </param>
-        /// <param name="position"> Position of a token. </param>
-        /// <returns> Chain of variable nodes </returns>
+        /// <returns> A chain of variable nodes </returns>
         static private Node ParseVarExprForSelect(ref int position, List<Token> tokens)
         {
             VariableNode variableNode = null;
@@ -63,12 +59,10 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Parses select print term node.
+        /// Parses a select print term node.
         /// Expecting: expression, expression
         /// </summary>
-        /// <param name="tokens"> Tokens to parse. </param>
-        ///  <param name="position"> Position of a token. </param>
-        /// <returns> Chain of variable nodes. </returns>
+        /// <returns> A chain of variable nodes. </returns>
         static private Node ParseSelectPrintTerm(ref int position, List<Token> tokens)
         {
             SelectPrintTermNode selectPrintTermNode = new SelectPrintTermNode();
@@ -87,11 +81,9 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Parses next select print term node.
+        /// Parses the next select print term node.
         /// </summary>
-        /// <param name="tokens"> Tokens to parse. </param>
-        ///  <param name="position"> Position of a token. </param>
-        /// <returns> Chain of print term nodes. </returns>
+        /// <returns> A chain of print term nodes. </returns>
         static private Node ParseNextSelectPrintNode(ref int position, List<Token> tokens)
         {
             Node nextSelectPrintTermNode = ParseSelectPrintTerm(ref position, tokens);

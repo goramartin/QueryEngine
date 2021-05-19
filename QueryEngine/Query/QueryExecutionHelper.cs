@@ -1,8 +1,8 @@
 ﻿/*! \file
-This file contains definition of a execution helper.
-Execution helper's job is to help with execution of a specific clauses of a query computation.
-That means, it contains information that defines execution of the clauses. Such as a thread count is used
-to create appropriate number of Matcher inside MatchObject, or pick the correct implementatin of processing algorithm.
+This file contains a definition of a execution helper.
+The execution helper's job is to help with the execution of specific clauses of during query computation.
+That means, it contains information that defines execution of the clauses. Such as a thread count that is used
+to create appropriate number of Matcher inside MatchObject, or pick the correct implementation of processing algorithms.
 Each query object adds interface to the helper that the object needs.
  */
 
@@ -16,19 +16,19 @@ namespace QueryEngine
     internal interface IBaseExecutionHelper
     {
         /// <summary>
-        /// Defines whether optional clause order by was defined in the user input query.
+        /// Defines whether an optional clause order by was defined in the user input query.
         /// </summary>
         bool IsSetOrderBy { get; set; }
 
         /// <summary>
-        /// Defines whether optional clause group by was defined in the user input query.
+        /// Defines whether an optional clause group by was defined in the user input query.
         /// </summary>
         bool IsSetGroupBy { get; set; }
 
         bool IsSetSingleGroupGroupBy { get; set; }
 
         /// <summary>
-        /// Number of threads that will be used during query execution.
+        /// A number of threads that will be used during query execution.
         /// </summary>
         int ThreadCount { get; }
 
@@ -49,7 +49,7 @@ namespace QueryEngine
     {
         /// <summary>
         /// If more than one thread is used to search,
-        /// this defines number of vertices that will be distributed to threads during matching algorithm.
+        /// this defines a number of vertices that will be distributed to threads during matching algorithm.
         /// </summary>
         int VerticesPerThread { get; }
 
@@ -71,18 +71,17 @@ namespace QueryEngine
     internal interface ISelectExecutionHelper : IBaseExecutionHelper
     {
         /// <summary>
-        /// Type of printer for printing results.
-        ///  Used inside print method for factory method of printer.
+        /// A type of a printer for printing results.
+        /// Used inside print method for factory method of printer.
         /// </summary>
         PrinterType Printer { get; }
         /// <summary>
-        /// Type of printing format.
-        /// Used inside print method for factory method of formater.
+        /// A type of the printing format.
         /// </summary>
         FormaterType Formater { get; }
 
         /// <summary>
-        /// File name where to print results.
+        /// A file name where to print results.
         /// </summary>
         string FileName { get; }
 
@@ -99,9 +98,7 @@ namespace QueryEngine
     }
 
     /// <summary>
-    /// A execution helper that is used inside query. 
-    /// The query passes this execution helper to its query objects and each object
-    /// sees only the neccessary information for its own execution.
+    /// The query passes this execution helper to its query objects and each object sees only the neccessary information for its own execution.
     /// </summary>
     internal class QueryExecutionHelper : IMatchExecutionHelper, ISelectExecutionHelper, IOrderByExecutionHelper, IGroupByExecutionHelper
     {

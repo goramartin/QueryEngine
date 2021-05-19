@@ -1,8 +1,9 @@
 ﻿namespace QueryEngine
 {
     /// <summary>
-    /// Represents a base interface for comparers that involve computing expression values.
-    /// The methods should contain all the valid inputs to the expressions.
+    /// An interface used for comparing expression values.
+    /// The returned values are the same as in the native .CompareTo methods.
+    /// The interface contains all the valid inputs to the used expressions. 
     /// </summary>
     internal interface IExpressionComparer
     {

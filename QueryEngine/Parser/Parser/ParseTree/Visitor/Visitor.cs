@@ -1,14 +1,11 @@
 ﻿/*! \file
-  This file includes definitions of visitor used to collect data from created parsed trees. 
+  This file includes definitions of visitors used to collect data from created parsed trees. 
   Each query object has its own visitor.
-  Visitor iterates over nodes defined in ParseTreeNodes.cs
+  The Visitor iterates over nodes defined in ParseTreeNodes.cs
  */
 
 namespace QueryEngine
 {
-    /// <summary>
-    /// Parse tree is processed via visitors
-    /// </summary>
     /// <typeparam name="T"> Object built after parsing </typeparam>
     internal interface IVisitor<T>
     {

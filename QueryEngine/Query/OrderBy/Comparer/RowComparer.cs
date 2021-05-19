@@ -1,5 +1,5 @@
 ﻿/*! \file 
-This file contains definitions of a row comparer and a expression comparer.
+This file contains a definition of a row comparer and a expression comparer.
     
 Each row comparer contains a list of expression comparers.
 During row comparing each expression comparer compares values computed with the given row.
@@ -18,7 +18,7 @@ namespace QueryEngine
 {
     /// <summary>
     /// Compares two rows.
-    /// Contains list of all expression to compared with the rows.
+    /// Contains a list of all expression to compare two rows of a table with.
     /// </summary>
     internal class RowComparer : Comparer<TableResults.RowProxy>, IExpressionComparer
     {
@@ -40,11 +40,11 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Compares rows for every expression.
+        /// Compares two rows for every expression.
         /// If it find value !=0 then it will retrun the value. Otherwise it will continue comparing.
         /// </summary>
-        /// <param name="x"> First row.</param>
-        /// <param name="y"> Second row. </param>
+        /// <param name="x"> The first row.</param>
+        /// <param name="y"> The econd row. </param>
         /// <returns> Less than zero x precedes y in the sort order.
         /// Zero x occurs in the same position as y in the sort order.
         /// Greater than zero x follows y in the sort order.</returns>

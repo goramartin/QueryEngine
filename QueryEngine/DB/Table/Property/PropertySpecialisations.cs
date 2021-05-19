@@ -1,7 +1,7 @@
 ﻿/*! \file
 This file includes definitions of specialised properties (e.i T = string, integer).
 Each speicalised property can parse its values itself from a string.
-Each property contains a list of typed values.
+Each property contains a List of typed values.
  */
 
 
@@ -11,8 +11,7 @@ using System.Collections.Generic;
 namespace QueryEngine
 {
     /// <summary>
-    /// Represents typed property of a Table class.
-    /// We create specialisations based on the type of T.
+    /// Represents a typed property of a Table class.
     /// Its functions are not visible from a table.
     /// </summary>
     public abstract class Property<T> : Property
@@ -23,7 +22,7 @@ namespace QueryEngine
         public List<T> propHolder;
 
         /// <summary>
-        /// Constructs property.
+        /// Constructs a property.
         /// </summary>
         /// <param name="propName"> An identifier of the property. </param>
         public Property(string propName)
@@ -46,16 +45,16 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Gets value on given index as a string.
+        /// Gets a value on a given index as a string.
         /// </summary>
-        /// <param name="index"> Index of a row. </param>
+        /// <param name="index"> An index of a row. </param>
         public override string GetValueAsString(int index)
         {
             return this.propHolder[index].ToString();
         }
 
         /// <summary>
-        /// Returns type of this property.
+        /// Returns a type of this property.
         /// </summary>
         public override Type GetPropertyType()
         {

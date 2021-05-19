@@ -99,7 +99,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Reallocated the last copied block from the merge of last blocks if it is half empty.
+        /// Reallocates the last copied block from the merge of last blocks if it is half empty.
         /// </summary>
         private Element[] TryReallocLastCopiedBlock(Element[] lastBlock, int sumOfLastBlocks)
         {
@@ -154,7 +154,7 @@ namespace QueryEngine
         /// The smaller arrays are copied into the bigger arrays.
         /// The indeces go from both sides and when they meet, the merging stops.
         /// </summary>
-        /// <returns> Index of the block that was lastly copied. </returns>
+        /// <returns> An index of the block that was lastly copied. </returns>
         private int MergeLastBlocks(List<Tuple<Element[], int>> blocks)
         {
             int i = 0;
@@ -205,7 +205,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Class that stores results of the matcher in a fixed sized arrays, instead of using simple List that 
+        /// A class that stores results of the matcher in a fixed sized arrays, instead of using simple List that 
         /// needs resizing everytime it exceeds the maximum capacity.
         /// </summary>
          public class MatcherFixedResultsInternal

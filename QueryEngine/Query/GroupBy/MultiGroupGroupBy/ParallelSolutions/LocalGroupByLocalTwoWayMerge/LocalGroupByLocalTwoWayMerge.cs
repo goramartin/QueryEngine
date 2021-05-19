@@ -6,12 +6,12 @@ namespace QueryEngine
 {
     /// <summary>
     /// The class represents multi group grouping algorithm.
+    /// The algorithm works in two steps.
+    /// In the first step each thread computes the groups locally.
+    /// When all threads are finished a two way merging is executed.
     /// The class should be used only as the parallel solution and not with thread count set to 1.
     /// The class uses aggregations with array like storage or buckets.
     /// Each thread receives an equality comparer, hasher, aggregates and a range of vertices.
-    /// The threads then work independently on each other. 
-    /// When the threads finish, the results are merged.
-    /// The results are merged in a form of a binary tree (equivalent to a merge operation in a Mergesort alg.).
     /// </summary>
     internal abstract class LocalGroupByLocalTwoWayMerge : Grouper
     {

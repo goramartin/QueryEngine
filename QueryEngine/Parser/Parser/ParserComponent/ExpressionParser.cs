@@ -16,10 +16,20 @@ namespace QueryEngine
         /// VarReference -> ReferenceName(.ReferenceName)?
         /// Label -> IDENTIFIER
         /// ReferenceName -> IDENTIFIER
+        /// 
+        /// 
+        /// Expression: ExpressionTerm AS Label
+        /// ExpressionTerm: AggregateFunc|VarReference
+        /// AggregateFunc: IDENTIFIER \( VarReference \)
+        /// VarReference: VariableNameReference(\.VariablePropertyReference)?
+        /// Label: IDENTIFIER
+        /// VariableNameReference: IDENTIFIER
+        /// VariablePropertyReference: IDENTIFIER
+        /// 
         /// </summary>
         /// <param name="tokens"> Tokens to parse. </param>
-        /// <param name="position"> Position of a token. </param>
-        /// <returns> Chain of variable nodes. </returns>
+        /// <param name="position"> A position of a token. </param>
+        /// <returns> A chain of variable nodes. </returns>
         static private Node ParseExpressionNode(ref int position, List<Token> tokens)
         {
             ExpressionNode expressionNode = new ExpressionNode();
@@ -43,8 +53,8 @@ namespace QueryEngine
         /// ExpressionTerm -> AggregateFunc|VarReference
         /// </summary>
         /// <param name="tokens"> Tokens to parse. </param>
-        /// <param name="position"> Position of a token. </param>
-        /// <returns> Non empty aggregate node or variable reference node. </returns>
+        /// <param name="position"> position of a token. </param>
+        /// <returns> A non empty aggregate node or variable reference node. </returns>
         static private Node ParseExpressionTerm(ref int position, List<Token> tokens)
         {
             Node aggFunc = ParseAggregateFunc(ref position, tokens);
@@ -56,8 +66,8 @@ namespace QueryEngine
         /// AggregateFunc -> IDENTIFIER \( VarReference \)
         /// </summary>
         /// <param name="tokens"> Tokens to parse. </param>
-        /// <param name="position"> Position of a token. </param>
-        /// <returns> Non empty aggregate node. </returns>
+        /// <param name="position"> A position of a token. </param>
+        /// <returns> A non empty aggregate node. </returns>
         static private Node ParseAggregateFunc(ref int position, List<Token> tokens)
         {
             // FuncName (
@@ -96,8 +106,8 @@ namespace QueryEngine
         /// ReferenceName -> IDENTIFIER
         /// </summary>
         /// <param name="tokens"> Tokens to parse. </param>
-        /// <param name="position"> Position of a token. </param>
-        /// <returns> Non empty variable node. </returns>
+        /// <param name="position"> A position of a token. </param>
+        /// <returns> A non empty variable node. </returns>
         static private Node ParseVarReference(ref int position, List<Token> tokens)
         {
             VariableNode variableNode = new VariableNode();
@@ -122,8 +132,8 @@ namespace QueryEngine
         /// Forces parsing of an identifier if failed, it throws.
         /// </summary>
         /// <param name="tokens"> Tokens to parse. </param>
-        /// <param name="position"> Position of a token. </param>
-        /// <returns> Identifier node with variable name. </returns>
+        /// <param name="position"> A position of a token. </param>
+        /// <returns> An identifier node with variable name. </returns>
         static private Node ParseReferenceName(ref int position, List<Token> tokens)
         {
             // Expecting identifier.
@@ -137,8 +147,8 @@ namespace QueryEngine
         /// Parses Identifier token and creates ident node.
         /// </summary>
         /// <param name="tokens"> Tokens to parse </param>
-        /// <param name="position"> Position of a token. </param>
-        /// <returns> Identifier Node </returns>
+        /// <param name="position"> A position of a token. </param>
+        /// <returns> An identifier Node </returns>
         static private Node ParseIdentifierExrp(ref int position, List<Token> tokens)
         {
             if (CheckToken(position, Token.TokenType.Identifier, tokens))

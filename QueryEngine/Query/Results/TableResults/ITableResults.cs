@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace QueryEngine
 {
     /// <summary>
-    /// Base interface for table result classes.
+    /// A base interface for table result classes.
     /// Table results represent results from match query stored in a form of a table.
     /// </summary>
     internal interface ITableResults : IEnumerable<TableResults.RowProxy>

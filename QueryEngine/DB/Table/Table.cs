@@ -9,11 +9,11 @@ On the same position we will find values of properties of the element in the pro
 The Dictionary of properties is used for fast access to property via propID.
   
 Properties are formed from an abstract type Property that is visible from within a table.
-Generic properties extend Property, and specialisations are created separately. 
+Generic properties extend the Property class.
+Specialisations are created separately. 
 Properties are created with a help of an Activator class based on a passed name.
 Properties are access via property ids that were assigned to them during schema parsing.
-That means that when accessing properties, only their IDs are used, while graph class holds a
-map of the ids associated with their string names. 
+That means that when accessing properties, only their IDs are used, while graph class holds a map of the ids associated with their string names. 
  */
 
 using System;
@@ -22,15 +22,15 @@ using System.Collections.Generic;
 namespace QueryEngine
 {
      /// <summary>
-     /// A class representing a single node type.
+     /// A class representing a single label in the Labeled-property model.
      /// Encompasses a table of properties pertaining to the type. 
-     /// List IDs consists of added nodes into the table. Values of the elements can be found 
-     /// on the same positions in the property lists.
+     /// The list IDs consists of added nodes into the table. Values of the elements can be found 
+     /// on the same positions in the property Lists.
      /// </summary>
     public sealed class Table
     {
         /// <summary>
-        /// Name of the table (type of node)
+        /// A name of the table (type of node)
         /// </summary> 
         public string IRI { get; private set; } 
 
@@ -40,14 +40,14 @@ namespace QueryEngine
         public Dictionary<int, Property> Properties { get; private set; }
        
         /// <summary>
-        /// List of all property IDs in the table.
+        /// A List of all property IDs in the table.
         /// In the order of creation.
         /// </summary>
         public List<int> PropertyLabels {  get; private set; }
 
         /// <summary>
         /// Represents nodes inside a table. An index represents also an index inside the property lists.
-        /// First int is an id of a node inside the table, and second int is the position inside the table.
+        /// The key is an id of a node inside the table, and value is the position inside the table.
         /// </summary>
         public Dictionary<int,int> IDs { get; private set; }
 
@@ -56,7 +56,7 @@ namespace QueryEngine
         /// </summary>
         public int PropertyCount => this.Properties.Count;  
        
-            /// <summary>
+        /// <summary>
         /// Inits a new instance of a table.
         /// </summary>
         /// <param name="tableName"> A name that will be used as an identifier of the new table. </param>
@@ -75,8 +75,7 @@ namespace QueryEngine
 
 
         /// <summary>
-        /// Adds id of a node into the table. Each id is bound with the position inside the table.
-        /// Tuple int, int is ment for: First int is the id of the node and the second int is the position inside this table.
+        /// Adds an id of a vertex into the table. Each id is bound with the position inside the table.
         /// </summary>
         /// <param name="id"> Unique id of a node. </param>
         public void AddID(int id) 
@@ -87,10 +86,10 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Gets position of an element in the table based its id.
+        /// Gets a position of an element in the table based its id.
         /// </summary>
-        /// <param name="element"> Graph element.</param>
-        /// <returns> Position of a given element in the table. </returns>
+        /// <param name="element"> A graph element pertaining to this table.</param>
+        /// <returns> A position of a given element in the table. </returns>
         public int GetElementPosition(Element element)
         {
             if (!this.IDs.TryGetValue(element.ID, out int value))
@@ -134,11 +133,11 @@ namespace QueryEngine
         /// The omission is done because the table is accessed via elements.
         /// Thus, if the access was wrong, than the entire loaded graph is in bad format.
         /// </summary>
-        /// <typeparam name="T"> Type of the accessed property. </typeparam>
-        /// <param name="id"> Id of an element in the table. </param>
-        /// <param name="propID"> Accessed property ID. </param>
+        /// <typeparam name="T"> A type of the accessed property. </typeparam>
+        /// <param name="id"> An id of an element in the table. </param>
+        /// <param name="propID"> An accessed property ID. </param>
         /// <param name="retValue"> Where to store the value of the property. </param>
-        /// <returns>True if successful access, otherwise false. </returns>
+        /// <returns> True if successful access, otherwise false. </returns>
         public bool TryGetPropertyValue<T>(int id, int propID, out T retValue)
         {
             if (!this.Properties.TryGetValue(propID, out Property property))

@@ -38,7 +38,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Expects expression and possibly the next group by term.
+        /// Expects an expression and possibly the next group by term.
         /// </summary>
         public void Visit(GroupByTermNode node)
         {

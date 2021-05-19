@@ -1,9 +1,9 @@
 ﻿/*! \file 
-Includes definition of a vertex. 
+Includes a definition of a vertex. 
 The vertex is an element of a graph. Each vertex is stored in a vertex list in the graph.
 Vertices are connected with edges. Each vertex knows the edges that are going outward and also inward.
 The edges are contained in Lists (one list for outward and one list for inward edges) of edges.
-The vertices contain information about the starting and ending positions of edges in the structures containing the edges, so that
+The vertices contain information about the starting and the ending positions of edges in the structures containing the edges, so that
 the edges can be accessed quickly.
  */
 
@@ -12,8 +12,8 @@ using System;
 namespace QueryEngine
 {
     /// <summary>
-    /// Vertex serves as a node in a graph.
-    /// Each vertex is stored in a vertex List in a graph.
+    /// A class Vertex serves as a vertex in a graph.
+    /// Each vertex is stored in a vertex List in the graph.
     /// To each vertex there are two corresponding Lists of edges, one List includes outgoing edges,
     /// and the other encompasses inwards edges.
     /// If the vertex does not have any edges (in or out), then the corresponding positions (start and end) are set to -1.
@@ -26,7 +26,7 @@ namespace QueryEngine
         public int InEdgesEndPosition { get; internal set; }
         
         /// <summary>
-        /// Constructs vertex with no edges.
+        /// Constructs a vertex with no edges.
         /// </summary>
         public Vertex(int id, Table table)
         {
@@ -45,7 +45,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Constructs empty vertex.
+        /// Constructs an empty vertex.
         /// </summary>
         public Vertex()
         {
@@ -63,20 +63,20 @@ namespace QueryEngine
         public bool HasInEdges() { if (this.InEdgesStartPosition == -1) return false; else return true; }
 
         /// <summary>
-        /// Gets range of out edges of this vertex.
+        /// Gets a range of out edges of this vertex.
         /// </summary>
-        /// <param name="start"> Starting position of its edges in a edge list.</param>
-        /// <param name="end"> Ending position of its edges in the same edge list.</param>
+        /// <param name="start"> The starting position of its edges in a edge List.</param>
+        /// <param name="end"> The ending position of its edges in the same edge List.</param>
         public void GetRangeOfOutEdges(out int start, out int end)
         {
             start = this.OutEdgesStartPosition;
             end = this.OutEdgesEndPosition;
         }
         /// <summary>
-        /// Gets range of in edges of this vertex.
+        /// Gets a range of in edges of this vertex.
         /// </summary>
-        /// <param name="start"> Starting position of its edges in a edge list.</param>
-        /// <param name="end"> Ending position of its edges in the same edge list.</param>
+        /// <param name="start"> The starting position of its edges in a edge list.</param>
+        /// <param name="end"> The ending position of its edges in the same edge list.</param>
         public void GetRangeOfInEdges(out int start, out int end)
         {
             start = this.InEdgesStartPosition;

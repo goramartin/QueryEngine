@@ -10,14 +10,12 @@ namespace QueryEngine
         #region ORDERBY
 
         /// <summary>
-        /// Parses order by expression. 
+        /// Parses an order by expression. 
         /// Order by expression consists only of expression optionally followed by ASC or DESC token separated by comma.
         /// OrderBy -> ORDER BY OrderTerm (, OrderTerm)*
         /// OrderTerm -> Expression (ASC|DESC)?
         /// </summary>
-        /// <param name="tokens"> Token list to parse </param>
-        /// <param name="position"> Position of a token. </param>
-        /// <returns> Tree representation of a order by or null if the tokens are missing order token on its first position. </returns>
+        /// <returns> A tree representation of a order by or null if the tokens are missing order token on its first position. </returns>
         static public OrderByNode ParseOrderBy(ref int position, List<Token> tokens)
         {
             OrderByNode orderByNode = new OrderByNode();
@@ -44,12 +42,10 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Parses order term. 
+        /// Parses an order term. 
         /// Expression (ASC|DESC)?, (Expression (ASC|DESC)?)*
         /// </summary>
-        /// <param name="tokens"> Tokens to parse. </param>
-        /// <param name="position"> Position of a token. </param>
-        /// <returns> Order term node. </returns>
+        /// <returns> An oder term node. </returns>
         private static Node ParseOrderTerm(ref int position, List<Token> tokens)
         {
             OrderTermNode orderTermNode = new OrderTermNode();
@@ -78,8 +74,6 @@ namespace QueryEngine
         /// (ASC|DESC)?
         /// If missing, it is implicitly set to ascending order.
         /// </summary>
-        /// <param name="tokens"> Tokens to parse. </param>
-        /// <param name="position"> Position of a token. </param>
         /// <returns> True for ascending otherwise false. </returns>
         private static bool ParseAscDesc(ref int position, List<Token> tokens)
         {

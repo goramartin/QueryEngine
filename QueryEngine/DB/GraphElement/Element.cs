@@ -1,5 +1,5 @@
 ﻿/*! \file 
-Includes definition of a base class for each element in the graph.
+Includes a definition of a base class for each element in the graph.
 Each element needs an unique ID in the entire graph, table (type of an element) where the properties
 of the element are stored and a position in the containing structure (such as an index in a list).
 
@@ -16,9 +16,9 @@ Note that the ID of an element is not directly a property in the table.
 namespace QueryEngine
 {
     /// <summary>
-    /// A base class every graph element.
-    /// Element data are stored in the Table.
-    /// It assumes that the elements are stored in a list.
+    /// A base class of every graph element.
+    /// The element data are stored in the Table.
+    /// It assumes that the elements are stored in a List.
     /// </summary>
     public abstract class Element
     {
@@ -27,12 +27,12 @@ namespace QueryEngine
         /// </summary>
         public int ID { get; internal set; }
         /// <summary>
-        /// A type of the element. Used to access it is properties.
+        /// A type of the element used to access it's properties.
         /// </summary>
         public Table Table { get; internal set; }
 
         /// <summary>
-        /// The position represents a position in a enclosing structure (In our case it is a List).
+        /// The position represents a position in an enclosing structure (in our case it is List).
         /// This enables to access bordering elements faster.
         /// </summary>
         public int PositionInList { get; internal set; }

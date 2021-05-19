@@ -3,7 +3,7 @@
 namespace QueryEngine
 {
     /// <summary>
-    /// Class represents a result holder for a group aggregated values during grouping.
+    /// A class represents a result holder for a group aggregated values during grouping.
     /// For every new group a new array filled with bucket result classes is created during grouping.
     /// Each bucket class encompases a result of the aggregation. 
     /// These storages will be used in parallel enviroment. 

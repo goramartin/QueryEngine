@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace QueryEngine
 {
     /// <summary>
-    /// Base class for match object (normal and streamed). The purpose of this class was to provide foundation for the
+    /// A base class for match object (normal and streamed). The purpose of this class was to provide foundation for the
     /// streamed version of the match since they share common semantics.
     /// </summary>
     internal abstract class MatchObjectBase : QueryObject

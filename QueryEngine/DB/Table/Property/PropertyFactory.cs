@@ -1,5 +1,5 @@
 ﻿/*! \file
-  File includes definition of a specialised property factory.
+  This file includes definition of a specialised property factory.
   Properties are created by inputed string that contains the type of the property.
  */
 
@@ -9,19 +9,19 @@ using System.Collections.Generic;
 namespace QueryEngine
 {
     /// <summary>
-    /// Property factory.
-    /// Class includes register of all the property types.
-    /// Enables to create instances of properties based on a string token.
+    /// A property factory.
+    /// Class includes a register of all the property types.
+    /// It enables us to create instances of properties based on a string token.
     /// </summary>
     public static class PropertyFactory
     {
         /// <summary>
-        /// Register with valid types.
+        /// A register with valid types.
         /// </summary>
         private static Dictionary<string, Type> registry;
 
         /// <summary>
-        /// Inicialises registry.
+        /// Inicialises the registry.
         /// </summary>
         static PropertyFactory()
         {
@@ -30,7 +30,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Inicialises registry with predefined values.
+        /// Inicialises the registry with predefined values.
         /// </summary>
         private static void InicialiseRegistry()
         {
@@ -41,8 +41,8 @@ namespace QueryEngine
         /// <summary>
         /// Registers a property with a given token and bounds a given type to it.
         /// </summary>
-        /// <param name="token"> Property type. </param>
-        /// <param name="type"> Type of property type. </param>
+        /// <param name="token"> A name of the property type. </param>
+        /// <param name="type"> A type of property (string, int ...). </param>
         private static void RegisterProperty(string token, Type type)
         {
             if (token == null || type == null)
@@ -57,9 +57,9 @@ namespace QueryEngine
         /// <summary>
         /// Creates an instance of a property based on a given token.
         /// </summary>
-        /// <param name="token"> The property type </param>
-        /// <param name="name"> The type of a property type. </param>
-        /// <returns> The specialiased property for the given type. </returns>
+        /// <param name="token"> A property type </param>
+        /// <param name="name"> A type of a property type. </param>
+        /// <returns> A specialiased property for the given type. </returns>
         public static Property CreateProperty(string token, string name)
         {
             if (token == null || name == null)

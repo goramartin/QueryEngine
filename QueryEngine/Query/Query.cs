@@ -1,5 +1,5 @@
 ﻿/*! \file
-This file includes definition of one query and the streamed query version as well.
+This file includes a definition of one query and the streamed query version as well.
 It is the same class, only different constructors are used. 
 
 Normal Query:
@@ -48,23 +48,23 @@ namespace QueryEngine
      public enum QueryMode {
         
         /// <summary>
-        /// Mode that stores results and then aggregates the values.
+        /// A mode that stores results and then aggregates the values.
         /// </summary>
         Normal, 
         
         /// <summary>
-        /// Mode that aggregates globally the values during pattern matching.
+        /// A mode that aggregates globally the values during pattern matching.
         /// </summary>
         Streamed, 
         
         /// <summary>
-        /// Mode that aggregates locally the values during pattern matching. After the matching is finished they are merged globally.
+        /// A mode that aggregates locally the values during pattern matching. After the matching is finished they are merged globally.
         /// </summary>
         HalfStreamed };
 
 
     /// <summary>
-    /// Represents a pgql query.
+    /// Represents one query.
     /// It tokenizes, parses and constructs simple execution chain.
     /// Provides api to execute the query.
     /// </summary>

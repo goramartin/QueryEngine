@@ -9,11 +9,11 @@ namespace QueryEngine
     internal sealed class ColumnDistributor
     {
         /// <summary>
-        /// Number of columns that have been disributed.
+        /// A number of columns that have been disributed.
         /// </summary>
         int firstFreeColumn = 0;
         /// <summary>
-        /// Number of columns to distribute.
+        /// A number of columns to distribute.
         /// </summary>
         readonly int columnCount;
 

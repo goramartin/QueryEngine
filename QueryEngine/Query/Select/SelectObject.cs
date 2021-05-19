@@ -1,11 +1,10 @@
 ﻿/*! \file
 File contains definition of select object.
-The class consists of a list of expressions enclosed in a generic wrapper.
+The class consists of a List of expressions enclosed in a generic wrapper.
 The wrapper helps to compute expression values and convert them to string.
 
-The list it self can be perceived as one row of the output.
-That is to say, for each individual result, the expressions are computed and printed on
-the same line.
+The List it self can be perceived as one row of the output.
+That is to say, for each individual result, the expressions are computed and printed on the same line.
 
 The printing is done via printer class that contains a formater class.
 The printer class defines where the output will be printed and the formater 
@@ -26,26 +25,25 @@ using System.Collections.Generic;
 namespace QueryEngine
 {
     /// <summary>
-    /// Select represents list of variables to be printed.
-    /// List of select variables contains names and property names to be printed from the result.
+    /// Select represents a List of expressions to be printed.
     /// </summary>
     internal sealed class SelectObject : QueryObject
     {
         /// <summary>
-        /// List of arguments to print from a select expression.
+        /// A List of expressions to print.
         /// </summary>
         private List<ExpressionToStringWrapper> rowFormat;
         private ISelectExecutionHelper helper;
         public bool allowPrint;
         
         /// <summary>
-        /// Creates Select object.
+        /// Creates a Select object.
         /// Parsing is done beforehand because first we need to parse match expression for variable definitions.
         /// </summary>
-        /// <param name="graph"> Property graph. </param>
-        /// <param name="map"> Variable map. </param>
-        /// <param name="executionHelper"> Select execution helper. </param>
-        /// <param name="selectNode"> Parsed tree of select expression. </param>
+        /// <param name="graph"> A property graph. </param>
+        /// <param name="map"> A variable map. </param>
+        /// <param name="executionHelper"> A select execution helper. </param>
+        /// <param name="selectNode"> A parsed tree of select expression. </param>
         /// <param name="exprInfo"> A query expression information. </param>
         public SelectObject(Graph graph, VariableMap map, ISelectExecutionHelper executionHelper, SelectNode selectNode, QueryExpressionInfo exprInfo)
         {
@@ -54,7 +52,7 @@ namespace QueryEngine
 
             this.helper = executionHelper;
             
-            // Process parse tree and create list of variables to be printed
+            // Process the parse tree and creates a List of expression to be printed.
             SelectVisitor visitor = new SelectVisitor(graph.labels, map, exprInfo);
             selectNode.Accept(visitor);
             this.rowFormat = visitor.GetResult();

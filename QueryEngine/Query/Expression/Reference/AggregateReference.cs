@@ -4,10 +4,9 @@ using System.Collections.Generic;
 namespace QueryEngine
 {
     /// <summary>
-    /// Class serves as an aggregation reference.
+    /// A class serves as an aggregation reference.
     /// The evaluation of this node is bound to the aggregate holders, thus nothing here is computed.
-    /// The evaluate method should be passed an object containg computed aggregates and a position
-    /// of the group.
+    /// The evaluate method must be passed an object containg the computed aggregated values and a position of the group.
     /// </summary>
     internal class AggregateReference<T> : ExpressionReturnValue<T>
     {
@@ -25,13 +24,13 @@ namespace QueryEngine
         protected int KeyCount { get; }
 
         /// <summary>
-        /// Reference to an aggregate, its purpose is only to properly override ToString().
+        /// A reference to an aggregate, its purpose is only to properly override ToString().
         /// Otherwise must not be used.
         /// </summary>
         private Aggregate Aggr { get; }
 
         /// <summary>
-        /// Creates aggregate reference.
+        /// Creates an aggregate reference.
         /// </summary>
         /// <param name="aggPos"> An aggregation position.</param>
         /// <param name="keyCount"> A key count. </param>
@@ -127,11 +126,11 @@ namespace QueryEngine
         /// <summary>
         /// Creates aggregation reference.
         /// </summary>
-        /// <param name="type"> Type of aggregation. </param>
-        /// <param name="position"> Position of the aggregation in terms of entire query. </param>
+        /// <param name="type"> A type of aggregation. </param>
+        /// <param name="position"> A position of the aggregation in terms of entire query. </param>
         /// <param name="keyCount"> A key count. </param>
-        /// <param name="aggr"> Aggregation to be referenced. The purpose is solely for overriding ToString method. </param>
-        /// <returns> Expression node that references aggregation. </returns>
+        /// <param name="aggr"> An aggregation to be referenced. The purpose is solely for overriding ToString method. </param>
+        /// <returns> An expression node that references aggregation. </returns>
         public static ExpressionBase Create(Type type, int position, int keyCount, Aggregate aggr)
         {
             if (type == typeof(int)) return new AggregateReference<int>(position, keyCount, aggr);

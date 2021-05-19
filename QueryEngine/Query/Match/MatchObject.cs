@@ -12,9 +12,10 @@ using System;
 namespace QueryEngine
 {
     /// <summary>
-    /// Contains Matcher to match pattern in graph.
-    /// Also contains pattern to match in main match algorithm  it checks th correctness of the pattern when creating it.
-    /// The pattern is created from List of Parsed Patterns passed from Visitor that processes Match expression.
+    /// Contains a Matcher to match the pattern in graph.
+    /// Also contains a pattern to match in main match algorithm.
+    /// It checks th correctness of the pattern when creating it.
+    /// The pattern is created from List of ParsedPatterns classes passed from Visitor that processes Match expression.
     /// The variable map is filled when constructor of pattern is called.
     /// </summary>
     internal sealed class MatchObject : MatchObjectBase
@@ -23,12 +24,12 @@ namespace QueryEngine
         private  IPatternMatcher matcher;
 
         /// <summary>
-        /// Creates Match object.
+        /// Creates a Match object.
         /// </summary>
-        /// <param name="graph"> Graph to conduct a query on. </param>
-        /// <param name="variableMap"> Empty map of variables. </param>
-        /// <param name="executionHelper"> Match execution helper. </param>
-        /// <param name="matchNode"> Parse tree of match expression. </param>
+        /// <param name="graph"> A graph to conduct a query on. </param>
+        /// <param name="variableMap"> An empty map of variables. </param>
+        /// <param name="executionHelper"> A match execution helper. </param>
+        /// <param name="matchNode"> A parse tree of match expression. </param>
         /// <param name="exprInfo"> A query expression information. </param>
         public MatchObject(Graph graph, VariableMap variableMap, IMatchExecutionHelper executionHelper, MatchNode matchNode, QueryExpressionInfo exprInfo)
         {
@@ -39,12 +40,12 @@ namespace QueryEngine
             MatchVisitor matchVisitor = new MatchVisitor(graph.nodeTables, graph.edgeTables);
             matchNode.Accept(matchVisitor);
 
-            //Create real pattern and variableMap
+            // Create real pattern and variableMap.
             var result = matchVisitor.GetResult();
             this.CheckParsedPatternCorrectness(result);
 
-            // Create  matcher and pattern based on the name of matcher and pattern
-            // Change if necessary 
+            // Create  matcher and pattern based on the name of matcher and pattern.
+            // Change if necessary .
             this.pattern = MatchFactory.CreatePattern(helper.ParallelPatternMatcherName, helper.PatternName, variableMap, result);
             
             // Now we have got enough information about results. 
@@ -68,7 +69,7 @@ namespace QueryEngine
         /// <summary>
         /// Starts searching of the graph and returns results of the search.
         /// </summary>
-        /// <returns> Results of search algorithm </returns>
+        /// <returns> The results of search algorithm </returns>
         private ITableResults Search()
         {
             this.matcher.Search();

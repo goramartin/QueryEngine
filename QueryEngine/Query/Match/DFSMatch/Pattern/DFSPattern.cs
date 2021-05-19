@@ -1,5 +1,5 @@
 ﻿/*! \file
-This file includes definition of pattern used by a dfs match algorithm.
+This file includes a definition of pattern used by a dfs match algorithm.
   
 Pattern itself is created from ParsedPattern nodes that visitor of match expression tree collects.
 The chains are sorted and connected so that they form a connected pattern (if the chains are connected.
@@ -21,7 +21,7 @@ using System.Collections.Generic;
 namespace QueryEngine
 {
     /// <summary>
-    /// Class that implements basic DFS pattern.
+    /// A class that implements basic DFS pattern.
     /// Creates it self from parsed pattern.
     /// Pattern is represented by the 2d-array of base match nodes.
     /// Also it remembers the state of the matched variables and state
@@ -59,8 +59,8 @@ namespace QueryEngine
         /// <summary>
         /// Creates a pattern from a given matches. Used only inside clone method.
         /// </summary>
-        /// <param name="dFSBaseMatches"> Pattern to match during search. </param>
-        /// <param name="variableCount"> Number of variables for the scope. </param>
+        /// <param name="dFSBaseMatches"> A pattern to match during search. </param>
+        /// <param name="variableCount"> A number of variables for the scope. </param>
         private DFSPattern(DFSBaseMatch[][] dFSBaseMatches, int variableCount)
         {
             if (dFSBaseMatches == null || dFSBaseMatches.Length == 0) 
@@ -123,21 +123,21 @@ namespace QueryEngine
         /// Note that (a) - (b) was reversed in order ( oriented edges are reversed as well )
         /// </summary>
         /// <param name="final"> The constructed pattern will be stored in this list. Never null. </param>
-        /// <param name="parsedPatterns"> Pattern created by Match Visitor </param>
-        /// <param name="variableMap"> Query map of variables (empty) </param>
+        /// <param name="parsedPatterns"> A pattern created by Match Visitor </param>
+        /// <param name="variableMap"> A query map of variables (empty) </param>
         private void CreatePattern(List<List<DFSBaseMatch>> final, List<ParsedPattern> parsedPatterns, VariableMap variableMap)
         {
             var orderedPatterns = OrderParsedPatterns(parsedPatterns);
 
-            // For every Parsed Pattern
+            // For every Parsed Pattern.
             for (int i = 0; i < parsedPatterns.Count; i++)
             {
                 // Try to split pattern into two parts.
                 // If split, then only the first part is returned and the second one is stored at the parsedPatterns[i]
                 var firstPart = orderedPatterns[i].TrySplitParsedPattern();
 
-                // If the parsed pattern was splited
-                // Add both parts into the real pattern
+                // If the parsed pattern was splited.
+                // Add both parts into the real pattern.
                 if (firstPart != null)
                 {
                     final.Add(CreateChain(firstPart.pattern, variableMap));
@@ -224,14 +224,14 @@ namespace QueryEngine
         /// And the order of added variable form an order that will be used to access each variable throughout
         /// the entire query computation.
         /// </summary>
-        /// <param name="patternNodes"> Parsed pattern </param>
+        /// <param name="patternNodes"> A parsed pattern </param>
         /// <param name="map"> A map to store info about variables. </param>
-        /// <returns> Chain of base matches for the search algorithm. </returns>
+        /// <returns> A chain of base matches for the search algorithm. </returns>
         private List<DFSBaseMatch> CreateChain(List<ParsedPatternNode> patternNodes, VariableMap map)
         {
             List<DFSBaseMatch> tmpChain = new List<DFSBaseMatch>();
 
-            // For each parsed pattern node
+            // For each parsed pattern node.
             for (int i = 0; i < patternNodes.Count; i++)
             {
                 var tmpNode = patternNodes[i];
@@ -264,10 +264,10 @@ namespace QueryEngine
         #region PatternInterface
 
         /// <summary>
-        /// Calls apply on match object. The element is checked whether it sufficces condition if yes,
-        /// the scope is actualised if necessary.
+        /// Calls Apply on the match object. The element is checked whether it sufficces condition.
+        /// if yes the scope is actualised if necessary.
         /// </summary>
-        /// <param name="element"> Element to be tested. </param>
+        /// <param name="element"> An element to be tested. </param>
         /// <returns> True if the element can be applied, false if it cannot be applied. </returns>
         public bool Apply(Element element)
         {
@@ -275,7 +275,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Prepares subsequent pattern (Moving in dfs forward). The only need is to actualise the indeces. It proceed to the next pattern,
+        /// Prepares a subsequent pattern (Moving in dfs forward). The only need is to actualise the indeces. It proceed to the next pattern,
         /// thus current pattern must be increased and position of base match node set to start. 
         /// </summary>
         public void PrepareNextSubPattern()
@@ -309,7 +309,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Proceeds to previous element that was matched.
+        /// Proceeds to the previous element that was matched.
         /// If the current node is not anonymous, we need to reset variable inside the scope.
         /// The unset method is called even if the variable is not set.
         /// </summary>
@@ -332,7 +332,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Gets starting element of the current chain (if it was connected to the ones before).
+        /// Gets the starting element of the current chain (if it was connected to the ones before).
         /// </summary>
         /// <returns> Null if anonymous/firstAppearance else it is picked from the scope. </returns>
         public Element GetCurrentChainConnection()
@@ -341,7 +341,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Gets starting element of the next chain (if it was connected to the ones before).
+        /// Gets the starting element of the next chain (if it was connected to the ones before).
         /// This method is called only when there is another pattern to be processed.
         /// If the next chain contains a variable that was already used it returns it from the scope.
         /// </summary>
@@ -362,7 +362,7 @@ namespace QueryEngine
         }
 
        /// <summary>
-       /// Returns type of the graph element represented by the current match node.
+       /// Returns a type of the graph element represented by the current match node.
        /// </summary>
         public Type GetMatchType()
         {
@@ -370,7 +370,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Shallow copy of a pattern.
+        /// Creates a shallow copy of a pattern.
         /// </summary>
         public IDFSPattern Clone()
         {

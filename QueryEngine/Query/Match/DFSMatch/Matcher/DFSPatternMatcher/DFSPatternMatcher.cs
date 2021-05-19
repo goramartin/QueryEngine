@@ -13,9 +13,9 @@ namespace QueryEngine
         /// Sets results storage for the matcher instance. 
         /// Everything else is done in the base constructor.
         /// </summary>
-        /// <param name="pat"> The pattern to find.</param>
-        /// <param name="gr"> The graph to search. </param>
-        /// <param name="res"> The object to store found results. </param>
+        /// <param name="pat"> A pattern to find.</param>
+        /// <param name="gr"> A graph to search. </param>
+        /// <param name="res"> An object to store found results. </param>
         public DFSPatternMatcher(IDFSPattern pat, Graph gr, MatchFixedResults.MatcherFixedResultsInternal res) : base(pat, gr)
         {
             if (res == null)

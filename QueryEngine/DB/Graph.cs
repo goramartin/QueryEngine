@@ -1,9 +1,9 @@
 ﻿/*! \file 
-File includes definition of graph.
-Graph contains three lists... inward edges, outgoing edges and vertices.
+This file includes a definition of a graph.
+The graph contains three Lists... inward edges, outgoing edges and vertices.
 The base class for nodes and edges is the Element class, each element in a graph has an ID and a table (type).
-Also each element knows its position in the list where it is included. 
-Graph also contains a list of all labels from a data scheme input file to ensure a quick access to the label type.
+Also each element knows its position in the List where it is included. 
+The graph also contains a List of all labels from a data scheme input file to ensure a quick access to the label type.
  */
 
 using System;
@@ -13,8 +13,8 @@ namespace QueryEngine
 {
 
     /// <summary>
-    /// The class serves only for holder purpose during creation inside Processor.
-    /// It enables us to pass a all the the required graph lists from within one function.
+    /// The class serves only for holder purposes during creation of the graph inside Processor class.
+    /// It enables us to pass all the required graph Lists from within one function.
     /// </summary>
     public class EdgeListHolder
     {
@@ -25,23 +25,22 @@ namespace QueryEngine
     }
 
     /// <summary>
-    /// Graph contains vertices, outgoing edges and inwards edges, also types of elements inside a graph.
-    /// Also gives interface to a whole graph.
+    /// A graph contains vertices, outgoing edges, inwards edges and types of elements inside a graph.
     /// </summary>
     public class Graph
     {
         /// <summary>
-        /// Nodes schema.
+        /// The vertices schema.
         /// </summary>
         public Dictionary<string, Table> nodeTables;
         /// <summary>
-        /// Edges schema.
+        /// The edges schema.
         /// </summary>
         public Dictionary<string, Table> edgeTables;
         /// <summary>
         /// A map of all properties and their types.
         /// string = Property IRI
-        /// Tuple(int,type) = (global property id, type of the property)
+        /// Tuple(int, type) = (global property id, type of the property)
         /// </summary>
         public Dictionary<string, Tuple<int, Type>> labels;
         
@@ -50,7 +49,7 @@ namespace QueryEngine
         public List<InEdge> inEdges;
 
         /// <summary>
-        /// Loads a graph from a files. File names must not be changed.
+        /// Loads a graph from files. File names must not be changed.
         /// </summary>
         public Graph()
         {
@@ -83,7 +82,7 @@ namespace QueryEngine
         /// Loads table types from a file. 
         /// </summary>
         /// <param name="filename"> A file containing definitions of tables. </param>
-        /// <returns> Dictionary of tables. </returns>
+        /// <returns> A dictionary of tables. </returns>
         private Dictionary<string, Table> LoadTables(string filename)
         {
             Dictionary<string, Table> tables = null;
@@ -111,7 +110,7 @@ namespace QueryEngine
         /// <summary>
         /// Loads all vetices from a file.
         /// </summary>
-        /// <param name="filename"> File containing data of vertices. </param>
+        /// <param name="filename"> A file containing data of vertices. </param>
         private void LoadVertices(string filename)
         {
             try
@@ -134,7 +133,7 @@ namespace QueryEngine
         /// <summary>
         /// Loads all vetices from a file.
         /// </summary>
-        /// <param name="filename"> File containing data of edges. </param>
+        /// <param name="filename"> A file containing data of edges. </param>
         private void LoadEdges(string filename)
         {
             try

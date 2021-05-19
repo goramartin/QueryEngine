@@ -3,19 +3,18 @@
 namespace QueryEngine
 {
     /// <summary>
-    /// Property reference of an element.
+    /// A property reference of an element.
     /// </summary>
-    /// <typeparam name="T"> Type of property referenced. </typeparam>
+    /// <typeparam name="T"> A type of the referenced property. </typeparam>
     internal sealed class VariablePropertyReference<T> : VariableReference<T>
     {
         private int PropertyID { get; }
         /// <summary>
-        /// Creates a property reference based on index of an element from a result and an accessed
-        /// property.
+        /// Creates a property reference.
         /// </summary>
-        /// <param name="nHolder"> Holder of string representation of the name. </param>
-        /// <param name="varIndex"> Index in a result during evaluation. </param>
-        /// <param name="propID"> ID of the accessed property. </param>
+        /// <param name="nHolder"> A holder of string representation of the name. </param>
+        /// <param name="varIndex"> An index in a result during evaluation. </param>
+        /// <param name="propID"> An ID of the accessed property. </param>
         public VariablePropertyReference(VariableReferenceNameHolder nHolder, int varIndex, int propID) : base(nHolder, varIndex)
         {
             if (propID < 0)
@@ -25,7 +24,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Returns type of this expression node.
+        /// Returns a type of this expression node.
         /// </summary>
         public override Type GetExpressionType()
         {
@@ -33,11 +32,11 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Accesses property of an element based on variable index.
+        /// Accesses property of an element based on the variable index.
         /// Always sets value, because we expect that the out value is set on default if failed to evaluate.
         /// </summary>
-        /// <param name="elements"> Result from a match query. </param>
-        /// <param name="returnValue">Return value of this expression node. </param>
+        /// <param name="elements"> A result from a match query. </param>
+        /// <param name="returnValue"> A placeholder for returned property value. </param>
         /// <returns> True on successful evaluation otherwise false. </returns>
         public override bool TryEvaluate(in TableResults.RowProxy elements, out T returnValue)
         {
