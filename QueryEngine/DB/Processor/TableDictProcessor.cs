@@ -1,5 +1,5 @@
 ﻿/*! \file 
-The file includes a definition of a table dictionary processor.
+The file includes a definition of a table Dictionary processor.
 
 The processor creates a table from a JSON input file.
 A JSON array is expected to be an array of objects. 

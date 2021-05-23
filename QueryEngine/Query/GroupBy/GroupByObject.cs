@@ -7,7 +7,7 @@ Then based on what grouping is desired.
 1. 
 If a group by clause is defined in the user input. Then the grouping is done
 with the help of user inputted expression. And a Multigroup grouper is selected.
-The results from result table are hashed and put into a dictionary with corresponding
+The results from result table are hashed and put into a Dictionary with corresponding
 indeces that represent their aggregate results. If no aggregates are defined for the query. 
 Only hashing is done.
 2.

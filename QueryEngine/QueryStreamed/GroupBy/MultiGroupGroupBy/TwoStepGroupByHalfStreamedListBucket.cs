@@ -4,17 +4,17 @@ using System.Collections.Generic;
 namespace QueryEngine 
 {
     /// <summary>
-    /// Class represents a half streamed grouping if group by is set in the input query.
-    /// The aggregate func. results are firstly stored in lists and then are put into buckets 
-    /// when they are merged into the global dictionary.
+    /// A class represents a half streamed grouping if group by is set in the input query.
+    /// The aggregate func. results are firstly stored in Lists and then are put into buckets 
+    /// when they are merged into the global Dictionary.
     /// The computation works as follows:
     /// Each matcher computes its groups localy and stores results of the matcher only if they 
     /// represent a representant of a group. If not, only aggregates are computed with the result.
     /// When matcher finishes, it merges its local results into a global groups.
-    /// Notice that the keys of the global dictionary contain row proxies, this enables
+    /// Notice that the keys of the global Dictionary contain row proxies, this enables
     /// to obtain a keys that stem from different tables.
     /// Notice that if it runs in single thread, the mergings do not happen. Thus we can use this class
-    /// as a single thread reference solution for the half streamed/streamed version using lists as a local result storage.
+    /// as a single thread reference solution for the half streamed/streamed version using Lists as a local result storage.
     /// </summary>
     internal class TwoStepHalfStreamedListBucket : GroupByResultProcessor
     {
@@ -25,7 +25,7 @@ namespace QueryEngine
         {
             this.groupJobs = new GroupJob[this.executionHelper.ThreadCount];
            
-            // Create initial job, comps and hashers
+            // Create an initial job, comparers and hashers.
             this.CreateHashersAndComparers(out ExpressionComparer[] comparers, out ExpressionHasher[] hashers);
             var firstComp = RowEqualityComparerGroupKey.Factory(null, comparers, true);
             var firstHasher = new RowHasher(hashers);
@@ -56,7 +56,7 @@ namespace QueryEngine
                 {
                     resPosition = job.groups.Count;
                     job.groups.Add(key, resPosition);
-                    // Store the temporary row in the table. This causes copying of the row to the actual lists of table.
+                    // Store the temporary row in the table. This causes copying of the row to the actual Lists of table.
                     // While the position of the stored row proxy remains the same, next time someone tries to access it,
                     // it returns the elements from the actual table and not the temporary row.
                     job.resTable.StoreTemporaryRow();

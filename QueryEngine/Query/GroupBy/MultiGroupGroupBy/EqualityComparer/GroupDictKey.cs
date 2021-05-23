@@ -2,7 +2,7 @@
 {
 
     /// <summary>
-    /// Struct serves as a type for the key that is put into the dictionary when multigroup grouping is performed.
+    /// Struct serves as a type for the key that is put into the Dictionary when multigroup grouping is performed.
     /// </summary>
     internal readonly struct GroupDictKey
     {

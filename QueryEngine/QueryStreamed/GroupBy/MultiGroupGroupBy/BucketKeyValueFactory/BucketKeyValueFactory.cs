@@ -3,18 +3,18 @@
 namespace QueryEngine
 {
     /// <summary>
-    /// Class servers as a creator of buckets that are inserted into a dictionary during 
+    /// A class servers as a creator of buckets that are inserted into a Dictionary during 
     /// streamed version of the group by and the values are directly stored in the key/values, and not as row proxies.
     /// The class creates an array of buckets where the first n buckets are used as keys, while
     /// the rest are used as values holders for the computed aggregate values.
     /// 
     /// The correct usage is that the flag lastWasInserted is set after each call of the Create method.
-    /// This is done to ensure that upon new call of the create it would not override already inserted values in the dictionary.
+    /// This is done to ensure that upon new call of the create it would not override already inserted values in the Dictionary.
     /// </summary>
     internal class BucketsKeyValueFactory
     {
         /// <summary>
-        /// True unpon next call of Create will create a new array.
+        /// If true then the next call of Create() will create a new array.
         /// Otherwise it will override values inside of the lastBucketsKeyValue field.
         /// </summary>
         public bool lastWasInserted = true;
@@ -34,9 +34,9 @@ namespace QueryEngine
 
 
         /// <summary>
-        /// Creates a new array of buckets that is used as key/value into a dictionary inside the streamed version
+        /// Creates a new array of buckets that is used as key/value into a Dictionary inside the streamed version
         /// of group by.
-        /// If the last array was inserted into the dictionary, the function inits a brand-new one.
+        /// If the last array was inserted into the Dictionary, the function inits a brand-new one.
         /// Otherwise it only actualises internal values of the last created one.
         /// </summary>
         public AggregateBucketResult[] Create(Element[] result)
@@ -45,7 +45,7 @@ namespace QueryEngine
             {
                 this.lastBucketsKeyValue = new AggregateBucketResult[this.keysCount + this.aggregates.Length];
                 
-                // Init the aggregation funcs. result buckets
+                // Init the aggregation funcs. result buckets.
                 for (int i = this.keysCount; i < this.keysCount + this.aggregates.Length; i++)
                 {
                     var agg = this.aggregates[i - this.keysCount];
@@ -83,7 +83,7 @@ namespace QueryEngine
             }
 
             /// <summary>
-            /// If the last created bucket was inserted into the dictionary, create a new one and init its values.
+            /// If the last created bucket was inserted into the Dictionary, create a new one and init its values.
             /// Otherwise the bucket was not used, thus only reset its internal values and 
             /// try to init those with the new given result.
             /// This is done in order to recycle uninserted buckets.

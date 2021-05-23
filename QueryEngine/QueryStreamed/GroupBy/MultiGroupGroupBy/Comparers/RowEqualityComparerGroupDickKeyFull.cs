@@ -3,7 +3,7 @@
 namespace QueryEngine
 {
     /// <summary>
-    /// A EqualityComparer that is used during half streamed group by.
+    /// An EqualityComparer that is used during the half streamed group by.
     /// The full key contains row proxy and it is hash value.
     /// The row proxies are compared for the key equality.
     /// </summary>

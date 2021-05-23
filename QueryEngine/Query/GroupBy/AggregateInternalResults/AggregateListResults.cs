@@ -5,13 +5,13 @@ namespace QueryEngine
 {
     /// <summary>
     /// A class represents a result holder for a group aggregated values during grouping.
-    /// For each aggregate, a holder containing a list of value. The list is a holder for the aggregate 
+    /// For each aggregate, a holder containing a List of value. The List is a holder for the aggregate 
     /// value for each individual group (index represents a group and its aggregate value).
     /// This approach can save a lot of memory because it does not have to allocate additional classes for every
     /// new group.
     /// These storages will not be used in the parallel enviroment. (Only in the local sense.)
     /// They are used only in the local group local merge algorithm, because there are no atomic operations
-    /// on lists. Thus instead of lists,
+    /// on Lists. Thus instead of Lists,
     /// </summary>
     internal abstract class AggregateListResults
     {

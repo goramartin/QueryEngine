@@ -33,7 +33,7 @@ namespace QueryEngine
                     string name = tmpPattern[j].Name;
                     // Anonymous variables are skipped.
                     if (name == null) continue;
-                    // Try to obtain variable with the same name, if it is missing insert it to dictionary.
+                    // Try to obtain variable with the same name, if it is missing insert it to the Dictionary.
                     if (!tmpDict.TryGetValue(name, out ParsedPatternNode node)) tmpDict.Add(name, tmpPattern[j]);
                     else
                     {   // Compare the two variables with the same name.

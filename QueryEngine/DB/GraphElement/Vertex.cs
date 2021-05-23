@@ -1,8 +1,8 @@
 ﻿/*! \file 
 Includes a definition of a vertex. 
-The vertex is an element of a graph. Each vertex is stored in a vertex list in the graph.
+The vertex is an element of a graph. Each vertex is stored in a vertex List in the graph.
 Vertices are connected with edges. Each vertex knows the edges that are going outward and also inward.
-The edges are contained in Lists (one list for outward and one list for inward edges) of edges.
+The edges are contained in Lists (one List for outward and one List for inward edges) of edges.
 The vertices contain information about the starting and the ending positions of edges in the structures containing the edges, so that
 the edges can be accessed quickly.
  */
@@ -75,8 +75,8 @@ namespace QueryEngine
         /// <summary>
         /// Gets a range of in edges of this vertex.
         /// </summary>
-        /// <param name="start"> The starting position of its edges in a edge list.</param>
-        /// <param name="end"> The ending position of its edges in the same edge list.</param>
+        /// <param name="start"> The starting position of its edges in a edge List.</param>
+        /// <param name="end"> The ending position of its edges in the same edge List.</param>
         public void GetRangeOfInEdges(out int start, out int end)
         {
             start = this.InEdgesStartPosition;

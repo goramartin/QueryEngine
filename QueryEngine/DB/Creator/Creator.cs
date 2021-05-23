@@ -5,7 +5,7 @@ in the template parameter.
 Creators make use of a processor and optionally a reader from a file. 
 Creators are used during creation of a database. 
 They load data of vertices and edges into dictionaries, also they load the vertices and
-edges into the database lists.
+edges into the database Lists.
  */
 
 namespace QueryEngine

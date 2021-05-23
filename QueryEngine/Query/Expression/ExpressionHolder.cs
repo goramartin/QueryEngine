@@ -49,11 +49,11 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Returns a list of used variable references in the expression node.
-        /// If the variable is already inside the list, the variable is not included.
+        /// Returns a List of used variable references in the expression node.
+        /// If the variable is already inside the List, the variable is not included.
         /// </summary>
-        /// <param name="vars"> A list of already collected variables. </param>
-        /// <returns> A list of collected variables, the same list as the one in func parameters.</returns>
+        /// <param name="vars"> A List of already collected variables. </param>
+        /// <returns> A List of collected variables, the same List as the one in func parameters.</returns>
         public override void CollectUsedVars(ref List<int> vars)
         {
             this.Expr.CollectUsedVars(ref vars);

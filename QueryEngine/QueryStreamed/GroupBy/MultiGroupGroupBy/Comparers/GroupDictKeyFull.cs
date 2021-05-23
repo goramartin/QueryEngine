@@ -1,7 +1,7 @@
 ﻿namespace QueryEngine
 {
     /// <summary>
-    /// Class representing a dictionary key in the streamed version of the grouping.
+    /// A class representing a Dictionary key in the streamed version of the grouping.
     /// The only difference between the class GroupDictKey is that it contains the full information about the
     /// row and not just a position indicator.
     /// </summary>

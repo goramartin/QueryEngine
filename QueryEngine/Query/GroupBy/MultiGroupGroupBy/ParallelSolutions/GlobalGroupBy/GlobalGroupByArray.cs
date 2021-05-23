@@ -11,10 +11,10 @@ namespace QueryEngine
 
         /// <summary>
         /// A main work of each thread when grouping.
-        /// For each result row, add/get a group in/from the global dictionary and compute the
+        /// For each result row, add/get a group in/from the global Dictionary and compute the
         /// corresponding aggregate values for the group.
         /// The values are stored using arrays (an index corresponding to a group results is placed as a value on a key, the results can be then accessed via the stored index).
-        /// Firstly, a position is inserted into the dictionary, note that the constructor
+        /// Firstly, a position is inserted into the Dictionary, note that the constructor
         /// runs outside of the synchronization, so it can happen that other thread inserted an element in the meanwhile.
         /// Then, if the position does exceed the array lenght, it acquires entire semaphore and doubles the arrays.
         /// Otherwise, it acquires only one part of the semaphore, updates the aggregates on the given position and releases the semaphore's part.

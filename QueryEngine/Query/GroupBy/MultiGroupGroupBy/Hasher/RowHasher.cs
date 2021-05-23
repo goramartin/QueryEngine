@@ -10,7 +10,7 @@ namespace QueryEngine
     /// 
     /// The expression hasher contain reference to the ExpressionEqualityComparer class, that enables the hashers
     /// store the results of the expression computation into their internal variables. A simple cache so to speak.
-    /// Because when the hash is computed, and the item is inserted into the dictionary. If the hashes are the same
+    /// Because when the hash is computed, and the item is inserted into the Dictionary. If the hashes are the same
     /// the two items will be compared. But the expressions of the inserting item has been computed already.
     /// So instead of cumputing it again, the information about the computation is stored into the equality comparer
     /// internal variables.
@@ -30,6 +30,12 @@ namespace QueryEngine
             this.Hashers = hashers;
         }
 
+        /// <summary>
+        /// A djb2 hashing function using xor instead of + operation.
+        /// Implementation taken from "http://www.cse.yorku.ca/~oz/hash.html" [last access 23.5.2021].
+        /// Although it is formally a string hashing function, based on the "https://softwareengineering.stackexchange.com/questions/49550/which-hashing-algorithm-is-best-for-uniqueness-and-speed" [last access 23.5.2021]
+        /// we decided to use it as a general hasing function.
+        /// </summary>
         public int Hash(in TableResults.RowProxy row)
         {
             unchecked

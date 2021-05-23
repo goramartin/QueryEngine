@@ -23,7 +23,7 @@ namespace QueryEngine
     internal abstract class ExpressionBase
     {
         /// <summary>
-        /// It is equal to its position in the QueryExpressionInfo list.
+        /// It is equal to its position in the QueryExpressionInfo List.
         /// </summary>
         protected int ExprPosition { get; set; } = -1;
 
@@ -36,10 +36,10 @@ namespace QueryEngine
         public abstract Type GetExpressionType();
 
         /// <summary>
-        /// Returns a list of used variable references in the expression node.
-        /// If the variable is already inside the list, the variable is not included.
+        /// Returns a List of used variable references in the expression node.
+        /// If the variable is already inside the List, the variable is not included.
         /// </summary>
-        /// <param name="vars"> A list of already collected variables. </param>
+        /// <param name="vars"> A List of already collected variables. </param>
         public abstract void CollectUsedVars(ref List<int> vars);
 
         /// <summary>

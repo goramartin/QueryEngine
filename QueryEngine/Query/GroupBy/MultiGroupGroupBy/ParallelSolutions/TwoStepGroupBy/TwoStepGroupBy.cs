@@ -9,7 +9,7 @@ namespace QueryEngine
     /// A class represents a multi group grouping algorithm.
     /// The algorithm works in two steps.
     /// In the first step each threads computes the groups locally.
-    /// When a thread is finished it does not wait for other threads to finish but immediately starts merging its results into a global concurrent dictionary.
+    /// When a thread is finished it does not wait for other threads to finish but immediately starts merging its results into a global concurrent Dictionary.
     /// The class should be used only as the parallel solution and not with thread count set to 1.
     /// The algorithm is composed of a local group by and a global merge.
     /// The algorithm uses only aggregate buckets or array like storages.
@@ -57,7 +57,7 @@ namespace QueryEngine
         /// Note that they are all copies, because they contain a private stete (hasher contains reference to the equality comparers to enable caching when computing the hash, aggregates
         /// contain references to storage arrays to avoid casting in a tight loop).
         /// The comparers and hashers build in the constructor of this class are given to the last job, just like the aggregates passed to the construtor.
-        /// The global dictionary recieves a comparer that has no internal comparers set to some hasher.
+        /// The global Dictionary recieves a comparer that has no internal comparers set to some hasher.
         /// </summary>
         private GroupByJob[] CreateJobs(ITableResults resTable, Aggregate[] aggs, ExpressionComparer[] comparers, ExpressionHasher[] hashers)
         {
@@ -71,7 +71,6 @@ namespace QueryEngine
             var lastHasher = new RowHasher(hashers);
             lastHasher.SetCache(lastComp.comparers);
 
-            // Global merge dictionary
             // It needs only comparator that has no comparers set as a cache to some hasher.
             var globalGroups = new ConcurrentDictionary<GroupDictKey, AggregateBucketResult[]>(lastComp.Clone(cacheResults: false));
             for (int i = 0; i < jobs.Length - 1; i++)

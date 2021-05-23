@@ -8,9 +8,10 @@ namespace QueryEngine
     /// values for each individual group (index represents a group and its aggregate value).
     /// This approach can save a lot of memory because it does not have to allocate additional classes for every
     /// new group.
-    /// The purpose of this alternative class using arrays is that there can be no atomic operations on lists.
-    /// Thus during algorithms where there is multiple accesses into a list, the list cannot be used.
-    /// Also, the arrays will provide method that will expand the array using the same way as the list.
+    /// The purpose of this alternative class using arrays is that there can be no atomic operations on 
+    /// s.
+    /// Thus during algorithms where there is multiple accesses into a List, the List cannot be used.
+    /// Also, the arrays will provide method that will expand the array using the same way as the List.
     /// 
     /// Note the initial size. The main purpose of these classes is a global grouping. The initial size,
     /// can skip a lot of synchronization in the beginning of the grouping algorithm.

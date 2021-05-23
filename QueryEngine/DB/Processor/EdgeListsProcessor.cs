@@ -1,7 +1,7 @@
 ﻿/*! \file 
 The file includes a definition of an edge List processor.
 
-The processor creates Lists of in edges and out edges, the return value is a holder for both lists.
+The processor creates Lists of in edges and out edges, the return value is a holder for both Lists.
 Firstly, the in edges defined in a file are read. It is expected that the edges are sorted based
 on the vertices IDs in the same ascending order. That means, if the first element is a vertex with id 1
 the edges in the file are edges with the starting vertex with the id 1 and vice versa.
@@ -20,7 +20,7 @@ using System.Collections.Generic;
 namespace QueryEngine
 {
     /// <summary>
-    /// Creates edge lists from data file.
+    /// Creates edge Lists from data file.
     /// We suppose vertices in a datafile are stored based on their id in ascending order.
     /// We suppose edges in datafile are stored based on id of the FROMID vertex in ascending order.
     /// That is to say, having three vertices with ids 1, 2, 3... first all edges are from vertex 1, then edges from vertex 2 etc...
@@ -37,7 +37,7 @@ namespace QueryEngine
         private List<OutEdge> outEdges;
         private List<InEdge> inEdges;
         /// <summary>
-        /// An index of vertices IDs to a position in their list. To speed up loading of edges.
+        /// An index of vertices IDs to a position in their List. To speed up loading of edges.
         /// (vertex ID, position)
         /// </summary>
         private Dictionary<int, int> verticesIndex;
@@ -244,7 +244,7 @@ namespace QueryEngine
                 //For no more parameters to parse left
                 if (proc.paramsToReadLeft == 0)
                 {
-                    // Add the completed out edge to the end of out edges list. 
+                    // Add the completed out edge to the end of out edges List. 
                     proc.outEdges.Add(proc.outEdge);
                     // The next step is to try reading a new out edge.
                     proc.SetNewState(EdgeIDState.Instance);
@@ -360,7 +360,7 @@ namespace QueryEngine
                 if (c == 0) continue;
 
                 // Otherwise, set the position.
-                // And add them to the in edge list.
+                // And add them to the in edge List.
                 vertices[i].InEdgesStartPosition = count;
                 for (int k = 0; k < c; k++)
                     inEdges.Add(incomingEdgesTable[i][k]);
@@ -371,7 +371,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// For each edge from in edges, set its position in a list.
+        /// For each edge from in edges, set its position in a List.
         /// </summary>
         private void SetPositionsInListforInEdges()
         {

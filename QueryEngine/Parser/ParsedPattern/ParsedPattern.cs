@@ -94,7 +94,7 @@ namespace QueryEngine
         /// <summary>
         /// This method is called if the split index if the last index of the pattern.
         /// Then the spilliting is uneccessary and the chain can be reversed in place.
-        /// Note we are removing former nodes from the end of the list, and add the reversed ones to the end.
+        /// Note we are removing former nodes from the end of the List, and add the reversed ones to the end.
         /// The size of array after one iteration stays the same as before calling the method.
         /// </summary>
         /// <param name="lastNodeinPatternIndex"> An index of split variable which is the last node in the pattern. </param>

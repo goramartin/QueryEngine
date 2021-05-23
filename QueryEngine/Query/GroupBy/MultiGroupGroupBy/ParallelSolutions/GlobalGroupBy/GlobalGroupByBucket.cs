@@ -9,7 +9,7 @@ namespace QueryEngine
 
         /// <summary>
         /// A main work of each thread when grouping.
-        /// For each result row, add/get a group in/from the global dictionary and compute the
+        /// For each result row, add/get a group in/from the global Dictionary and compute the
         /// corresponding aggregate values for the group.
         /// Aggregate functions results are stored using Buckets (an array of value holders stored as a value on a key).
         /// </summary>

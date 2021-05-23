@@ -7,7 +7,7 @@ namespace QueryEngine
     ///  The results are grouped using Dictionary, the key is a struct containing a proxy to a row of the result table and its hash.
     ///  The hash is stored inside the key, because the interface of the Dictionary does two accesses.
     ///  Also, the hasher stores cache of the comparer in the Dictionary.
-    ///  The value for a group in the dictionary is an index. The index is a position of a group's values inside aggregate result storage.
+    ///  The value for a group in the Dictionary is an index. The index is a position of a group's values inside aggregate result storage.
     /// </summary>
     internal class GroupByWithLists : Grouper
     {

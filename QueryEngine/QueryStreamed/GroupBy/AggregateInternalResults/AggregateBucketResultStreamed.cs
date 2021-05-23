@@ -3,11 +3,11 @@
 namespace QueryEngine
 {
     /// <summary>
-    /// A class that will represent a key part in the dictionary's KeyValue pair of the streamed group by version.
+    /// A class that will represent a key part in the Dictionary's KeyValue pair of the streamed group by version.
     /// The key/value will be included in one array instead of two separate ones. Thus, it can save a bit of memory.
     /// The key and values (aggregate function results) are of the same base because they will be held in the same array.
     /// 
-    /// Class provides isSet flag if certain keys were evaluated as null values.
+    /// The class provides isSet flag if certain keys were evaluated as null values.
     /// 
     /// To compare the keys, a static method is used from within AggregateBucketResultStreamedComparers class.
     /// The GetValue method is implemented separately from the GetFinal interface, because it needs to fit the 
@@ -31,7 +31,7 @@ namespace QueryEngine
     }
 
     /// <summary>
-    /// The class contains a method to obtain value of a bucket. It is used only in the context of the 
+    /// A class contains a method to obtain value of a bucket. It is used only in the context of the 
     /// streamed group by, where results are stored in the same array as keys. Since only the array
     /// is passed for evaluation, the method otherwise placed in the groupProxy struct is missing.
     /// </summary>
@@ -47,7 +47,7 @@ namespace QueryEngine
     {
         /// <summary>
         /// A methods that is used only in the context of fully streamed version of group by.
-        /// The keys put in the concurrent dictionary will be of the base type AggregateBucketResult(T) since
+        /// The keys put in the concurrent Dictionary will be of the base type AggregateBucketResult(T) since
         /// the keys and agg value will be stored in the same array to save a bit of memory.
         /// Note that the values must always be set beforehand.
         /// </summary>

@@ -24,7 +24,7 @@ namespace QueryEngine
     internal static class Tokenizer
     {
         /// <summary>
-        /// A dictionary of all possible tokens.
+        /// A Dictionary of all possible tokens.
         /// </summary>
         private static Dictionary<string, Token.TokenType> tokenTypes;
         /// <summary>
@@ -59,7 +59,7 @@ namespace QueryEngine
         /// Creates a stream from the string and calls a method Tokenize(TextReader)
         /// </summary>
         /// <param name="input"> A query as a string. </param>
-        /// <returns> A list of parsed tokens. </returns>
+        /// <returns> A List of parsed tokens. </returns>
         public static List<Token> Tokenize(string input)
         {
             List<Token> tokens;
@@ -75,7 +75,7 @@ namespace QueryEngine
         /// Reads input char by char and parses keywords and creates tokens based on the keywords.
         /// </summary>
         /// <param name="reader"> A reader that reads input from a string or console. </param>
-        /// <returns> A list of parsed tokens </returns>
+        /// <returns> A List of parsed tokens </returns>
         public static List<Token> Tokenize(TextReader reader)
         {
             // A result storage.

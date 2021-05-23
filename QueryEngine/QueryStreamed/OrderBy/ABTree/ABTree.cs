@@ -10,8 +10,7 @@ namespace QueryEngine
     /// The keys on the nodes store the values directly.
     /// The used nodes contain parent pointers and indeces of their position in the parent's children array.
     /// This enables insertion without the need to remember the path, as well as the unumeration.
-    /// The implementation is based on the lecture on Data Structures 1 (NTIN066) taught in the 2020/2021 winter semester, at Charles University
-    /// Mathematical and physical faculty.
+    /// The implementation is based on the Průvodce labyrintem algoritmů (Mareš, Martin and Valla, Tomáš, 2017, 978-80-88168-19-5, CZ.NIC - z.s.p.o.)
     /// No duplicate values.
     /// </summary>
     /// <typeparam name="T"> The type of keys stored in the nodes.</typeparam>

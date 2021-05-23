@@ -5,11 +5,11 @@ using System.Collections.Generic;
 namespace QueryEngine
 {
     /// <summary>
-    /// Class representing a streamed group by if a clause group by is set.
+    /// A class representing a streamed group by if a clause group by is set.
     /// The computation does not store results of the matcher in any way, instead it stores only the 
-    /// group keys and aggregate func. results in one entry in the dictionary using AggregateBucketResult[].
+    /// group keys and aggregate func. results in one entry in the Dictionary using AggregateBucketResult[].
     /// Note that the array contains directly the values and not row proxies.
-    /// The first n buckets are used as a key inside the dictionary, while the rest are used as value holders for the computed
+    /// The first n buckets are used as a key inside the Dictionary, while the rest are used as value holders for the computed
     /// aggregate function.
     /// For single thread solution it uses Dictionary class and for the parallel solution it uses ConcurrentDictionary.
     /// 
@@ -43,7 +43,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Tries to add it into a dictionary.
+        /// Tries to add it into a Dictionary.
         /// If it was added, the returnedBuckets contain the passed buckets into the function.
         /// Otherwise the variable contains buckets that has been added before.
         /// </summary>

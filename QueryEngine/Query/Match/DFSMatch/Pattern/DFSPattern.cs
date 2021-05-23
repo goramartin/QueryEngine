@@ -99,7 +99,7 @@ namespace QueryEngine
         #region PatternCreation
 
         /// <summary>
-        /// Turns lists of parsed patterns into 2d array.
+        /// Turns Lists of parsed patterns into 2d array.
         /// </summary>
         private void CreatePatternArray(List<List<DFSBaseMatch>> patternList)
         {
@@ -122,7 +122,7 @@ namespace QueryEngine
         /// For example: (a) - (b) - (c) splited by var. b == (b) - (a) , (b) - (c)
         /// Note that (a) - (b) was reversed in order ( oriented edges are reversed as well )
         /// </summary>
-        /// <param name="final"> The constructed pattern will be stored in this list. Never null. </param>
+        /// <param name="final"> The constructed pattern will be stored in this List. Never null. </param>
         /// <param name="parsedPatterns"> A pattern created by Match Visitor </param>
         /// <param name="variableMap"> A query map of variables (empty) </param>
         private void CreatePattern(List<List<DFSBaseMatch>> final, List<ParsedPattern> parsedPatterns, VariableMap variableMap)
@@ -154,7 +154,7 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Purpose of the ordering is to ensure that the chains in the final list form
+        /// Purpose of the ordering is to ensure that the chains in the final List form
         /// a connected components and to find the variable that the chains are connected by.
         /// By doing so, the matching algorithm can simply start dfs by picking the variable that the chains were
         /// connected by. If there are more separate connected components. They are put after one another.
@@ -180,25 +180,25 @@ namespace QueryEngine
             usedPatterns.Populate(false);
             Queue<int> connectedPatternsIndeces = new Queue<int>();
 
-            // For every pattern
+            // For every pattern.
             for (int i = 0; i < parsedPatterns.Count; i++)
             {
-                // If it is used already, skip to the next one
+                // If it is used already, skip to the next one.
                 if (usedPatterns[i] == true) continue;
                 else
                 {
-                    // Else add it to the results, mark it as used and enqueu it
+                    // Else add it to the results, mark it as used and enqueu it.
                     result.Add(parsedPatterns[i]); 
                     usedPatterns[i] = true;
                     connectedPatternsIndeces.Enqueue(i);
                     while (connectedPatternsIndeces.Count != 0)
                     {
-                        // Take the last inserted pattern and try to iterate over all other unused patterns and check
+                        // Take the last inserted pattern and try to iterate over all other unused patterns and check.
                         // for common variables
                         ParsedPattern currentPattern = parsedPatterns[connectedPatternsIndeces.Dequeue()];
                         for (int j = 0; j < parsedPatterns.Count; j++)
                         {
-                            // If the pattern is used, it was already connected by other pattern
+                            // If the pattern is used, it was already connected by other pattern,
                             // else we can connected it to the results.
                             if (usedPatterns[j] == true) continue;
                             else if (currentPattern.TryFindEqualVariable(parsedPatterns[j], out string name)){
@@ -217,7 +217,7 @@ namespace QueryEngine
 
         /// <summary>
         /// Creates a pattern chain formed by base matches that create a final pattern used in a matcher.
-        /// Iterates over a list of given pattern nodes and creates
+        /// Iterates over a List of given pattern nodes and creates
         /// appropriate base match classes with the attributes based on properties
         /// of each pattern node. During this iteration, the variable map for entire
         /// query is actualised. (The names of pattern nodes represent variables.)
@@ -241,7 +241,7 @@ namespace QueryEngine
                 // If it has not got a name, do not add it to the variable map.
                 if (tmpNode.Name != null)
                 {
-                    // Try if the variable is inside a dictionary
+                    // Try if the variable is inside a Dictionary.
                     if ((index = map.GetVariablePosition(tmpNode.Name)) == -1)
                     {
                         // If it is not, Add it there with the proper type and index.

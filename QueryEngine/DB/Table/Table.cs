@@ -5,7 +5,7 @@ Each table holds all the nodes of the same type.
 Table has got a List and two Dictionaries.
 The List for property IDs = property IDs in the same order as they were added.
 The Dictionary of IDs, each entry is a representation of a graph element (element ID), on that entry lies the position of the element in table.
-On the same position we will find values of properties of the element in the property lists.
+On the same position we will find values of properties of the element in the property Lists.
 The Dictionary of properties is used for fast access to property via propID.
   
 Properties are formed from an abstract type Property that is visible from within a table.
@@ -24,7 +24,7 @@ namespace QueryEngine
      /// <summary>
      /// A class representing a single label in the Labeled-property model.
      /// Encompasses a table of properties pertaining to the type. 
-     /// The list IDs consists of added nodes into the table. Values of the elements can be found 
+     /// The List IDs consists of added nodes into the table. Values of the elements can be found 
      /// on the same positions in the property Lists.
      /// </summary>
     public sealed class Table
@@ -46,7 +46,7 @@ namespace QueryEngine
         public List<int> PropertyLabels {  get; private set; }
 
         /// <summary>
-        /// Represents nodes inside a table. An index represents also an index inside the property lists.
+        /// Represents nodes inside a table. An index represents also an index inside the property Lists.
         /// The key is an id of a node inside the table, and value is the position inside the table.
         /// </summary>
         public Dictionary<int,int> IDs { get; private set; }
@@ -112,7 +112,7 @@ namespace QueryEngine
         /// Adds new property into a table.
         /// Throws when the property is already inside.
         /// </summary>
-        /// <param name="propID"> An Id used to access property via a dictionary.</param>
+        /// <param name="propID"> An Id used to access property via a Dictionary.</param>
         /// <param name="newProp"> A property to be added into a table.</param>
         public void AddNewProperty(int propID, Property newProp)
         {

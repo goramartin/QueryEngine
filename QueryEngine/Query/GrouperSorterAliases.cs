@@ -23,11 +23,11 @@ namespace QueryEngine
         /// </summary>
         RefL,
         /// <summary>
-        /// A parallel solution grouping results into a global dictionary using Buckets.
+        /// A parallel solution grouping results into a global Dictionary using Buckets.
         /// </summary>
         GlobalB,
         /// <summary>
-        /// A parallel solution grouping results into a global dictionary using Lists.
+        /// A parallel solution grouping results into a global Dictionary using Lists.
         /// </summary>
         GlobalL,
         /// <summary>
@@ -39,11 +39,11 @@ namespace QueryEngine
         /// </summary>
         LocalL,
         /// <summary>
-        /// A parallel solution grouping results locally and subsequently merging the results into global dictionary using Buckets.
+        /// A parallel solution grouping results locally and subsequently merging the results into a global Dictionary using Buckets.
         /// </summary>
         TwoStepB,
         /// <summary>
-        /// A parallel solution grouping results locally and subsequently merging the results into global dictionary using Lists.
+        /// A parallel solution grouping results locally and subsequently merging the results into a global Dictionary using Lists.
         /// </summary>
         TwoStepL,
 

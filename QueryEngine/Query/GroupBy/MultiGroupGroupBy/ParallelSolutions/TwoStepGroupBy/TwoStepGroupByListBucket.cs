@@ -14,15 +14,15 @@ namespace QueryEngine
         /// A main work of each thread when grouping.
         /// The values are stored using arrays in the first step (an index corresponding to a group results is placed as a value on a key, the results can be then accessed via the stored index).
         /// In the second step, the values are reinserted into newly created buckets.
-        /// For each result row, perform a local grouping with a simple dictionary storing aggs. results in lists.
-        /// Afterwards merge the computed groups with the groups in the global dictionary and store the agg. results in buckets.
-        /// Notice that the local part is using hash cache with comparers when inserting into the dictionary
-        /// and when inserting into the global dictionary, the hash values are stored in the groupDictKey.
+        /// For each result row, perform a local grouping with a simple Dictionary storing aggs. results in Lists.
+        /// Afterwards merge the computed groups with the groups in the global Dictionary and store the agg. results in buckets.
+        /// Notice that the local part is using hash cache with comparers when inserting into the Dictionary
+        /// and when inserting into the global Dictionary, the hash values are stored in the groupDictKey.
         /// </summary>
         /// <param name="job"> A group by job class. </param>
         protected override void SingleThreadGroupByWork(object job)
         {
-            // Local part with lists
+            // Local part with Lists.
             #region DECL
             var tmpJob = ((GroupByJobMixListsBuckets)job);
             var results = tmpJob.resTable;
@@ -49,7 +49,7 @@ namespace QueryEngine
                     aggregates[j].Apply(in row, aggResults[j], position);
             }
 
-            // Global part with buckets
+            // Global part with buckets.
             var globalGroups = tmpJob.globalGroups;
             AggregateBucketResult[] buckets = null;
             AggregateBucketResult[] spareBuckets = AggregateBucketResult.CreateBucketResults(aggregates);

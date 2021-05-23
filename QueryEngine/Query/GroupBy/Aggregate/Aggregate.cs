@@ -9,14 +9,14 @@ There are two types of aggregates, the types stem from the way the results are s
 The first one is array like storage (Array, List) and the second one is bucket like storage.
 
 The array like storage:
-The values are stored in an array/list and can be accessed via the provided index pertaining to a group.
-The array/list contain values of all groups.
+The values are stored in an array/List and can be accessed via the provided index pertaining to a group.
+The array/List contain values of all groups.
 
 The bucket like stora:
 The values are stored in classes that store the computed values. The classes are stored in an array.
 The array represents aggregate values for a single group.
  
-The main point of having two types of storage classes is that the array/list can save a lot of memory,
+The main point of having two types of storage classes is that the array/List can save a lot of memory,
 while the buckets are much more usefull in terms of parallel execution of the algorithms, since they are singletons (1:1 ratio to a group).
 
 Notice that the aggregate function compute the values only if the evaluated expression value
@@ -153,7 +153,7 @@ namespace QueryEngine
         #region Lists
 
         /// <summary>
-        /// Is called only on aggregates that are bound with the list type results.
+        /// Is called only on aggregates that are bound with the List type results.
         /// It computes the desired value from the containing expression with the given row and applies it to the aggregate.
         /// </summary>
         /// <param name="row"> A result table row. </param>
@@ -177,21 +177,21 @@ namespace QueryEngine
         #region InterCompatibility
 
         /// <summary>
-        /// Merges results of a list into a bucket with a thread safe manner.
+        /// Merges results of a List into a bucket with a thread safe manner.
         /// It assumes that the results were set before.
         /// </summary>
         /// <param name="bucket"> A bucket that will contain the final merged results. </param>
-        /// <param name="list"> A list that will provide value to merge for the bucket1. </param>
-        /// <param name="position"> A position of a value in the list.</param>
+        /// <param name="list"> A List that will provide value to merge for the bucket1. </param>
+        /// <param name="position"> A position of a value in the List.</param>
         public abstract void MergeThreadSafe(AggregateBucketResult bucket, AggregateListResults list, int position);
 
         /// <summary>
-        /// Merges results of a list into a bucket with a thread safe manner.
+        /// Merges results of a List into a bucket with a thread safe manner.
         /// It assumes that the results were set before.
         /// </summary>
         /// <param name="bucket"> A bucket that will contain the final merged results. </param>
-        /// <param name="list"> A list that will provide value to merge for the bucket1. </param>
-        /// <param name="position"> A position of a value in the list.</param>
+        /// <param name="list"> A List that will provide value to merge for the bucket1. </param>
+        /// <param name="position"> A position of a value in the List.</param>
         public abstract void Merge(AggregateBucketResult bucket, AggregateListResults list, int position);
 
 

@@ -4,13 +4,13 @@ using System.Collections.Generic;
 namespace QueryEngine
 {
     /// <summary>
-    /// A class serves as a input for dictionary when performing multi group grouping.
+    /// A class serves as a input for Dictionary when performing multi group grouping.
     /// This class does not compute hash function because the hash is expected to be stored
-    /// in the GrouDictKey struct that is the key in the dictionary.
+    /// in the GrouDictKey struct that is the key in the Dictionary.
     /// 
     /// This class is connected to the hasher classes via comparers (Hasher have stored reference to the given comparers).
     /// It is done because during the computation of the hash the y parameter is then compared with the x n-times. 
-    /// When inserting it into the dictionary, it will again trigger computation of the same value that the hash was calculated from.
+    /// When inserting it into the Dictionary, it will again trigger computation of the same value that the hash was calculated from.
     /// Thus, we want to avoid unneccessary computation of expressions again for the same row y.
     /// </summary>
     internal class RowEqualityComparerGroupKey : IEqualityComparer<GroupDictKey>

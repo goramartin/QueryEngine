@@ -82,7 +82,7 @@ namespace QueryEngine
         /// Loads table types from a file. 
         /// </summary>
         /// <param name="filename"> A file containing definitions of tables. </param>
-        /// <returns> A dictionary of tables. </returns>
+        /// <returns> A Dictionary of tables. </returns>
         private Dictionary<string, Table> LoadTables(string filename)
         {
             Dictionary<string, Table> tables = null;

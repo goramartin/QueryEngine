@@ -1,7 +1,7 @@
 ﻿/*! \file 
 Includes a definition of a base class for each element in the graph.
 Each element needs an unique ID in the entire graph, table (type of an element) where the properties
-of the element are stored and a position in the containing structure (such as an index in a list).
+of the element are stored and a position in the containing structure (such as an index in a List).
 
 Hash codes are based on the unique ID of the element.
 

@@ -150,7 +150,7 @@ namespace QueryEngine
         /// Tries to find a table based on the indentifier node value and assign it to the parsed node.
         /// </summary>
         /// <param name="node"> An identifier node from Visiting indetifier node.</param>
-        /// <param name="d"> A dictionary of tables from edges/vertices. </param>
+        /// <param name="d"> A Dictionary of tables from edges/vertices. </param>
         /// <param name="n"> A ParsedPatternNode from within Visiting identifier node.</param>
         private void ProcessType(IdentifierNode node, Dictionary<string, Table> d, ParsedPatternNode n)
         {

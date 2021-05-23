@@ -70,12 +70,13 @@ namespace QueryEngine
         }
 
         /// <summary>
-        /// Parses inputed list of tokens and creates corresponding parse trees for 
+        /// Parses inputed List of tokens and creates corresponding parse trees for 
         /// the query expressions.
         /// Order of the parsing of tokens is given precisely, and defined in the static constructor of the parser.
         /// </summary>
-        /// <param name="tokens"> A list of tokens that were parsed from a string/console. </param>
-        /// <returns> A dictionary of parsed query expressions with corresponding label. So that the class that 
+        /// <param name="tokens"> A List of tokens that were parsed from a string/console. </param>
+        /// <returns> A 
+        /// of parsed query expressions with corresponding label. So that the class that 
         /// processes the expression can pick which one to process.</returns>
         static public Dictionary<Clause, Node> Parse(List<Token> tokens)
         {

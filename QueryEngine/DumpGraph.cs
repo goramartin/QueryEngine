@@ -12,7 +12,7 @@ namespace QueryEngine
         {
             /////////////
             Console.WriteLine();
-            //Display whats inside dictionary of nodes 
+            //Display whats inside Dictionary of nodes 
 
             foreach (var item in g.nodeTables)
             {
@@ -32,7 +32,7 @@ namespace QueryEngine
             Console.WriteLine();
 
             /////////////
-            //Display whats inside dictionary of edges
+            //Display whats inside Dictionary of edges
 
             foreach (var item in g.edgeTables)
             {

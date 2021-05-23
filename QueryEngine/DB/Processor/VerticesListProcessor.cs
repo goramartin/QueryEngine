@@ -1,7 +1,7 @@
 ﻿/*! \file 
-The file includes definition of a vertices list processor.
+The file includes definition of a vertices List processor.
 
-The processor creates a list of vertices. The edges position for each vertex are not filled (set to -1).
+The processor creates a List of vertices. The edges position for each vertex are not filled (set to -1).
 The processor expects the vertices to have a unique id, preferably sorted by ascending order.
 
 The input file should look like: ID TYPE PROPERTIES.
@@ -124,7 +124,7 @@ namespace QueryEngine
                 // For no more parameters to parse left.
                 if (proc.paramsToReadLeft == 0)
                 {
-                    // Add the new vertex to the list of vertices.
+                    // Add the new vertex to the List of vertices.
                     proc.vertices.Add(proc.vertex);
                     // Try to read another vertex.
                     proc.SetNewState(NodeIDState.Instance);

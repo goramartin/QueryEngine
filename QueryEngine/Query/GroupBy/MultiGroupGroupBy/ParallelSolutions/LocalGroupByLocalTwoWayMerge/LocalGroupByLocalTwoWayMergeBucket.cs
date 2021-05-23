@@ -16,7 +16,7 @@ namespace QueryEngine
         /// <summary>
         /// Main work of a thread when merging with another thread's groups.
         /// Merge only if there is already the given group, otherwise the buckets
-        /// are inserted into the jobs1's dictionary.
+        /// are inserted into the jobs1's Dictionary.
         /// </summary>
         /// <param name="job1"> A place to merge into. </param>
         /// <param name="job2"> A place to merge from. </param>
@@ -37,7 +37,7 @@ namespace QueryEngine
                     // No need to merge the results.
                     continue;
                 }
-                // It merges the results only if the group was already in the dictionary.
+                // It merges the results only if the group was already in the Dictionary.
                 for (int i = 0; i < aggregates.Length; i++)
                     aggregates[i].Merge(buckets[i], item.Value[i]);
             }
@@ -45,7 +45,7 @@ namespace QueryEngine
 
         /// <summary>
         /// Main work of a thread when grouping.
-        /// For each result row, try to add it to the dictionary and apply aggregate functions.
+        /// For each result row, try to add it to the Dictionary and apply aggregate functions.
         /// Note that when the hash is computed. The comparer cache is set.
         /// So when the insertion happens, it does not have to compute the values for comparison.
         /// Aggregate functions results are stored using Buckets (an array of value holders stored as a value on a key).

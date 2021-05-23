@@ -35,7 +35,7 @@ namespace QueryEngine
 
 
         /// <summary>
-        /// Parses a list of variables - Name.Prop, Name2, *, Name3.Prop3 
+        /// Parses a List of variables - Name.Prop, Name2, *, Name3.Prop3 
         /// There can be either only * or variable references.
         /// </summary>
         /// <returns> A chain of variable nodes </returns>

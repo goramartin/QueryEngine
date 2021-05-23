@@ -8,7 +8,7 @@ So far there are only out edges and in edges (only the semantic meaning is diffe
 Edges are defined in a file.
 The file contains only out edges.
 The inward edges are constructed based on the out edges.
-Both types are contained in a list in the class Graph.
+Both types are contained in a List in the class Graph.
 
 The inward edges are created and assigned to appropriate vertices by using information from the newly created out edges.
 Each edge knows the ending vertex it points to. So each vertex has assigned its out an in edges.
