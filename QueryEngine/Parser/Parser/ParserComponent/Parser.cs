@@ -33,12 +33,12 @@ OrderTerm: Expression (ASC | DESC)?
 GroupBy: GroupByTerm (, GroupByTerm)*
 GroupByTerm: Expression
 
-Expression -> ExpressionTerm AS Label
-ExpressionTerm -> AggregateFunc|VarReference
-AggregateFunc -> IDENTIFIER \( VarReference \)
-VarReference -> ReferenceName(.ReferenceName)?
-Label -> IDENTIFIER
-ReferenceName -> IDENTIFIER
+Expression: ExpressionTerm AS Label
+ExpressionTerm: AggregateFunc|VarReference
+AggregateFunc: IDENTIFIER \( VarReference \)
+VarReference: ReferenceName(.ReferenceName)?
+Label: IDENTIFIER
+ReferenceName: IDENTIFIER
 */
 
 using System;
